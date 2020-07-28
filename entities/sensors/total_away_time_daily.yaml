@@ -1,0 +1,13 @@
+#####
+# Cumulative Daily Away time 
+#
+# Not used for anything currently
+#####
+
+platform: history_stats
+name: tado_away
+entity_id: sensor.living_room_tado_mode
+state: 'AWAY'
+type: time
+start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+end: '{{ now() }}'

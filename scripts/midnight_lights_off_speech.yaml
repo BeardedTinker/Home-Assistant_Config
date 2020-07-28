@@ -1,0 +1,22 @@
+#####
+# Midnight script to announce midnight (actually 23:59)
+# NUSed daily
+#####
+midnightlightsoffspeech:
+  sequence:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.display_me
+      volume_level: 0.2
+  - delay: 00:00:02    
+  - service: tts.google_say
+    entity_id: media_player.display_me
+    data_template:
+      message: >
+       {{ [
+       "Lights out, nighty night!", 
+       "Let's get to bed. Lightf off!",
+       "Sweet dreams, lights are out", 
+       "Let there be night! Have a rest",
+       "Go to bed, I'm going!",
+       ] | random }}

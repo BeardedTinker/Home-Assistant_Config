@@ -1,0 +1,13 @@
+# The http component serves all files and data required for the
+# Home Assistant frontend.
+#
+# https://www.home-assistant.io/components/http/
+#
+# base_url removed - will be deprecieted in version 0.115
+http:
+  base_url: !secret my_url # the Home Assistant https url which is exposed to the internet.
+  ssl_profile: intermediate
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+  ip_ban_enabled: true
+  login_attempts_threshold: 5

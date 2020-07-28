@@ -1,0 +1,24 @@
+alias: if time is between midnight and 6:00 turn on light on motion detection
+#####
+# Old night light automation - not used anymore
+#####
+description: ''
+trigger:
+#- event: sunset
+#  platform: sun
+- entity_id: binary_sensor.living_room_motion_occupancy
+  platform: state
+  to: 'on'
+condition:
+- after: 00:00:00
+  before: 06:00:00
+  condition: time
+action:
+- data:
+    entity_id: light.stairs
+  service: light.turn_on
+- timeout: 00:04:00
+  wait_template: ''
+- data:
+    entity_id: light.stairs
+  service: light.turn_off

@@ -1,0 +1,15 @@
+#####
+# Tado warning if heating for too long
+#####
+alias: tado warning on long heating - Living room
+description: ''
+trigger:
+  entity_id: binary_sensor.living_room_heating
+  for: 00:60:00
+  platform: state
+  to: 'on'
+condition: []
+action:
+  data:
+    message: WARNING Living Room Heating ON for 60 minutes
+  service: notify.ebroz_bot

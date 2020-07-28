@@ -1,0 +1,7 @@
+#####
+# Chromecast devices
+#####
+
+home_media:
+  - media_player.living_room_tv_2
+  - media_player.loft_tv

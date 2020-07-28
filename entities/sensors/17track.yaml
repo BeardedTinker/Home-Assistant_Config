@@ -1,0 +1,9 @@
+#####
+# 17 track component
+# https://www.home-assistant.io/integrations/seventeentrack/
+# Tracking various packages - needs account
+#####
+
+platform: seventeentrack
+username: !secret 17_name
+password: !secret 17_pwd

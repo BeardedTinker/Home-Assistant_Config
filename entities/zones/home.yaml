@@ -1,0 +1,12 @@
+#####
+# Home zone
+# https://www.home-assistant.io/integrations/zone/
+#####
+
+name: Home
+latitude: !secret home_latitude
+longitude: !secret home_longitude 
+#elevation: 140
+radius: 50
+passive: false
+icon: mdi:home

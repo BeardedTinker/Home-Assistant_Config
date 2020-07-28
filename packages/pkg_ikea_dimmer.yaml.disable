@@ -1,0 +1,24 @@
+automation:
+  - alias: Ikea Dimmer
+    trigger:
+    - platform: state
+      entity_id: sensor.ikea_dimmer_diningroom
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: zigbee2mqtt/Left/set
+        payload_template: >-
+          {% if is_state('sensor.ikea_dimmer_diningroom', '0') %}
+            {"state":"OFF"}
+          {% else %}
+            {"state":"ON","brightness": {{ states("sensor.ikea_dimmer_diningroom") }} }
+          {% endif %}
+  - alias: Dimmer
+    trigger:
+    - platform: state
+      entity_id: sensor.ikea_dimmer_diningroom
+    action:
+    - service: light.turn_on
+      entity_id: light.dining_room_lights
+      data_template:
+        brightness: '{{ states.sensor.ikea_dimmer_diningroom.state}}'

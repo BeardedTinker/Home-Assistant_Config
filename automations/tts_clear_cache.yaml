@@ -1,0 +1,10 @@
+#####
+# Clear TTS cache
+#####
+alias: Flush TTS Cache
+initial_state: 'on'
+trigger:
+  platform: time
+  at: '2:35:00'
+action:
+  service: tts.clear_cache

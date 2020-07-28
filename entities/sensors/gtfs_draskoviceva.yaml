@@ -1,0 +1,12 @@
+#####
+# GTFS component - test
+# https://www.home-assistant.io/integrations/gtfs/
+#####
+
+platform: gtfs
+name: Draskoviceva
+origin: "124"
+destination: "127"
+#data: ZET
+data: ZET.zip
+include_tomorrow: true

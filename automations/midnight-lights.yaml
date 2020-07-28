@@ -1,0 +1,23 @@
+#####
+# Turn all lights off at midnight
+# It's sometimes annoying but now everyone at least know it's time for bed
+#####
+alias: Midnight Lights Out
+trigger:
+  at: '23:59:00'
+  platform: time
+condition:
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'on'
+action:
+- data:
+    entity_id: all
+  service: light.turn_off
+- data:
+    message: Midnight, lights out!
+  service: notify.lg_tv
+- data:
+    message: Midnight! Turning lights off
+  service: notify.ebroz_bot
+- service: script.midnightlightsoffspeech

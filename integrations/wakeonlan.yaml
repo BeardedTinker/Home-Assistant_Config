@@ -1,0 +1,6 @@
+###
+# Wake on line - used for LG webOS TV
+# Not working for me
+# https://www.home-assistant.io/integrations/wake_on_lan/
+###
+wake_on_lan:

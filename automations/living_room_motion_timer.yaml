@@ -1,0 +1,19 @@
+#####
+# Start timer on motion during night
+# need to adapt to take into account lux/summer
+#####
+alias: Living room motion timer
+description: ''
+trigger:
+- entity_id: binary_sensor.living_room_motion_occupancy
+  platform: state
+  to: 'on'
+condition:
+  - after: 00:00:00
+    before: 06:00:00
+    condition: time
+action:
+- service: timer.start
+  entity_id: timer.living_room_motion
+- service: light.turn_on
+  entity_id: light.stairs

@@ -1,0 +1,13 @@
+#####
+# Update OpenUV every 59 minutes
+#####
+alias: Update OpenUV every 59 minutes during the daytime
+trigger:
+  minutes: 59
+  platform: time_pattern
+condition:
+  after: sunrise
+  before: sunset
+  condition: sun
+action:
+  service: openuv.update_data

@@ -1,0 +1,10 @@
+#####
+# Get Octoprint conditions
+#
+# https://www.home-assistant.io/integrations/octoprint/
+#####
+
+platform: octoprint
+monitored_conditions:
+  - Printing
+  - Printing Error

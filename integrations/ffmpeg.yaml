@@ -1,0 +1,6 @@
+#####
+# ffmpeg used to process video
+# https://www.home-assistant.io/integrations/ffmpeg/
+#####
+
+ffmpeg:

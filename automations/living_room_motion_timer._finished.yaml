@@ -1,0 +1,13 @@
+#####
+# Turns lights off after time is done
+#####
+alias: Living room timer fished
+description: ''
+trigger:
+- event_type: timer.finished
+  event_data:
+    entity_id: timer.living_room_motion
+  platform: event
+action:
+- service: light.turn_off
+  entity_id: light.stairs

@@ -1,0 +1,9 @@
+#####
+# NOT USED - should be used to play radio on Google devices
+#####
+alias: Listen Radio
+trigger:
+  - platform: state
+    entity_id: input_select.radio_station
+action: 
+  - service: script.radio

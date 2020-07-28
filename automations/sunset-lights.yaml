@@ -1,0 +1,20 @@
+#####
+# Turn lights on before sunset
+#####
+alias: Turn on the light when the sun sets
+trigger:
+  event: sunset
+  offset: -00:40:00
+  platform: sun
+condition:
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'on'
+action:
+- data:
+    message: Sun setting, turning lights on.
+  service: notify.ebroz_bot
+- data:
+    entity_id: light.living_room_lights
+  service: light.turn_on
+- service: script.eveninglightsspeach

@@ -1,0 +1,7 @@
+#####
+# Devices in this area
+#####
+
+zita_room:
+  - light.goose_light
+  - light.zita_ceiling_light

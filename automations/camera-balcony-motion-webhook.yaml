@@ -1,0 +1,16 @@
+#####
+# Used to trigger image processing for face recognition
+#####
+alias: SS Balcony webhook
+trigger:
+  platform: webhook
+  webhook_id: motion_balcony_hook
+condition: []
+action:
+- data:
+    entity_id: camera.terasa2
+    filename: /config/tmp/balcony.jpg
+  service: camera.snapshot
+- data:
+    entity_id: image_processing.facebox_saved_image
+  service: image_processing.scan

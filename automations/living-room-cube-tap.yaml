@@ -1,0 +1,14 @@
+#####
+# Action based on Cube movement
+#####
+alias: Cube Living room lights
+trigger:
+  platform: mqtt
+  topic: zigbee2mqtt/Cube
+condition:
+  condition: template
+  value_template: '{{ ''tap'' == trigger.payload_json.action }}'
+action:
+  data:
+    entity_id: light.living_room_lights
+  service: homeassistant.toggle

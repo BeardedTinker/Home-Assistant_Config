@@ -1,0 +1,8 @@
+# Play TuneIn radio - not working!
+playradio:
+  sequence:
+  - service: media_player.play_media
+    data_template:
+      entity_id: '{{ "media_player." + states("input_select.choose_player") }}'
+      media_content_id: '{{ states("input_select.choose_radio") }}'
+      media_content_type: 'TUNEIN'

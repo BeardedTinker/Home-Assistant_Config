@@ -1,0 +1,26 @@
+#####
+# Xiaomi Magic Cube 
+#####
+
+platform: "mqtt"
+name: Cube state
+state_topic: "zigbee2mqtt/Cube"
+availability_topic: "zigbee2mqtt/bridge/state"
+icon: "mdi:gesture-double-tap"
+value_template: "{{ value_json.action }}"
+json_attributes_topic: "zigbee2mqtt/Cube"
+#    json_attributes: 
+#      - "battery"
+#      - "voltage"
+#      - "angle"
+#      - "side"
+#      - "from_side"
+#      - "to_side"
+#      - "brightness"
+#      - "angle_x_absolute"
+#      - "angle_y_absolute"
+#      - "angle_z"
+#      - "angle_y"
+#      - "angle_x"
+#      - "unknown_data"
+force_update: true

@@ -1,0 +1,10 @@
+#####
+# Check maximum temperature in rooms
+#####
+
+platform: min_max
+entity_ids:
+  - sensor.luka_room_temperature
+  - sensor.living_room_temperature
+  - sensor.zita_room_temperature
+name: max_temp_rooms

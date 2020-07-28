@@ -1,0 +1,7 @@
+#####
+# Devices in this area
+#####
+
+dining_room:
+  - light.left
+  - light.right

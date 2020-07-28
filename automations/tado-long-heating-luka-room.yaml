@@ -1,0 +1,15 @@
+#####
+# tado warning if heating for too long
+#####
+alias: tado warning on long heating - Luka room
+description: ''
+trigger:
+  entity_id: binary_sensor.luka_room_heating
+  for: 00:60:00
+  platform: state
+  to: 'on'
+condition: []
+action:
+  data:
+    message: WARNING Luka Room Heating ON for 60 minutes
+  service: notify.ebroz_bot

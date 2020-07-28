@@ -1,0 +1,14 @@
+#####
+# Luftdaten - air quality sensor
+# https://www.home-assistant.io/integrations/luftdaten/
+#####
+
+luftdaten:
+  sensor_id: 43996
+  show_on_map: false
+  sensors:
+    monitored_conditions:
+      - P1
+      - P2
+      - temperature
+      - humidity

@@ -1,0 +1,12 @@
+alias: Telegram - GPS Notify ZIta
+trigger:
+  event_data:
+    command: /zita
+  event_type: telegram_command
+  platform: event
+action:
+- data:
+    message: Zita GPS Position
+  service: notify.ebroz_bot
+- service: script.luka_gps_notify_telegram
+initial_state: true

@@ -1,0 +1,14 @@
+alias: Telegram - Ceiling Light OFF
+trigger:
+  platform: event
+  event_type: telegram_callback
+  event_data:
+    data: /ceiling_off
+action:
+- service: telegram_bot.answer_callback_query
+  data_template:
+    callback_query_id: '{{ trigger.event.data.id }}'
+    message: Ceiling Lights OFF
+- service: light.turn_off
+  data:
+    entity_id: light.ceiling_lights

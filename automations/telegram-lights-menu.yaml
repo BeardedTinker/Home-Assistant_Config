@@ -1,0 +1,21 @@
+alias: Telegram Lights Menu
+trigger:
+  event_data:
+    data: /lights
+  event_type: telegram_callback
+  platform: event
+action:
+- data_template:
+    callback_query_id: '{{ trigger.event.data.id }}'
+    message: What you want to do with Lights?
+  service: telegram_bot.answer_callback_query
+- data_template:
+    inline_keyboard:
+    - ALL ON:/lighton, Living ON:/living_on, Dining ON:/dining_on
+    - ALL OFF:/lightoff, Living OFF :/living_off, dining OFF:/dining_off
+    - Kitchen ON:/kitchen_on, Ceiling ON:/ceiling_on
+    - Kitchen OFF:/kitchen_off, Ceiling OFF:/ceiling_off
+    message: Looks like you want to control your lights. What you want to do?
+    target: -327494046
+    title: Lights ON or OFF?
+  service: telegram_bot.send_message

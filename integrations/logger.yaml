@@ -1,0 +1,8 @@
+# Logger - only log warning and up
+# https://www.home-assistant.io/integrations/logger/
+#####
+logger:
+  default: info
+  logs:
+    homeassistant.components.cast: debug
+    homeassistant.components.cast.media_player: debug

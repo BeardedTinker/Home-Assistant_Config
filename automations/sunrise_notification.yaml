@@ -1,0 +1,19 @@
+#####
+# Notification when sun is up
+# Have to disable this one
+#####
+alias: Notify on sunrise
+initial_state: 'on'
+trigger:
+  platform: sun
+  event: sunrise
+  offset: '+00:00:00'
+action:
+  - service: notify.ebroz_bot
+    data:
+      message: "The sun is up. Wake Up! {{ states('sensor.date_time') }}"
+  - data_template:
+      entity_id: media_player.display_me
+      volume_level: 0.2
+    service: media_player.volume_set
+  - service: script.sunrisespeech

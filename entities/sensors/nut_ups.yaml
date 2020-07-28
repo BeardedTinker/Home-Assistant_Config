@@ -1,0 +1,16 @@
+#####
+# NUT - Network UPS Tool component
+# https://www.home-assistant.io/integrations/nut/
+#####
+
+platform: nut
+name: UPS 
+host: !secret ups_host
+port: !secret ups_port
+alias: ups
+resources:
+  - ups.load
+  - ups.realpower.nominal
+  - input.voltage
+  - battery.runtime
+  - ups.status.display 

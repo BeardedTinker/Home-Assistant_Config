@@ -1,0 +1,10 @@
+#####
+# Dining Room lights
+#
+#####
+
+platform: group
+name: Dining Room Lights
+entities:
+  - light.left
+  - light.right

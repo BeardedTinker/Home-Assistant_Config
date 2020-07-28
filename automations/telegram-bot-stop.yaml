@@ -1,0 +1,16 @@
+alias: Telegram_Bot_Stop
+trigger:
+- platform: event
+  event_type: telegram_callback
+  event_data:
+    data: /stop
+action:
+- service: notify.hassnico_bot
+  data_template:
+    message: '*Control Panel*'
+    data:
+      inline_keyboard:
+        - "\U0001F4A1 Lights:/lights, \U0001F6A8 Security:/security"
+        - "\U0001F4BB System:/system, \U0001F4BB Status:/status, Help:/help, Ping:/ping"
+        - "\U0001F4C4 Summary:/Summary, \U00002600 Weather:/weather"
+        - "Addons:/addons"

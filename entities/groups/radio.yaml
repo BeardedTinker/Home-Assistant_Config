@@ -1,0 +1,11 @@
+#####
+# All entities needed for radio
+#####
+
+radio:
+  name: Radio
+  entities:
+  - input_select.radio_station
+  - input_select.chromecast_radio
+  - script.radio
+  - input_number.volume_radio

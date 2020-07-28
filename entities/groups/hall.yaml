@@ -1,0 +1,7 @@
+#####
+# Devices in this area
+#####
+
+hall:
+  - light.rice_lights
+  - light.stairs

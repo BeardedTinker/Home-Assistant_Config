@@ -1,0 +1,20 @@
+alias: Telegram - Start Command
+trigger:
+  event_data:
+    command: /start
+  event_type: telegram_command
+  platform: event
+action:
+- data:
+    data:
+      keyboard:
+      - /andrej, /luka, /mirta
+      - /pcon, /pcoff, /pcreboot
+      - /ping, /camera
+      - /start, /cp
+    message: "{{ [ \"Hi, I'm your home assistant .. I'll list below available commands\"\
+      , \"How can I help you?\", \"Yes Sir!\", \"If you really insist, here is the\
+      \ list of commands\", \"Annddd.. stil here?\", \"It's a pleasure to see you\
+      \ again\" ] | random }}       \n"
+  service: notify.ebroz_bot
+initial_state: 'on'

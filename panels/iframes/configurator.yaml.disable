@@ -1,0 +1,9 @@
+#####
+# Configurator - needs add-on/docker to run
+# Helps you edit configration YAML files
+# disabled since I now use vscode
+#####
+#configurator:
+#  title: 'Configurator'
+#  icon: mdi:wrench
+#  url: !secret url_configurator 

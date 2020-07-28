@@ -1,0 +1,11 @@
+#####
+# Light history
+#####
+
+platform: history_stats
+name: Kitchen Lights yearly
+entity_id: light.kitchen_lights
+state: 'on'
+type: time
+start: '{{ now().replace(month=1).replace(day=1).replace(hour=0).replace(minute=0).replace(second=0) }}'
+end: '{{ now() }}'

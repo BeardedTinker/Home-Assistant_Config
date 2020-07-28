@@ -1,0 +1,9 @@
+#####
+# SocialBlade component 
+# https://www.home-assistant.io/integrations/socialblade/
+#
+# "Live" subsrciber counter - sort off
+#####
+
+platform: socialblade
+channel_id: UCuqokNoK8ZFNQdXxvlE129g

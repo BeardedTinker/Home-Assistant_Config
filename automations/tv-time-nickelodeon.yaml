@@ -1,0 +1,19 @@
+#####
+# Check if kids are wathing Nickelodeon for 15 minutes
+#####
+
+alias: Nickelodeon counter
+trigger:
+  entity_id: sensor.media_player_title
+  for: 00:15:00
+  platform: state
+  to: Nickelodeon
+condition: []
+action:
+- data:
+    message: Zita, već gledaš Nikelodeon 15 minuta!
+  service: notify.lg_tv
+- data:
+    entity_id: media_player.display_me
+    message: Zita, you are watching Nickelodeon for 15 minutes!
+  service: tts.google_say

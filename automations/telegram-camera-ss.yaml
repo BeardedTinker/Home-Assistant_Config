@@ -1,0 +1,13 @@
+id: telegram-camera-ss
+alias: 'Camera command'
+initial_state: 'on'
+trigger:
+  platform: event
+  event_type: telegram_command
+  event_data:
+    command: '/camera'
+action:
+- service: notify.ebroz_bot
+  data:
+    message: 'Balcony camere snapshot'
+- service: script.camera_snapshot

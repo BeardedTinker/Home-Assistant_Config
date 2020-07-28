@@ -1,0 +1,4 @@
+# Zeroconf, Bonjour, Rendezvous, and Avahi - disabled since using default_config:
+# https://www.home-assistant.io/integrations/zeroconf/
+#####
+zeroconf:

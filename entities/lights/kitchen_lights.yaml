@@ -1,0 +1,10 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Kitchen Lights
+entities:
+  - light.fridge
+  - light.oven
+  - light.sink

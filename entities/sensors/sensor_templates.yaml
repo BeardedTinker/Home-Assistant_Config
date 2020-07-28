@@ -1,0 +1,125 @@
+#####
+# Sensor Templates
+#####
+platform: template
+sensors:
+
+#####
+# Octoprint - Time Elapse in HH:MM:SS
+# Calculcate HH:MM:SS from seconds
+#####
+  octoprint_time_elapsed_friendly:
+    friendly_name: "OctoPrint Time Elapsed"
+    value_template: "{{ states('sensor.octoprint_time_elapsed') | int | timestamp_custom('%H:%M:%S', 0) }}"
+
+#####
+# Octoprint - Time Remaining in HH:MM:SS
+# Calculcate HH:MM:SS from seconds
+#####
+  octoprint_time_remaining_friendly:
+    friendly_name: "OctoPrint Time Remaining"
+    value_template: "{{ states('sensor.octoprint_time_remaining') | int | timestamp_custom('%H:%M:%S', 0) }}"
+
+#####
+# Get deatiled info from LG TV - used to check if kids watch toom much TV
+# Used for automation later on
+#####
+
+  media_player_title:
+    entity_id: media_player.lg_tv
+    value_template: '{{ state_attr("media_player.lg_tv", "media_title") }}'
+    friendly_name: Media Player Title
+  media_content_type:
+    entity_id: media_player.lg_tv
+    value_template: '{{ state_attr("media_player.lg_tv", "media_content_type") }}'
+    friendly_name: Media Content Type
+  media_source:
+    entity_id: media_player.lg_tv
+    value_template: '{{ state_attr("media_player.lg_tv", "source") }}'
+    friendly_name: Media Source
+
+#####
+# Track A/B week for school schedule
+# We need to know if it's odd or even week
+#####
+
+  current_week:
+    entity_id: sensor.date
+    friendly_name: "School week"
+    value_template: >-
+      {% set week_number = now().isocalendar()[1] %}
+      Week {{'A' if week_number % 2 == 0 else 'B'}} (#{{week_number}})
+
+#####
+# Facebox - try to recognize face
+# We try to pull name of the person recognized
+#####
+
+  facebox_detection:
+    friendly_name: 'Facebox Detection'
+    value_template: '{{ states.image_processing.facebox_saved_image.attributes.faces[0]["name"].title()}}' # old - to be removed after testing
+#    value_template: '{{ state_attr("image_processing.facebox_saved_image", "faces[0][''name''].title()")}}'
+
+# Check for low batteried
+  low_batteries:
+    friendly_name: Low batteries
+    value_template: >-
+      {%- for state in states if state.attributes.battery_level or state.attributes.battery -%}
+        {%- set battery = state.attributes.battery_level or state.attributes.battery -%}
+        {%- if battery == 'High' -%}
+          {%- set battery = 100 -%}
+        {%- endif -%}
+        {%- if battery | int < 30 -%}
+          {{state.attributes.friendly_name}}
+        {%- endif -%}
+      {%- endfor -%}
+  battery_status:
+    friendly_name: Batteries
+    icon_template: '{% if states.sensor.low_batteries.state %}mdi:battery-10{% else %}mdi:battery{% endif %}'
+#    value_template: '{% if states.sensor.low_batteries.state %}{{states.sensor.low_batteries.state}}{% else %}OK{% endif %}' # old - to be removed after testing
+    value_template: '{% if states("sensor.low_batteries") %}{{states("sensor.low_batteries")}}{% else %}OK{% endif %}'
+
+# living room lights "calculation"
+# 34W = 12W + 12W + 5W + 5W
+  living_room_lights_yearly:
+#    value_template: '{{ states.sensor.living_room_lights_yearly_2.state | multiply(0.0340) | round(2)}} kWh' # old - to be removed after testing
+    value_template: '{{ states("sensor.dining_room_lights_yearly_2") | multiply(0.0340) | round(2)}} kWh' 
+    friendly_name: 'Yearly Living Room Lights'
+
+# kitchen lights "calculation"
+# 37,5W = 12,5W + 12,5W + 12,5W
+  kitchen_lights_yearly:
+#    value_template: '{{ states.sensor.kitchen_lights_yearly_2.state | multiply(0.0375) | round(2)}} kWh' # old - to be removed after testing
+    value_template: '{{ states("sensor.kitchen_lights_yearly_2") | multiply(0.0375) | round(2)}} kWh' 
+    friendly_name: 'Yearly Kitchen Lights'
+
+# dining room lights "calculation"
+# 25W = 12,5W + 12,5W
+  dining_room_lights_yearly:
+#    value_template: '{{ states.sensor.dining_room_lights_yearly_2.state | multiply(0.0250) | round(2)}} kWh' # old - to be removed after testing
+    value_template: '{{ states("sensor.dining_room_lights_yearly_2") | multiply(0.0250) | round(2)}} kWh'     
+    friendly_name: 'Yearly Dining Room Lights'
+
+# living room lights "calculation" kWh
+# 34W = 12W + 12W + 5W + 5W
+  living_room_lights_yearly_kwh:
+    unit_of_measurement: "kWh"
+#    value_template: '{{ states.sensor.living_room_lights_yearly_2.state | multiply(0.0340) | round(2)}}' # old - to be removed after testing
+    value_template: '{{ states("sensor.living_room_lights_yearly_2") | multiply(0.0340) | round(2)}}'         
+    friendly_name: 'Yearly Living Room Lights kWh'
+
+# kitchen lights "calculation" kWh
+# 37,5W ? 12,5W + 12,5W + 12,5W
+  kitchen_lights_yearly_kwh:
+    unit_of_measurement: "kWh"
+#    value_template: '{{ states.sensor.kitchen_lights_yearly_2.state | multiply(0.0375) | round(2)}}' # old - to be removed after testing
+    value_template: '{{ states("sensor.kitchen_lights_yearly_2") | multiply(0.0375) | round(2)}}'   
+    friendly_name: 'Yearly Kitchen Lights kWh'
+
+# dininig room lights "calculation" kWh
+# 25W = 12,5W + 12,5W
+  dining_room_lights_yearly_kwh:
+    unit_of_measurement: "kWh"
+#    value_template: '{{ states.sensor.dining_room_lights_yearly_2.state | multiply(0.0250) | round(2)}}' # old - to be removed after testing
+    value_template: '{{ states("sensor.dining_room_lights_yearly_2") | multiply(0.0250) | round(2)}}'   
+    friendly_name: 'Yearly Dining Room Lights kWh'         

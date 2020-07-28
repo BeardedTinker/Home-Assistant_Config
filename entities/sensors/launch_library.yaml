@@ -1,0 +1,6 @@
+#####
+# Launch library component
+# https://www.home-assistant.io/integrations/launch_library/
+#####
+
+platform: launch_library

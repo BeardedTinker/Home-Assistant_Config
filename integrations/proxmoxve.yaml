@@ -1,0 +1,16 @@
+#####
+# Proxmox VE integration
+# https://www.home-assistant.io/integrations/proxmoxve/
+##### 
+
+proxmoxve:
+  - host: 192.168.1.30
+    username: !secret px_user
+    password: !secret px_pass
+    verify_ssl: false
+    realm: pve
+    nodes:
+      - node: proxmox
+        vms:
+          - 201
+          - 202

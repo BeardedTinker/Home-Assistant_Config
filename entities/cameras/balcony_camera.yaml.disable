@@ -1,0 +1,10 @@
+#####
+# Create ONVIF camera
+#####
+
+platform: onvif
+name: Balcony
+host: !secret balcony_cam_ip 
+username: !secret balcony_user
+password: !secret balcony_pass
+port: 80

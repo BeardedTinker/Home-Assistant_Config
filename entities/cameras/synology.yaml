@@ -1,0 +1,9 @@
+#####
+# Pull all cameras from Synology Surveilence station
+#####
+
+platform: synology
+url: !secret syno_url 
+username: !secret syno_name
+password: !secret syno_pwd
+verify_ssl: false

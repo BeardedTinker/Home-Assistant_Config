@@ -1,0 +1,7 @@
+###
+# Emby integration
+###
+
+platform: emby
+host: !secret emby_ip 
+api_key: !secret emby_key

@@ -1,0 +1,8 @@
+#####
+# Devices in this area
+#####
+
+kitchen:
+  - light.fridge
+  - light.oven
+  - light.sink

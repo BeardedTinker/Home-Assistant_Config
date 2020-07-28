@@ -1,0 +1,14 @@
+#####
+# Action based on Cube movement
+##### 
+alias: Cube Dining Room
+trigger:
+  platform: mqtt
+  topic: zigbee2mqtt/Cube
+condition:
+  condition: template
+  value_template: '{{ ''flip180'' == trigger.payload_json.action }}'
+action:
+  data:
+    entity_id: light.dining_room_lights
+  service: homeassistant.toggle

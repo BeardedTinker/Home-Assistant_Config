@@ -1,0 +1,16 @@
+#####
+# Not used - list of radio stations
+#####
+
+radio_station:
+  name: 'Select Radio Station:'
+  options:
+    - Antena Zagreb
+    - Narodni
+    - Otvoreni Radio
+    - yammat FM
+    - Hrvatski Katolicki Radio
+    - Radio Marija
+    - Radio Postaja Mir Medugorje
+  initial: Antena Zagreb
+  icon: mdi:radio

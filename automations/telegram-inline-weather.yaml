@@ -1,0 +1,26 @@
+id: telegram-weather-info
+alias: Weather Info
+trigger:
+- platform: event
+  event_type: telegram_callback
+  event_data:
+    data: /weather
+action:
+- service: telegram_bot.answer_callback_query
+  data_template:
+    callback_query_id: '{{ trigger.event.data.id }}'
+    message: Weather
+- service: notify.hassnico_bot
+  data_template:
+    message: >- 
+      {{ "\U00002600" }} *Weather*:
+      
+      ------------------------------------------------
+      
+      *Temperature*:   {{ states.sensor.dark_sky_temperature.state}}
+      
+      *Summary*:   {{ states.sensor.dark_sky_summary_0d.state}}
+      
+    data:
+      inline_keyboard:
+      - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'

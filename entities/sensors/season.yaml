@@ -1,0 +1,6 @@
+#####
+# Season component
+# https://www.home-assistant.io/integrations/season/
+#####
+
+platform: season

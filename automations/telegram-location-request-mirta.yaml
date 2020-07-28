@@ -1,0 +1,12 @@
+alias: Telegram - GPS Notify Mirta
+trigger:
+  event_data:
+    command: /mirta
+  event_type: telegram_command
+  platform: event
+action:
+- data:
+    message: Mirta GPS Position
+  service: notify.ebroz_bot
+- service: script.mirta_gps_notify_telegram
+initial_state: true

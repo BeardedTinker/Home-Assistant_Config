@@ -1,0 +1,9 @@
+#####
+# Doesn't work? Need to make group of all smart speakers for warnings
+#####
+
+warning_players:
+  - media_player.clock_me
+  - media_player.display_me
+  - media_player.mini_me
+  - media_player.whatever_me

@@ -1,0 +1,15 @@
+#####
+# Send state of the battery to Telegram/notify
+#####
+initial_state: true
+alias: Low battery notification
+trigger:
+  entity_id: sensor.low_batteries
+  platform: state
+condition:
+  condition: template
+  value_template: '{% if states("sensor.low_batteries") %}true{% else %}false{% endif %}'
+action:
+  service: notify.ebroz_bot
+  data_template:
+    message: 'Low/Empty batteries: {{ states.sensor.low_batteries.state }} '

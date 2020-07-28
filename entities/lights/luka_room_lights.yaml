@@ -1,0 +1,10 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Luka Room Lights
+entities:
+  - light.luka_floor_light
+  - light.luka_table_light
+  - light.luka_ceiling_light

@@ -1,0 +1,21 @@
+#####
+# Home Assistant Start script
+# Runs as soon as HA is up
+#####
+googlescripthastart:
+  sequence:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.display_me
+      volume_level: 0.5
+  - delay: 00:00:01    
+  - service: tts.google_say
+    entity_id: media_player.display_me
+    data_template:
+      message: >
+       {{ [
+       "Home Assistant is ready now!",
+       "Home Assistant is operational",
+       "Home assistant is back.",
+       "Home assistant is alive and kicking",
+       ] | random }}

@@ -1,0 +1,6 @@
+#####
+# HACS - Home Assistant Community Store
+#####
+
+hacs:
+  token: !secret hacs_token

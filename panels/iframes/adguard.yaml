@@ -1,0 +1,8 @@
+#####
+# AdGuard panel
+# Not working since AdGuard is using http still
+#####
+adguard:
+  title: 'AdGuard Home'
+  url: !secret url_adguard
+  icon: mdi:skull

@@ -1,0 +1,6 @@
+#####
+# Get latest video from BeardedTinker channel
+#####
+
+platform: youtube
+channel_id: UCuqokNoK8ZFNQdXxvlE129g

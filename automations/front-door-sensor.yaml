@@ -1,0 +1,23 @@
+#####
+# Reminder that door is open after 5 minutes
+#####
+alias: Front Door sensor
+trigger:
+  entity_id: binary_sensor.front_door_contact
+  for: 00:05
+  from: 'off'
+  platform: state
+  to: 'on'
+condition: []
+action:
+- data:
+    message: Front door is open
+  service: notify.ebroz_bot
+- data_template:
+    entity_id: media_player.display_me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data:
+    entity_id: media_player.display_me
+    message: Front door is open!
+  service: tts.google_say

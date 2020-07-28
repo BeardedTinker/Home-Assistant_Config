@@ -1,0 +1,13 @@
+#####
+# Luftdaten local sensor
+# https://github.com/lichtteil/local_luftdaten
+#####
+
+platform: local_luftdaten
+host: !secret luftdaten_ip 
+name: Indoor AQ
+monitored_conditions:
+  - SDS_P1
+  - SDS_P2
+  - temperature
+  - humidity

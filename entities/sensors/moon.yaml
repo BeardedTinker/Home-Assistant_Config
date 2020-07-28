@@ -1,0 +1,6 @@
+#####
+# Moon phases sensor
+# https://www.home-assistant.io/integrations/moon/
+#####
+
+platform: moon

@@ -1,0 +1,14 @@
+#####
+# Action based on switch
+#####
+alias: Luka switch single
+description: ''
+trigger:
+  entity_id: sensor.luka_switch_click
+  platform: state
+  to: single
+condition: []
+action:
+  data:
+    entity_id: light.luka_table_light
+  service: light.toggle

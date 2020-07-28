@@ -1,0 +1,5 @@
+#####
+# Conversation - try to make HA communicate to us
+# https://www.home-assistant.io/integrations/conversation/
+#####
+conversation:

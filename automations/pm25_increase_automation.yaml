@@ -1,0 +1,18 @@
+#####
+# Warn if airquality is decreasing inside
+#####
+alias: "PM2.5 increase"
+trigger:
+  platform: state
+  entity_id: binary_sensor.pm25_increase
+condition:
+  condition: and
+  conditions:
+    - condition: state
+      entity_id: binary_sensor.pm25_increase
+      state: 'on'
+    - condition: numeric_state
+      entity_id: sensor.luftdaten_43996_p25
+      above: 20
+action:
+- service: script.pm25_increase_speech

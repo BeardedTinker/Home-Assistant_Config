@@ -1,0 +1,14 @@
+#####
+# Action based on switch
+#####
+alias: Zita switch double
+description: ''
+trigger:
+  entity_id: sensor.zita_switch_click
+  platform: state
+  to: double
+condition: []
+action:
+  data:
+    entity_id: light.goose_light
+  service: light.toggle

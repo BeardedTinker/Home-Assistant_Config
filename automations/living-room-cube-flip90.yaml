@@ -1,0 +1,14 @@
+#####
+# Action based on Cube movement
+#####
+alias: Cube Kitchen Lights
+trigger:
+  platform: mqtt
+  topic: zigbee2mqtt/Cube
+condition:
+  condition: template
+  value_template: '{{ ''flip90'' == trigger.payload_json.action }}'
+action:
+  data:
+    entity_id: light.kitchen_lights
+  service: homeassistant.toggle

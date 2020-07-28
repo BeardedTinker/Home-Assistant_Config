@@ -1,0 +1,32 @@
+id: telegram-inline-system-status
+alias: System status
+trigger:
+- platform: event
+  event_type: telegram_callback
+  event_data:
+    data: /status
+action:
+- service: telegram_bot.answer_callback_query
+  data_template:
+    callback_query_id: '{{ trigger.event.data.id }}'
+    message: System Status
+- service: notify.ebroz_bot
+  data_template:
+    message: >- 
+      {{ "\U0001F4BB" }} *System*:
+      
+      ------------------------------------------------        
+      
+      *CPU Usage*:   {{ states.sensor.synology_cpu_load_total }} %
+      
+      *Memory usage*:   {{ states.sensor.synology_memory_usage_real }} %
+
+      *HDD Temp*:   {{ sensor.synology_temperature_sda }}  
+      
+      *Network UL*:   {{ states.sensor.synology_network_down }} Mb
+      
+      *Network DL:   {{ states.sensor.synology_network_up }} kbps
+        
+    data:
+      inline_keyboard:
+      - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'

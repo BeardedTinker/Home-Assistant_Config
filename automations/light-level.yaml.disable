@@ -1,0 +1,22 @@
+#####
+# Used to test lux sensor
+# Will be used in future for automating some lights during day and low light
+#####
+alias: Light level sensor
+trigger:
+  platform: numeric_state
+  entity_id: sensor.living_room_motion_illuminance
+  below: '120'
+condition: 
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'on'
+    condition: and
+  conditions:
+    - condition: state
+      entity_id: light.living_room_lights
+      state: 'on'
+action:
+  data:
+    message: Light low, people home
+  service: notify.ebroz_bot

@@ -1,0 +1,15 @@
+#####
+# Track workdays for Croatia
+# This checks if tomorrow is workday - used to check for school night warning
+#
+# https://www.home-assistant.io/integrations/workday/
+#####
+platform: workday
+name: workday_tomorrow
+days_offset: 1
+country: HR
+#    workdays: [mon, wed, fri]
+#    excludes: [sat, sun, holiday]
+#    add_holidays: 
+#      - '2018-12-26'
+#      - '2018-12-31'

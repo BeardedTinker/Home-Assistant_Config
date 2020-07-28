@@ -1,0 +1,14 @@
+#####
+# Text to speech for Smart Speakers
+# https://www.home-assistant.io/integrations/google_translate/
+#
+# Disabled - because it sounds horrible!
+#####
+
+platform: google_translate
+service_name: google_say_hr
+language: 'hr'
+base_url: !secret my_full_url 
+cache: true
+cache_dir: /tmp/tts
+time_memory: 300

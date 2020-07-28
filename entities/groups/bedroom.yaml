@@ -1,0 +1,6 @@
+#####
+# Devices in this area
+#####
+
+bedroom:
+  - light.bedroom_light  

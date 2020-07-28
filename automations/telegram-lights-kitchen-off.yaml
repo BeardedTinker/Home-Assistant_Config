@@ -1,0 +1,14 @@
+alias: Telegram - Living Room Light OFF
+trigger:
+  platform: event
+  event_type: telegram_callback
+  event_data:
+    data: /living_off
+action:
+- service: telegram_bot.answer_callback_query
+  data_template:
+    callback_query_id: '{{ trigger.event.data.id }}'
+    message: Living Room Lights OFF
+- service: light.turn_off
+  data:
+    entity_id: light.living_room_lights

@@ -1,0 +1,7 @@
+#####
+# Create camere out of local file
+#####
+
+platform: local_file
+name: Saved Image
+file_path: /config/tmp/balcony.jpg 

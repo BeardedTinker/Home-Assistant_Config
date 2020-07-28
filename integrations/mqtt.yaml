@@ -1,0 +1,20 @@
+#####
+# MQTT integration
+# Using docker MQTT installation with username and password
+# https://www.home-assistant.io/integrations/mqtt/
+#####
+
+mqtt:
+  broker: !secret mqtt_url
+  port: !secret mqtt_port
+  username: !secret mqtt_name
+  password: !secret mqtt_pwd
+  client_id: home-assistant
+  discovery: true
+  discovery_prefix: homeassistant
+  birth_message:
+    topic: 'hass/status'
+    payload: 'online'
+  will_message:
+    topic: 'hass/status'
+    payload: 'offline'

@@ -1,0 +1,15 @@
+alias: Telegram Home Assistant restart
+initial_state: 'on'
+trigger:
+  event_data:
+    command: /harestart
+  event_type: telegram_command
+  platform: event
+action:
+- data:
+    message: HA - Restart - Triggered
+  service: notify.ebroz_bot
+- alias: ''
+  data: {}
+  service: homeassistant.restart
+- service: script.googlescriptharestart

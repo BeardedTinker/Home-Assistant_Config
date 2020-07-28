@@ -1,0 +1,15 @@
+#####
+# Not used - list of players
+#####
+
+chromecast_radio:
+  name: 'Select Speakers:'
+  initial: Display Me
+  icon: mdi:speaker-wireless
+  options:
+    - Living Room TV
+    - Loft TV
+    - Display Me
+    - Clock Me
+    - Whatever Me
+    - Mini Me

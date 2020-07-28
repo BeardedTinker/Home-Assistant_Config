@@ -1,0 +1,27 @@
+#####
+# Sends reminder midnight is approaching
+#####
+alias: Almost Midnight Lights Dimm
+trigger:
+  at: '23:30:00'
+  platform: time
+condition:
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'on'
+action:
+- data:
+    entity_id: 
+      - light.living_room_lights
+    brightness: 64
+  service: light.turn_on
+- data:
+    entity_id:
+      - light.kitchen_lights
+      - light.ceiling_lights
+      - light.dining_room_lights
+  service: light.turn_off
+- data:
+    message: Almost Midnight!
+  service: notify.lg_tv
+- service: script.almostmidnightspeech

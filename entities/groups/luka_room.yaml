@@ -1,0 +1,7 @@
+#####
+# Devices in this area
+#####
+
+luka_room:
+  - light.luka_floor_light
+  - light.luka_table_light

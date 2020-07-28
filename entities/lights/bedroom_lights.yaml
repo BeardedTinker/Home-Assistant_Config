@@ -1,0 +1,8 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Bedroom Lights
+entities:
+  - light.bedroom_light

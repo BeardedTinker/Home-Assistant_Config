@@ -1,0 +1,8 @@
+#####
+# Dark Sky sensor component
+# https://www.home-assistant.io/integrations/darksky/
+#####
+
+platform: darksky
+api_key: !secret darksky_api
+scan_interval: 360

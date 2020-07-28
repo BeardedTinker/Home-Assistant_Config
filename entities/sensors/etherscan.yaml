@@ -1,0 +1,9 @@
+#####
+# Etherium EtherScan component
+# https://www.home-assistant.io/integrations/etherscan/
+#####
+
+platform: etherscan
+address: !secret storj_token
+token: storj
+#value_template: '{{ value.replace(",", "") }}'  

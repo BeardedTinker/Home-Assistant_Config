@@ -1,0 +1,9 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Zita Room Lights
+entities:
+  - light.goose_light
+  - light.zita_ceiling_light

@@ -1,0 +1,19 @@
+####
+# PM10 above 25 and getting worse speech
+####
+pm25_increase_speech:
+  sequence:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.display_me
+      volume_level: 0.3
+  - delay: 00:00:01    
+  - service: tts.google_say
+    entity_id: media_player.display_me
+    data_template:
+      message: >
+        {{ [
+        "Warning! Air quality decreasing", 
+        "Caution! Air inside is getting worse",
+        "Please vent room now!",
+        ] | random }}

@@ -1,0 +1,38 @@
+# Logbbok - list of included/excluded entities
+# TODO: Clean this list a lot more
+# https://www.home-assistant.io/integrations/logbook/
+#####
+logbook:
+  include:
+    domains:
+#    - alarm_control_panel
+      - climate
+#    - cover
+#    - input_boolean
+#    - input_select
+      - light
+      - media_player
+      - switch
+      - person
+      - sensor
+    entities:
+      - binary_sensor.front_door_contact
+      - binary_sensor.people_home
+  exclude:
+    domains:
+      - sun
+#      - binary_sensor
+#    - camera
+#    - device_tracker
+      - group
+#    - input_number
+#    - input_text
+#    - script
+#    - sensor
+      - weather
+      - zone
+      - automation
+    entities:
+      - sensor.last_boot
+      - sensor.date
+      - sensor.darksky

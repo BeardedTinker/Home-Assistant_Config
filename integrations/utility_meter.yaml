@@ -1,0 +1,19 @@
+#####
+# Utility meter
+#
+# https://www.home-assistant.io/integrations/utility_meter/
+#####
+
+utility_meter:
+  daily_energy:
+    source: sensor.shelly_em_total_consumption
+    cycle: daily
+    tariffs:
+      - peak
+      - offpeak
+  monthly_energy:
+    source: sensor.shelly_em_total_consumption
+    cycle: monthly
+    tariffs:
+      - peak
+      - offpeak

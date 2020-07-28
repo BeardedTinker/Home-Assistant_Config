@@ -1,0 +1,24 @@
+#####
+# Warning when there is Meteoalarm alert
+# Doesn't work if there is current warning and new warning is received.
+#####
+alias: Meteoalarm alert
+trigger:
+  entity_id: binary_sensor.meteoalarm
+  from: 'off'
+  platform: state
+action:
+- data_template:
+    message: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+    title: '{{state_attr(''binary_sensor.meteoalarm'', ''headline'')}}'
+  service: notify.ebroz_bot
+- data_template:
+    entity_id: media_player.display_me
+#    entity_id: media_player.clock.me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data_template:
+    entity_id: media_player.display_me
+#    entity_is: media_player.clock_me
+    message: 'Meteorological warning. {{state_attr(''binary_sensor.meteoalarm'', ''event'')}}. {{state_attr(''binary_sensor.meteoalarm'', ''description'')}}'
+  service: tts.google_say

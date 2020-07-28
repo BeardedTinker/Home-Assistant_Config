@@ -1,0 +1,8 @@
+#####
+# Not used, but could be in future - copied it from Frenks config
+#####
+
+apartment_silent_hours_end:
+  name: Apartment Silent Hours End
+  has_date: false
+  has_time: true

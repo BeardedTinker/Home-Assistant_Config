@@ -1,0 +1,11 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Living room Lights
+entities:
+  - light.corner
+  - light.entrance
+  - light.standing
+  - light.TV

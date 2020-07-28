@@ -1,0 +1,14 @@
+#####
+# Action based on Cube movement
+#####
+alias: Cube Bar light
+trigger:
+  platform: mqtt
+  topic: zigbee2mqtt/Cube
+condition:
+  condition: template
+  value_template: '{{ ''shake'' == trigger.payload_json.action }}'
+action:
+  data:
+    entity_id: light.bar_light
+  service: homeassistant.toggle

@@ -1,0 +1,14 @@
+#####
+# Track workdays for Croatia
+# This checks if today is workday
+#
+# https://www.home-assistant.io/integrations/workday/
+#####
+platform: workday
+name: workday_today
+country: HR
+#    workdays: [mon, wed, fri]
+#    excludes: [sat, sun, holiday]
+#    add_holidays: 
+#      - '2018-12-26'
+#      - '2018-12-31'

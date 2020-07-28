@@ -1,0 +1,10 @@
+#####
+# Office zone
+# https://www.home-assistant.io/integrations/zone/
+#####
+
+name: Office
+latitude: !secret office_lat
+longitude: !secret office_long 
+radius: 75
+icon: mdi:worker

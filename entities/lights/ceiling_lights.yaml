@@ -1,0 +1,12 @@
+#####
+# List of lights in specific area
+#####
+
+platform: group
+name: Ceiling Lights
+entities:
+  - light.ceiling_one_light
+  - light.ceiling_two_light
+  - light.ceiling_three_light
+  - light.ceiling_four_light
+  - light.ceiling_five_light

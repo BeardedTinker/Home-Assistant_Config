@@ -1,0 +1,10 @@
+#####
+# Used to make "slider" for volume control - not used
+#####
+
+volume_radio:
+  name: Volume
+  icon: mdi:volume-high
+  min: 0
+  max: 1
+  step: 0.05

@@ -1,0 +1,11 @@
+alias: Telegram test
+trigger:
+  event_data:
+    command: /ping
+  event_type: telegram_command
+  platform: event
+condition: []
+action:
+  data:
+    message: pong
+  service: notify.ebroz_bot

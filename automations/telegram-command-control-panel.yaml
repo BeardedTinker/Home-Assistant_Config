@@ -1,0 +1,17 @@
+alias: Telegram Control Pannel Command
+initial_state: 'on'
+trigger:
+  platform: event
+  event_type: telegram_command
+  event_data:
+    command: /cp
+action:
+  service: notify.ebroz_bot
+  data:
+    message: "{{ [ \"Home Assistant Status\", \"Control Panel\", \"Yes Sir!\", \"\
+      Home Assistant Control Panel\", \"Control box\" ] | random }}       \n"
+    data:
+      inline_keyboard:
+        - "\U0001F4A1 Lights:/lights, \U0001F4BB System:/system"
+        - "\U0001F4BB Status:/status, Help:/help, Ping:/ping"
+        - "\U0001F4C4 Summary:/Summary, \U00002600 Weather:/weather"

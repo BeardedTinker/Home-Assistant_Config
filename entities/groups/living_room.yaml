@@ -1,0 +1,16 @@
+#####
+# Devices in this area
+#####
+
+living_room:
+    - light.corner
+    - light.entrance
+    - light.standing
+    - light.TV
+    - light.bar_light
+#    - light.ceiling_one_light
+#    - light.ceiling_two_light
+#    - light.ceiling_three_light
+#    - light.ceiling_four_light
+#    - light.ceiling_five_light
+#    - light.bar

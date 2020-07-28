@@ -1,0 +1,16 @@
+#####
+# Not used but still here
+#####
+alias: SS Elevator webhook
+trigger:
+  platform: webhook
+  webhook_id: motion_elevator_hook
+condition: []
+action:
+- data:
+    entity_id: camera.lift
+    filename: /config/tmp/elevator.jpg
+  service: camera.snapshot
+- data:
+    entity_id: image_processing.facebox_saved_image
+  service: image_processing.scan

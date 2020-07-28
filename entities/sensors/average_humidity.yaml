@@ -1,0 +1,11 @@
+#####
+# Get average humidity from room sensors
+#####
+
+platform: min_max
+entity_ids:
+  - sensor.luka_room_humidity
+  - sensor.living_room_humidity
+  - sensor.zita_room_humidity
+name: average_humidity
+type: mean

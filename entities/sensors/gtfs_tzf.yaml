@@ -1,0 +1,13 @@
+#####
+# GTFS component - test
+# https://www.home-assistant.io/integrations/gtfs/
+#####
+
+platform: gtfs
+name: XVI 
+origin: 169
+#    origin: 104    
+destination: 299
+#data: ZET
+data: ZET.zip
+include_tomorrow: true

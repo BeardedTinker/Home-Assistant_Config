@@ -1,0 +1,10 @@
+#####
+# High school zone
+# https://www.home-assistant.io/integrations/zone/
+#####
+
+name: High school
+latitude: !secret highscool_lat
+longitude: !secret highscool_long
+radius: 70
+icon: mdi:school

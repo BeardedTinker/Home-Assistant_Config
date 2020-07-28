@@ -1,0 +1,11 @@
+#####
+# This is an input boolean to use with automations
+# in case we have guests over for visit or sleepovers.
+#
+# https://www.home-assistant.io/components/input_boolean/
+#####
+
+guest_mode:
+  name: Enables Guest Mode
+  initial: false
+  icon: mdi:bunk-bed-outline

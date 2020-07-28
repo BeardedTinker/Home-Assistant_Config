@@ -1,0 +1,10 @@
+#####
+# PM2.5 increase 
+# 
+# Using Trend platform with airquality sensor
+#####
+
+platform: trend
+sensors:
+  pm25_increase:
+    entity_id: sensor.luftdaten_43996_p25
