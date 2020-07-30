@@ -1,0 +1,54 @@
+esphome:
+  name: light_1
+  platform: ESP8266
+  board: d1_mini
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Light 1 Fallback Hotspot"
+    password: "ACiX7CPWcDLm"
+  manual_ip:
+    # Set this to the IP of the ESP
+    static_ip: 192.168.1.58
+    # Set this to the IP address of the router. Often ends with .1
+    gateway: 192.168.1.1
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    subnet: 255.255.255.0
+# Enable logging
+captive_portal:
+
+# Enable logging
+logger:
+#  level: VERBOSE
+  
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+i2c:
+ - id: bus_a
+   sda: D2
+   scl: D1
+   scan: True
+as3935_i2c:
+  irq_pin: D3
+  address: 0x03
+  indoor: true
+  noise_level: 5 # default 2
+  spike_rejection: 11 # default 2
+
+sensor:
+  - platform: as3935
+    lightning_energy:
+      name: "Lightning Energy"
+    distance:
+      name: "Distance to Storm"
+binary_sensor:
+  - platform: as3935
+    name: "Storm Warning"
