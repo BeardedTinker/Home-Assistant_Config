@@ -50,7 +50,6 @@ Google Light Theme:
   ha-card-border-radius: "10px"
   ha-card-box-shadow: 1px 1px 5px 0px rgb(230, 230, 230)
   paper-dialog-background-color: var(--card-background-color)
-  paper-card-background-color: var(--card-background-color)
   paper-listbox-background-color: var(--card-background-color)
   # Switches
   switch-checked-button-color: "#5F9BEA"

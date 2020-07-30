@@ -1,0 +1,20 @@
+#####
+# Plant monitor integration
+#####
+
+plant:
+  daisy:
+    sensors:
+      moisture: sensor.plant_soil_1
+      battery: sensor.plant_battery_1
+      temperature: sensor.plant_temp_1
+      conductivity: sensor.plant_salt_1
+      brightness: sensor.plant_lux_1
+    min_moisture: 20
+    max_moisture: 60
+    min_battery: 20
+    min_conductivity: 150
+    min_temperature: 15
+    min_brightness: 1000
+    check_days: 4
+        

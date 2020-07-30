@@ -1,8 +1,7 @@
 #####
 # Creating manual plant sensor based on MQTT data from LilyGO HiGrow board with pesor firmware
 # https://www.home-assistant.io/integrations/sensor.mqtt/
-# WORK IN PROGRESS
-#####
+ 
 sensor plant:
   - platform: mqtt    
     name: Plant_salt_1
