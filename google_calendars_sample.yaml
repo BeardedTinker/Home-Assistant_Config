@@ -1,0 +1,70 @@
+
+- cal_id: name.lastname@gmail.com
+  entities:
+  - device_id: name_lastname_gmail_com
+    ignore_availability: true
+    name: name.lastname@gmail.com
+    track: true
+
+- cal_id: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@import.calendar.google.com
+  entities:
+  - device_id: calendar
+    ignore_availability: true
+    name: Calendar
+    track: true
+
+- cal_id: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@group.calendar.google.com
+  entities:
+  - device_id: the_bearded_family
+    ignore_availability: true
+    name: The Bearded family
+    track: true
+
+- cal_id: addressbook#contacts@group.v.calendar.google.com
+  entities:
+  - device_id: contacts
+    ignore_availability: true
+    name: Contacts
+    track: true
+
+- cal_id: en.croatian#holiday@group.v.calendar.google.com
+  entities:
+  - device_id: holidays_in_croatia
+    ignore_availability: true
+    name: Holidays in Croatia
+    track: true
+
+- cal_id: hr.christian#holiday@group.v.calendar.google.com
+  entities:
+  - device_id: krscanski_blagdani
+    ignore_availability: true
+    name: "Christian holidays"
+    track: true
+
+- cal_id: hr.croatian#holiday@group.v.calendar.google.com
+  entities:
+  - device_id: praznici_u_hrvatskoj
+    ignore_availability: true
+    name: Public holidays in Hrvatskoj
+    track: true
+
+- cal_id: xxxxxxxxxx#sunrise@group.v.calendar.google.com
+  entities:
+  - device_id: sunrise_sunset_city_of_zagreb
+    ignore_availability: true
+    name: 'Sunrise/Sunset: City of Zagreb'
+    track: true
+
+- cal_id: p#weather@group.v.calendar.google.com
+  entities:
+  - device_id: weather
+    ignore_availability: true
+    name: Weather
+    track: true
+
+- cal_id: xxxxxxxxxxxxxxxxxxxxxxxx@group.calendar.google.com
+  entities:
+  - device_id: family
+    ignore_availability: true
+    name: family
+    track: true

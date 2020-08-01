@@ -1,0 +1,17 @@
+zone.school:
+  icon: mdi:school
+zone.work_d_o_o:
+  icon: mdi:work
+  radius: 75
+zone.home:
+  radius: 50
+zone.high_school:
+  latitude: 45.815399
+  longitude: 15.966568
+  radius: 70
+switch.energy_1_relay:
+  icon: mdi:power-socket-eu
+switch.energy_1_led_blue:
+  icon: mdi:led-outline
+switch.energy_1_led_red:
+  icon: mdi:led-outline

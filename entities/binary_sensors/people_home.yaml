@@ -1,0 +1,11 @@
+#####
+# Set People Home to "Home" if anyone is home
+# Currently using tado - some delay
+#####
+platform: template
+sensors:
+  people_home:
+    value_template: >-
+      {{ is_state('device_tracker.andrej', 'home')
+         or is_state('device_tracker.lukica', 'home')
+         or is_state('device_tracker.mirta', 'home') }}

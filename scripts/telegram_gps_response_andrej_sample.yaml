@@ -1,0 +1,15 @@
+#####
+# Andrej GPS response for Telegram
+#####
+
+andrej_gps_notify_telegram:    
+ alias: Script for Telegram Notify - Andrej's Location
+ sequence:
+   - service: telegram_bot.send_location
+     data:
+       caption: 'Andrej location'
+       target:
+         - !secret telegram_bot_chat_id
+       latitude: '{{ states.device_tracker.google_maps_xxxxxxxxxx.attributes.latitude|float }}'
+       longitude: '{{ states.device_tracker.google_maps_xxxxxxxxxx.attributes.longitude|float }}'
+       disable_notification: true

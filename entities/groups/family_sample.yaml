@@ -1,0 +1,9 @@
+#####
+# Devices for family group
+#####
+
+
+family:
+  - device_tracker.google_maps_1xxxxxxxxxxxxxxxxxxxx # Andrej Gmaps
+  - device_tracker.google_maps_2xxxxxxxxxxxxxxxxxxxx # Luka Gmaps
+  - device_tracker.google_maps_3xxxxxxxxxxxxxxxxxxxx # Mirta Gmaps

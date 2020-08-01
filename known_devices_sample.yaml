@@ -1,0 +1,117 @@
+mirta:
+  hide_if_away: false
+  icon:
+  mac: '250532'
+  name: Mirta 
+  picture:
+  track: true
+
+andrej:
+  hide_if_away: false
+  icon:
+  mac: '250534'
+  name: Andrej
+  picture:
+  track: true
+
+lukica:
+  hide_if_away: false
+  icon:
+  mac: '250840'
+  name: Luka
+  picture:
+  track: true
+
+andrej_phone:
+  hide_if_away: false
+  icon:
+  mac:
+  name: Andrej
+  picture:
+  track: true
+
+google_maps_xxxxxxxxxxxxxxxxxxx:
+  hide_if_away: false
+  icon: mdi:cellphone-android
+  mac:
+  name: Luka 
+  picture: https://lh3.googleusercontent.com/a-/xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  track: true
+
+google_maps_xxxxxxxxxxxxxxxxxxxx:
+  hide_if_away: false
+  icon: mdi:cellphone-android
+  mac:
+  name: Mirta 
+  picture: https://lh6.googleusercontent.com/-xxxxxxxx-x/xxxxxxxx/xxxxxxx/xxxxxxx-xx/mo/photo.jpg
+  track: true
+
+google_maps_xxxxxxxxxxxxxxxxxxxxx:
+  hide_if_away: false
+  icon: mdi:cellphone-android
+  mac:
+  name: Andrej 
+  picture: https://lh3.googleusercontent.com/a-/xxxxxxxxxxxxxxxxxxxxxxxxxxx
+  track: true
+
+gw_xxxxxxxxxx:
+  hide_if_away: false
+  icon:
+  mac: xx:xx:xx:xx:xx:xx
+  name: GW-xxxxxxxxxx
+  picture:
+  track: false
+
+chromecast:
+  hide_if_away: false
+  icon: mdi:google-chrome
+  mac: xx:xx:xx:xx:xx:xx
+  name: Chromecast
+  picture:
+  track: false
+
+tado:
+  hide_if_away: false
+  icon: mdi:radiator
+  mac: xx:xx:xx:xx:xx:xx
+  name: tado
+  picture:
+  track: false
+
+google_home_mini:
+  hide_if_away: false
+  icon: mdi:google-home
+  mac: xx:xx:xx:xx:xx:xx
+  name: Google-Home-Mini
+  picture:
+  track: false
+
+lgwebostv:
+  hide_if_away: false
+  icon: mdi:television
+  mac: xx:xx:xx:xx:xx:xx
+  name: LGwebOSTV
+  picture:
+  track: false
+
+google_maps_xxxxxxxxxxxxx:
+  hide_if_away: false
+  icon:
+  mac:
+  name: google maps xxxxxxxxxxxxxx
+  picture: https://lh6.googleusercontent.com/-xxxxxxxxx/xxxxxxxxx/xxxxxxxxx/xxxxxx-xxx/photo.jpg
+  track: true
+
+tile_xxxxxxxxxxxxxxxx:
+  icon: mdi:view-grid
+  mac:
+  name: tile_xxxxxxxxxxxxxxxxxxx
+  picture:
+  track: true
+
+tile_p_xxxxxxxxxxxxxxxxxxxx:
+  icon: mdi:view-grid
+  mac:
+  name: tile_p_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  picture:
+  track: true

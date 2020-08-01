@@ -23,24 +23,25 @@ From other devices I use, here is a list:
 - IKEA TRADFRI ON/OFF switch (E1743)
 - IKEA TRADFRI control outlet (E1603/E1702)
 - IKEA TRADFRI various bulbs of all sizes and shapes (LED1545G12, LED1623G12, LED1650R5, LED1536G5, LED1649C5, LED1736G9)
-- Xiaomi MiJia wireless switch (WXKG01LM)
-- Xiaomi MiJia temperature & humidity sensor (WSDCGQ01LM)
-- Xiaomi Aqara human body movement and illuminance sensor (RTCGQ11LM)
-- Xiaomi Aqara door & window contact sensor (MCCGQ11LM)
-- Xiaomi Mi/Aqara smart home cube (MFKZQ01LM)
-- QuinLED Dig Uno for controlling addressable LED strips 
-- Shelly EM energy meter with 50A clamp
-- Shely Plug S smart Plugs
+- Xiaomi MiJia wireless switch [WXKG01LM](https://www.zigbee2mqtt.io/devices/WXKG01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dW7ZKDA)
+- Xiaomi MiJia temperature & humidity sensor [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
+- Xiaomi Aqara human body movement and illuminance sensor [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
+- Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
+- Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+- NEW Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+- [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
+- [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
+- [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
 - ESPHome compatible Smart Plug - removed
-- Google Chromcast devices
+- Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
 - LG webOS TV
-- tado° Smart Thermostat
-- tado° Smart Radiator Thermostat
+- tado° [Smart Thermostat](https://www.tado.com/hr/)
+- tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
 - various PoE IP cameras 
-- Tile Mate 2020
-- Google Home Mini
-- Google Home Display
-- Lenovo Smart Clock
+- Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
+- Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
+- Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
+- Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
 
 ### Integrations
 
@@ -72,10 +73,10 @@ custom_components
 www/community
 
 #### Missing files
- - ip_bans.yaml - could contain IP addresses
- - secrets.yaml - contains credentials and some private infos
- - known_devices.yaml - contains indentifiers 
- - customize.yaml - contains private information
+ - ip_bans.yaml - could contain IP addresses  - added SAMPLE
+ - secrets.yaml - contains credentials and some private infos - added SAMPLE
+ - known_devices.yaml - contains indentifiers  - added SAMPLE
+ - customize.yaml - contains private information - added SAMPLE
  - facebox-*.yaml - contains information for face recognition
  - people_home.yaml - contains personal information
  - family.yaml - contains personal information
