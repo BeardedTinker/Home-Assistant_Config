@@ -7,7 +7,7 @@ trigger:
   platform: homeassistant
 action:
 - data:
-    message: Home Assistant started at {{ states('sensor.date_time') }}
+    message: Home Assistant started at {{ states('sensor.time') }}
   service: notify.ebroz_bot
 - data:
     entity_id: media_player.display_me
