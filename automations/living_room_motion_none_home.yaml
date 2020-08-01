@@ -1,0 +1,25 @@
+#####
+# Alert on motion when none home
+# Quick and dirty alarm
+#####
+alias: Living room motion when none home
+trigger:
+- entity_id: binary_sensor.living_room_motion_occupancy
+  platform: state
+  to: 'on'
+condition:
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'off'
+action:
+- data:
+    message: Living room motion and none at home!
+  service: notify.ebroz_bot
+- data_template:
+    entity_id: media_player.display_me
+    volume_level: 0.7
+  service: media_player.volume_set
+- data:
+    entity_id: media_player.display_me
+    message: Intruder alert!
+  service: tts.google_say

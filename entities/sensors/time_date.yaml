@@ -7,7 +7,9 @@ platform: time_date
 display_options:
   - time
   - date
-  - date_time
-  - time_date
   - time_utc
-  - beat
+
+# These are NOT used, so disabled
+#  - date_time
+#  - time_date
+#  - beat

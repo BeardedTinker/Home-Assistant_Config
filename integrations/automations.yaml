@@ -1,5 +1,7 @@
+#####
 # This handles the loading of my automations
-#
+# Each automation is in separate YAML file
 # https://www.home-assistant.io/docs/automation/
-#
+#####
+
 automation: !include_dir_list ../automations
