@@ -43,6 +43,30 @@ From other devices I use, here is a list:
 - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
 - Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
 
+
+### Containers and add-ons
+
+As I'm running this on Synology, I have mix of Docker containers and hass.io add-ons. Here is a list:
+
+Add-ons:
+ - Check Home Assistant configuration - [link](https://github.com/home-assistant/hassio-addons/tree/master/check_config)
+ - ESPHome - [link](https://esphome.io/) - migrated from Docker container
+ - Node-RED - [linl](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
+ - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
+ - Zigbee2MQTT Assistant - [link](https://github.com/yllibed/Zigbee2MqttAssistant)
+
+Containers:
+ - AdGuard Home 
+ - Emby
+ - ESPHome
+ - Grafana
+ - InfluxDB
+ - MQTT
+ - Node-RED
+ - Portainer
+ - Zigbee2MQTT
+ plus some others too - not directly related to Home Assistant.
+
 ### Integrations
 
 There are too many integrations to list them all, but some of the main ones are:
