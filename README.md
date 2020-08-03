@@ -69,24 +69,23 @@ Due to privacy, security,... some files are not included as well as some folders
 
 Here is a list of them sorted:
 #### Missing folders
-custom_components
-www/community
+ - custom_components
+ - www/community
 
 #### Missing files
  - ip_bans.yaml - could contain IP addresses  - added SAMPLE
  - secrets.yaml - contains credentials and some private infos - added SAMPLE
  - known_devices.yaml - contains indentifiers  - added SAMPLE
  - customize.yaml - contains private information - added SAMPLE
- - facebox-*.yaml - contains information for face recognition
- - people_home.yaml - contains personal information
- - family.yaml - contains personal information
- - telegram_gps_response_andrej.yaml - contains identifiers
+ - facebox-*.yaml - contains information for face recognition - added SAMPLE
+ - family.yaml - contains personal information - added SAMPLE
+ - google_calendars.yaml - contains private information - added SAMPLE
+ - driving_andrej.yaml - contains identifiers - added SAMPLE
+ - telegram_gps_response_andrej.yaml - contains identifiers - added SAMPLE
  - telegram_gps_response_luka.yaml - contains identifiers
  - telegram_gps_response_mirta.yaml - contains identifiers
- - google_calendars.yaml - contains private information
  - luka-lights-off-when-away.yaml - contains identifiers
  - energy_1.yaml - contains secure information
  - temp_flash.yaml - contains secure information
- - driving_andrej.yaml - contains identifiers
 
 Also missing are certificates, json files, cookies,...
