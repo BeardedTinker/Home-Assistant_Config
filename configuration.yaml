@@ -7,7 +7,7 @@ homeassistant:
 #  time_zone: Europe/Zagreb
   customize: !include customize.yaml
   packages: !include_dir_named integrations # package setup / added config split
-  whitelist_external_dirs:
+  allowlist_external_dirs:
     - /config/tmp
 
 ###
@@ -82,6 +82,7 @@ timer:
 
 #####
 # Disabled components
+# All of this has been moved to individual files and folders
 #####
 
 # # Google Calendar - pull data from calendar

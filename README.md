@@ -51,7 +51,7 @@ As I'm running this on Synology, I have mix of Docker containers and hass.io add
 Add-ons:
  - Check Home Assistant configuration - [link](https://github.com/home-assistant/hassio-addons/tree/master/check_config)
  - ESPHome - [link](https://esphome.io/) - migrated from Docker container
- - Node-RED - [linl](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
+ - Node-RED - [link](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
  - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
  - Zigbee2MQTT Assistant - [link](https://github.com/yllibed/Zigbee2MqttAssistant)
 
