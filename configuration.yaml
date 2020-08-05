@@ -34,24 +34,11 @@ python_script:
 # script: !include scripts.yaml
 # input_select: !include input_select.yaml
 # sensor: !include sensor.yaml
-scene: !include scenes.yaml
+# scene: !include scenes.yaml
 
 #####
 # Component definitions
 #####
-
-# Notifications - TV, Telegram
-notify:
-  - platform: telegram
-    name: !secret telegram_bot_name 
-    chat_id: !secret telegram_bot_chat_id
-#  - name: ga_broadcast
-#    platform: google
-#    resource: !secret google_home_mini_broadcast
-#  - platform: webostv
-#    host: !secret lg_tv_ip
-#    name: LG TV
-#    filename: webostv.conf
 
 # Zigbee2MQTT - get map of entities
 zigbee2mqtt_networkmap:
@@ -71,19 +58,32 @@ geo_location:
     feed_type: 'past_week_all_earthquakes'
     radius: 350
 
-timer:
-  front_door_open:
-    duration: '00:05:00'
-    name: Front Door Open Timer
-    icon: mdi:door-open
-  living_room_motion:
-    duration: '00:02:00'
-    name: Living Room motion timer
-
 #####
 # Disabled components
 # All of this has been moved to individual files and folders
 #####
+
+# Notifications - TV, Telegram
+#notify:
+#  - platform: telegram
+#    name: !secret telegram_bot_name 
+#    chat_id: !secret telegram_bot_chat_id
+#  - name: ga_broadcast
+#    platform: google
+#    resource: !secret google_home_mini_broadcast
+#  - platform: webostv
+#    host: !secret lg_tv_ip
+#    name: LG TV
+#    filename: webostv.conf
+
+#timer:
+#  front_door_open:
+#    duration: '00:05:00'
+#    name: Front Door Open Timer
+#    icon: mdi:door-open
+#  living_room_motion:
+#    duration: '00:02:00'
+#    name: Living Room motion timer
 
 # # Google Calendar - pull data from calendar
 # google:

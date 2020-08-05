@@ -1,9 +1,8 @@
 #####
 # Pull shared locations from Google Maps
-#
-# I have separate Gmail account created for Home Assistant
-# All houshold members share location with it. 
+# I have separate Gmail account created for Home Assistant and all houshold members share location with it. 
 # Getting cookie was a bit of a pain
+# https://www.home-assistant.io/integrations/google_maps/
 #####
 
 platform: google_maps

@@ -1,5 +1,6 @@
 #####
 # Using tado to get location inforamtion too
+# https://www.home-assistant.io/integrations/tado/
 #####
 
 platform: tado

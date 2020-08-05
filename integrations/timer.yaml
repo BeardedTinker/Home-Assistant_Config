@@ -1,0 +1,6 @@
+#####
+# Timer integration - not heavily used, but hope to have more to improve automations
+# https://www.home-assistant.io/integrations/timer/
+#####
+
+timer: !include_dir_merge_named ../entities/timer

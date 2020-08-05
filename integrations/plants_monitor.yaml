@@ -13,10 +13,10 @@ plant:
       conductivity: sensor.plant_salt_1
       brightness: sensor.plant_lux_1
     min_moisture: 20
-    max_moisture: 60
+    max_moisture: 85
     min_battery: 20
-    min_conductivity: 150
+    min_conductivity: 20
     min_temperature: 15
-    min_brightness: 1000
+    min_brightness: 500
     check_days: 3
         

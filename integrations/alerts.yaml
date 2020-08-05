@@ -2,16 +2,5 @@
 # Alerts - will do a lot more here
 # https://www.home-assistant.io/integrations/alert/
 #####
-alert:
-# Alert for one plant - Daiys
-  daisy_plant:
-    name: Daisy needs help
-    entity_id: plant.daisy
-    state: 'problem'
-    repeat: 30
-    can_acknowledge: true
-    skip_first: true
-    message: "Plant {{ state_attr('plant.daisy', 'friendly_name') }} needs help ({{ state_attr('plant.daisy', 'problem') }})"
-    done_message: Daisy is fine now
-    notifiers:
-      - ebroz_bot
+
+alert: !include_dir_merge_named ../entities/alerts

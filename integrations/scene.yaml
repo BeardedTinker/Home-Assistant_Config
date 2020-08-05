@@ -2,3 +2,5 @@
 # Scenes - something I'm not using... For now...
 # https://www.home-assistant.io/integrations/scene/
 #####
+
+scene: !include_dir_list ../entities/scenes

@@ -1,0 +1,8 @@
+#####
+# Living room motion timer
+# Used for night-lights
+#####
+
+living_room_motion:
+  duration: '00:02:00'
+  name: Living Room motion timer
