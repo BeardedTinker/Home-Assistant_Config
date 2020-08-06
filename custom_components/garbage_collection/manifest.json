@@ -1,0 +1,20 @@
+{
+  "domain": "garbage_collection",
+  "name": "Garbage Collection",
+  "documentation": "https://github.com/bruxy70/Garbage-Collection/",
+  "issue_tracker": "https://github.com/bruxy70/Garbage-Collection/issues",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": [
+    "@bruxy70"
+  ],
+  "requirements": [
+    "datetime",
+    "python-dateutil>=2.8.1",
+    "integrationhelper>=0.2.2",
+    "holidays>=0.10.1",
+    "typing",
+    "uuid", 
+    "voluptuous"
+  ]
+}

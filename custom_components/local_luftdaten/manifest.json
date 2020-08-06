@@ -1,0 +1,8 @@
+{
+  "domain": "local_luftdaten",
+  "name": "Local Luftdaten sensor",
+  "documentation": "https://github.com/lichtteil/local_luftdaten/",
+  "dependencies": [],
+  "codeowners": ["@lichtteil"],
+  "requirements": []
+}

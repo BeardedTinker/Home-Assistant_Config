@@ -1,0 +1,12 @@
+{
+  "domain": "calendarific",
+  "name": "Calendarific",
+  "documentation": "https://github.com/pinkywafer/Calendarific",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": ["@pinkywafer"],
+  "requirements": [
+    "sampleclient",
+    "integrationhelper"
+  ]
+}

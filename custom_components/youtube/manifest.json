@@ -1,0 +1,8 @@
+{
+  "domain": "youtube",
+  "name": "Youtube Sensor",
+  "documentation": "https://github.com/custom-components/youtube",
+  "dependencies": [],
+  "codeowners": ["@ludeeus"],
+  "requirements": []
+}

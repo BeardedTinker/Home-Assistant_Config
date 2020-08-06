@@ -1,0 +1,10 @@
+{
+  "domain": "zigbee2mqtt_networkmap",
+  "name": "zigbee2mqtt Networkmap",
+  "documentation": "https://github.com/rgruebel/ha_zigbee2mqtt_networkmap",
+  "dependencies": ["mqtt"],
+  "codeowners": [
+    "@rgruebel"
+  ],
+  "requirements": []
+}

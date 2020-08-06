@@ -1,0 +1,10 @@
+{
+  "domain": "emby_upcoming_media",
+  "name": "Emby Latest Media",
+  "documentation": "https://github.com/gcorgnet/sensor.emby_upcoming_media",
+  "dependencies": [],
+  "codeowners": [
+    "@gcorgnet"
+  ],
+  "requirements": []
+}
