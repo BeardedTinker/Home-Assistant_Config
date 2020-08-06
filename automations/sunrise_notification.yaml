@@ -11,7 +11,7 @@ trigger:
 action:
   - service: notify.ebroz_bot
     data:
-      message: "The sun is up. Wake Up! {{ states('sensor.date_time') }}"
+      message: "The sun is up. Wake Up! {{ states('sensor.time') }}"
   - data_template:
       entity_id: media_player.display_me
       volume_level: 0.2

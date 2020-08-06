@@ -10,17 +10,18 @@ action:
   data_template:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Weather
-- service: notify.hassnico_bot
+- service: notify.ebroz_bot
+
   data_template:
     message: >- 
       {{ "\U00002600" }} *Weather*:
       
       ------------------------------------------------
       
-      *Temperature*:   {{ states.sensor.dark_sky_temperature.state}}
-      
-      *Summary*:   {{ states.sensor.dark_sky_summary_0d.state}}
+      *Temperature*:   {{ state_attr('weather.dark_sky', 'temperature') }}
+      *Humidity*:      {{ state_attr('weather.dark_sky', 'humidity') }}    
+      *Pressure*:      {{ state_attr('weather.dark_sky', 'pressure') }}
       
     data:
       inline_keyboard:
-      - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'
+      - '{{ "\u21a9\ufe0f" }} Control Panel:/cp'

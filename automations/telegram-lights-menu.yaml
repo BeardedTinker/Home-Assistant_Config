@@ -13,8 +13,10 @@ action:
     inline_keyboard:
     - ALL ON:/lighton, Living ON:/living_on, Dining ON:/dining_on
     - ALL OFF:/lightoff, Living OFF :/living_off, dining OFF:/dining_off
-    - Kitchen ON:/kitchen_on, Ceiling ON:/ceiling_on
-    - Kitchen OFF:/kitchen_off, Ceiling OFF:/ceiling_off
+    - Kitchen ON:/kitchen_on, Ceiling ON:/ceiling_on, Bedroom ON:/bedroom_on
+    - Kitchen OFF:/kitchen_off, Ceiling OFF:/ceiling_off, Bedroom OFF:/bedroom_off
+    - Zita Room ON:/zita_on, Luka Room OFF:/luka_on
+    - Zita Room OFF:/zita_off, Luka Rook OFF:/luka_off
     message: Looks like you want to control your lights. What you want to do?
     target: -327494046
     title: Lights ON or OFF?

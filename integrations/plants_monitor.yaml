@@ -15,7 +15,7 @@ plant:
     min_moisture: 20
     max_moisture: 85
     min_battery: 20
-    min_conductivity: 20
+    min_conductivity: 1
     min_temperature: 15
     min_brightness: 500
     check_days: 3
