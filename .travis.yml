@@ -4,17 +4,17 @@ python: "3.7"
 
 before_install:
   - touch fake_key.pem
-  - mv secrets_sample.yaml secrets.yaml
-  - mv customize_sample.yaml customize.yaml
-  - mv 0d25726f0c18_sample.json 0d25726f0c18.json
-  - git clone https://github.com/rgruebel/ha_zigbee2mqtt_networkmap.git zigbee2mqtt_networkmap/
-  - mv zigbee2mqtt_networkmap/custom_components custom_components
+#  - mv secrets_sample.yaml secrets.yaml
+#  - mv customize_sample.yaml customize.yaml
+#  - mv 0d25726f0c18_sample.json 0d25726f0c18.json
+#  - git clone https://github.com/rgruebel/ha_zigbee2mqtt_networkmap.git zigbee2mqtt_networkmap/
+#  - mv zigbee2mqtt_networkmap/custom_components custom_components
 #  - git clone https://github.com/custom-components/breaking_changes.git breaking_changes/
 #  - mv breaking_changes/custom_components custom_components
 #  - git clone https://github.com/claytonjn/hass-circadian_lighting.git hass-circadian_lighting/
 #  - mv hass-circadian_lighting/custom_components custom_components
-  - git clone https://github.com/bruxy70/Garbage-Collection.git garbage_collection/
-  - mv garbage_collection/custom_components custom_components
+#  - git clone https://github.com/bruxy70/Garbage-Collection.git garbage-collection/
+#  - mv garbage-collection/custom_components custom_components
   - sudo apt-get install -y libudev-dev
 install:
 - pip3 install homeassistant

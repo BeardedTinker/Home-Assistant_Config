@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <style type="text/css" media="screen">
+    body,
+    html {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .footer {
+      position: absolute;
+      padding: 10px;
+      margin: 0;
+      background: rgba(255, 255, 255, 0.4);
+      bottom: 10px;
+      color: rgba(0, 0, 0, 0.52);
+    }
+  </style>
+</head>
+
+<body>
+  <script>document.write("<script type='text/javascript' src='source.js?v=" + Date.now() + "'><\/script>");</script>
+  <script src="viz.js/viz.js"></script>
+  <script src="viz.js/full.render.js"></script>
+  <script src='panzoom/panzoom.min.js'></script>
+  <div id="output">
+    <div id="error"></div>
+  </div>
+  <p class='footer'>
+    <label id="engine">
+      Engine:
+      <select>
+        <option>circo</option>
+        <option>dot</option>
+        <option>fdp</option>
+        <option>neato</option>
+        <option>osage</option>
+        <option>twopi</option>
+      </select>
+    </label> - Last updated on
+    <script>document.write(last_update.toLocaleString());</script> - <a id="updateLink" title="Update" href="#"
+      onclick="updateSource();return false;">Update now</a>
+  </p>
+
+  <script>
+    // Set engine from URL param if possible
+    var engine = new URL(window.location.href).searchParams.get("engine");
+    if (engine === null) {
+      engine = "circo";
+    }
+    document.querySelector("#engine select").value = engine;
+
+    document.querySelector("#engine select").addEventListener("change", function () {
+      updateMap();
+    });
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updateMap() {
+      var viz = new Viz();
+      viz.renderSVGElement(graph, { 'engine': document.querySelector("#engine select").value })
+        .then(function (element) {
+          var graph = document.querySelector("#output");
+          var svg = graph.querySelector("svg");
+          if (svg) {
+            graph.removeChild(svg);
+          }
+          svg = graph.appendChild(element);
+          window.pz = panzoom(svg.firstElementChild, { autocenter: true, bounds: true });
+        });
+    }
+
+    async function updateSource() {
+      // Call the Webhook, wait a few seconds til source.js is ready and then reload the page.
+      try {
+        document.body.style.cursor = 'progress';
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", webhook);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.send();
+        await sleep(5000);
+        document.location.reload(true);
+      }
+      finally {
+        document.body.style.cursor = 'default';
+      }
+    }
+
+    updateMap();   
+  </script>
+</body>
+
+</html>
