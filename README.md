@@ -1,7 +1,3 @@
-# BeardedTinker's Home Assistant configuration
-
-Here is a shot on making my Home Assistant configuration available.
-All individual files should have comments inside and I'll try to add as much documentation as I can over time.
 
   <h4>
     <a href="https://travis-ci.org/BeardedTinker/Home-Assistant_Config"><img src="https://travis-ci.org/BeardedTinker/Home-Assistant_Config.svg?branch=master"/></a>
@@ -10,6 +6,11 @@ All individual files should have comments inside and I'll try to add as much doc
         <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
 
   </h4>
+
+# BeardedTinker's Home Assistant configuration
+
+Here is a shot on making my Home Assistant configuration available.
+All individual files should have comments inside and I'll try to add as much documentation as I can over time.
 
 ## Want to get more info?
 
