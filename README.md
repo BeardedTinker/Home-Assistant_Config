@@ -3,6 +3,14 @@
 Here is a shot on making my Home Assistant configuration available.
 All individual files should have comments inside and I'll try to add as much documentation as I can over time.
 
+  <h4>
+    <a href="https://travis-ci.org/BeardedTinker/Home-Assistant_Config"><img src="https://travis-ci.org/BeardedTinker/Home-Assistant_Config.svg?branch=master"/></a>
+    <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
+    <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
+        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
+
+  </h4>
+
 ## Want to get more info?
 
 You can follow my YouTube channel (https://YouTube.com/BeardedTinker) for more information and video guides for various stuff that's included here. 
