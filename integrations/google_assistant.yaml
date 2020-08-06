@@ -7,7 +7,7 @@ google_assistant:
   project_id: !secret google_pjid
 #  api_key: !secret google_api # NOT needed anymore
 #  service_account: !include c14727911e02.json # Old account
-  service_account: !include /config/0d25726f0c18.json
+  service_account: !include ../0d25726f0c18.json
   report_state: true
   exposed_domains:
     - switch
