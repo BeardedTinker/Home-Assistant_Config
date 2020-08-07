@@ -9,8 +9,6 @@ before_install:
   - mv 0d25726f0c18_sample.json 0d25726f0c18.json
   - "sudo mkdir -p /ssl/ && sudo touch /ssl/fullchain.pem"
   - "sudo mkdir -p /ssl/ && sudo touch /ssl/privkey.pem"
-#  - mv privkey_sample.pem /ssl/privkey.pem
-#  - mv fullchain_sample.pem /ssl/fullchain.pem
 #  - git clone https://github.com/rgruebel/ha_zigbee2mqtt_networkmap.git zigbee2mqtt_networkmap/
 #  - mv zigbee2mqtt_networkmap/custom_components custom_components
 #  - git clone https://github.com/custom-components/breaking_changes.git breaking_changes/
