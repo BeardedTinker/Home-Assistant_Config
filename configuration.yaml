@@ -17,9 +17,6 @@ homeassistant:
 # Deafult_config - loads: automation, cloud, config, frontend, history, logbook, map, mobile_app, person, script, ssdp, sun, system_health, updater, zeroconf
 default_config:
 
-# Python scripts - we may use them - soon (tm)
-python_script:
-
 
 #####
 # Disabled components
@@ -278,3 +275,6 @@ python_script:
 #    port: 8080
 #    source:
 #      - entity_id: camera.saved_image
+
+# Python scripts - we may use them - soon (tm)
+#python_script:
