@@ -49,12 +49,6 @@ image_processing:
     source:
       - entity_id: camera.saved_image
 
-# Earthquake location - 400km range from us
-geo_location:
-  - platform: usgs_earthquakes_feed
-    feed_type: 'past_week_all_earthquakes'
-    radius: 350
-
 #####
 # Disabled components
 # All of this has been moved to individual files and folders
@@ -282,3 +276,9 @@ geo_location:
 
 ## Zigbee2MQTT - get map of entities
 #zigbee2mqtt_networkmap:
+
+#   Earthquake location - 400km range from us
+#geo_location:
+#  - platform: usgs_earthquakes_feed
+#    feed_type: 'past_week_all_earthquakes'
+#    radius: 350
