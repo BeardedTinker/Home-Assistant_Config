@@ -40,9 +40,6 @@ python_script:
 # Component definitions
 #####
 
-# Zigbee2MQTT - get map of entities
-zigbee2mqtt_networkmap:
-
 # Process camera images (saved) in FaceBox 
 image_processing:
   - platform: facebox
@@ -282,3 +279,6 @@ geo_location:
 
 # Simple Service Discovery Protocol - disabled since no Philips Hue or Deconz
 #ssdp:
+
+## Zigbee2MQTT - get map of entities
+#zigbee2mqtt_networkmap:

@@ -1,0 +1,5 @@
+#####
+# Zigbee2MQTT - get map of entities - custom-component
+# https://github.com/rgruebel/ha_zigbee2mqtt_networkmap
+#####
+zigbee2mqtt_networkmap:
