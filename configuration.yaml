@@ -11,9 +11,7 @@ homeassistant:
     - ./tmp
 
 ###
-#
 # Most of the stuff that is disabled here has been moved to new structure and separate files. Some things are still here.
-#
 ###
 
 # Deafult_config - loads: automation, cloud, config, frontend, history, logbook, map, mobile_app, person, script, ssdp, sun, system_health, updater, zeroconf
@@ -21,6 +19,13 @@ default_config:
 
 # Python scripts - we may use them - soon (tm)
 python_script:
+
+
+#####
+# Disabled components
+# All of this has been moved to individual files and folders
+#####
+
 
 # Includes
 # automation: !include automations.yaml
@@ -35,24 +40,6 @@ python_script:
 # input_select: !include input_select.yaml
 # sensor: !include sensor.yaml
 # scene: !include scenes.yaml
-
-#####
-# Component definitions
-#####
-
-# Process camera images (saved) in FaceBox 
-image_processing:
-  - platform: facebox
-    scan_interval: 10000
-    ip_address: 192.168.1.35
-    port: 8080
-    source:
-      - entity_id: camera.saved_image
-
-#####
-# Disabled components
-# All of this has been moved to individual files and folders
-#####
 
 # Notifications - TV, Telegram
 #notify:
@@ -282,3 +269,12 @@ image_processing:
 #  - platform: usgs_earthquakes_feed
 #    feed_type: 'past_week_all_earthquakes'
 #    radius: 350
+
+# Process camera images (saved) in FaceBox 
+#image_processing:
+#  - platform: facebox
+#    scan_interval: 10000
+#    ip_address: 192.168.1.35
+#    port: 8080
+#    source:
+#      - entity_id: camera.saved_image

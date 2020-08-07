@@ -1,0 +1,5 @@
+#####
+# Image Processing - created and used by Facebox 
+# https://www.home-assistant.io/integrations/facebox/
+#####
+image_processing: !include_dir_list ../entities/image_processing

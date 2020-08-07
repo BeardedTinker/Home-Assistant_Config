@@ -1,0 +1,10 @@
+#####
+# Facebox - Docekr container with FREE version of Facebox used to to face recognition
+# https://www.home-assistant.io/integrations/facebox/
+#####
+platform: facebox
+scan_interval: 10000
+ip_address: 192.168.1.35
+port: 8080
+source:
+  - entity_id: camera.saved_image
