@@ -14,15 +14,14 @@ homeassistant:
 # Most of the stuff that is disabled here has been moved to new structure and separate files. Some things are still here.
 ###
 
-# Deafult_config - loads: automation, cloud, config, frontend, history, logbook, map, mobile_app, person, script, ssdp, sun, system_health, updater, zeroconf
-default_config:
-
 
 #####
 # Disabled components
 # All of this has been moved to individual files and folders
 #####
 
+# Deafult_config - loads: automation, cloud, config, frontend, history, logbook, map, mobile_app, person, script, ssdp, sun, system_health, updater, zeroconf
+#default_config:
 
 # Includes
 # automation: !include automations.yaml
