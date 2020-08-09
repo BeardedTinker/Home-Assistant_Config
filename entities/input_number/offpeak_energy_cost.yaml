@@ -1,0 +1,12 @@
+#####
+# Energy const - work in progress
+# Adapted from https://community.home-assistant.io/t/daily-energy-monitoring/143436
+#####
+
+offpeak_energy_cost:
+  name: Off peak Energy Cost
+  mode: box
+  min: 0
+  max: 100
+  unit_of_measurement: "hrk/kWh"
+  icon: mdi:currency-eur-off

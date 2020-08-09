@@ -1,0 +1,12 @@
+#####
+# Energy const - work in progress
+# Adapted from https://community.home-assistant.io/t/daily-energy-monitoring/143436
+#####
+
+energy_daily_cost:
+  name: Daily Cost
+  mode: box
+  min: 0
+  max: 100
+  unit_of_measurement: "hrk/day"
+  icon: mdi:currency-eur-off
