@@ -10,11 +10,6 @@ homeassistant:
   allowlist_external_dirs:
     - ./tmp
 
-###
-# Most of the stuff that is disabled here has been moved to new structure and separate files. Some things are still here.
-###
-
-
 #####
 # Disabled components
 # All of this has been moved to individual files and folders

@@ -163,11 +163,7 @@ class MQTT:
         await self.hass.async_add_executor_job(stop)
 
     async def async_subscribe(
-        self,
-        topic: str,
-        msg_callback,
-        qos: int,
-        encoding: Optional[str] = None,
+        self, topic: str, msg_callback, qos: int, encoding: Optional[str] = None,
     ) -> Callable[[], None]:
         """Set up a subscription to a topic with the provided qos.
 

@@ -1,7 +1,7 @@
-from . import geohash
 import math
 from collections import namedtuple
 
+from . import geohash
 
 Box = namedtuple("Box", ["s", "w", "n", "e"])
 

@@ -21,4 +21,7 @@ before_install:
 install:
 - pip3 install homeassistant
 script:
-- hass -c . --script check_config --info all
+- hass --version
+#- hass -c . --script check_config --info all
+- "hass -c . --script check_config --info all | tee check.output"
+- '! less check.output | grep -q "Failed config"'

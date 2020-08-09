@@ -1,0 +1,14 @@
+id: '1596823574044'
+alias: Travis build failed
+description: 'Triggered when Travis-CI failes'
+trigger:
+- entity_id: sensor.beardedtinker_home_assistant_config_last_build_state
+  platform: state
+  to: errored
+condition: []
+action:
+- data:
+    title: Travis failed!
+    message: At {{ states('sensor.beardedtinker_home_assistant_config_last_build_finished_at') }} after {{states('sensor.beardedtinker_home_assistant_config_last_build_duration')}} seconds, while building {{ states('sensor.beardedtinker_home_assistant_config_last_build_id') }} 
+  service: notify.ebroz_bot
+mode: single

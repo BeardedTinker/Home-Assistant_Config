@@ -1,23 +1,18 @@
 import logging
 
-from homeassistant.const import (
-    ATTR_ATTRIBUTION,
-    CONF_NAME,
-    LENGTH_KILOMETERS,
-)
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, LENGTH_KILOMETERS
 from homeassistant.helpers.entity import Entity
 
 from .const import (
+    ATTR_LAT,
     ATTR_LIGHTNING_AZIMUTH,
     ATTR_LIGHTNING_COUNTER,
     ATTR_LIGHTNING_DISTANCE,
-    DOMAIN,
-    ATTR_LAT,
     ATTR_LON,
+    ATTRIBUTION,
+    DOMAIN,
     SERVER_STATS,
 )
-
-ATTRIBUTION = "Data provided by blitzortung.org"
 
 ATTR_ICON = "icon"
 ATTR_LABEL = "label"
