@@ -3,7 +3,7 @@ daisy_plant:
   name: Daisy needs help
   entity_id: plant.daisy
   state: 'problem'
-  repeat: 30
+  repeat: 60
   can_acknowledge: true
   skip_first: true
   message: "Plant {{ state_attr('plant.daisy', 'friendly_name') }} needs help ({{ state_attr('plant.daisy', 'problem') }})"
