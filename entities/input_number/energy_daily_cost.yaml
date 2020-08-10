@@ -8,5 +8,6 @@ energy_daily_cost:
   mode: box
   min: 0
   max: 100
+  initial: 0.65553
   unit_of_measurement: "hrk/day"
   icon: mdi:currency-eur-off

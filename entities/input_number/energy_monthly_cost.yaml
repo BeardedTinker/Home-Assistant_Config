@@ -8,5 +8,6 @@ energy_monthly_cost:
   mode: box
   min: 0
   max: 100
+  initial: 19.66
   unit_of_measurement: "hrk/day"
   icon: mdi:currency-eur-off

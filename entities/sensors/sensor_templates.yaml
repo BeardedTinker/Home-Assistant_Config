@@ -81,7 +81,8 @@ sensors:
 
 #####
 # VERY UNEFFICIENT energy tracking by combining W for every lightbulb.
-# This is old attempt to get some at least idea of how energy is used
+# This is old attempt to get some at least idea of how energy is used - not counting dimmer or standby
+# Hasn't been update in over a year...
 #####
 
 # living room lights "calculation"
@@ -139,7 +140,7 @@ sensors:
     entity_id:
       - sensor.daily_energy_peak
       - sensor.daily_energy_offpeak
-    value_template: "{{ (states('sensor.daily_energy_peak')|float + states('sensor.daily_energy_offpeak')|float)|round(3) }}"
+    value_template: "{{ ((states('sensor.daily_energy_peak')|float + states('sensor.daily_energy_offpeak')|float) /1000)|round(3) }}"
     unit_of_measurement: "kWh"
 
   monthly_energy_total:
@@ -147,15 +148,17 @@ sensors:
     entity_id:
       - sensor.monthly_energy_peak
       - sensor.monthly_energy_offpeak
-    value_template: "{{ (states('sensor.monthly_energy_peak')|float + states('sensor.monthly_energy_offpeak')|float)|round(3) }}"
+    value_template: "{{ ((states('sensor.monthly_energy_peak')|float + states('sensor.monthly_energy_offpeak')|float) /1000)|round(3) }}"
     unit_of_measurement: "kWh"    
+
+# Quarterly is not very interesting for me, but it's here
 
   quarterly_energy_total:
     friendly_name: 'Quarterly Peak and Offpeak Total'
     entity_id:
       - sensor.quarterly_energy_peak
       - sensor.quarterly_energy_offpeak
-    value_template: "{{ (states('sensor.quarterly_energy_peak')|float + states('sensor.quarterly_energy_offpeak')|float)|round(3) }}"
+    value_template: "{{ ((states('sensor.quarterly_energy_peak')|float + states('sensor.quarterly_energy_offpeak')|float) /1000)|round(3) }}"
     unit_of_measurement: "kWh"    
 
   yearly_energy_total:
@@ -163,12 +166,13 @@ sensors:
     entity_id:
       - sensor.yearly_energy_peak
       - sensor.yearly_energy_offpeak
-    value_template: "{{ (states('sensor.yearly_energy_peak')|float + states('sensor.yearly_energy_offpeak')|float)|round(3) }}"
+    value_template: "{{ ((states('sensor.yearly_energy_peak')|float + states('sensor.yearly_energy_offpeak')|float) /1000)|round(3) }}"
     unit_of_measurement: "kWh"    
 
 #####
 # Trying to calculate some basic electricity costs. This is VERY rough.
-# This does not include all the other overheads, fixed costs and variable costs that are added
+# This only includes calculated daily cost (1/30 of monthly cost) not some additional possible costs
+# Same for monthly cost - only peak/offpeak * kWh cost + fixed monthly cost
 #####
 
   daily_peak_energy_cost:
@@ -176,8 +180,7 @@ sensors:
     entity_id:
       - sensor.daily_energy_peak
       - input_number.peak_energy_cost
-    value_template: "{{ (states('sensor.energy_t31_light_and_power_total')|float * states('input_number.peak_energy_cost')|float) }}"
-#     value_template: "{{ (states('sensor.energy_t31_light_and_power_total')|float * states('input_number.peak_energy_cost')|float + states('input_number.t31_daily_cost')|float)|round(2) }}"
+    value_template: "{{ ((states('sensor.daily_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   daily_offpeak_energy_cost:
@@ -185,8 +188,7 @@ sensors:
     entity_id:
       - sensor.daily_energy_offpeak
       - input_number.offpeak_energy_cost
-    value_template: "{{ (states('sensor.daily_energy_offpeak')|float * states('input_number.offpeak_energy_cost')|float) }}"
-#     value_template: "{{ (states('sensor.energy_t31_light_and_power_total')|float * states('input_number.peak_energy_cost')|float + states('input_number.t31_daily_cost')|float)|round(2) }}"
+    value_template: "{{ ((states('sensor.daily_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   daily_total_energy_cost:
@@ -194,6 +196,31 @@ sensors:
     entity_id:
       - sensor.daily_peak_energy_cost
       - sensor.daily_offpeak_energy_cost
-    value_template: "{{ (states('sensor.daily_peak_energy_cost')|float + states('sensor.daily_offpeak_energy_cost')|float) }}"
-#     value_template: "{{ (states('sensor.energy_t31_light_and_power_total')|float * states('input_number.peak_energy_cost')|float + states('input_number.t31_daily_cost')|float)|round(2) }}"
+      - input_number.energy_daily_cost
+    value_template: "{{ (states('sensor.daily_peak_energy_cost')|float + states('sensor.daily_offpeak_energy_cost')|float + states('input_number.energy_daily_cost')|float)|round(2) }}"
+    unit_of_measurement: "hrk"
+
+  monthly_peak_energy_cost:
+    friendly_name: 'Monthly Peak Energy Cost'
+    entity_id:
+      - sensor.monthly_energy_peak
+      - input_number.peak_energy_cost
+    value_template: "{{ ((states('sensor.monthly_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
+    unit_of_measurement: "hrk"
+
+  monthly_offpeak_energy_cost:
+    friendly_name: 'Monthly Offpeak Energy Cost'
+    entity_id:
+      - sensor.monthly_energy_offpeak
+      - input_number.offpeak_energy_cost
+    value_template: "{{ ((states('sensor.monthly_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
+    unit_of_measurement: "hrk"
+
+  monthly_total_energy_cost:
+    friendly_name: 'Monthly Total Energy Cost'
+    entity_id:
+      - sensor.monthly_peak_energy_cost
+      - sensor.monthly_offpeak_energy_cost
+      - input_number.energy_monthly_cost
+    value_template: "{{ (states('sensor.monthly_peak_energy_cost')|float + states('sensor.monthly_offpeak_energy_cost')|float + states('input_number.energy_monthly_cost')|float)|round(2) }}"
     unit_of_measurement: "hrk"

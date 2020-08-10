@@ -12,3 +12,7 @@ action:
     entity_id: utility_meter.daily_energy
   - service: utility_meter.next_tariff
     entity_id: utility_meter.monthly_energy
+  - service: utility_meter.next_tariff
+    entity_id: utility_meter.quarterly_energy
+  - service: utility_meter.next_tariff
+    entity_id: utility_meter.yearly_energy
