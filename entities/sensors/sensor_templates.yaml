@@ -180,7 +180,8 @@ sensors:
     entity_id:
       - sensor.daily_energy_peak
       - input_number.peak_energy_cost
-    value_template: "{{ ((states('sensor.daily_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
+    value_template: "{{ ((states('sensor.daily_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
+#    value_template: "{{ ((states('sensor.daily_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   daily_offpeak_energy_cost:
@@ -188,7 +189,8 @@ sensors:
     entity_id:
       - sensor.daily_energy_offpeak
       - input_number.offpeak_energy_cost
-    value_template: "{{ ((states('sensor.daily_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
+    value_template: "{{ ((states('sensor.daily_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
+#    value_template: "{{ ((states('sensor.daily_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   daily_total_energy_cost:
@@ -205,7 +207,8 @@ sensors:
     entity_id:
       - sensor.monthly_energy_peak
       - input_number.peak_energy_cost
-    value_template: "{{ ((states('sensor.monthly_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
+    value_template: "{{ ((states('sensor.monthly_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
+#    value_template: "{{ ((states('sensor.monthly_energy_peak')|float /1000) * states('input_number.peak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   monthly_offpeak_energy_cost:
@@ -213,7 +216,8 @@ sensors:
     entity_id:
       - sensor.monthly_energy_offpeak
       - input_number.offpeak_energy_cost
-    value_template: "{{ ((states('sensor.monthly_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
+    value_template: "{{ ((states('sensor.monthly_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
+#    value_template: "{{ ((states('sensor.monthly_energy_offpeak')|float /1000) * states('input_number.offpeak_energy_cost')|float) }}"
     unit_of_measurement: "hrk"
 
   monthly_total_energy_cost:
