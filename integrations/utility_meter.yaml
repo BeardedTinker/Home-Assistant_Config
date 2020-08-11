@@ -29,3 +29,9 @@ utility_meter:
     tariffs:
       - peak
       - offpeak
+  sun_energy:
+    source: sensor.shelly_em_total_consumption
+    cycle: daily
+    tariffs:
+      - day
+      - night

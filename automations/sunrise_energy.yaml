@@ -1,0 +1,17 @@
+id: Change to sunrise
+alias: 'Set energy to Sunrise/day'
+initial_state: true
+trigger:
+  platform: sun
+  event: sunrise
+action:
+- service: utility_meter.select_tariff ###### Tariff change to night
+  data:
+    entity_id:
+    - utility_meter.sun_energy
+    tariff: day
+# This part is disabled, but good idea to change theme to day/night status
+#- service: input_select.select_option
+#  data:
+#    entity_id: input_select.select_theme
+#    option: Day
