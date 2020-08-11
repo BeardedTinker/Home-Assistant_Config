@@ -1,0 +1,9 @@
+#####
+# This file will be used by sunrise_sunset_tracking.yaml file to store daily energy usage 
+# in CSV format.
+#####
+
+platform: file
+name: energy_log
+filename: /config/www/csv_logs/energy_log.csv
+timestamp: false

@@ -1,3 +1,8 @@
+#####
+# At sunset trigger night tarif.
+# This tarif really is used only to track difference in energy usage between night and day.
+#####
+
 id: Change to sunset
 alias: 'Set energy to Sunset/night'
 initial_state: true

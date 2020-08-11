@@ -1,3 +1,8 @@
+#####
+# At sunrise trigger day tarif.
+# This tarif really is used only to track difference in energy usage between day and night.
+#####
+
 id: Change to sunrise
 alias: 'Set energy to Sunrise/day'
 initial_state: true

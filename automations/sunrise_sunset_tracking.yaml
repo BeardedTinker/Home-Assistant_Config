@@ -1,0 +1,19 @@
+#####
+# Automation to daily send to Telegram inforamtion about total energy usage.
+# Also, it will create at same time new entry in CSV file containing specific daily realted data
+#####
+
+id: sunrise_sunset_tracking
+alias: 'Daily Energy Use Message'
+trigger:
+  platform: time
+  at: '23:59:50'
+action:
+- service: notify.ebroz_bot
+  data_template:
+    title: '*Information*'
+    message: "Today's energy use was {{ states('sensor.daily_energy_total') }} kWh."
+- service: notify.energy_log
+  data_template:
+    message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ state_attr('sensor.power_stats','min_value') }},{{ state_attr('sensor.power_stats','max_value') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }}"
+#    message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ state_attr('sensor.power_stats','min_value') }},{{ state_attr('sensor.power_stats','max_value') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }}"
