@@ -66,17 +66,18 @@ Add-ons:
  - Node-RED - [link](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
  - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
  - Zigbee2MQTT Assistant - [link](https://github.com/yllibed/Zigbee2MqttAssistant)
+ - Zigbee2MQTT -[link](https://github.com/danielwelch/hassio-zigbee2mqtt)
+ - MQTT - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto)
 
 Containers:
  - AdGuard Home 
  - Emby
- - ESPHome
  - Grafana
  - InfluxDB
- - MQTT
  - Node-RED
  - Portainer
- - Zigbee2MQTT
+ - Zigbee2MQTT - REMOVED, now using Add-on
+ - MQTT - REMOVED, now using Add-on
  plus some others too - not directly related to Home Assistant.
 
 
