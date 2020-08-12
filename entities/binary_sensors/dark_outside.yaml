@@ -1,0 +1,9 @@
+#####
+# Time of the day binary sensor that is used just to help visualize day/night in mini graph
+# https://www.home-assistant.io/integrations/tod/
+#####
+
+platform: tod
+name: Dark Outside
+after: sunset
+before: sunrise
