@@ -1,0 +1,8 @@
+{
+  "domain": "ventus_veather",
+  "name": "Ventus",
+  "documentation": "https://github.com/pesor/ventus/blob/master/README.md",
+  "dependencies": [],
+  "codeowners": ["@pesor"],
+  "requirements": []
+}
