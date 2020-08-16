@@ -4,7 +4,7 @@
 #####
 alias: Midnight Lights Out
 trigger:
-  at: '23:59:00'
+  at: '23:59:59'
   platform: time
 condition:
   condition: state
