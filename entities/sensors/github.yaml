@@ -1,0 +1,18 @@
+#####
+# GitHub Integration
+# https://www.home-assistant.io/integrations/github/
+#####
+
+platform: github
+access_token: !secret github_token
+repositories: 
+  - path: 'BeardedTinker/Home-Assistant_config'
+    name: BT's HA Config
+  - path: 'frenck/home-assistant-config'
+    name: Frenck's HA Config
+  - path: 'CCOSTAN/Home-AssistantConfig'
+    name:  Carlo's HA Config
+  - path: 'pesor/LilyGO-TTGO-HiGrow'
+    name: Pesor's HiGrow repo
+  - path: 'home-assistant/core'
+    name: HA Core repo
