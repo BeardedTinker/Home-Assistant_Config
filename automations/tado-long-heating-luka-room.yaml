@@ -4,6 +4,7 @@
 #####
 
 alias: tado warning on long heating - Luka room
+id: 2e858345-e993-408a-b6b0-20a6719d4e37
 description: ''
 trigger:
   entity_id: binary_sensor.luka_room_heating

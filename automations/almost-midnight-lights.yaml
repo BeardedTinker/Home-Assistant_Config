@@ -1,7 +1,9 @@
 #####
 # Sends reminder midnight is approaching
 #####
+
 alias: Almost Midnight Lights Dimm
+id: 84d9b508-e48e-469e-a613-4faf320c21fd
 trigger:
   at: '23:30:00'
   platform: time

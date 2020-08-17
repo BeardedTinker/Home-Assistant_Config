@@ -1,10 +1,12 @@
 #####
 # Clear TTS cache
 #####
+
 alias: Flush TTS Cache
+id: 793161ca-eb30-4f6f-a238-974ef84cf7a9
 initial_state: 'on'
 trigger:
   platform: time
-  at: '2:35:00'
+  at: '02:35:00'
 action:
   service: tts.clear_cache

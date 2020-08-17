@@ -2,7 +2,9 @@
 # Notification when sun is up
 # Have to disable this one
 #####
+
 alias: Notify on sunrise
+id: e9f0c421-03eb-41e6-8332-1f4d6d7fcb30
 initial_state: 'on'
 trigger:
   platform: sun

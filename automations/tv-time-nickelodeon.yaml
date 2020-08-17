@@ -3,6 +3,7 @@
 #####
 
 alias: Nickelodeon counter
+id: 039106d6-5529-4c70-9b84-acb0cb5fda01
 trigger:
   entity_id: sensor.media_player_title
   for: 00:15:00

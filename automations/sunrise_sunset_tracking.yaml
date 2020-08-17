@@ -3,8 +3,8 @@
 # Also, it will create at same time new entry in CSV file containing specific daily realted data
 #####
 
-id: sunrise_sunset_tracking
 alias: 'Daily Energy Use Message'
+id: e485c1d3-6fb6-4e69-b86f-1af73ad12bfb
 trigger:
   platform: time
   at: '23:59:50'

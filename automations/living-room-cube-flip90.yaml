@@ -1,7 +1,9 @@
 #####
 # Action based on Cube movement
 #####
+
 alias: Cube Kitchen Lights
+id: 3fdc03a2-1997-4c4d-a1f9-7ef581cc5943
 trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube

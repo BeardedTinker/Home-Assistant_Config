@@ -3,6 +3,7 @@
 #####
 
 alias: Front Door sensor
+id: 35d7007f-da7e-4896-8eaf-1e1e1d99a9da
 trigger:
   entity_id: binary_sensor.front_door_contact
   for: 00:05

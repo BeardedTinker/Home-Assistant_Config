@@ -1,7 +1,9 @@
-alias: if time is between midnight and 6:00 turn on light on motion detection
 #####
 # Old night light automation - not used anymore
 #####
+
+alias: if time is between midnight and 6:00 turn on light on motion detection
+id: ee3c7530-a100-4be1-818d-88bbaee3acf8
 description: ''
 trigger:
 #- event: sunset

@@ -4,6 +4,7 @@
 #####
 
 alias: Power Failure
+id: 0ce9cdb3-c997-44a8-9070-8300801ad88d
 trigger:
   entity_id: sensor.ups_status
   platform: state

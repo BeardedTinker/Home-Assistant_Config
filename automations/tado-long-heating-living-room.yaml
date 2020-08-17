@@ -4,6 +4,7 @@
 #####
 
 alias: tado warning on long heating - Living room
+id: e02a9419-132e-4f32-84d7-d4b3d86ca12a
 description: ''
 trigger:
   entity_id: binary_sensor.living_room_heating

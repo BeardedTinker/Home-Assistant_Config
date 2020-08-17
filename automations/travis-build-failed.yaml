@@ -3,8 +3,8 @@
 # If it fails, notify!
 #####
 
-id: '1596823574044'
 alias: Travis build failed
+id: 2043b650-bc2d-42ac-b037-59ef1348418d
 description: 'Triggered when Travis-CI failes'
 trigger:
 - entity_id: sensor.beardedtinker_home_assistant_config_last_build_state

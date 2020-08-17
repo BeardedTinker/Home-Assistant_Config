@@ -4,6 +4,7 @@
 #####
 
 alias: Living room motion when none home
+id: c6b9f2b5-d9a1-4058-8e38-bee64091d1e3
 trigger:
 - entity_id: binary_sensor.living_room_motion_occupancy
   platform: state

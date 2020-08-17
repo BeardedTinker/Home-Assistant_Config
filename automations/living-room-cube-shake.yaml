@@ -1,7 +1,9 @@
 #####
 # Action based on Cube movement
 #####
+
 alias: Cube Bar light
+id: d1b0550d-666a-4b0b-9d17-ea3da43084fb
 trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube

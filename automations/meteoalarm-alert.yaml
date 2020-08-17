@@ -4,6 +4,7 @@
 #####
 
 alias: Meteoalarm alert
+id: 05dc3287-f3d4-44fc-bbf7-69b0cd06e2f4
 trigger:
   entity_id: binary_sensor.meteoalarm
   from: 'off'

@@ -1,7 +1,9 @@
 #####
 # Action based on switch
 #####
+
 alias: Zita switch double
+id: 116ab2cb-cb89-49c5-9a49-17e6f821647d
 description: ''
 trigger:
   entity_id: sensor.zita_switch_click

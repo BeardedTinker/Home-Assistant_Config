@@ -1,7 +1,9 @@
 #####
 # Triggers change of tariffs - sometimes fails
 #####
+
 alias: Peak and Offpeak tariffs
+id: bbbc9885-74b9-4895-9fca-0ce2c3879bf0
 trigger:
   - platform: time
     at: '08:00:00'

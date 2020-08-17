@@ -1,7 +1,9 @@
 #####
 # Warn if airquality is decreasing inside
 #####
+
 alias: "PM2.5 increase"
+id: 0c119a65-c7fd-4b3b-b9c2-04f2d3d5ef6d
 trigger:
   platform: state
   entity_id: binary_sensor.pm25_increase

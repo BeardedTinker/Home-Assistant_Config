@@ -1,7 +1,9 @@
 #####
 # Update OpenUV every 59 minutes
 #####
+
 alias: Update OpenUV every 59 minutes during the daytime
+id: 90a76832-88a6-4da3-94f6-975154c297ff
 trigger:
   minutes: 59
   platform: time_pattern

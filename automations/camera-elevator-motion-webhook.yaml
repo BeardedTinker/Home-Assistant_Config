@@ -1,7 +1,9 @@
 #####
 # Not used but still here
 #####
+
 alias: SS Elevator webhook
+id: c00896c2-5180-4a87-aa60-e550916b6ace
 trigger:
   platform: webhook
   webhook_id: motion_elevator_hook

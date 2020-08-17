@@ -1,7 +1,9 @@
 #####
 # Action based on Cube movement
 #####
+
 alias: Cube Piano
+id: 27c190cc-a2fd-456b-a946-91525a48ad12
 trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube

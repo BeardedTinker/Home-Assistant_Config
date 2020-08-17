@@ -2,7 +2,9 @@
 # Used to test lux sensor
 # Will be used in future for automating some lights during day and low light
 #####
+
 alias: Light level sensor
+id: 469322b4-b9a6-42ba-be34-0670240f7d3a
 trigger:
   platform: numeric_state
   entity_id: sensor.living_room_motion_illuminance

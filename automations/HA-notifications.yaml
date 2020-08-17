@@ -3,6 +3,7 @@
 #####
 
 alias: Home Assistant Start - Notify
+id: d2d8775b-e666-4fb4-976d-02b4d9c5a396
 trigger:
   event: start
   platform: homeassistant

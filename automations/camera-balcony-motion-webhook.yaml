@@ -1,7 +1,9 @@
 #####
 # Used to trigger image processing for face recognition
 #####
+
 alias: SS Balcony webhook
+id: a778d90b-3c32-4f1d-af3b-a87637c9e3d2
 trigger:
   platform: webhook
   webhook_id: motion_balcony_hook

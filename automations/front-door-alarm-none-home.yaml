@@ -4,6 +4,7 @@
 #####
 
 alias: Front Door alert when none home
+id: 639975e4-2bb8-4945-88a5-f3e7dbca8e04
 trigger:
   entity_id: binary_sensor.front_door_contact
   platform: state

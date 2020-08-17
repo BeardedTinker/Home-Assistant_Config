@@ -4,6 +4,7 @@
 #####
 
 alias: tado warning on long heating - Zita room
+id: 1b47342e-c924-4273-b611-4839a5dc1330
 description: ''
 trigger:
   entity_id: binary_sensor.zita_room_heating
