@@ -1,6 +1,7 @@
 #####
 # Turn lights on before sunset
 #####
+
 alias: Turn on the light when the sun sets
 trigger:
   event: sunset
@@ -11,9 +12,15 @@ condition:
   entity_id: binary_sensor.people_home
   state: 'on'
 action:
-- data:
-    message: Sun setting, turning lights on.
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'andrej'
+    value1: "Sun setting, turning lights on."
+    tag_id: 'information'
+# Disabled since notify_engine has beed introduced  
+#- data:
+#    message: Sun setting, turning lights on.
+#  service: notify.ebroz_bot
 - data:
     entity_id: light.living_room_lights
   service: light.turn_on

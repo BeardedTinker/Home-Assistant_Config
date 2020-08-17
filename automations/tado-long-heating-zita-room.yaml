@@ -1,6 +1,8 @@
 #####
 # tado warning if heating for too long
+# Sometimes due to low batteris smart valve can't send stop heating command
 #####
+
 alias: tado warning on long heating - Zita room
 description: ''
 trigger:
@@ -10,6 +12,13 @@ trigger:
   to: 'on'
 condition: []
 action:
-  data:
-    message: WARNING Zita Room Heating ON for 60 minutes
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'parents'
+    title: "WARNING!"
+    value1: "Zita Room Heating ON for > 60 minutes"
+    tag_id: 'warning'
+# Disabled since notify_engine has beed introduced    
+#- data:
+#    message: WARNING Zita Room Heating ON for 60 minutes
+#  service: notify.ebroz_bot

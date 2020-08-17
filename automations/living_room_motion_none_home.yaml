@@ -2,6 +2,7 @@
 # Alert on motion when none home
 # Quick and dirty alarm
 #####
+
 alias: Living room motion when none home
 trigger:
 - entity_id: binary_sensor.living_room_motion_occupancy
@@ -12,9 +13,11 @@ condition:
   entity_id: binary_sensor.people_home
   state: 'off'
 action:
-- data:
-    message: Living room motion and none at home!
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'parents'
+    value1: "Living room motion and none at home!"
+    tag_id: 'emergency'  
 - data_template:
     entity_id: media_player.display_me
     volume_level: 0.7

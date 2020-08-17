@@ -2,16 +2,24 @@
 # Warning when there is Meteoalarm alert
 # Doesn't work if there is current warning and new warning is received.
 #####
+
 alias: Meteoalarm alert
 trigger:
   entity_id: binary_sensor.meteoalarm
   from: 'off'
   platform: state
 action:
-- data_template:
-    message: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+- service: script.notify_engine
+  data_template:
+    who: 'family'
     title: '{{state_attr(''binary_sensor.meteoalarm'', ''headline'')}}'
-  service: notify.ebroz_bot
+    value1: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+    tag_id: 'warning'  
+# Disabled since notify_engine has beed introduced
+#- data_template:
+#    message: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+#    title: '{{state_attr(''binary_sensor.meteoalarm'', ''headline'')}}'
+#  service: notify.ebroz_bot
 - data_template:
     entity_id: media_player.display_me
 #    entity_id: media_player.clock.me

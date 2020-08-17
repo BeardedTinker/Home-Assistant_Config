@@ -1,6 +1,7 @@
 #####
 # Reminder that door is open after 5 minutes
 #####
+
 alias: Front Door sensor
 trigger:
   entity_id: binary_sensor.front_door_contact
@@ -10,9 +11,11 @@ trigger:
   to: 'on'
 condition: []
 action:
-- data:
-    message: Front door is open
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'parents'
+    value1: "Front door is open!"
+    tag_id: 'warning'
 - data_template:
     entity_id: media_player.display_me
     volume_level: 0.5

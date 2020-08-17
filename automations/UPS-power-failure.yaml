@@ -1,6 +1,8 @@
 #####
 # Warn on power failuer/UPS kicing in
+# Have to add Alert with battery time remaining 
 #####
+
 alias: Power Failure
 trigger:
   entity_id: sensor.ups_status
@@ -8,6 +10,12 @@ trigger:
   to: On Battery Battery Discharging
 condition: []
 action:
-  data:
-    message: Power failure - UPS running
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'family'
+    value1: "Power Failure! UPS running!"
+    tag_id: 'emergency'
+# Disabled since notify_engine has beed introduced
+#- data:
+#    message: Power failure - UPS running
+#  service: notify.ebroz_bot

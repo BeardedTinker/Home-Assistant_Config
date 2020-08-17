@@ -1,0 +1,40 @@
+#####
+# Notifications engine - taken from CCOSTAN
+# It allows more robust configuring on who to notify and type of notification
+#
+# Original Repo : https://github.com/CCOSTAN/Home-AssistantConfig
+#####
+
+notify_engine:
+  sequence:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.text_notifications
+          state: 'on'
+    - service_template: >
+          {% if who == 'mirta' %}
+            notify.mobile_app_fig_lx1
+          {% elif who == 'andrej' %}
+            notify.mobile_app_eml_l29
+          {% elif who == 'parents' %}
+            notify.parents
+          {% elif who == 'family' %}
+            notify.family
+          {% else %}
+            notify.ebroz_bot
+          {% endif %}
+      data_template:
+        title: "{{ title }}"
+        message: "{{ value1 }} {{ value2 }} {{ value3 }}"
+        data:
+          attachment:
+            url: "{{ url }}"
+            content-type: "{{ content_type }}"
+            hide-thumbnail: false
+          tag: "{{ tag_id }}"
+          push:
+#            sound: "{{ ios_sound }}"
+#            badge: "{{ ios_badge }}"
+#            category: "{{ ios_category }}"
+          entity_id: "{{ camera_entity }}"

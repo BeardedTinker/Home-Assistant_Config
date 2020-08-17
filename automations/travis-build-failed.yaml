@@ -1,3 +1,8 @@
+#####
+# Travis runson every Github commit
+# If it fails, notify!
+#####
+
 id: '1596823574044'
 alias: Travis build failed
 description: 'Triggered when Travis-CI failes'
@@ -7,8 +12,15 @@ trigger:
   to: errored
 condition: []
 action:
-- data:
-    title: Travis failed!
-    message: At {{ states('sensor.beardedtinker_home_assistant_config_last_build_finished_at') }} after {{states('sensor.beardedtinker_home_assistant_config_last_build_duration')}} seconds, while building {{ states('sensor.beardedtinker_home_assistant_config_last_build_id') }} 
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'telegram'
+    title: "Travis failed!"
+    value1: "At {{ states('sensor.beardedtinker_home_assistant_config_last_build_finished_at') }} after {{states('sensor.beardedtinker_home_assistant_config_last_build_duration')}} seconds, while building {{ states('sensor.beardedtinker_home_assistant_config_last_build_id') }} "
+    tag_id: 'warning'
+# Disabled since notify_engine has beed introduced  
+#- data:
+#    title: Travis failed!
+#    message: At {{ states('sensor.beardedtinker_home_assistant_config_last_build_finished_at') }} after {{states('sensor.beardedtinker_home_assistant_config_last_build_duration')}} seconds, while building {{ states('sensor.beardedtinker_home_assistant_config_last_build_id') }} 
+#  service: notify.ebroz_bot
 mode: single

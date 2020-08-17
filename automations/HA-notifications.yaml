@@ -1,18 +1,21 @@
 #####
 # Sends notifications that HA nas started
 #####
+
 alias: Home Assistant Start - Notify
 trigger:
   event: start
   platform: homeassistant
 action:
-- data:
-    message: Home Assistant started at {{ states('sensor.time') }}
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'andrej'
+    value1: "Home Assistant started at {{ states('sensor.time') }}"
+    tag_id: 'information'  
 - data:
     entity_id: media_player.display_me
     volume_level: 0.3
   service: media_player.volume_set
 - delay: 00:00:01
 - service: script.googlescripthastart
-initial_state: 'on'
+#  initial_state: 'on'

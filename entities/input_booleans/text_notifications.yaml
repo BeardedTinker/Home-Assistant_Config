@@ -1,0 +1,11 @@
+#####
+# This is an input boolean to use with notifications
+# If state ON notifications can be sent
+#
+# https://www.home-assistant.io/components/input_boolean/
+#####
+
+text_notifications:
+  name: Text Notifications
+  icon: mdi:cellphone-wireless
+  initial: on

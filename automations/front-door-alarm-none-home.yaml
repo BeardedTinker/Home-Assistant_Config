@@ -1,7 +1,8 @@
 #####
 # Alert on front door open when none home
-# Quick and dirty alarm
+# Quick and dirty alarm - this will be worked on
 #####
+
 alias: Front Door alert when none home
 trigger:
   entity_id: binary_sensor.front_door_contact
@@ -12,9 +13,15 @@ condition:
   entity_id: binary_sensor.people_home
   state: 'off'
 action:
-- data:
-    message: Front door is open and no one is at home!
-  service: notify.ebroz_bot
+- service: script.notify_engine
+  data_template:
+    who: 'family'
+    value1: "Motion in apartment! No family member is home"
+    tag_id: 'emergency'  
+# Disabled since notify_engine has beed introduced
+#- data:
+#    message: Front door is open and no one is at home!
+#  service: notify.ebroz_bot
 - data_template:
     entity_id: media_player.display_me
     volume_level: 0.7
