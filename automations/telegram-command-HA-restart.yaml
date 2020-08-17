@@ -1,5 +1,10 @@
+#####
+# Telegram Command - /harestart to restar HA
+#####
+
 alias: Telegram Home Assistant restart
-initial_state: 'on'
+id: d6ce8e15-cba1-4a9c-a9f3-1696b9f6633d
+initial_state: true
 trigger:
   event_data:
     command: /harestart

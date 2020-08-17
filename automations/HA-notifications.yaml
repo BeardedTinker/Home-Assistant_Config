@@ -4,6 +4,7 @@
 
 alias: Home Assistant Start - Notify
 id: d2d8775b-e666-4fb4-976d-02b4d9c5a396
+initial_state: true
 trigger:
   event: start
   platform: homeassistant
@@ -19,4 +20,3 @@ action:
   service: media_player.volume_set
 - delay: 00:00:01
 - service: script.googlescripthastart
-#  initial_state: 'on'

@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /stop command to go back to Control panel
+#####
+
 alias: Telegram_Bot_Stop
+id: e6a795d6-5ae5-4f53-a78d-cad9b1c07ab0
 trigger:
 - platform: event
   event_type: telegram_callback

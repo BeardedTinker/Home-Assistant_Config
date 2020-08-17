@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /ping to test if it's working
+#####
+
 alias: Telegram test
+id: 772b221c-0873-4671-9096-88137e6e060c
 trigger:
   event_data:
     command: /ping

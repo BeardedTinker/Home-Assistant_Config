@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /mirta to get GPS location
+#####
+
 alias: Telegram - GPS Notify Mirta
+id: 9c48281e-2372-4e68-9b12-5c3b3013ca29
 trigger:
   event_data:
     command: /mirta

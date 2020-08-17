@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /kitchen_on
+#####
+
 alias: Telegram - Kitchen Light On
+id: 419bb55e-03c1-4dcb-b79c-e1d62bb34a03
 trigger:
   platform: event
   event_type: telegram_callback

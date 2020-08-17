@@ -1,5 +1,9 @@
-id: telegram-inline-system-status
+#####
+# Telegram Command - /status to get System information
+#####
+
 alias: System status
+id: 3cb3b274-3f57-40e8-ad25-d6b1e2b70e30
 trigger:
 - platform: event
   event_type: telegram_callback

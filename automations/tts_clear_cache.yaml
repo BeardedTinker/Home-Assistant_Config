@@ -4,7 +4,7 @@
 
 alias: Flush TTS Cache
 id: 793161ca-eb30-4f6f-a238-974ef84cf7a9
-initial_state: 'on'
+initial_state: true
 trigger:
   platform: time
   at: '02:35:00'

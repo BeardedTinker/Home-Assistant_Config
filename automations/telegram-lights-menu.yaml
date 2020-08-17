@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /lights shows menu with on/off option for lights
+#####
+
 alias: Telegram Lights Menu
+id: ce010b6f-4ea1-4a19-a839-73dae1689003
 trigger:
   event_data:
     data: /lights

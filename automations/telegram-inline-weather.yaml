@@ -1,5 +1,9 @@
-id: telegram-weather-info
+#####
+# Telegram Command - /weather to get info on weather
+#####
+
 alias: Weather Info
+id: d9e0a1dc-519f-4706-bc95-e816c64a5fed
 trigger:
 - platform: event
   event_type: telegram_callback

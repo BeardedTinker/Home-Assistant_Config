@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /andrej to get GPS location
+#####
+
 alias: Telegram - GPS Notify Andrej
+id: b2b15b19-cbeb-4be9-9160-327a65647c9b
 trigger:
   event_data:
     command: /andrej
@@ -9,4 +14,4 @@ action:
     message: Andrej GPS Position
   service: notify.ebroz_bot
 - service: script.andrej_gps_notify_telegram
-initial_state: 'on'
+initial_state: true

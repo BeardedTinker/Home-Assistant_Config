@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /ceiling_on turn ceiling lights on
+#####
+
 alias: Telegram - Ceiling Lights On
+id: a70fa4dc-8a37-4463-ac40-ae24057695f2
 trigger:
   platform: event
   event_type: telegram_callback

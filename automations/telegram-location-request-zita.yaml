@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /zita to get GPS position
+#####
+
 alias: Telegram - GPS Notify ZIta
+id: 2d31cfcf-75f6-4619-af95-8e2a0c734b35
 trigger:
   event_data:
     command: /zita

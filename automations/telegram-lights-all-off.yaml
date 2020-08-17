@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /ligftoff -- turn all lights off
+#####
+
 alias: Telegram - Light Off
+id: d6e43d02-a188-43c7-9b5a-071a9103dfaf
 trigger:
   platform: event
   event_type: telegram_callback

@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /lighton turn all lights on
+#####
+
 alias: Telegram - All Light On
+id: 3effd570-7069-4d28-bac2-e7e474f94468
 trigger:
   platform: event
   event_type: telegram_callback

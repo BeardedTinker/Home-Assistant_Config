@@ -1,5 +1,9 @@
-id: telegram-ik-ping-pong
+#####
+# Telegram Command - /ping - to test if it's working
+#####
+
 alias: 'telegram ping pong'
+id: 6a2ee31e-193b-4ed2-a167-cc9582e7e64f
 trigger:
   - platform: event
     event_type: telegram_callback

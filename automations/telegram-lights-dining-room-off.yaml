@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /dining_off turn dining room lights off
+#####
+
 alias: Telegram - Dining Light OFF
+id: c843b98f-f662-4b42-99fa-e9cb5f470ad6
 trigger:
   platform: event
   event_type: telegram_callback

@@ -1,14 +1,19 @@
-alias: Telegram - Living Room Light OFF
+#####
+# Telegram Command - /kitchen_off turn kitchen lights off
+#####
+
+alias: Telegram - kitchen Light OFF
+id: 9841fdee-b023-4028-892f-0bed116bc222
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
-    data: /living_off
+    data: /kitchen_off
 action:
 - service: telegram_bot.answer_callback_query
   data_template:
     callback_query_id: '{{ trigger.event.data.id }}'
-    message: Living Room Lights OFF
+    message: Kitchen Lights OFF
 - service: light.turn_off
   data:
-    entity_id: light.living_room_lights
+    entity_id: light.kitchen_lights

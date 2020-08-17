@@ -1,4 +1,9 @@
+#####
+# Telegram Command - /living_on turn living room lights on
+#####
+
 alias: Telegram - Living Light On
+id: 83f1ed86-b290-4d66-9ab4-a5a08d7f1610
 trigger:
   platform: event
   event_type: telegram_callback
