@@ -1,0 +1,22 @@
+#####
+# Telegram callback - /cp to open Control Panel
+#####
+
+alias: Telegram Control Pannel Command
+id: 36db8046-1efd-48f3-a303-ddbefce0b59f
+initial_state: true
+trigger:
+  event_data:
+    data: /cp
+  event_type: telegram_callback
+  platform: event
+action:
+  service: notify.ebroz_bot
+  data:
+    message: "{{ [ \"Home Assistant Status\", \"Control Panel\", \"Yes Sir!\", \"\
+      Home Assistant Control Panel\", \"Control box\" ] | random }}       \n"
+    data:
+      inline_keyboard:
+        - "\U0001F4A1 Lights:/lights, \U0001F4BB System:/system"
+        - "\U0001F4BB Status:/status, Help:/help, Ping:/ping"
+        - "\U0001F4C4 Summary:/Summary, \U00002600 Weather:/weather"

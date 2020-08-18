@@ -14,17 +14,19 @@ action:
   data_template:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Weather
+    target: !secret telegram_bot_chat_id
 - service: notify.ebroz_bot
-
   data_template:
     message: >- 
       {{ "\U00002600" }} *Weather*:
       
       ------------------------------------------------
       
-      *Temperature*:   {{ state_attr('weather.dark_sky', 'temperature') }}
-      *Humidity*:      {{ state_attr('weather.dark_sky', 'humidity') }}    
-      *Pressure*:      {{ state_attr('weather.dark_sky', 'pressure') }}
+      *Temperature*:   {{ state_attr('weather.dark_sky', 'temperature') }} °C
+
+      *Humidity*:      {{ state_attr('weather.dark_sky', 'humidity') }} %
+
+      *Pressure*:      {{ state_attr('weather.dark_sky', 'pressure') }} hPa
       
     data:
       inline_keyboard:

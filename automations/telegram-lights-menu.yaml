@@ -10,10 +10,10 @@ trigger:
   event_type: telegram_callback
   platform: event
 action:
-- data_template:
+- service: telegram_bot.answer_callback_query
+  data_template:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: What you want to do with Lights?
-  service: telegram_bot.answer_callback_query
 - data_template:
     inline_keyboard:
     - ALL ON:/lighton, Living ON:/living_on, Dining ON:/dining_on
@@ -22,7 +22,8 @@ action:
     - Kitchen OFF:/kitchen_off, Ceiling OFF:/ceiling_off, Bedroom OFF:/bedroom_off
     - Zita Room ON:/zita_on, Luka Room OFF:/luka_on
     - Zita Room OFF:/zita_off, Luka Rook OFF:/luka_off
+    - '{{ "\u21a9\ufe0f" }} Control Panel:/cp'
     message: Looks like you want to control your lights. What you want to do?
-    target: -327494046
+    target: !secret telegram_bot_chat_id
     title: Lights ON or OFF?
   service: telegram_bot.send_message

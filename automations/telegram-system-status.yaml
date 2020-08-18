@@ -1,14 +1,14 @@
 #####
-# Telegram Command - /status to get System information
+# Telegram Command - /status to get Synology System information
 #####
 
 alias: System status
 id: 3cb3b274-3f57-40e8-ad25-d6b1e2b70e30
 trigger:
-- platform: event
-  event_type: telegram_callback
   event_data:
-    data: /status
+    data: /system
+  event_type: telegram_callback
+  platform: event
 action:
 - service: telegram_bot.answer_callback_query
   data_template:
@@ -20,17 +20,20 @@ action:
       {{ "\U0001F4BB" }} *System*:
       
       ------------------------------------------------        
-      
-      *CPU Usage*:   {{ states.sensor.synology_cpu_load_total }} %
-      
-      *Memory usage*:   {{ states.sensor.synology_memory_usage_real }} %
 
-      *HDD Temp*:   {{ sensor.synology_temperature_sda }}  
-      
-      *Network UL*:   {{ states.sensor.synology_network_down }} Mb
-      
-      *Network DL:   {{ states.sensor.synology_network_up }} kbps
-        
+      *CPU Usage*:   {{ states('sensor.synology_cpu_load_total') }} %
+
+      *Memory usage*:   {{ states('sensor.synology_memory_usage_real') }} %
+
+      *HDD Temp*:   {{ states('sensor.synology_temperature_sda') }} °C
+
+      *Network DL*:   {{ states('sensor.synology_network_down') }} kB/s
+
+      *Network UL*:   {{ states('sensor.synology_network_up') }} kB/s
+
+
     data:
       inline_keyboard:
-      - '{{ "\u21a9\ufe0f" }} Control Panel:/stop'
+      - '{{ "\u21a9\ufe0f" }} Control Panel:/cp'
+    
+  
