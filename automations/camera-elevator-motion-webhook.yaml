@@ -11,7 +11,7 @@ condition: []
 action:
 - data:
     entity_id: camera.lift
-    filename: /config/tmp/elevator.jpg
+    filename: /tmp/elevator.jpg
   service: camera.snapshot
 - data:
     entity_id: image_processing.facebox_saved_image

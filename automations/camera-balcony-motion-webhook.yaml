@@ -11,7 +11,7 @@ condition: []
 action:
 - data:
     entity_id: camera.terasa2
-    filename: /config/tmp/balcony.jpg
+    filename: /tmp/balcony.jpg
   service: camera.snapshot
 - data:
     entity_id: image_processing.facebox_saved_image
