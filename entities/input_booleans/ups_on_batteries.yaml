@@ -1,0 +1,22 @@
+#####
+# Trying to save state of UPS when on batteries
+# If during the restart it detects this state of boobean as "on" it would turn off all lights
+#
+# Following are states of UPS I got so far
+#
+# UPS Full and mains
+# Ups Status : Online
+# Ups Status Data : OL
+#
+# UPS on batteries
+# Ups Status : On Battery Battery Discharging
+# Ups Status Data : OB DISCHRG
+#
+# UPS on mains and charging
+# Ups Status : Online Battery Charging
+# Ups Status Data : OL CHRG
+#####
+
+ups_on_batteries:
+  name: UPS on Batteries
+  icon: mdi:battery-alert
