@@ -1,9 +1,9 @@
 #####
 # Warn on power failuer/UPS kicing in
-# Save state in input_boolean.ups_on_batteries
+# Change input_boolean.ups_on_batteries to on
 #####
 
-alias: Power Failure
+alias: UPS Power Failure
 id: 0ce9cdb3-c997-44a8-9070-8300801ad88d
 trigger:
   entity_id: sensor.ups_status
@@ -19,7 +19,3 @@ action:
 - service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.ups_on_batteries
-# Disabled since notify_engine has beed introduced
-#- data:
-#    message: Power failure - UPS running
-#  service: notify.ebroz_bot
