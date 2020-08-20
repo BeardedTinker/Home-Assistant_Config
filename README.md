@@ -94,6 +94,7 @@ There are too many integrations to list them all, but some of the main ones are:
 etc...
 
 Following is a list of active Integrations that are visible at Configuration->Integration page:
+- AccuWeather
 - AdGuard
 - AirVisual
 - Blitzortung (HACS)
