@@ -7,4 +7,4 @@ homeassistant:
   customize: !include customize.yaml
   packages: !include_dir_named integrations # package setup / added config split
   allowlist_external_dirs:
-    - ./tmp
+    - /tmp
