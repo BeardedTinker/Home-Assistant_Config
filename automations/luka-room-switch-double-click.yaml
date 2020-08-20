@@ -3,7 +3,7 @@
 #####
 
 alias: Luka switch double
-id: d998e84e-c978-467f-a28f-d8ebc4335bd9
+id: e698230c-f152-486b-af68-3481cd78f164
 description: ''
 trigger:
   entity_id: sensor.luka_switch_click
