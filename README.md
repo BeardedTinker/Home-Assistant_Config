@@ -145,12 +145,9 @@ Most of the missing files now have sample version. This is edited version with "
  - known_devices.yaml - contains indentifiers  - added SAMPLE
  - customize.yaml - contains private information - added SAMPLE
  - facebox-*.yaml - contains information for face recognition - added SAMPLE
- - family.yaml - contains personal information - added SAMPLE
  - google_calendars.yaml - contains private information - added SAMPLE
- - driving_andrej.yaml - contains identifiers - added SAMPLE
  - telegram_gps_response_andrej.yaml - contains identifiers - added SAMPLE
  - telegram_gps_response_luka.yaml - contains identifiers
  - telegram_gps_response_mirta.yaml - contains identifiers
- - luka-lights-off-when-away.yaml - contains identifiers
 
 Also missing are certificates, json files, cookies,...
