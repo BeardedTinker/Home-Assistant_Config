@@ -6,6 +6,7 @@ platform: template
 sensors:
   people_home:
     value_template: >-
-      {{ is_state('device_tracker.andrej', 'home')
-         or is_state('device_tracker.lukica', 'home')
-         or is_state('device_tracker.mirta', 'home') }}
+      {{ is_state('person.andrej', 'home')
+         or is_state('person.luka', 'home')
+         or is_state('person.zita', 'home')
+         or is_state('person.mirta', 'home') }}
