@@ -1,0 +1,18 @@
+#####
+# Inpute select for logger - allows to select and change logger level without restart
+# Thanks to @CCOSTAN and @VDRainer for this
+#####
+
+logger_level:
+  name: Log Level
+  options:
+    - critical
+    - fatal
+    - error
+    - warning
+    - warn
+    - info
+    - debug
+    - notset
+  initial: warn
+  icon: mdi:bug

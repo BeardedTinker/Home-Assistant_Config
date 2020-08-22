@@ -1,0 +1,23 @@
+#####
+# Automagicly change level for logger 
+# Upon change of input_select.logger_level use logger.set_level to change level
+#####
+
+alias: Logger Level
+id: cc623f27-2f06-4e1b-ac66-6c14924bd964
+trigger:
+  platform: state
+  entity_id:
+    - input_select.logger_level
+#    - input_select.logger_component
+action:
+  - service: logger.set_level
+    data_template:
+      homeassistant.components: "{{ states.input_select.logger_level.state }}"
+#  - service: script.tweet_engine_image
+#    data_template:
+#      tweet: "My logging level has just been set to {{ states.input_select.log_level.state }}"
+#      image: >-
+#        {{ [
+#        "/config/www/custom_ui/floorplan/images/branding/keyboard.png"
+#        ] | random }}
