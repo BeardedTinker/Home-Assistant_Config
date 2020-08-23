@@ -11,7 +11,6 @@
   "requirements": [
     "datetime",
     "python-dateutil>=2.8.1",
-    "integrationhelper>=0.2.2",
     "holidays>=0.10.1",
     "typing",
     "uuid", 

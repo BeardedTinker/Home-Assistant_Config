@@ -1,9 +1,13 @@
+"""Genrate configuration that is used by both YAML and config_flow."""
+
 from collections import OrderedDict
+from typing import Dict
 
 
 class config_singularity:
-    """
-    Options is a dictionary (key is the parameter name), 
+    """Store configuration and generate configs and default values.
+
+    Options is a dictionary (key is the parameter name),
     where each value is a dictionary with following keys
     "step".......in whict config_flow step is this in
     "valid_for"..a function to test for which this option is relevant
@@ -11,18 +15,19 @@ class config_singularity:
     "default"....default value (optional)
     "type".......type
     "validator"..validator
-    (Type and validator are somewhat redundant. 
-    But I cannot use custom validators in ShowForm - it calls convert from voluptuous-serialize that does not accept them.
-    So I pass it twice - once the type, then the validator. Not necesaty for standard validators, such as vol.In()
+    (Type and validator are somewhat redundant.
+    But I cannot use custom validators in ShowForm - it calls convert from
+    voluptuous-serialize that does not accept them.
+    So I pass it twice - once the type, then the validator.
+    Not necesaty for standard validators, such as vol.In()
     For example: "type": str, "validator": cv.string.
-    )
     """
 
-    options = {}
+    options: Dict = {}
 
     def __init__(self):
-        # Validate
-        for key, value in self.options.items():
+        """Validate configuration and reset defaults."""
+        for _, value in self.options.items():
             if "method" not in value:
                 raise ('config_singularity.options must contain the key "method"')
             if "type" not in value:
@@ -32,9 +37,11 @@ class config_singularity:
 
     @property
     def defaults(self):
+        """Return default values."""
         return self.__defaults
 
     def reset_defaults(self):
+        """Reset the defaults from const.py."""
         self.__defaults = {}
         items = {
             key: value for (key, value) in self.options.items() if "default" in value
@@ -43,10 +50,7 @@ class config_singularity:
             self.__defaults[key] = value["default"]
 
     def compile_config_flow(self, step, valid_for=None):
-        """
-        Generate dictionary with relevant configuration options
-        For the current step and relevant for the current frequency
-        """
+        """Generate configuration options relevant for current step and frequency."""
         result = OrderedDict()
         items = {
             key: value
@@ -70,9 +74,7 @@ class config_singularity:
         return result
 
     def compile_schema(self, step=None, valid_for=None):
-        """
-        For both YAML Scheme (step is None) or config_flow Scheme
-        """
+        """For both YAML Scheme (step is None) or config_flow Scheme."""
         result = OrderedDict()
         items = {
             key: value
@@ -94,13 +96,14 @@ class config_singularity:
         return result
 
     def set_defaults(self, step, data) -> None:
+        """Generate default values."""
         items = {
             key: value
             for (key, value) in self.options.items()
             if "step" in value and value["step"] == step and key in data
         }
-        for key, value in items.items():  # pylint: disable=W0612
-            if data[key] != None and (
+        for key, _ in items.items():
+            if data[key] is not None and (
                 type(data[key]) not in [list, dict] or len(data[key]) != 0
             ):
                 self.__defaults[key] = data[key]

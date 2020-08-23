@@ -1,19 +1,12 @@
-"""Garbage Collection Callendar"""
-from datetime import datetime, timedelta
+"""Garbage collection calendar."""
+
 import logging
-from homeassistant.components.calendar import PLATFORM_SCHEMA, CalendarEventDevice
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.template import DATE_STR_FORMAT
-from homeassistant.util import Throttle, dt
+from datetime import timedelta
 
-# from .sensor import find_entity
+from homeassistant.components.calendar import CalendarEventDevice
+from homeassistant.util import Throttle
 
-from .const import (
-    DOMAIN,
-    CALENDAR_PLATFORM,
-    SENSOR_PLATFORM,
-    CALENDAR_NAME,
-)
+from .const import CALENDAR_NAME, CALENDAR_PLATFORM, DOMAIN, SENSOR_PLATFORM
 
 _LOGGER = logging.getLogger(__name__)
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
@@ -22,19 +15,19 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 async def async_setup_platform(
     hass, config, async_add_entities, discovery_info=None
 ):  # pylint: disable=unused-argument
-    """Setup the calendar platform."""
+    """Add calendar entities to HA, of there are calendar instances."""
     # Only single instance allowed
     if GarbageCollectionCalendar.instances == 0:
         async_add_entities([GarbageCollectionCalendar(hass)], True)
 
 
 class GarbageCollectionCalendar(CalendarEventDevice):
-    """The garbage collection calendar class"""
+    """The garbage collection calendar class."""
 
     instances = 0
 
     def __init__(self, hass):
-        """Create empry calendar"""
+        """Create empry calendar."""
         self._cal_data = {}
         self._name = CALENDAR_NAME
         GarbageCollectionCalendar.instances += 1
@@ -70,23 +63,21 @@ class GarbageCollectionCalendar(CalendarEventDevice):
 
 
 class EntitiesCalendarData:
-    """
-    Class used by the Entities Calendar class to hold all entity events.
-    """
+    """Class used by the Entities Calendar class to hold all entity events."""
 
     def __init__(self, hass):
-        """Initialize an Entities Calendar Data"""
+        """Initialize an Entities Calendar Data."""
         self.event = None
         self._hass = hass
         self.entities = []
 
     def add_entity(self, entity_id):
-        """Append entity ID to the calendar"""
+        """Append entity ID to the calendar."""
         if entity_id not in self.entities:
             self.entities.append(entity_id)
 
     def remove_entity(self, entity_id):
-        """Remove entity ID from the calendar"""
+        """Remove entity ID from the calendar."""
         if entity_id in self.entities:
             self.entities.remove(entity_id)
 
@@ -98,7 +89,6 @@ class EntitiesCalendarData:
         start_date = start_datetime.date()
         end_date = end_datetime.date()
         for entity in self.entities:
-            # garbage_collection = find_entity(hass, entity)
             if (
                 entity not in hass.data[DOMAIN][SENSOR_PLATFORM]
                 or hass.data[DOMAIN][SENSOR_PLATFORM][entity].hidden
@@ -111,8 +101,8 @@ class EntitiesCalendarData:
                 event = {
                     "uid": entity,
                     "summary": garbage_collection.name,
-                    "start": {"date": start.strftime("%Y-%m-%d"),},
-                    "end": {"date": start.strftime("%Y-%m-%d"),},
+                    "start": {"date": start.strftime("%Y-%m-%d")},
+                    "end": {"date": start.strftime("%Y-%m-%d")},
                     "allDay": True,
                 }
                 events.append(event)
@@ -127,13 +117,15 @@ class EntitiesCalendarData:
         events = []
         for entity in self.entities:
             state_object = self._hass.states.get(entity)
+            if state_object is None:
+                continue
             start = state_object.attributes.get("next_date")
             if start is not None:
                 event = {
                     "uid": entity,
                     "summary": state_object.attributes.get("friendly_name"),
-                    "start": {"date": start.strftime("%Y-%m-%d"),},
-                    "end": {"date": start.strftime("%Y-%m-%d"),},
+                    "start": {"date": start.strftime("%Y-%m-%d")},
+                    "end": {"date": start.strftime("%Y-%m-%d")},
                     "allDay": True,
                 }
                 events.append(event)

@@ -1,0 +1,10 @@
+collect_garbage:
+  description: Set the last_collection attribute to the current date and time.
+  fields:
+    entity_id:
+      description: The garbage_collection sensor entity_id
+      example: sensor.general_waste
+    last_collection:
+      description: Date and time of the last collection (optional)
+      example: "2020-08-16 10:54:00"
+  
