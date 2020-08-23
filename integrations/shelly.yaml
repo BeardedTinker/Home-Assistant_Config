@@ -5,10 +5,9 @@
 #####
 
 shelly:
-  version: true # 0.1.7 #add version sensor
+  version: true  #add version sensor
   sensors:
     - all
-    - additional_information
   discover_by_ip:
     - '192.168.1.70'
     - '192.168.1.71'
