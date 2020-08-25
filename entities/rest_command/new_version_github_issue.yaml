@@ -1,0 +1,11 @@
+#####
+# RESTful command to set state of issue 14 - new version of HA available
+#
+#####
+
+new_version_github_issue:
+  url: "https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/14"
+  method: PATCH
+  headers:
+    Authorization: !secret github_token2
+  payload: '{"state":"{{ status }}"}'

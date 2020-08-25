@@ -1,0 +1,11 @@
+#####
+# RESTful command to create new issue
+#
+#####
+
+new_github_issue:
+  url: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/
+  method: POST
+  headers:
+    Authorization: !secret github_token2
+  payload: '{"title":"{{ title }}","body":"{{ message }}"}'

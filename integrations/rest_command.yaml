@@ -1,0 +1,10 @@
+#####
+# This integration can expose regular REST commands as services.
+# Services can be called from a script or in automation.
+#
+# This loads up my RESTful commands.
+#
+# https://www.home-assistant.io/integrations/rest_command/
+#####
+
+rest_command: !include_dir_merge_named ../entities/rest_command

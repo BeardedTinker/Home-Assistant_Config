@@ -1,3 +1,4 @@
+#####
 # The updater component will check daily for new releases.
 #
 # https://www.home-assistant.io/integrations/updater
@@ -5,6 +6,7 @@
 # For more information, please see:
 # https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
 #####
+
 updater:
   reporting: true
   include_used_components: true

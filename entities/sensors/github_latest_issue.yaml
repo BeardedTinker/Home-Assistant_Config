@@ -1,0 +1,14 @@
+platform: rest
+name: GitHub Latest Issue
+resource: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/
+authentication: basic
+headers:
+  Authorization: !secret github_token2
+  Content-Type: application/json
+json_attributes:
+  - number
+  - title
+  - state
+  - created_at
+  - url
+value_template: '{{ value_json[0].number }}'

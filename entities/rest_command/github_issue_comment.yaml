@@ -1,0 +1,11 @@
+#####
+# RESTful command to add comment to the issue based on issue_number
+#
+#####
+
+github_issue_comment:
+  url: "https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/{{ issue_number }}/comments"
+  method: POST
+  headers:
+    Authorization: !secret github_token2
+  payload: '{"body":"{{ comment }}"}'

@@ -1,0 +1,8 @@
+#####
+# Version component for local copy
+# https://www.home-assistant.io/integrations/version/
+#####
+
+platform: version
+name: Current Version
+source: local
