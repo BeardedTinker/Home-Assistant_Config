@@ -1,0 +1,9 @@
+travis_build:
+  url: https://api.travis-ci.org/repo/BeardedTinker%2Home-Assistant_Config/requests
+  method: POST
+  headers:
+    authorization: !secret travis_api_key
+    Content-Type: "application/json"
+    Accept: "application/json"
+    Travis-API-Version: 3
+  payload: '{"request": {"branch":"master"}}'
