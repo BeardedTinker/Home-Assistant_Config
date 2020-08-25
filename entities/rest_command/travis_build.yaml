@@ -1,5 +1,5 @@
 travis_build:
-  url: https://api.travis-ci.org/repo/BeardedTinker%2Home-Assistant_Config/requests
+  url: https://api.travis-ci.org/repo/BeardedTinker%2FHome-Assistant_Config/requests
   method: POST
   headers:
     authorization: !secret travis_api_key
