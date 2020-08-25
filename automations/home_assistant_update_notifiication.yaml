@@ -1,0 +1,100 @@
+#####
+# New HA version noficitaion - WORK IN PROGRESS
+# https://github.com/pinkywafer/Home-Assistant_Config/blob/master/packages/system/homeassistant_version.yaml
+#####
+
+id: c57b0367-ca6f-4e7b-8e18-307c4b44cf8b
+alias: Home Assistant Update Notification
+trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id: sensor.latest_version
+condition:
+  - condition: template
+    value_template: >
+      {{
+      states("sensor.latest_version") != states("sensor.current_version")
+      and states("sensor.latest_version") != "unknown"
+      and states("sensor.latest_version") != states("input_text.version_latest_notified")
+      }}
+action:
+- service: input_text.set_value
+  data_template:
+    entity_id: input_text.version_latest_notified
+    value: '{{ states("sensor.latest_version") }}'
+- service: notify.mobile_app_eml_l29
+  data:
+    message: >
+      There is an update to Home Assistant supervised
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Triggering Travis build...
+    title: Update Home Assistant
+    data:
+      sticky: 'true'
+      group: updates
+      tag: update_ha
+      color: '#ff8c00'
+      clickAction: /hassio/dashboard
+- service: persistent_notification.create
+  data_template:
+    title: Update Home Assistant
+    message: >
+      There is an update to Home Assistant Supervised
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Triggering Travis build...
+    notification_id: update_ha
+- service: rest_command.new_version_github_issue
+  data_template:
+    status: "open"
+- service: rest_command.new_version_github_comment
+  data_template:
+    message: ' Home Assistant version {{ states("sensor.latest_version") }} is now available"}'
+- service: rest_command.travis_build
+# wait for travis build to start then update notification
+- wait_template: "{{ is_state('sensor.beardedtinker_home_assistant_config_state', 'started') }}"
+- service: notify.mobile_app_eml_l29
+  data:
+    message: >
+      There is an update to Home Assistant core
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Travis Build has started
+    title: Update Home Assistant
+    data:
+      sticky: 'true'
+      tag: update_ha
+      color: '#ff8c00'
+      clickAction: /hassio/dashboard
+- service: persistent_notification.create
+  data_template:
+    title: Update Home Assistant
+    message: >
+      There is an update to Home Assistant core
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Travis Build has started
+    notification_id: update_ha
+# wait for build to complete and update notification with status
+- wait_template: "{{ not is_state('sensor.beardedtinker_home_assistant_config_state', 'created') and not is_state('sensor.pinkywafer_home_assistant_config_state', 'started') }}"
+- service: notify.mobile_app_eml_l29
+  data:
+    message: >
+      There is an update to Home Assistant core
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Travis Build has {{states('sensor.beardedtinker_home_assistant_config_state')}}
+    title: Update Home Assistant
+    data:
+      sticky: 'true'
+      tag: update_ha
+      color: '#ff8c00'
+      clickAction: /hassio/dashboard
+- service: persistent_notification.create
+  data_template:
+    title: Update Home Assistant
+    message: >
+      There is an update to Home Assistant core
+        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
+        Travis Build has {{states('sensor.beardedtinker_home_assistant_config_state')}}
+    notification_id: update_ha
+- service: rest_command.new_version_github_issue_comment
+  data_template:
+    message: "Travis build has {{ states('sensor.beardedtinker_home_assistant_config_state') }}"

@@ -1,0 +1,26 @@
+#####
+# New HA version noficitaion dismiss - WORK IN PROGRESS
+# https://github.com/pinkywafer/Home-Assistant_Config/blob/master/packages/system/homeassistant_version.yaml
+#####
+
+id: 17269511-9c96-4b8a-9c42-d19887917fd4
+alias: Home Assistant Update Notification Dismiss
+trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+      - sensor.latest_version
+      - sensor.current_version
+condition:
+  - condition: template
+    value_template: '{{ states("sensor.latest_version") == states("sensor._current_version") }}'
+action:
+- service: notify.mobile_app_eml_l29
+  data:
+    message: clear_notification
+    data:
+      tag: update_ha
+- service: persistent_notification.dismiss
+  data:
+    notification_id: update_ha
