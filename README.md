@@ -3,8 +3,10 @@
     <a href="https://travis-ci.org/BeardedTinker/Home-Assistant_Config"><img src="https://travis-ci.org/BeardedTinker/Home-Assistant_Config.svg?branch=master"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
-        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
-    <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a<br>
+        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_config?style=plastic"/></a>
+    <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a><br>
+
+
 Each commit is verified automaticlly with <a href="https://travis-ci.org/github/BeardedTinker/Home-Assistant_Config">Travis</a>.
   </h4>
 
@@ -55,6 +57,7 @@ From other devices I use, here is a list:
 - Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
 - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
 - Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
+- Elgato [Key Light Air](https://www.elgato.com/en/gaming/key-light-air)
 
 
 ### Containers and add-ons
@@ -101,6 +104,7 @@ Following is a list of active Integrations that are visible at Configuration->In
 - Blitzortung (HACS)
 - Certificate Expiry
 - COVID-19
+- Elgato Key Light
 - EPSHome
 - GDACS
 - Google Cast
@@ -120,7 +124,7 @@ Following is a list of active Integrations that are visible at Configuration->In
 - Tado
 - Tile
 - UPnP
-- WLED
+- WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
 
 
 ## Folder structure and files
