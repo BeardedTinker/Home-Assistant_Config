@@ -4,5 +4,5 @@
 #####
 
 platform: discord
-name: discord
+name: discord_bot
 token: !secret discord_token
