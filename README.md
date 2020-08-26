@@ -3,7 +3,8 @@
     <a href="https://travis-ci.org/BeardedTinker/Home-Assistant_Config"><img src="https://travis-ci.org/BeardedTinker/Home-Assistant_Config.svg?branch=master"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
-        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a><br>
+        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
+    <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a<br>
 Each commit is verified automaticlly with <a href="https://travis-ci.org/github/BeardedTinker/Home-Assistant_Config">Travis</a>.
   </h4>
 
@@ -18,7 +19,7 @@ All individual files should have comments inside and I'll try to add as much doc
 
 You can follow my YouTube channel (https://YouTube.com/BeardedTinker) for more information and video guides for various stuff that's included here. 
 
-If you want to get in touch, you can always find me on my Discord Server - [BeardedHome](https://discord.gg/W3xKtV) 
+If you want to get in touch, you can always find me on my Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
 
 Also, you can try and get in touch while I'm streaming. There should be at least 1 stream each month!
 
