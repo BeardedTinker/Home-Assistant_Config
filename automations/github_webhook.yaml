@@ -1,0 +1,45 @@
+id: '724c3e88-97c6-4193-b06f-ce468c411e92'
+alias: github webhook
+mode: queued
+trigger:
+  platform: webhook
+  webhook_id: !secret github_webhook
+condition:
+    - condition: template
+      value_template: >-
+        {%- if trigger.json.action == "created" or "closed" or "opened" or "reopened" or trigger.json.ref %}
+          True
+        {%- else -%}
+          False
+        {%- endif -%}
+action:
+  - service: notify.discord_bot
+    data_template:
+      target: !secret discord_github_id
+      message: >-
+        {%- if trigger.json.pull_request -%}
+          Pull request 
+          {% if trigger.json.comment %}
+            New comment on {{trigger.json.pull_request.title }} - Pull Request #{{
+            trigger.json.pull_request.number}} from {{ trigger.json.comment.sender.login }}
+          {%- else -%}
+            {{ trigger.json.pull_request.title }} - Pull Request #{{ trigger.json.pull_request.number}} {{
+            trigger.json.action}} by {{trigger.json.sender.login}}
+          {% endif -%}
+          {{trigger.json.pull_request.html_url}}
+        {%- elif trigger.json.issue -%}
+          {% if trigger.json.comment %}
+            New comment on {{trigger.json.issue.title }} - Issue #{{ 
+            trigger.json.issue.number}} from {{ trigger.json.comment.user.login }}
+          {% else -%}
+          {{ trigger.json.issue.title }} - Issue #{{ trigger.json.issue.number}} {{
+            trigger.json.action }} by {{trigger.json.sender.login}}
+          {% endif -%}
+          {{trigger.json.issue.html_url}}
+        {%- elif trigger.json.ref %}
+          {{ trigger.json.commits | count }} commits pushed to Home-Assistant_config:
+            {% for commit in trigger.json.commits -%}
+              {{commit.message}}
+            {%- endfor %}
+            https://github.com/BeardedTinker/Home-Assistant_Config/commits/master
+        {%- endif %}
