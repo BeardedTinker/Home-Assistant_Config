@@ -24,3 +24,6 @@ action:
 - service: persistent_notification.dismiss
   data:
     notification_id: update_ha
+- service: rest_command.new_version_github_issue
+  data_template:
+    status: "close"
