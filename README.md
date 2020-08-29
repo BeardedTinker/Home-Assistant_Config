@@ -33,7 +33,7 @@ Plugged in Synolgoy is cc2531 Zigbee USB stick with Zigbee2mqtt firmware from Ko
 
 From other devices I use, here is a list:
 - IKEA TRADFRI Gateway - NOT used anymore
-- IKEA TRADFRI wireless dimmer (ICTC-G-1)
+- IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore
 - IKEA TRADFRI remote control (E1524/E1810)
 - IKEA TRADFRI ON/OFF switch (E1743)
 - IKEA TRADFRI control outlet (E1603/E1702)
@@ -76,13 +76,15 @@ Add-ons:
 Containers:
  - AdGuard Home 
  - Emby
+ - Facebox
  - Grafana
  - InfluxDB
  - Node-RED
  - Portainer
  - Zigbee2MQTT - REMOVED, now using Add-on
  - MQTT - REMOVED, now using Add-on
- plus some others too - not directly related to Home Assistant.
+
+ plus some others too - not directly related to Home Assistant (Minecraft, Storj node,...)
 
 
 ### Integrations
@@ -129,7 +131,7 @@ Following is a list of active Integrations that are visible at Configuration->In
 
 ## Folder structure and files
 
-Insipred by [Frenck](https://github.com/frenck/home-assistant-config) I've broken my configuration in various files.
+Insipred by [Franck](https://github.com/frenck/home-assistant-config) I've broken my configuration in various files.
 
 It looks overwhelming at first, but when you get the hang of it, this structure is much easier to maintain and find something. Also disabeling parts of the integrations is just a rename away :)
 
@@ -143,7 +145,7 @@ Here is a list of them sorted:
  - www/community
 
 #### Missing files
-Most of the missing files now have sample version. This is edited version with "fake" information, so you ae able to reuse code.
+Most of the missing files now have sample version. This is edited version with "fake" information, so you are able to reuse code.
 
  - ip_bans.yaml - could contain IP addresses  - added SAMPLE
  - secrets.yaml - contains credentials and some private infos - added SAMPLE
