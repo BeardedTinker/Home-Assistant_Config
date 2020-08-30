@@ -1,0 +1,7 @@
+#####
+# Get information about successful logins to Home Assistant
+# https://github.com/custom-components/authenticated
+#####
+
+platform: authenticated
+enable_notification: false
