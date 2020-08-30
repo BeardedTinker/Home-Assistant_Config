@@ -1,0 +1,8 @@
+#####
+# Counter that tracks total number of lines in YAML
+#
+#####
+
+platform: command_line
+name: "Number of Lines of Code (YAML)"
+command: " find /config/ -name '*.yaml' | xargs cat | wc -l"
