@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of cameras
+#
+#####
+
+platform: template
+sensors:
+  camera_count:
+    friendly_name: 'Number of online Cameras'
+    entity_id: []
+    value_template: >
+      {{ states.camera | list | count }}

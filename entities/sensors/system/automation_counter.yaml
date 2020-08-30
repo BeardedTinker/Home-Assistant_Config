@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of automation
+#
+#####
+
+platform: template
+sensors:
+  automation_count:
+    friendly_name: 'Number of Automations'
+    entity_id: []
+    value_template: >-
+      {{ states.automation| list | count }}

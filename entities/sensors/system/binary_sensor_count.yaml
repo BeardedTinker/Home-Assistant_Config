@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of binary sensors
+#
+#####
+
+platform: template
+sensors:
+  binary_sensor_count:
+    friendly_name: 'Number of Binary Sensors'
+    entity_id: []
+    value_template: >-
+      {{ states.binary_sensor | list | count }}
