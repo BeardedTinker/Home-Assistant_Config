@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  devices_count:
+  entities_count:
     friendly_name: 'Number of Entities'
     entity_id: []
     value_template: >
