@@ -1,0 +1,31 @@
+#####
+# blitzortung automation - alert when there are lightning strikes nearby
+# Since WWLLN has been removed this HACS integration is replacement for it
+#####
+
+alias: 'Lightning Notification'
+id: 87ff4df4-97d7-4177-b01f-37055f789e73
+mode: single
+trigger:
+  - platform: state
+    entity_id: sensor.blitzortung_lightning_counter
+
+condition:
+  - condition: state
+    entity_id: binary_sensor.people_home
+    state: 'on'
+  - condition: numeric_state
+    entity_id: sensor.blitzortung_lightning_counter
+    above: 0
+  - condition: numeric_state
+    entity_id: sensor.blitzortung_lightning_distance
+    below: 30
+
+action:
+  - service: script.notify_engine
+    data_template:
+      title: 'Lightning Warning!'
+      value1: "Lightning has been detected within {{states('sensor.blitzortung_lightning_distance') | round (1, 'floor')}} km from our place."
+      ios_category: "LIGHTNING"
+      who: 'family'
+      tag_id: 'warning'
