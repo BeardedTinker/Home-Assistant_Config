@@ -32,8 +32,6 @@ CONF_POWER_DECIMALS = 'power_decimals'
 CONF_SENSORS = 'sensors'
 CONF_UPGRADE_SWITCH = 'upgrade_switch'
 CONF_UNAVALABLE_AFTER_SEC = 'unavailable_after_sec'
-CONF_LOCAL_PY_SHELLY = 'debug_local_py_shelly'
-CONF_ONLY_DEVICE_ID = 'debug_only_device_id'
 CONF_CLOUD_AUTH_KEY = 'cloud_auth_key'
 CONF_CLOUD_SERVER = 'cloud_server'
 CONF_TMPL_NAME = 'tmpl_name'
@@ -45,6 +43,11 @@ CONF_DECIMALS = 'decimals'
 CONF_DIV = 'div'
 CONF_UNIT = 'unit'
 CONF_MQTT_PORT = 'mqtt_port'
+
+#Debug settings used for testing
+CONF_LOCAL_PY_SHELLY = 'debug_local_py_shelly'
+CONF_ONLY_DEVICE_ID = 'debug_only_device_id'
+CONF_DEBUG_ENABLE_INFO = 'debug_enable_info'
 
 CONF_WIFI_SENSOR = 'wifi_sensor' #deprecated
 CONF_UPTIME_SENSOR = 'uptime_sensor' #deprecated
@@ -90,6 +93,7 @@ ATTRIBUTE_RSSI = 'rssi'
 ATTRIBUTE_UPTIME = 'uptime'
 ATTRIBUTE_HAS_FIRMWARE_UPDATE = 'has_firmware_update'
 ATTRIBUTE_LATEST_FW = 'latest_fw_version'
+ATTRIBUTE_LATEST_BETA_FW = 'latest_beta_fw_version'
 ATTRIBUTE_FW = 'firmware_version'
 ATTRIBUTE_CLOUD_ENABLED = 'cloud_enabled'
 ATTRIBUTE_CLOUD_CONNECTED = 'cloud_connected'
@@ -127,6 +131,7 @@ ALL_ATTRIBUTES = {
     ATTRIBUTE_UPTIME,
     ATTRIBUTE_HAS_FIRMWARE_UPDATE,
     ATTRIBUTE_LATEST_FW,
+    ATTRIBUTE_LATEST_BETA_FW,
     ATTRIBUTE_FW,
     ATTRIBUTE_MQTT_CONNECTED,
     ATTRIBUTE_CLOUD_STATUS,
