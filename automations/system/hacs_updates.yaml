@@ -1,0 +1,35 @@
+#####
+# HACS Updates notification
+# Sends message to mobile device and Github - Issue #16
+#####
+
+alias: HACS Updates
+id: dc99162c-4e54-47e8-b8c8-3b9396d4ac36
+mode: single
+trigger:
+  - platform: state
+    entity_id: sensor.hacs
+  
+condition:
+  - condition: numeric_state
+    entity_id: sensor.hacs
+    above: 0
+  
+action:
+- service: script.notify_engine
+  data_template:
+    who: 'andrej'
+    title: HACS Update
+    value1: 'HACS Update(s) at {{ states("sensor.time") }}'
+    value2: '{{state_attr("sensor.hacs","repositories")}}'
+    value3: 'There is {{ states.sensor.hacs.state }} update.'
+    tag_id: 'system'
+    sticky: 'true'
+    group: updates
+    color: '#ff8c00'
+
+- service: rest_command.github_issue_comment
+  data_template:
+    status: "open"
+    issue_number: 16
+    message: 'HACS Update(s) at {{ states("sensor.time") }}. \n {{state_attr("sensor.hacs","repositories")}}. \n There is {{ states.sensor.hacs.state }} update.'

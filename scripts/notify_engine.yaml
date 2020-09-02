@@ -33,6 +33,9 @@ notify_engine:
             content-type: "{{ content_type }}"
             hide-thumbnail: false
           tag: "{{ tag_id }}"
+          group: "{{ group }}"
+          sticky: "{{ sticky }}"
+          color: "{{ color }}"
           push:
 #            sound: "{{ ios_sound }}"
 #            badge: "{{ ios_badge }}"
