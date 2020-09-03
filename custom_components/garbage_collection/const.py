@@ -1,6 +1,7 @@
 """Define constants used in garbage_collection."""
 
 from datetime import datetime
+from typing import Any
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -176,7 +177,7 @@ COUNTRY_CODES = [
 ]
 
 
-def date_text(value):
+def date_text(value: Any) -> str:
     """Have to store date as text - datetime is not JSON serialisable."""
     if value is None or value == "":
         return ""
@@ -186,7 +187,7 @@ def date_text(value):
         raise vol.Invalid(f"Invalid date: {value}")
 
 
-def time_text(value):
+def time_text(value: Any) -> str:
     """Have to store time as text - datetime is not JSON serialisable."""
     if value is None or value == "":
         return ""
@@ -196,7 +197,7 @@ def time_text(value):
         raise vol.Invalid(f"Invalid date: {value}")
 
 
-def month_day_text(value):
+def month_day_text(value: Any) -> str:
     """Validate format month/day."""
     if value is None or value == "":
         return ""

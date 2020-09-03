@@ -2,6 +2,7 @@
 import logging
 import uuid
 from datetime import datetime
+from typing import Dict
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -46,7 +47,7 @@ class garbage_collection_shared:
         self.errors = {}
         self.data_schema = {}
 
-    def update_data(self, user_input, step):
+    def update_data(self, user_input: Dict, step: int):
         """Remove empty fields, and fields that should not be stored in the config."""
         self._data.update(user_input)
         items = {
@@ -61,7 +62,7 @@ class garbage_collection_shared:
             self.name = self._data[CONF_NAME]
             del self._data[CONF_NAME]
 
-    def step1_user_init(self, user_input, defaults=None):
+    def step1_user_init(self, user_input: Dict, defaults=None):
         """Step 1 - general set-up."""
         self.errors = {}
         if user_input is not None:
@@ -99,7 +100,7 @@ class garbage_collection_shared:
 
         return False
 
-    def step2_annual_group(self, user_input, defaults=None):
+    def step2_annual_group(self, user_input: Dict, defaults=None):
         """Step 2 - Annual or Group (no week days)."""
         self.errors = {}
         self.data_schema = {}
@@ -132,7 +133,7 @@ class garbage_collection_shared:
         )
         return False
 
-    def step3_detail(self, user_input, defaults=None):
+    def step3_detail(self, user_input: Dict, defaults=None):
         """Step 2 - other than Annual or Group."""
         self.errors = {}
         self.data_schema = {}
@@ -177,7 +178,7 @@ class garbage_collection_shared:
             ] = bool
         return False
 
-    def step4_final(self, user_input, defaults=None):
+    def step4_final(self, user_input: Dict, defaults=None):
         """Step 3 - additional parameters."""
         self.errors = {}
         self.data_schema = {}

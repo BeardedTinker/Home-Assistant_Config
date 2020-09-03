@@ -9,11 +9,8 @@
     "@bruxy70"
   ],
   "requirements": [
-    "datetime",
     "python-dateutil>=2.8.1",
     "holidays>=0.10.1",
-    "typing",
-    "uuid", 
     "voluptuous"
   ]
 }

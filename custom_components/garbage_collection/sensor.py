@@ -1,7 +1,7 @@
 """Sensor platform for garbage_collection."""
 import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any, List
+from typing import Any, List, Optional
 
 import holidays
 import homeassistant.util.dt as dt_util
@@ -105,7 +105,7 @@ def nth_weekday_date(n: int, date_of_month: date, collection_day: int) -> date:
 def to_date(day: Any) -> date:
     """Convert datetime or text to date, if not already datetime."""
     if day is None:
-        return None
+        raise ValueError
     if type(day) == date:
         return day
     if type(day) == datetime:
@@ -113,7 +113,7 @@ def to_date(day: Any) -> date:
     return date.fromisoformat(day)
 
 
-def parse_datetime(text: str):
+def parse_datetime(text: str) -> Optional[datetime]:
     """Parse text to datetime object."""
     try:
         return parse(text)
@@ -121,7 +121,7 @@ def parse_datetime(text: str):
         return None
 
 
-def parse_date(text: str):
+def parse_date(text: str) -> Optional[date]:
     """Parse text to date object."""
     try:
         return parse(text).date()
@@ -131,7 +131,7 @@ def parse_date(text: str):
 
 def to_dates(dates: List[Any]) -> List[date]:
     """Convert list of text to datetimes, if not already datetimes."""
-    converted = []
+    converted = []  # type: List[date]
     for day in dates:
         try:
             converted.append(to_date(day))
@@ -177,7 +177,10 @@ class GarbageCollection(RestoreEntity):
         self.__holidays = []
         self.__period = config.get(CONF_PERIOD)
         self.__first_week = config.get(CONF_FIRST_WEEK)
-        self.__first_date = to_date(config.get(CONF_FIRST_DATE))
+        try:
+            self.__first_date = to_date(config.get(CONF_FIRST_DATE))
+        except ValueError:
+            self.__first_date = None
         self.__next_date = None
         self.__last_updated = None
         self.last_collection = None
@@ -258,9 +261,6 @@ class GarbageCollection(RestoreEntity):
         if state is not None:
             self.last_collection = parse_datetime(
                 state.attributes.get(ATTR_LAST_COLLECTION)
-            )
-            self.__last_updated = parse_datetime(
-                state.attributes.get(ATTR_LAST_UPDATED)
             )
             self.__next_date = parse_date(state.attributes.get(ATTR_NEXT_DATE))
             self.__days = state.attributes.get(ATTR_DAYS)
@@ -444,12 +444,10 @@ class GarbageCollection(RestoreEntity):
                     (day1 - self.__first_date).days % self.__period
                 )
             except TypeError:
-                _LOGGER.error(
-                    "(%s) Please configure first_date and period "
-                    "for every-n-days collection frequency.",
-                    self.__name,
+                raise ValueError(
+                    f"({self.__name}) Please configure first_date and period "
+                    "for every-n-days collection frequency."
                 )
-                return None
             return day1 + relativedelta(days=offset)
         elif self.__frequency == "monthly":
             # Monthly
@@ -467,17 +465,16 @@ class GarbageCollection(RestoreEntity):
             try:
                 conf_date = datetime.strptime(self.__date, "%m/%d").date()
             except TypeError:
-                _LOGGER.error(
-                    "(%s) Please configure the date for annual collection frequency.",
-                    self.__name,
+                raise ValueError(
+                    f"({self.__name}) Please configure the date "
+                    "for annual collection frequency."
                 )
-                return None
             candidate_date = date(year, conf_date.month, conf_date.day)
             if candidate_date < day1:
                 candidate_date = date(year + 1, conf_date.month, conf_date.day)
             return candidate_date
         elif self.__frequency == "group":
-            candidate_date = None
+            candidate_date = None  # type: ignore
             try:
                 for entity_id in self.__entities:
                     entity = self.hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
@@ -485,14 +482,14 @@ class GarbageCollection(RestoreEntity):
                     if candidate_date is None or d < candidate_date:
                         candidate_date = d
             except KeyError:
-                return None
+                raise ValueError
             except TypeError:
                 _LOGGER.error("(%s) Please add entities for the group.", self.__name)
-                return None
+                raise ValueError
             return candidate_date
         else:
             _LOGGER.debug("(%s) Unknown frequency %s", self.__name, self.__frequency)
-            return None
+            raise ValueError
 
     async def __async_candidate_date_with_holidays(self, day1: date) -> date:
         """Find candidate date, automatically skip holidays."""
@@ -510,9 +507,10 @@ class GarbageCollection(RestoreEntity):
             if len(check_near) > 0:
                 first_day -= relativedelta(days=self.__holiday_move_offset)
         while True:
-            next_date = await self.__async_find_candidate_date(first_day)
-            if next_date is None:
-                return None
+            try:
+                next_date = await self.__async_find_candidate_date(first_day)
+            except ValueError:
+                raise
             if bool(self.__holiday_in_week_move):
                 start_date = next_date - relativedelta(days=next_date.weekday())
                 delta = relativedelta(days=1)
@@ -561,11 +559,13 @@ class GarbageCollection(RestoreEntity):
         first_day = day1 - relativedelta(days=self.__offset)
         i = 0
         while True:
-            next_date = self.__insert_include_date(
-                first_day, await self.__async_candidate_date_with_holidays(first_day)
-            )
-            if next_date is None:
-                return None
+            try:
+                next_date = self.__insert_include_date(
+                    first_day,
+                    await self.__async_candidate_date_with_holidays(first_day),
+                )
+            except ValueError:
+                raise
             date_ok = True
             # Ifit is today and after expiration, search from tomorrow
             now = dt_util.now()
@@ -594,7 +594,7 @@ class GarbageCollection(RestoreEntity):
             i += 1
             if i > 365:
                 _LOGGER.error("(%s) Cannot find any suitable date", self.__name)
-                return None
+                raise ValueError
 
     async def __async_ready_for_update(self) -> bool:
         """Check if the entity is ready for the update.
@@ -605,30 +605,32 @@ class GarbageCollection(RestoreEntity):
         """
         now = dt_util.now()
         today = now.date()
-        ready_for_update = bool(
-            self.__last_updated is None or self.__last_updated.date() != today
-        )
+        try:
+            ready_for_update = bool(self.__last_updated.date() != today)
+        except AttributeError:
+            ready_for_update = True
         if self.__frequency == "group":
             members_ready = True
             for entity_id in self.__entities:
                 state_object = self.hass.states.get(entity_id)
-                if (
-                    state_object is None
-                    or state_object.attributes.get(ATTR_LAST_UPDATED).date() != today
-                ):
+                try:
+                    if state_object.attributes.get(ATTR_LAST_UPDATED).date() != today:
+                        members_ready = False
+                        break
+                except AttributeError:
                     members_ready = False
                     break
             if ready_for_update and not members_ready:
                 ready_for_update = False
         else:
-            if self.__next_date == today and (
-                (self.__expire_after is not None and now.time() >= self.__expire_after)
-                or (
-                    self.last_collection is not None
-                    and self.last_collection.date() == today
-                )
-            ):
-                ready_for_update = True
+            try:
+                if self.__next_date == today and (
+                    now.time() >= self.__expire_after
+                    or self.last_collection.date() == today
+                ):
+                    ready_for_update = True
+            except (AttributeError, TypeError):
+                pass
         return ready_for_update
 
     async def async_find_next_date(self, today: date) -> date:
@@ -636,45 +638,57 @@ class GarbageCollection(RestoreEntity):
         year = today.year
         month = today.month
         if self.date_inside(today):
-            next_date = await self.__async_candidate_with_incl_excl(today)
-            if next_date is not None:
-                if not self.date_inside(next_date):
-                    if self.__first_month <= self.__last_month:
-                        next_year = date(year + 1, self.__first_month, 1)
+            try:
+                next_date = await self.__async_candidate_with_incl_excl(today)
+            except ValueError:
+                raise
+            if not self.date_inside(next_date):
+                if self.__first_month <= self.__last_month:
+                    next_year = date(year + 1, self.__first_month, 1)
+                    _LOGGER.debug(
+                        "(%s) Did not find a date this year, " "lookig at next year",
+                        self.__name,
+                    )
+                    try:
                         next_date = await self.__async_candidate_with_incl_excl(
                             next_year
                         )
-                        _LOGGER.debug(
-                            "(%s) Did not find a date this year, "
-                            "lookig at next year",
-                            self.__name,
-                        )
-                    else:
-                        next_year = date(year, self.__first_month, 1)
+                    except ValueError:
+                        raise
+                else:
+                    next_year = date(year, self.__first_month, 1)
+                    _LOGGER.debug(
+                        "(%s) Date not within the range, " "searching again from %s",
+                        self.__name,
+                        MONTH_OPTIONS[self.__first_month - 1],
+                    )
+                    try:
                         next_date = await self.__async_candidate_with_incl_excl(
                             next_year
                         )
-                        _LOGGER.debug(
-                            "(%s) Date not within the range, "
-                            "searching again from %s",
-                            self.__name,
-                            MONTH_OPTIONS[self.__first_month - 1],
-                        )
+                    except ValueError:
+                        raise
         else:
             if self.__first_month <= self.__last_month and month > self.__last_month:
                 next_year = date(year + 1, self.__first_month, 1)
-                next_date = await self.__async_candidate_with_incl_excl(next_year)
                 _LOGGER.debug(
                     "(%s) Date outside range, lookig at next year", self.__name
                 )
+                try:
+                    next_date = await self.__async_candidate_with_incl_excl(next_year)
+                except ValueError:
+                    raise
             else:
                 next_year = date(year, self.__first_month, 1)
-                next_date = await self.__async_candidate_with_incl_excl(next_year)
                 _LOGGER.debug(
                     "(%s) Current date is outside of the range, "
                     "starting from first month",
                     self.__name,
                 )
+                try:
+                    next_date = await self.__async_candidate_with_incl_excl(next_year)
+                except ValueError:
+                    raise
         return next_date
 
     async def async_update(self) -> None:

@@ -25,22 +25,24 @@ class config_singularity:
 
     options: Dict = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Validate configuration and reset defaults."""
         for _, value in self.options.items():
             if "method" not in value:
-                raise ('config_singularity.options must contain the key "method"')
+                raise KeyError(
+                    'config_singularity.options must contain the key "method"'
+                )
             if "type" not in value:
-                raise ('config_singularity.options must contain the key "type"')
+                raise KeyError('config_singularity.options must contain the key "type"')
         # Set defaults
         self.reset_defaults()
 
     @property
-    def defaults(self):
+    def defaults(self) -> Dict:
         """Return default values."""
         return self.__defaults
 
-    def reset_defaults(self):
+    def reset_defaults(self) -> None:
         """Reset the defaults from const.py."""
         self.__defaults = {}
         items = {
@@ -49,7 +51,7 @@ class config_singularity:
         for key, value in items.items():
             self.__defaults[key] = value["default"]
 
-    def compile_config_flow(self, step, valid_for=None):
+    def compile_config_flow(self, step: int, valid_for=None) -> Dict:
         """Generate configuration options relevant for current step and frequency."""
         result = OrderedDict()
         items = {
@@ -73,7 +75,7 @@ class config_singularity:
                 result[value["method"](key)] = value["type"]
         return result
 
-    def compile_schema(self, step=None, valid_for=None):
+    def compile_schema(self, step: int = None, valid_for=None) -> Dict:
         """For both YAML Scheme (step is None) or config_flow Scheme."""
         result = OrderedDict()
         items = {
@@ -95,7 +97,7 @@ class config_singularity:
                 result[value["method"](key)] = t
         return result
 
-    def set_defaults(self, step, data) -> None:
+    def set_defaults(self, step: int, data) -> None:
         """Generate default values."""
         items = {
             key: value
