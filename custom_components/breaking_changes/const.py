@@ -2,7 +2,7 @@
 # Base component constants
 DOMAIN = "breaking_changes"
 DOMAIN_DATA = "{}_data".format(DOMAIN)
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 PLATFORMS = ["sensor"]
 ISSUE_URL = "https://github.com/custom-components/breaking_changes/issues"
 
@@ -17,7 +17,7 @@ If you have any issues with this you need to open an issue here:
 """
 
 # Operational
-URL = "https://hachanges.halfdecent.io/{0}-{1}/json"
+URL = "https://hachanges.entrypoint.xyz/{0}-{1}/json"
 
 # Icons
 ICON = "mdi:package-up"
