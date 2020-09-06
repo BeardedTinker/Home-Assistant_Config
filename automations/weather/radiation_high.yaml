@@ -1,0 +1,34 @@
+#####
+# Warning when radiation level is too high
+# Nuber for trigger is guesstimate
+#####
+
+alias: Radiation Alert
+id: e0df13b6-00ac-4b3e-9b2b-f6aca28a6da5
+trigger:
+  - platform: state
+    entity_id: sensor.geiger_counter_2
+
+condition:
+  - condition: numeric_state
+    entity_id: sensor.geiger_counter_2
+    above: 0.9
+
+action:
+- service: script.notify_engine
+  data_template:
+    who: 'family'
+    title: 'Radiation Level Alert!'
+    value1: 'Radiation alert currently is {{ states("sensor.geiger_counter_2") }} counts per minute. Normal value is belo 0.5'
+    tag_id: 'warning'  
+- data_template:
+    entity_id: media_player.display_me
+#    entity_id: media_player.clock_me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data_template:
+    entity_id: media_player.display_me
+#    entity_is: media_player.clock_me
+    message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter_2") }} and normal value should be below 0.5'
+  service: tts.google_say
+
