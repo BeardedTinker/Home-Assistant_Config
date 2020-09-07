@@ -19,7 +19,7 @@ action:
   data_template:
     who: 'family'
     title: '*Radiation Level Alert!*'
-    value1: 'Radiation alert currently is {{ states("sensor.geiger_counter_2") }} counts per minute. Normal value is belo 0.5'
+    value1: 'Radiation alert currently is {{ states("sensor.geiger_counter_2") }} counts per minute. Normal value is below 0.5'
     tag_id: 'warning'  
     sticky: 'true'
     group: weather
