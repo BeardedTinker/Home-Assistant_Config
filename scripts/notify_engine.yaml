@@ -17,6 +17,8 @@ notify_engine:
             notify.mobile_app_fig_lx1
           {% elif who == 'andrej' %}
             notify.mobile_app_eml_l29
+          {% elif who == 'luka' %}
+            notify.mobile_app_atu_l21
           {% elif who == 'parents' %}
             notify.parents
           {% elif who == 'family' %}

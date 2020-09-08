@@ -1,0 +1,48 @@
+#####
+# School day wakeup alarm for Zita
+# Stil work in progress
+#####
+
+alias: Zita School Day Wake up
+id: 97d8e2b1-6e89-499a-9823-aa03d6273378
+
+trigger:
+  at: '06:30:00'
+  platform: time
+
+condition:
+  condition: state
+  entity_id: binary_sensor.workday_today
+  state: 'on'
+
+action:
+#- service: script.notify_engine
+#  data_template:
+#    who: 'family'
+#    title: '{{state_attr(''binary_sensor.meteoalarm'', ''headline'')}}'
+#    value1: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+#    tag_id: 'information'  
+- data_template:
+    entity_id: media_player.mini_me
+    volume_level: 0.3
+  service: media_player.volume_set
+- data_template:
+    entity_id: media_player.mini_me
+    message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to wake up.'
+  service: tts.google_say
+- data:
+    entity_id: 
+      - light.goose_light
+      - light.zita_ceiling_light
+    brightness: 64
+  service: light.turn_on
+- delay: '00:00:10'
+- data_template:
+    entity_id: media_player.mini_me
+    volume_level: 0.1
+  service: media_player.volume_set
+- data_template:
+    entity_id: media_player.mini_me
+    media_content_id: 'http://proxima.shoutca.st:8357/stream'
+    media_content_type: audio/mp4
+  service: media_player.play_media
