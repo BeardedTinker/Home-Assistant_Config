@@ -39,7 +39,7 @@ notify_engine:
           sticky: "{{ sticky }}"
           color: "{{ color }}"
           push:
-#            sound: "{{ ios_sound }}"
-#            badge: "{{ ios_badge }}"
-#            category: "{{ ios_category }}"
+#          sound: "{{ ios_sound }}"
+#          badge: "{{ ios_badge }}"
+#          category: "{{ ios_category }}"
           entity_id: "{{ camera_entity }}"

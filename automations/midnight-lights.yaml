@@ -16,14 +16,11 @@ action:
 - service: script.midnightlightsoffspeech  
 - data:
     entity_id: all
+    transition: 30
   service: light.turn_off
 - data:
     message: Midnight, lights out!
   service: notify.lg_tv
-# Disabled since notify_engine has beed introduced  
-#- data:
-#    message: Midnight! Turning lights off
-#  service: notify.ebroz_bot
 - service: script.notify_engine
   data_template:
     who: 'andrej'

@@ -16,10 +16,6 @@ action:
     who: 'andrej'
     value1: "The sun is up. Wake Up! {{ states('sensor.time') }}"
     tag_id: 'information'
-# Disabled since notify_engine has beed introduced      
-#- service: notify.ebroz_bot
-#  data:
-#    message: "The sun is up. Wake Up! {{ states('sensor.time') }}"
 - data_template:
     entity_id: media_player.display_me
     volume_level: 0.2

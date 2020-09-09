@@ -15,8 +15,3 @@ action:
     entity_id:
     - utility_meter.sun_energy
     tariff: day
-# This part is disabled, but good idea to change theme to day/night status
-#- service: input_select.select_option
-#  data:
-#    entity_id: input_select.select_theme
-#    option: Day

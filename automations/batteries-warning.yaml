@@ -12,6 +12,12 @@ condition:
   condition: template
   value_template: '{% if states("sensor.low_batteries") %}true{% else %}false{% endif %}'
 action:
-  service: notify.ebroz_bot
+- service: script.notify_engine
   data_template:
-    message: 'Low/Empty batteries: {{ states.sensor.low_batteries.state }} '
+    who: 'telegram'
+    title: '*Information*'
+    value1: 'There are low batteries:  {{ states.sensor.low_batteries.state }}'
+    tag_id: 'information'  
+    sticky: 'true'
+    group: system
+#    color: '#ff0000'

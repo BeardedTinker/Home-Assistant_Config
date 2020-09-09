@@ -25,13 +25,15 @@ action:
     group: weather
     color: '#ff0000'
 - data_template:
-    entity_id: media_player.display_me
-#    entity_id: media_player.clock_me
+    entity_id: 
+      - media_player.display_me
+      - media_player.clock_me
     volume_level: 0.5
   service: media_player.volume_set
 - data_template:
-    entity_id: media_player.display_me
-#    entity_is: media_player.clock_me
+    entity_id: 
+      - media_player.display_me
+      - media_player.clock_me
     message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter_2") }} and normal value should be below 0.5'
   service: tts.google_say
 

@@ -18,11 +18,8 @@ action:
     who: 'andrej'
     value1: "Sun setting, turning lights on."
     tag_id: 'information'
-# Disabled since notify_engine has beed introduced  
-#- data:
-#    message: Sun setting, turning lights on.
-#  service: notify.ebroz_bot
 - data:
     entity_id: light.living_room_lights
+    transition: 60
   service: light.turn_on
 - service: script.eveninglightsspeach

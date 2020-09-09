@@ -22,6 +22,7 @@ action:
       - light.kitchen_lights
       - light.ceiling_lights
       - light.dining_room_lights
+    transition: 60
   service: light.turn_off
 - data:
     message: Almost Midnight!
