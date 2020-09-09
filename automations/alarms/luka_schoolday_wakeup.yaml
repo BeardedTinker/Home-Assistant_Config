@@ -7,7 +7,7 @@ alias: Luka School Day Wake up
 id: d7b4d3a8-8268-4f18-b3bb-be96c4c119e2
 
 trigger:
-  at: '06:03:00'
+  at: '06:02:00'
   platform: time
 
 condition:
