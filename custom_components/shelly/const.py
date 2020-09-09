@@ -31,6 +31,7 @@ CONF_VERSION = 'version'
 CONF_POWER_DECIMALS = 'power_decimals'
 CONF_SENSORS = 'sensors'
 CONF_UPGRADE_SWITCH = 'upgrade_switch'
+CONF_UPGRADE_BETA_SWITCH = 'upgrade_beta_switch'
 CONF_UNAVALABLE_AFTER_SEC = 'unavailable_after_sec'
 CONF_CLOUD_AUTH_KEY = 'cloud_auth_key'
 CONF_CLOUD_SERVER = 'cloud_server'
@@ -64,7 +65,7 @@ DEFAULT_SETTINGS = \
     'default' : {},
     'temperature' : {CONF_UNIT:'°C'},
     'device_temp' : {CONF_UNIT:'°C'},
-    'illuminance' : {CONF_UNIT:'lux'},
+    'illuminance' : {CONF_UNIT:'lx'},
     'humidity' : {CONF_UNIT:'%'},
     'total_consumption' : {CONF_DECIMALS:2, CONF_DIV:1000, CONF_UNIT:'kWh'},
     'total_returned' : {CONF_DECIMALS:2, CONF_DIV:1000, CONF_UNIT:'kWh'},
