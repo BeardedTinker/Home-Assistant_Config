@@ -1,0 +1,17 @@
+{
+  "domain": "spacex",
+  "name": "SpaceX Launches and Starman",
+  "config_flow": true,
+  "documentation": "https://github.com/djtimca/haspacex",
+  "issue_tracker": "https://github.com/djtimca/HASpaceX/issues",
+  "requirements": [
+    "spacexpypi==0.0.4"
+  ],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@djtimca"
+  ]
+}
