@@ -40,16 +40,16 @@ class config_singularity:
     @property
     def defaults(self) -> Dict:
         """Return default values."""
-        return self.__defaults
+        return self._defaults
 
     def reset_defaults(self) -> None:
         """Reset the defaults from const.py."""
-        self.__defaults = {}
+        self._defaults = {}
         items = {
             key: value for (key, value) in self.options.items() if "default" in value
         }
         for key, value in items.items():
-            self.__defaults[key] = value["default"]
+            self._defaults[key] = value["default"]
 
     def compile_config_flow(self, step: int, valid_for=None) -> Dict:
         """Generate configuration options relevant for current step and frequency."""
@@ -65,10 +65,10 @@ class config_singularity:
             )
         }
         for key, value in items.items():
-            if key in self.__defaults:
+            if key in self._defaults:
                 result[
                     value["method"](
-                        key, description={"suggested_value": self.__defaults[key]}
+                        key, description={"suggested_value": self._defaults[key]}
                     )
                 ] = value["type"]
             else:
@@ -108,4 +108,4 @@ class config_singularity:
             if data[key] is not None and (
                 type(data[key]) not in [list, dict] or len(data[key]) != 0
             ):
-                self.__defaults[key] = data[key]
+                self._defaults[key] = data[key]

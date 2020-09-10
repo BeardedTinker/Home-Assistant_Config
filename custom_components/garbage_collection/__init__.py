@@ -136,7 +136,7 @@ async def update_listener(hass, entry):
     """Update listener."""
     # The OptionsFlow saves data to options.
     # Move them back to data and clean options (dirty, but not sure how else to do that)
-    if entry.options != {}:
+    if len(entry.options) > 0:
         entry.data = entry.options
         entry.options = {}
     await hass.config_entries.async_forward_entry_unload(entry, SENSOR_PLATFORM)
