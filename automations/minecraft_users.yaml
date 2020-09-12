@@ -1,0 +1,34 @@
+#####
+# Notify Luka when someone is on Minecraft server
+# 
+#####
+
+alias: Minecrft server 
+id: 86034f45-36b5-44c7-b34f-980680eca9c4
+
+trigger:
+  entity_id: sensor.minecraft_server_players_online
+  platform: state
+
+condition:
+  condition: not
+  conditions:
+    - condition: state
+      entity_id: sensor.minecraft_server_players_online
+      state: '0'
+
+action:
+- service: script.notify_engine
+  data_template:
+    who: 'luka'
+    title: 'Someone is playing minecraft'
+    value1: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) is/are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
+    tag_id: 'information'  
+- data_template:
+    entity_id: media_player.whatever_me
+    volume_level: 0.3
+  service: media_player.volume_set
+- data_template:
+    entity_id: media_player.whatever_me
+    message: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
+  service: tts.google_say
