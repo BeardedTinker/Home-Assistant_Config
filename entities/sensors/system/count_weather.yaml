@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of weather integrations 
+#
+#####
+
+platform: template
+sensors:
+  weather_count:
+    friendly_name: 'Number of Weather'
+    entity_id: []
+    value_template: >-
+      {{ states.weather | list | count }}

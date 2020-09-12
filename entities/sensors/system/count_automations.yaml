@@ -9,4 +9,4 @@ sensors:
     friendly_name: 'Number of Automations'
     entity_id: []
     value_template: >-
-      {{ states.automation| list | count }}
+      {{ states.automation | list | count }}

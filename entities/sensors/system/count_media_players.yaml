@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of media players
+#
+#####
+
+platform: template
+sensors:
+  media_player_count:
+    friendly_name: 'Number of Media Players'
+    entity_id: []
+    value_template: >-
+      {{ states.media_player | list | count }}

@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of groups
+#
+#####
+
+platform: template
+sensors:
+  groups_count:
+    friendly_name: 'Number of Groups'
+    entity_id: []
+    value_template: >-
+      {{ states.group | list | count }}

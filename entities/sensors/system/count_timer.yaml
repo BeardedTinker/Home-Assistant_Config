@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of timers
+#
+#####
+
+platform: template
+sensors:
+  timer_count:
+    friendly_name: 'Number of Timers'
+    entity_id: []
+    value_template: >-
+      {{ states.timer | list | count }}
