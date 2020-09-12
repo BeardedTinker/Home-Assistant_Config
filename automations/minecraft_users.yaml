@@ -30,5 +30,5 @@ action:
   service: media_player.volume_set
 - data_template:
     entity_id: media_player.whatever_me
-    message: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
+    message: 'Currently, {{states("sensor.minecraft_server_players_online")}} players are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
   service: tts.google_say
