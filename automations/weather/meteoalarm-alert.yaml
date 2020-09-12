@@ -21,8 +21,8 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'family'
-    title: '{{state_attr(''binary_sensor.meteoalarm'', ''headline'')}}'
-    value1: '{{state_attr(''binary_sensor.meteoalarm'', ''description'')}} is effective on {{state_attr(''binary_sensor.meteoalarm'', ''effective'')}}'
+    title: '{{state_attr("binary_sensor.meteoalarm", "headline")}}'
+    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is effective on {{state_attr("binary_sensor.meteoalarm", "effective")}}'
     tag_id: 'warning'  
 - data_template:
     entity_id: 
@@ -34,5 +34,5 @@ action:
     entity_id: 
       - media_player.display_me
       - media_player.clock_me
-    message: 'Meteorological warning. {{state_attr(''binary_sensor.meteoalarm'', ''event'')}}. {{state_attr(''binary_sensor.meteoalarm'', ''description'')}}'
+    message: 'Meteorological warning. {{state_attr("binary_sensor.meteoalarm", "event")}}. {{state_attr("binary_sensor.meteoalarm", "description")}}'
   service: tts.google_say
