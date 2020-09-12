@@ -16,7 +16,7 @@ action:
   data_template:
     who: 'telegram'
     title: '*Information*'
-    value1: 'There are low batteries:  {{ states.sensor.low_batteries.state }}'
+    value1: 'There are low batteries: {{ states("sensor.low_batteries") }}'
     tag_id: 'information'  
     sticky: 'true'
     group: system

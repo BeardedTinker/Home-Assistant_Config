@@ -4,14 +4,17 @@
 
 alias: Goose Turn On Sunset
 id: e6328644-d123-44f1-944a-bc100fdc0117
+
 trigger:
   event: sunset
   offset: 00:45:00
   platform: sun
+
 condition:
   condition: state
   entity_id: binary_sensor.people_home
   state: 'on'
+  
 action:
   data:
     entity_id: light.goose_light

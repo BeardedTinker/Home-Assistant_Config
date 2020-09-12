@@ -23,7 +23,7 @@ action:
   data_template:
     who: 'luka'
     title: 'Good morning Luka'
-    value1: 'It is {{ states("sensor.time") }} - time for wake up'
+    value1: 'It is {{ states("sensor.time") }} - time to wake up'
     tag_id: 'information'  
 - data_template:
     entity_id: media_player.whatever_me

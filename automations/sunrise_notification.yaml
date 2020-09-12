@@ -14,7 +14,7 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'andrej'
-    value1: "The sun is up. Wake Up! {{ states('sensor.time') }}"
+    value1: "It is {{ states('sensor.time') }} and the sun is up. Wake Up!"
     tag_id: 'information'
 - data_template:
     entity_id: media_player.display_me

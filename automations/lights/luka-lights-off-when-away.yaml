@@ -4,12 +4,15 @@
 
 alias: Luka - light off when away
 id: 278cf614-c49f-47a3-b261-6e678c79bcf5
+
 trigger:
   platform: zone
   entity_id: person.luka
   zone: zone.home
   event: leave
+
 condition: []
+
 action:
 - data:
     entity_id:

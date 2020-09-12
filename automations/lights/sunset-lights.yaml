@@ -4,14 +4,17 @@
 
 alias: Turn on the light when the sun sets
 id: 60a5163a-4375-4586-8ca6-af403699cf3d
+
 trigger:
   event: sunset
   offset: -00:40:00
   platform: sun
+
 condition:
   condition: state
   entity_id: binary_sensor.people_home
   state: 'on'
+  
 action:
 - service: script.notify_engine
   data_template:
