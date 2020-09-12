@@ -10,7 +10,7 @@ exemptLabels:
   - security
 
 # Label to use when marking an issue as stale
-staleLabel: wontfix
+staleLabel: old-issue
 
 # Comment to post when marking an issue as stale. Set to `false` to disable
 markComment: >
@@ -23,3 +23,4 @@ closeComment: false
 
 # Limit to only `issues` or `pulls`
 only: issues
+
