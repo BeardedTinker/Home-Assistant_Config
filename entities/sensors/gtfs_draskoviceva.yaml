@@ -8,5 +8,5 @@ name: Draskoviceva
 origin: "124"
 destination: "127"
 #data: ZET
-data: ZET.zip
+data: zet.zip
 include_tomorrow: true

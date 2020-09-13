@@ -9,5 +9,5 @@ origin: 169
 #    origin: 104    
 destination: 299
 #data: ZET
-data: ZET.zip
+data: zet.zip
 include_tomorrow: true

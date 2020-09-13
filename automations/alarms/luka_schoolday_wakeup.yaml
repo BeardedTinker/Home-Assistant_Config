@@ -11,12 +11,17 @@ trigger:
   platform: time
 
 condition:
-- condition: state
-  entity_id: binary_sensor.workday_today
-  state: 'on'
-- condition: state
-  entity_id: sensor.current_week
-  state: 'Week B'
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: input_boolean.school
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.workday_today
+    state: 'on'
+  - condition: state
+    entity_id: sensor.current_week
+    state: 'Week B'
   
 action:
 - service: script.notify_engine
