@@ -1,0 +1,30 @@
+#####
+# This automation will turn input_boolean off when there is a break of some kind
+# Very crude, but should work
+#####
+
+alias: School off
+id: f8aaaec4-748e-4732-9f6a-9efecca7a0b6
+
+trigger:
+  - platform: template
+    value_template: '{{ now().date() | string == “2020-11-02” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2020-11-18” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2020-12-24” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2021-02-23” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2021-04-02” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2021-06-03” }}'
+  - platform: template
+    value_template: '{{ now().date() | string == “2021-06-18” }}'
+
+condition: []
+
+action:
+- service: input_boolean.turn_off
+  data: {}
+  entity_id: input_boolean.school
