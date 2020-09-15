@@ -38,18 +38,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         except ConnectionError as e:
             _LOGGER.info("SpaceX API: %s", e)
             raise PlatformNotReady
+        except ValueError as e:
+            _LOGGER.info("SpaceX API: %s", e)
+            raise ConfigEntryNotReady
 
         try:
             spacex_next_launch = await api.get_next_launch()
         except ConnectionError as e:
             _LOGGER.info("SpaceX API: %s", e)
             raise PlatformNotReady
+        except ValueError as e:
+            _LOGGER.info("SpaceX API: %s", e)
+            raise ConfigEntryNotReady
 
         try:
             spacex_latest_launch = await api.get_latest_launch()
         except ConnectionError as e:
             _LOGGER.info("SpaceX API: %s", e)
             raise PlatformNotReady
+        except ValueError as e:
+            _LOGGER.info("SpaceX API: %s", e)
+            raise ConfigEntryNotReady
 
         return [
             spacex_starman,
