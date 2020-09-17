@@ -19,6 +19,7 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'andrej'
+    title: "🌅 Sunrise"
     value1: "Sun setting, turning lights on."
     tag_id: 'information'
 - data:

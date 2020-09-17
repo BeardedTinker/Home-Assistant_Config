@@ -27,7 +27,7 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'luka'
-    title: 'Good morning Luka'
+    title: '⏲ Good morning Luka'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
     tag_id: 'information'  
 - data_template:

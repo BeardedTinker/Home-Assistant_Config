@@ -12,7 +12,7 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'telegram'
-    title: '*Information*'    
+    title: '*⚡ Energy Usage*'    
     value1: "Today's energy use was {{ states('sensor.daily_energy_total') }} kWh."
     tag_id: 'information'
 - service: notify.energy_log

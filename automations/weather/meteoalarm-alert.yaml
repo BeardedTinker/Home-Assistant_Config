@@ -21,7 +21,7 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'family'
-    title: '{{state_attr("binary_sensor.meteoalarm", "headline")}}'
+    title: '💨 {{state_attr("binary_sensor.meteoalarm", "headline")}}'
     value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is effective on {{state_attr("binary_sensor.meteoalarm", "effective")}}'
     tag_id: 'warning'  
 - data_template:
