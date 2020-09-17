@@ -5,5 +5,4 @@
 
 school:
   name: School ongoing
-  initial: false
   icon: mdi:school
