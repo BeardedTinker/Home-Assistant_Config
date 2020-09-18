@@ -18,14 +18,15 @@ action:
 - data:
     entity_id: 
       - light.living_room_lights
-    brightness: 64
+    transition: 60
+    brightness: 48
   service: light.turn_on
 - data:
     entity_id:
       - light.kitchen_lights
       - light.ceiling_lights
       - light.dining_room_lights
-    transition: 60
+    transition: 90
   service: light.turn_off
 - data:
     message: Almost Midnight!

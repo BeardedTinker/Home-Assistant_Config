@@ -19,7 +19,7 @@ action:
 - service: script.midnightlightsoffspeech  
 - data:
     entity_id: all
-    transition: 30
+    transition: 60
   service: light.turn_off
 - data:
     message: Midnight, lights out!
