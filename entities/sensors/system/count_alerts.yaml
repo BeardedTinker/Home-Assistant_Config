@@ -7,6 +7,5 @@ platform: template
 sensors:
   alert_count:
     friendly_name: 'Number of Alerts'
-    entity_id: []
     value_template: >-
       {{ states.alert | list | count }}

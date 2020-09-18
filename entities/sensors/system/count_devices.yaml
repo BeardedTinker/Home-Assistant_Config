@@ -7,6 +7,5 @@ platform: template
 sensors:
   devices_count:
     friendly_name: 'Number of Device trackers'
-    entity_id: []
     value_template: >
       {{ states.device_tracker | list | count }}

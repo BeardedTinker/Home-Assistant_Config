@@ -7,6 +7,5 @@ platform: template
 sensors:
   person_count:
     friendly_name: 'Number of Persons'
-    entity_id: []
     value_template: >-
       {{ states.person | list | count }}

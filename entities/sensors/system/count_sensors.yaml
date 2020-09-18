@@ -7,6 +7,5 @@ platform: template
 sensors:
   sensor_count:
     friendly_name: 'Number of Sensors'
-    entity_id: []
     value_template: >-
       {{ states.sensor | list | count }}
