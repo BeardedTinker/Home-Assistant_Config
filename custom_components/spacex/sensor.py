@@ -386,10 +386,12 @@ class SpaceXSensor(Entity):
         elif self._kind == "spacex_starman_speed":
             self._state = int(starman_data["speed_kph"])
             self._unit_of_measure = SPEED_KILOMETERS_PER_HOUR
+            self.attrs["machspeed"] = float(starman_data["speed_kph"]) / 1235
 
         elif self._kind == "spacex_starman_distance":
             self._state = int(starman_data["earth_distance_km"])
             self._unit_of_measure = LENGTH_KILOMETERS
+            self.attrs["au_distance"] = float(starman_data["earth_distance_km"]) / (1.496 * (10**8))
 
     async def async_added_to_hass(self):
         """Subscribe to updates."""
