@@ -16,11 +16,17 @@ condition:
   - condition: template
     value_template: '{{ states("sensor.latest_version") == states("sensor._current_version") }}'
 action:
-- service: notify.mobile_app_eml_l29
+- service: script.notify_engine
   data:
-    message: clear_notification
-    data:
-      tag: update_ha
+    who: 'andrej'
+    value1: clear_notification
+    tag_id: 'update_ha'
+    group: ha_status
+#- service: notify.mobile_app_eml_l29
+#  data:
+#    message: clear_notification
+#    data:
+#      tag: update_ha
 - service: persistent_notification.dismiss
   data:
     notification_id: update_ha

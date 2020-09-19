@@ -12,8 +12,12 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'andrej'
-    value1: "Home Assistant started at {{ states('sensor.time') }}"
-    tag_id: 'information'  
+    title: 'HA started'
+    value1: 'Home Assistant started at {{ states("sensor.time") }}'
+    tag_id: 'system'  
+    sticky: 'false'
+    group: ha_status
+    color: '#ff0000'
 - data:
     entity_id: media_player.display_me
     volume_level: 0.3

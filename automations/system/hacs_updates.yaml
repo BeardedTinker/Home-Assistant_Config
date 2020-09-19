@@ -19,17 +19,17 @@ action:
 - service: script.notify_engine
   data_template:
     who: 'andrej'
-    title: HACS Update
+    title: 'HACS Update'
     value1: 'HACS Update(s) at {{ states("sensor.time") }}'
     value2: '{{state_attr("sensor.hacs","repositories")}}'
     value3: 'There is {{ states.sensor.hacs.state }} update.'
-    tag_id: 'system'
+    tag_id: 'update_hacs'
     sticky: 'true'
-    group: updates
-    color: '#ff8c00'
+    group: ha_status
+    color: '#ff8c0'
 
 - service: rest_command.github_issue_comment
   data_template:
-    status: "open"
+    status: 'open'
     issue_number: 16
     message: 'HACS Update(s) at {{ states("sensor.time") }}. \n {{state_attr("sensor.hacs","repositories")}}. \n There is {{ states.sensor.hacs.state }} update.'

@@ -1,0 +1,10 @@
+#####
+# Notification group "Andrej & Discord"
+# Andrej + Discord
+#####
+
+platform: group
+name: andrej_discord
+services:
+  - service: mobile_app_eml_l29
+  - service: discord_bot
