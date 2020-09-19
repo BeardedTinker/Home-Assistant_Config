@@ -13,7 +13,7 @@ trigger:
 condition: []
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'discord'
     title: 'Travis failed!'
     value1: 'At {{ states("sensor.beardedtinker_home_assistant_config_last_build_finished_at") }} after {{states("sensor.beardedtinker_home_assistant_config_last_build_duration")}} seconds, while building {{ states("sensor.beardedtinker_home_assistant_config_last_build_id") }} '

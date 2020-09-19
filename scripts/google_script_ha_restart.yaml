@@ -11,7 +11,7 @@ googlescriptharestart:
   - delay: 00:00:01
   - service: tts.google_say
     entity_id: media_player.display_me
-    data_template:
+    data:
       message: >
        {{ [
        "Home Assistant is restarting. Hold on.", 

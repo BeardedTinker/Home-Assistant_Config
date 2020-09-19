@@ -14,7 +14,7 @@ trigger:
 condition: []
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'parents'
     title: "♨ HEATING WARNING!"
     value1: "Living Room Heating ON for > 60 minutes"

@@ -6,7 +6,7 @@ radio:
   alias: Play Radio on Chromecast Audio
   sequence:
   - service: media_player.volume_set
-    data_template:
+    data:
       entity_id: >
         {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
         {% elif is_state("input_select.chromecast_radio", "Bedroom") %} media_player.loft_tv
@@ -15,7 +15,7 @@ radio:
         {% endif %}
       volume_level: '{{  states.input_number.volume_radio.state  }}' 
   - service: media_player.play_media
-    data_template:
+    data:
       entity_id: >
         {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
         {% elif is_state("input_select.chromecast_radio", "Bedroom") %} media_player.loft_tv

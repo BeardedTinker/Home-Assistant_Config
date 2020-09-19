@@ -19,16 +19,16 @@ condition:
 
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'luka'
     title: '🎮Someone is playing minecraft'
     value1: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) is/are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
     tag_id: 'information'  
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     volume_level: 0.3
   service: media_player.volume_set
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     message: 'Currently, {{states("sensor.minecraft_server_players_online")}} players are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
   service: tts.google_say

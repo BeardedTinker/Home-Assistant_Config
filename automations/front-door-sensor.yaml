@@ -13,11 +13,11 @@ trigger:
 condition: []
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'parents'
     value1: "Front door is open!"
     tag_id: 'warning'
-- data_template:
+- data:
     entity_id: media_player.display_me
     volume_level: 0.5
   service: media_player.volume_set

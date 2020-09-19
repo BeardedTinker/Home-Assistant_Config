@@ -11,7 +11,7 @@ trigger:
     data: /stop
 action:
 - service: notify.ebroz_bot
-  data_template:
+  data:
     message: '*Control Panel*'
     data:
       inline_keyboard:

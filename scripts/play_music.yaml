@@ -2,7 +2,7 @@
 playmusic:
   sequence:
   - service: media_player.play_media
-    data_template:
+    data:
       entity_id: '{{ "media_player." + states("input_select.choose_player") }}'
       media_content_id: '{{ states("input_select.choose_music") }}'
       media_content_type: 'AMAZON_MUSIC'

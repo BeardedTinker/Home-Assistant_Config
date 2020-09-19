@@ -11,10 +11,10 @@ trigger:
   platform: event
 action:
 - service: telegram_bot.answer_callback_query
-  data_template:
+  data:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: What you want to do with Lights?
-- data_template:
+- data:
     inline_keyboard:
     - ALL ON:/lighton, Living ON:/living_on, Dining ON:/dining_on
     - ALL OFF:/lightoff, Living OFF :/living_off, dining OFF:/dining_off

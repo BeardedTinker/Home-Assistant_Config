@@ -19,18 +19,18 @@ condition:
 
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     title: '💨 {{state_attr("binary_sensor.meteoalarm", "headline")}}'
     value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is effective on {{state_attr("binary_sensor.meteoalarm", "effective")}}'
     tag_id: 'warning'  
-- data_template:
+- data:
     entity_id: 
       - media_player.display_me
       - media_player.clock.me
     volume_level: 0.5
   service: media_player.volume_set
-- data_template:
+- data:
     entity_id: 
       - media_player.display_me
       - media_player.clock_me

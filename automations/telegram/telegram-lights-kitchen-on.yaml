@@ -11,7 +11,7 @@ trigger:
     data: /kitchen_on
 action:
 - service: telegram_bot.answer_callback_query
-  data_template:
+  data:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Kitchen Lights ON
 - service: light.turn_on

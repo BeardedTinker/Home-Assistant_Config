@@ -10,7 +10,7 @@ trigger:
   platform: homeassistant
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'andrej'
     title: 'HA started'
     value1: 'Home Assistant started at {{ states("sensor.time") }}'

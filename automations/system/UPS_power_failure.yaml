@@ -12,7 +12,7 @@ trigger:
 condition: []
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     value1: "Power Failure! UPS running!"
     tag_id: 'emergency'

@@ -17,7 +17,7 @@ condition:
   
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'andrej'
     title: "🌅 Sunrise"
     value1: "Sun setting, turning lights on."

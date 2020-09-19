@@ -10,7 +10,7 @@ almostmidnightspeech:
   - delay: 00:00:01    
   - service: tts.google_say
     entity_id: media_player.display_me
-    data_template:
+    data:
       message: >
         {{ [
         "23:30 get ready for bed!", 

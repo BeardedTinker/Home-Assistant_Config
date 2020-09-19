@@ -18,11 +18,11 @@ condition:
   
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'parents'
     value1: "Living room motion and none at home!"
     tag_id: 'emergency'  
-- data_template:
+- data:
     entity_id: media_player.display_me
     volume_level: 0.7
   service: media_player.volume_set

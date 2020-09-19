@@ -15,11 +15,11 @@ condition:
   state: 'off'
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     value1: "Motion in apartment! No family member is home"
     tag_id: 'emergency'  
-- data_template:
+- data:
     entity_id: media_player.display_me
     volume_level: 0.7
   service: media_player.volume_set

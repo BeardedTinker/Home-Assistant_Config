@@ -18,7 +18,7 @@ condition:
 
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'parents'
     title: '♻ Garbage day'
     value1: 'Take out plastic for recycling.'

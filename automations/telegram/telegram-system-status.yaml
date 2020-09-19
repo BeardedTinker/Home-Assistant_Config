@@ -11,11 +11,11 @@ trigger:
   platform: event
 action:
 - service: telegram_bot.answer_callback_query
-  data_template:
+  data:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: System Status
 - service: notify.ebroz_bot
-  data_template:
+  data:
     message: >- 
       {{ "\U0001F4BB" }} *System*:
       

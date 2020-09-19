@@ -13,7 +13,7 @@ trigger:
 condition: []
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     value1: "Power restored, battery charging, restoring boolean to off!"
     tag_id: 'emergency'

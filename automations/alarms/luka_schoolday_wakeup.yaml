@@ -25,16 +25,16 @@ condition:
   
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'luka'
     title: '⏲ Good morning Luka'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
     tag_id: 'information'  
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     volume_level: 0.3
   service: media_player.volume_set
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     message: 'Good morning Luka. It is {{ states("sensor.time") }} and time for you to wake up. '
   service: tts.google_say
@@ -43,11 +43,11 @@ action:
     brightness: 64
   service: light.turn_on
 - delay: '00:00:10'
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     volume_level: 0.1
   service: media_player.volume_set
-- data_template:
+- data:
     entity_id: media_player.whatever_me
     media_content_id: 'http://proxima.shoutca.st:8357/stream'
     media_content_type: audio/mp4

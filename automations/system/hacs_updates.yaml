@@ -17,7 +17,7 @@ condition:
   
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'andrej'
     title: 'HACS Update'
     value1: 'HACS Update(s) at {{ states("sensor.time") }}'
@@ -29,7 +29,7 @@ action:
     color: '#ff8c0'
 
 - service: rest_command.github_issue_comment
-  data_template:
+  data:
     status: 'open'
     issue_number: 16
     message: 'HACS Update(s) at {{ states("sensor.time") }}. \n {{state_attr("sensor.hacs","repositories")}}. \n There is {{ states.sensor.hacs.state }} update.'

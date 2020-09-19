@@ -14,7 +14,7 @@ schoolnightzitabedtime:
   - delay: 00:00:01    
   - service: tts.google_say_hr
     entity_id: media_player.display_me
-    data_template:
+    data:
 #      language: "hr"
       message: >
 

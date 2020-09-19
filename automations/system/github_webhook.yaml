@@ -14,7 +14,7 @@ condition:
         {%- endif -%}
 action:
   - service: notify.discord_bot
-    data_template:
+    data:
       target: !secret discord_github_id
       message: >-
         {%- if trigger.json.pull_request -%}

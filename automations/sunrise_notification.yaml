@@ -12,12 +12,12 @@ trigger:
   offset: '+00:00:00'
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'andrej'
     title: "🌅 Sunrise"
     value1: "It is {{ states('sensor.time') }} and the sun is up. Wake Up!"
     tag_id: 'information'
-- data_template:
+- data:
     entity_id: media_player.display_me
     volume_level: 0.2
   service: media_player.volume_set

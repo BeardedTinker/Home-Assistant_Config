@@ -16,7 +16,7 @@ condition:
 
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     title: '☢ Radiation Level Alert!'
     value1: 'Radiation is currently {{ states("sensor.geiger_counter_2") }} CPM. Normal value is below 0.5'
@@ -24,13 +24,13 @@ action:
     sticky: 'true'
     group: weather
     color: '#ff0000'
-- data_template:
+- data:
     entity_id: 
       - media_player.display_me
       - media_player.clock_me
     volume_level: 0.5
   service: media_player.volume_set
-- data_template:
+- data:
     entity_id: 
       - media_player.display_me
       - media_player.clock_me

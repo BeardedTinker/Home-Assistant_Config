@@ -11,7 +11,7 @@ midnightlightsoffspeech:
   - delay: 00:00:02    
   - service: tts.google_say
     entity_id: media_player.display_me
-    data_template:
+    data:
       message: >
        {{ [
        "Lights out, nighty night!", 

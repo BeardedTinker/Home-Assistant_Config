@@ -11,7 +11,7 @@ trigger:
       data: '/ping'
 action:
   - service: telegram_bot.answer_callback_query
-    data_template:
+    data:
       callback_query_id: '{{ trigger.event.data.id }}'
       message: >-
         Callback received from {{ trigger.event.data.from_first }}.

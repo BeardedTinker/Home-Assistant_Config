@@ -14,7 +14,7 @@ condition:
   state: 'on'
 action:
 - service: script.notify_engine
-  data_template:
+  data:
     who: 'family'
     value1: "HA restaring after power failure - please check the lights!"
     tag_id: 'emergency'

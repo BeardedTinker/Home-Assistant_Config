@@ -28,7 +28,7 @@ notify_engine:
             {% else %}
             notify.ebroz_bot
           {% endif %}
-      data_template:
+      data:
         title: "{{ title }}"
         message: "{{ value1 }} {{ value2 }} {{ value3 }}"
         target: "{{ target_id }}"
