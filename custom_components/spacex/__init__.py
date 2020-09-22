@@ -21,57 +21,32 @@ PLATFORMS = ["binary_sensor", "sensor"]
 
 async def async_setup(hass: HomeAssistant, config: dict):
     """Set up the SpaceX component."""
+    hass.data.setdefault(DOMAIN, {})
+
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up SpaceX from a config entry."""
-    polling_interval = 5
+    polling_interval = 25
     api = SpaceX()
 
-    async def async_update_data():
-        """Fetch data from API endpoint."""
-        _LOGGER.debug("Updating the coordinator data.")
+    try:
+        await api.get_next_launch()
+    except ConnectionError as error:
+        _LOGGER.debug("SpaceX API Error: %s", error)
+        return False
+        raise ConfigEntryNotReady from error
+    except ValueError as error:
+        _LOGGER.debug("SpaceX API Error: %s", error)
+        return False
+        raise ConfigEntryNotReady from error
 
-        try:
-            spacex_starman = await api.get_roadster_status()
-        except ConnectionError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise PlatformNotReady
-        except ValueError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise ConfigEntryNotReady
-
-        try:
-            spacex_next_launch = await api.get_next_launch()
-        except ConnectionError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise PlatformNotReady
-        except ValueError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise ConfigEntryNotReady
-
-        try:
-            spacex_latest_launch = await api.get_latest_launch()
-        except ConnectionError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise PlatformNotReady
-        except ValueError as e:
-            _LOGGER.info("SpaceX API: %s", e)
-            raise ConfigEntryNotReady
-
-        return [
-            spacex_starman,
-            spacex_next_launch,
-            spacex_latest_launch,
-        ]
-
-    coordinator = DataUpdateCoordinator(
+    coordinator = SpaceXUpdateCoordinator(
         hass,
-        _LOGGER,
+        api=api,
         name="SpaceX",
-        update_method=async_update_data,
-        update_interval=timedelta(seconds=polling_interval),
+        polling_interval=polling_interval,
     )
 
     await coordinator.async_refresh()
@@ -79,7 +54,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {COORDINATOR: coordinator, SPACEX_API: api}
 
     for component in PLATFORMS:
@@ -105,3 +79,44 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+class SpaceXUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching update data from the SpaceX endpoint."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        api: str,
+        name: str,
+        polling_interval: int,
+    ):
+        """Initialize the global SpaceX data updater."""
+        self.api = api
+
+        super().__init__(
+            hass = hass,
+            logger = _LOGGER,
+            name = name,
+            update_interval = timedelta(seconds=polling_interval),
+        )
+
+    async def _async_update_data(self):
+        """Fetch data from SpaceX."""
+        try:
+            _LOGGER.debug("Updating the coordinator data.")
+            spacex_starman = await self.api.get_roadster_status()
+            spacex_next_launch = await self.api.get_next_launch()
+            spacex_latest_launch = await self.api.get_latest_launch()
+        except ConnectionError as error:
+            _LOGGER.info("SpaceX API: %s", error)
+            raise PlatformNotReady from error
+        except ValueError as error:
+            _LOGGER.info("SpaceX API: %s", error)
+            raise ConfigEntryNotReady from error
+
+        return [
+            spacex_starman,
+            spacex_next_launch,
+            spacex_latest_launch,
+        ]
+
