@@ -17,6 +17,10 @@ action:
     title: '*⚡ Energy Usage*'    
     value1: "Today's energy use was {{ states('sensor.daily_energy_total') }} kWh."
     tag_id: 'information'
+    sticky: 'true'
+    group: system
+    color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
 - service: notify.energy_log
   data:
     message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ state_attr('sensor.power_stats','min_value') }},{{ state_attr('sensor.power_stats','max_value') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }}"

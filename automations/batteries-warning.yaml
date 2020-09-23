@@ -20,3 +20,4 @@ action:
     sticky: 'true'
     group: system
     color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
