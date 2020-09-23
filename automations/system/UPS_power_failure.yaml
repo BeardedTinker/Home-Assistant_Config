@@ -19,6 +19,7 @@ action:
     who: 'family'
     value1: "Power Failure! UPS running!"
     tag_id: 'emergency'
+    target_id: !secret telegram_bot_chat_id
 - service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.ups_on_batteries

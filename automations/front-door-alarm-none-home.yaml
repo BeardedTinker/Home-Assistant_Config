@@ -19,6 +19,7 @@ action:
     who: 'family'
     value1: "Motion in apartment! No family member is home"
     tag_id: 'emergency'  
+    target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me
     volume_level: 0.7

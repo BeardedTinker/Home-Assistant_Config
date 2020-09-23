@@ -22,6 +22,7 @@ action:
     who: 'parents'
     value1: "Living room motion and none at home!"
     tag_id: 'emergency'  
+    target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me
     volume_level: 0.7

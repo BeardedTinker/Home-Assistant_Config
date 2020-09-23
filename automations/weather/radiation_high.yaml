@@ -24,6 +24,7 @@ action:
     sticky: 'true'
     group: weather
     color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: 
       - media_player.display_me

@@ -24,6 +24,7 @@ action:
     title: '💨 {{state_attr("binary_sensor.meteoalarm", "headline")}}'
     value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is effective on {{state_attr("binary_sensor.meteoalarm", "effective")}}'
     tag_id: 'warning'  
+    target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: 
       - media_player.display_me

@@ -31,3 +31,4 @@ action:
       sticky: 'true'
       group: weather
       color: '#ff8c00'
+      target_id: !secret telegram_bot_chat_id

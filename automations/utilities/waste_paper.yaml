@@ -24,3 +24,4 @@ action:
     value1: 'Take out paper for recycling.'
     tag_id: 'information' 
     sticky: 'true'
+    target_id: !secret telegram_bot_chat_id
