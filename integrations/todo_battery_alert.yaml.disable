@@ -548,7 +548,7 @@ automation:
       value_template: *low_battery_check
     - condition: template
       value_template: "{{ states.input_select.notifier_format.state == 'Default' }}"
-    - service_template: >
+    - service:: >
         {% if "notify." in states.input_text.notifier_name.state %}
           {{ states.input_text.notifier_name.state }}
         {% else %}
@@ -574,7 +574,7 @@ automation:
       value_template: *low_battery_check
     - condition: template
       value_template: "{{ states.input_select.notifier_format.state == 'Slack' }}"
-    - service_template: >
+    - service:: >
         {% if states.input_text.notifier_name.state != "" %}
           {{ states.input_text.notifier_name.state }}
         {% else %}

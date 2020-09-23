@@ -5,12 +5,15 @@
 
 alias: UPS Power restored battery charging
 id: 108f3bf9-4d86-4a79-8909-a15309775d94
+
 trigger:
   entity_id: sensor.ups_status
   platform: state
   from: On Battery Battery Discharging
   to: Online Battery Charging
+
 condition: []
+
 action:
 - service: script.notify_engine
   data:

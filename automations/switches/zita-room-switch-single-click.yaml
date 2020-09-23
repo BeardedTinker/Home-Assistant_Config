@@ -4,12 +4,14 @@
 
 alias: Zita switch single
 id: 8473cd9c-783f-424d-9133-295d9d3f7964
-description: ''
+
 trigger:
   entity_id: sensor.zita_switch_click
   platform: state
   to: single
+
 condition: []
+
 action:
   data:
     entity_id: light.zita_ceiling_light

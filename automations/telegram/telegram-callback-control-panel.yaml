@@ -4,7 +4,7 @@
 
 alias: Telegram Control Pannel Command
 id: 36db8046-1efd-48f3-a303-ddbefce0b59f
-initial_state: true
+
 trigger:
   event_data:
     data: /cp

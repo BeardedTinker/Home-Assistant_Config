@@ -5,10 +5,11 @@
 
 alias: 'Set energy to Sunset/night'
 id: 6466fff5-3eaa-4966-a693-5454b4507b73
-initial_state: true
+
 trigger:
   platform: sun
   event: sunset
+  
 action:
 - service: utility_meter.select_tariff ###### Tariff change to night
   data:

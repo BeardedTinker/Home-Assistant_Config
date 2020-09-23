@@ -4,12 +4,15 @@
 
 alias: Cube Dining Room
 id: d9e4917e-d0cc-4b35-b497-478d76137af5
+
 trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube
+
 condition:
   condition: template
   value_template: '{{ ''flip180'' == trigger.payload_json.action }}'
+  
 action:
   data:
     entity_id: light.dining_room_lights

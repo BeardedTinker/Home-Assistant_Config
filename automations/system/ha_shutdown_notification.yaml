@@ -1,19 +1,20 @@
 #####
-# Sends notifications that HA nas started
+# Sends notifications that HA nas shutsdown
 #####
 
-alias: Home Assistant Start - Notify
-id: d2d8775b-e666-4fb4-976d-02b4d9c5a396
-initial_state: true
+alias: Home Assistant Shutdown - Notify
+id: 2a93d8c4-5ad7-4bf3-842c-2b0940efe4a2
+
 trigger:
-  event: start
+  event: shutdown
   platform: homeassistant
+  
 action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: 'HA started'
-    value1: 'Home Assistant started at {{ states("sensor.time") }}'
+    title: 'HA shutdown'
+    value1: 'Home Assistant shutting down at {{ states("sensor.time") }}'
     tag_id: 'system'  
     sticky: 'false'
     group: ha_status
@@ -23,4 +24,4 @@ action:
     volume_level: 0.3
   service: media_player.volume_set
 - delay: 00:00:01
-- service: script.googlescripthastart
+- service: script.googlescriptharestart

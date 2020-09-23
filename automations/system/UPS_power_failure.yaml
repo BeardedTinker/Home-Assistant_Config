@@ -5,11 +5,14 @@
 
 alias: UPS Power Failure
 id: 0ce9cdb3-c997-44a8-9070-8300801ad88d
+
 trigger:
   entity_id: sensor.ups_status
   platform: state
   to: On Battery Battery Discharging
+
 condition: []
+
 action:
 - service: script.notify_engine
   data:

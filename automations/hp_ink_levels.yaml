@@ -5,7 +5,7 @@
 
 alias: 'Ink Alert'
 id: 152242fd-7e93-47ea-98cb-6084a02a9d75
-initial_state: 'on'
+
 trigger:
   - platform: numeric_state
     entity_id:

@@ -12,7 +12,7 @@ notify_engine:
         - condition: state
           entity_id: input_boolean.text_notifications
           state: 'on'
-    - service_template: >
+    - service: >
           {% if who == 'mirta' %}
             notify.mobile_app_fig_lx1
           {% elif who == 'andrej' %}

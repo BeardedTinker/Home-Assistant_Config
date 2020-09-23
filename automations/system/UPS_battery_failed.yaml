@@ -5,13 +5,16 @@
 
 alias: UPS HA restart after power fail
 id: dad6234e-003a-440d-94ad-bb3dc82f7a61
+
 trigger:
   platform: homeassistant
   event: start
+
 condition: 
   condition: state
   entity_id: input_boolean.ups_on_batteries
   state: 'on'
+  
 action:
 - service: script.notify_engine
   data:

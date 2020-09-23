@@ -4,7 +4,7 @@
 
 alias: 'Camera command'
 id: f701f488-0bff-4bf0-86c3-6b6a20d7f20b
-initial_state: true
+
 trigger:
   platform: event
   event_type: telegram_command

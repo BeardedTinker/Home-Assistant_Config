@@ -1,9 +1,12 @@
 id: '724c3e88-97c6-4193-b06f-ce468c411e92'
 alias: github webhook
+
 mode: queued
+
 trigger:
   platform: webhook
   webhook_id: !secret github_webhook
+
 condition:
     - condition: template
       value_template: >-
@@ -12,6 +15,7 @@ condition:
         {%- else -%}
           False
         {%- endif -%}
+        
 action:
   - service: notify.discord_bot
     data:

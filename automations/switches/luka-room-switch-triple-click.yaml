@@ -4,12 +4,14 @@
 
 alias: Luka switch triple
 id: d998e84e-c978-467f-a28f-d8ebc4335bd9
-description: ''
+
 trigger:
   entity_id: sensor.luka_switch_click
   platform: state
   to: triple
+
 condition: []
+
 action:
   data:
     entity_id: light.luka_ceiling_light

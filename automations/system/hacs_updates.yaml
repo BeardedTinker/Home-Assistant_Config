@@ -6,6 +6,7 @@
 alias: HACS Updates
 id: dc99162c-4e54-47e8-b8c8-3b9396d4ac36
 mode: single
+
 trigger:
   - platform: state
     entity_id: sensor.hacs
@@ -27,7 +28,6 @@ action:
     sticky: 'true'
     group: ha_status
     color: '#ff8c0'
-
 - service: rest_command.github_issue_comment
   data:
     status: 'open'

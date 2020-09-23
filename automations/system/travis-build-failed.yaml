@@ -6,11 +6,14 @@
 alias: Travis build failed
 id: ab612ffe-5607-463a-ad84-2ba70cc49c79
 description: 'Triggered when Travis-CI failes'
+
 trigger:
 - entity_id: sensor.beardedtinker_home_assistant_config_last_build_state
   platform: state
   to: errored
+
 condition: []
+
 action:
 - service: script.notify_engine
   data:

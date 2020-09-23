@@ -4,7 +4,6 @@
 
 alias: Living room timer fished
 id: a1c9f691-a305-43d4-92f9-b5ea2b603597
-description: ''
 
 trigger:
 - event_type: timer.finished

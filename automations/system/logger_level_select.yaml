@@ -5,11 +5,13 @@
 
 alias: Logger Level
 id: cc623f27-2f06-4e1b-ac66-6c14924bd964
+
 trigger:
   platform: state
   entity_id:
     - input_select.logger_level
 #    - input_select.logger_component
+
 action:
   - service: logger.set_level
     data:

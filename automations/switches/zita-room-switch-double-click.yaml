@@ -4,12 +4,14 @@
 
 alias: Zita switch double
 id: 116ab2cb-cb89-49c5-9a49-17e6f821647d
-description: ''
+
 trigger:
   entity_id: sensor.zita_switch_click
   platform: state
   to: double
+
 condition: []
+
 action:
   data:
     entity_id: light.goose_light

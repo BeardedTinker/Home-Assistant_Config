@@ -2,7 +2,6 @@
 # Send state of the battery to Telegram/notify
 #####
 
-initial_state: true
 alias: Low battery notification
 id: 405c1997-e24b-4c74-99b9-3cd29bb4b797
 trigger:

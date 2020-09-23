@@ -4,17 +4,19 @@
 
 alias: Peak and Offpeak tariffs
 id: bbbc9885-74b9-4895-9fca-0ce2c3879bf0
+
 trigger:
-  - platform: time
-    at: '08:00:00'
-  - platform: time
-    at: '22:00:00'
+- platform: time
+  at: '08:00:00'
+- platform: time
+  at: '22:00:00'
+
 action:
-  - service: utility_meter.next_tariff
-    entity_id: utility_meter.daily_energy
-  - service: utility_meter.next_tariff
-    entity_id: utility_meter.monthly_energy
-  - service: utility_meter.next_tariff
-    entity_id: utility_meter.quarterly_energy
-  - service: utility_meter.next_tariff
-    entity_id: utility_meter.yearly_energy
+- service: utility_meter.next_tariff
+  entity_id: utility_meter.daily_energy
+- service: utility_meter.next_tariff
+  entity_id: utility_meter.monthly_energy
+- service: utility_meter.next_tariff
+  entity_id: utility_meter.quarterly_energy
+- service: utility_meter.next_tariff
+  entity_id: utility_meter.yearly_energy

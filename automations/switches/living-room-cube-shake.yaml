@@ -4,12 +4,15 @@
 
 alias: Cube Bar light
 id: d1b0550d-666a-4b0b-9d17-ea3da43084fb
+
 trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube
+
 condition:
   condition: template
   value_template: '{{ ''shake'' == trigger.payload_json.action }}'
+  
 action:
   data:
     entity_id: light.bar_light

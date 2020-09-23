@@ -5,12 +5,15 @@
 
 alias: UPS Power restored battery full
 id: 6e6acb81-0fb3-4aec-bb37-8df8c788e527
+
 trigger:
   entity_id: sensor.ups_status
   platform: state
   from: Online Battery Charging
   to: Online
+
 condition: []
+
 action:
 - service: script.notify_engine
   data:
