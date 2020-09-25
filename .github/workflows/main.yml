@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v1
       - name: Running YAMLlint
         uses: "docker://pipelinecomponents/yamllint:latest"
+        continue-on-error: true
         with:
           args: yamllint .
   remarklint:
