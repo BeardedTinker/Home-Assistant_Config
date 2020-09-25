@@ -21,9 +21,12 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '💨 {{state_attr("binary_sensor.meteoalarm", "headline")}}'
-    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is effective on {{state_attr("binary_sensor.meteoalarm", "effective")}}'
+    title: '💨 {{state_attr("binary_sensor.meteoalarm", "event")}}'
+    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is valid from {{state_attr("binary_sensor.meteoalarm", "onset")}}'
     tag_id: 'warning'  
+    sticky: 'true'
+    group: weather
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: 
