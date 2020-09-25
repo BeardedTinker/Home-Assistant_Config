@@ -19,6 +19,7 @@ jobs:
         continue-on-error: true
         with:
           args: yamllint .
+          config_file: .github/yamllint-config.yml
   remarklint:
     runs-on: ubuntu-18.04
     steps:
