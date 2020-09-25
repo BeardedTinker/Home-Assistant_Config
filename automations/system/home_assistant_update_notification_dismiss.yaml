@@ -16,7 +16,7 @@ trigger:
 
 condition:
   - condition: template
-    value_template: '{{ states("sensor.latest_version") == states("sensor._current_version") }}'
+    value_template: '{{ states("sensor.latest_version") == states("sensor.current_version") }}'
 
 action:
 - service: script.notify_engine
