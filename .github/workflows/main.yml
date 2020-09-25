@@ -36,7 +36,11 @@ jobs:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
       - name: Copy stub files into configuration folder
-        run: cp -R secrets_sample.yaml secrets.yaml      
+        run: |
+          cp -R secrets_sample.yaml secrets.yaml 
+          cp -R customize_sample.yaml customize.yaml
+          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml
+             
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:stable"
         with:
@@ -53,7 +57,10 @@ jobs:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
       - name: Copy stub files into configuration folder
-        run: cp -R secrets_sample.yaml secrets.yaml               
+        run: |
+          cp -R secrets_sample.yaml secrets.yaml 
+          cp -R customize_sample.yaml customize.yaml
+          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:beta"
         with:
@@ -70,7 +77,10 @@ jobs:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
       - name: Copy stub files into configuration folder
-        run: cp -R secrets_sample.yaml secrets.yaml      
+        run: |
+          cp -R secrets_sample.yaml secrets.yaml 
+          cp -R customize_sample.yaml customize.yaml
+          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml     
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:dev"
         with:
