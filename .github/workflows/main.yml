@@ -39,7 +39,7 @@ jobs:
         run: |
           cp -R secrets_sample.yaml secrets.yaml 
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml
+          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
              
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:stable"
@@ -60,7 +60,7 @@ jobs:
         run: |
           cp -R secrets_sample.yaml secrets.yaml 
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml
+          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:beta"
         with:
@@ -80,7 +80,7 @@ jobs:
         run: |
           cp -R secrets_sample.yaml secrets.yaml 
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.yaml 0d25726f0c18.yaml     
+          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:dev"
         with:
