@@ -1,0 +1,17 @@
+---
+#####
+# Used to configure yamlling so it skips some checks like too long lines and comments
+# But also some files too
+#####
+extends: default
+
+rules:
+  line-length: disable
+  comments: disable
+  comments-indentation: disable
+
+ignore: |
+  lovelace-ui.yaml
+  custom_components/
+  .git
+  .github/workflows/yaml-lint.yaml
