@@ -7,6 +7,6 @@ platform: gtfs
 name: Zvjezda
 origin: 124
 destination: 127
-#data: ZET
+# ata: ZET
 data: zet.zip
 include_tomorrow: true

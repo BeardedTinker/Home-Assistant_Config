@@ -5,22 +5,22 @@
 
 garbage_collection:
   sensors:
-  - name: "Mixed waste" # Each week on Wednesday and Saturday. 
+  - name: "Mixed waste"   # Each week on Wednesday and Saturday.
     frequency: "weekly"
     verbose_state: true
     collection_days:
     - tue
     - thu
     - sat
-  - name: "Bio-waste" # Weekly - every monday
+  - name: "Bio-waste"   # Weekly - every monday
     frequency: "weekly"
     verbose_state: true
     collection_days: "mon"
-  - name: "Plastic waste" # Every odd week Tuesday
+  - name: "Plastic waste"   # Every odd week Tuesday
     frequency: "even-weeks"
     verbose_state: true
     collection_days: "tue"
-  - name: "Paper waste" # Every even weeks on Tuesday
+  - name: "Paper waste"   # Every even weeks on Tuesday
     frequency: "odd-weeks"
     verbose_state: true
     collection_days: "tue"

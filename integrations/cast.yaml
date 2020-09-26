@@ -1,13 +1,13 @@
 ###
-# Google Cast 
+# Google Cast
 # All Google Cast devices
 # After udpate to 0.109 this stopped working for me - strange
-# Will be removed - in 0.116 depriciated 
+# Will be removed - in 0.116 depriciated
 ###
 
 cast:
   media_player:
-    - host: !secret chromecast_living_ip  
+    - host: !secret chromecast_living_ip
     - host: !secret chromecast_loft_ip
     - host: !secret google_home_mini_ip
     - host: !secret google_nest_hub_ip

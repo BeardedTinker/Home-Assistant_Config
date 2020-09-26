@@ -36,7 +36,7 @@ sensor plant:
     name: Plant_Humid_1
     state_topic: "Tgrow_HIGrow/fcf5c40cfb8c"
     value_template: "{{ value_json.humid.humid }}"
-    unit_of_measurement: '%' 
+    unit_of_measurement: '%'
     icon: mdi:water-percent
   - platform: mqtt
     name: Plant_Lux_1

@@ -1,3 +1,8 @@
+#####
+# REST for GitHub latest issue
+#
+#####
+
 platform: rest
 name: GitHub Latest Issue
 resource: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/

@@ -8,4 +8,4 @@ name: parents
 services:
   - service: mobile_app_fig_lx1
   - service: mobile_app_eml_l29
-  - service: ebroz_bot  
+  - service: ebroz_bot

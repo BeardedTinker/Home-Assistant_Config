@@ -7,7 +7,7 @@ schoolnightzitabedtime:
   sequence:
   - service: media_player.volume_set
     data:
-      entity_id: 
+      entity_id:
         - media_player.display_me
         - media_player.mini_me
         - media_player.clock_me

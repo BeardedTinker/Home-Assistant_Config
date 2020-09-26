@@ -4,5 +4,5 @@
 #####
 
 platform: telegram
-name: !secret telegram_bot_name 
+name: !secret telegram_bot_name
 chat_id: !secret telegram_bot_chat_id

@@ -1,6 +1,7 @@
 #####
 # Used to see list of upcoming media from Emby server
 #####
+
 platform: emby_upcoming_media
 api_key: !secret emby_key
 user_id: !secret emby_user_id

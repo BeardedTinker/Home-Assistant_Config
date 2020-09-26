@@ -6,8 +6,8 @@
 platform: gtfs
 name: XVI 
 origin: 169
-#    origin: 104    
+#    origin: 104
 destination: 299
-#data: ZET
+# data: ZET
 data: zet.zip
 include_tomorrow: true

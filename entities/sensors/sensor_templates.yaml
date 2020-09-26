@@ -84,7 +84,7 @@ sensors:
 #####
 # Work in progress - Daily, Monthly, Quarterly and Yearly energy usage (totals)
 # Adapting https://community.home-assistant.io/t/daily-energy-monitoring/143436
-#####   
+#####
 
   daily_energy_total:
     friendly_name: 'Daily Peak and Offpeak Total'
@@ -100,7 +100,7 @@ sensors:
 #      - sensor.monthly_energy_peak
 #      - sensor.monthly_energy_offpeak
     value_template: "{{ ((states('sensor.monthly_energy_peak')|float + states('sensor.monthly_energy_offpeak')|float) )|round(3) }}"
-    unit_of_measurement: "kWh"    
+    unit_of_measurement: "kWh"
 
 # Quarterly is not very interesting for me, but it's here
 
@@ -110,7 +110,7 @@ sensors:
 #      - sensor.quarterly_energy_peak
 #      - sensor.quarterly_energy_offpeak
     value_template: "{{ ((states('sensor.quarterly_energy_peak')|float + states('sensor.quarterly_energy_offpeak')|float) )|round(3) }}"
-    unit_of_measurement: "kWh"    
+    unit_of_measurement: "kWh"
 
   yearly_energy_total:
     friendly_name: 'Yearly Peak and Offpeak Total'
@@ -118,7 +118,7 @@ sensors:
 #      - sensor.yearly_energy_peak
 #      - sensor.yearly_energy_offpeak
     value_template: "{{ ((states('sensor.yearly_energy_peak')|float + states('sensor.yearly_energy_offpeak')|float) )|round(3) }}"
-    unit_of_measurement: "kWh"    
+    unit_of_measurement: "kWh"
 
 #####
 # Trying to calculate some basic electricity costs. This is VERY rough.

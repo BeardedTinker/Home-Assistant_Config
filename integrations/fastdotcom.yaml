@@ -1,7 +1,6 @@
 #####
 # fast.com - check Internet speed
-# 
-# https://www.home-assistant.io/integrations/fastdotcom/ 
+# https://www.home-assistant.io/integrations/fastdotcom/
 #####
 
 fastdotcom:

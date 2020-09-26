@@ -5,6 +5,6 @@
 
 logger:
   default: info
-  logs:
+#  logs:
 #    homeassistant.components.cast: debug
 #    homeassistant.components.cast.media_player: debug

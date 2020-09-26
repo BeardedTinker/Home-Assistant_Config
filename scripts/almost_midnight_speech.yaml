@@ -8,15 +8,15 @@ almostmidnightspeech:
     data:
       entity_id: media_player.display_me
       volume_level: 0.4
-  - delay: 00:00:01    
+  - delay: 00:00:01
   - service: tts.google_say
     entity_id: media_player.display_me
     data:
       message: >
         {{ [
-        "23:30 get ready for bed!", 
+        "23:30 get ready for bed!",
         "Midnight is close, let's get ready for bed",
-        "Wind down, midnight is almost here", 
+        "Wind down, midnight is almost here",
         "Get ready to go to bed. Dimming lights",
         "Hey, look at the time, it's late",
         "Did you take dog out?",

@@ -6,7 +6,7 @@
 name: Home
 latitude: !secret home_latitude
 longitude: !secret home_longitude 
-#elevation: 140
+# elevation: 140
 radius: 50
 passive: false
 icon: mdi:home

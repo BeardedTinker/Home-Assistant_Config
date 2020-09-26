@@ -1,6 +1,7 @@
 #####
 # Travis-CI
 #####
+
 platform: travisci
 api_key: !secret travis_api
 monitored_conditions:

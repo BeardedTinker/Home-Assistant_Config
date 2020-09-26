@@ -14,7 +14,7 @@ pm25_increase_speech:
     data:
       message: >
         {{ [
-        "Warning! Air quality decreasing", 
+        "Warning! Air quality decreasing",
         "Caution! Air inside is getting worse",
         "Please vent room now!",
         ] | random }}
