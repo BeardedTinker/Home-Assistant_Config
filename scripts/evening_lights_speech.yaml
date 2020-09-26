@@ -1,6 +1,7 @@
 #####
 # Notification on evening lights
 #####
+
 eveninglightsspeach:
   sequence:
   - service: media_player.volume_set
@@ -13,9 +14,9 @@ eveninglightsspeach:
     data:
       message: >
         {{ [
-        "Good evening, lights are on", 
+        "Good evening, lights are on",
         "Sun is setting! Turning lights on.",
-        "Time to evening relaxation. Lights are on", 
+        "Time to evening relaxation. Lights are on",
         "Another day has passed and evening has arrived",
         "Let there be light!",
         ] | random }}

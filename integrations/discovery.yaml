@@ -2,4 +2,5 @@
 # Discovery - automaticly configure zeroconf/mDNS and uPnP devices .
 # https://www.home-assistant.io/integrations/discovery/
 #####
+
 discovery:

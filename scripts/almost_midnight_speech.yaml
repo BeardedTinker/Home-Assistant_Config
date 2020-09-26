@@ -1,6 +1,7 @@
 ####
 # Almost midnight warning - 23:30
 ####
+
 almostmidnightspeech:
   sequence:
   - service: media_player.volume_set

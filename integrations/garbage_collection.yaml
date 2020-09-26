@@ -2,6 +2,7 @@
 # HACS integration
 # https://github.com/bruxy70/Garbage-Collection
 #####
+
 garbage_collection:
   sensors:
   - name: "Mixed waste" # Each week on Wednesday and Saturday. 
@@ -19,13 +20,7 @@ garbage_collection:
     frequency: "even-weeks"
     verbose_state: true
     collection_days: "tue"
-#    weekday_order_number: 
-#    - 1
-#    - 3
   - name: "Paper waste" # Every even weeks on Tuesday
     frequency: "odd-weeks"
     verbose_state: true
     collection_days: "tue"
-#    weekday_order_number: 
-#    - 2
-#    - 4

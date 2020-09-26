@@ -3,4 +3,5 @@
 #
 # https://www.home-assistant.io/integrations/notify/
 #####
+
 notify: !include_dir_list ../entities/notify

@@ -1,4 +1,4 @@
-  # Sets up Home Assistant.
+# Sets up Home Assistant.
 #
 # Basically, everything that doesn't have to be in the
 # main configuration.yaml.

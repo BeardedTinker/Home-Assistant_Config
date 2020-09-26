@@ -1,7 +1,9 @@
+#####
 # Logbbok - list of included/excluded entities
 # TODO: Clean this list a lot more
 # https://www.home-assistant.io/integrations/logbook/
 #####
+
 logbook:
   include:
     domains:

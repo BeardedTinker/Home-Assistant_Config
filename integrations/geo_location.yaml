@@ -1,1 +1,6 @@
+#####
+# Geolocation integration
+# https://www.home-assistant.io/integrations/geo_location/
+#####
+
 geo_location: !include_dir_list ../entities/geo_location

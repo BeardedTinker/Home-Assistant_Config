@@ -1,8 +1,10 @@
+#####
 # The history component will track everything that is going on within
 # Home Assistant and allows the user to browse through it.
 #
 # https://www.home-assistant.io/components/history/
-#
+#####
+
 history:
 #use_include_order: True
 #  include:

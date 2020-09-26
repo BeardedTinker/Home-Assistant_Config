@@ -4,6 +4,7 @@
 # After udpate to 0.109 this stopped working for me - strange
 # Will be removed - in 0.116 depriciated 
 ###
+
 cast:
   media_player:
     - host: !secret chromecast_living_ip  

@@ -2,6 +2,7 @@
 # Grafana panel
 # was a bit hard to setup - using https/ssl certificate
 #####
+
 grafana:
   title: 'Grafana'
   icon: 'mdi:chart-areaspline'

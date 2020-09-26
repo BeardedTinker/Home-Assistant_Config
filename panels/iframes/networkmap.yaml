@@ -2,6 +2,7 @@
 # Zigbee map
 # Mostly using Zigbee2MQTT Assistant lately, but still here
 #####
+
 networkmap:
   title: 'Zigbee Map'
   url: '/local/community/zigbee2mqtt_networkmap/map.html'

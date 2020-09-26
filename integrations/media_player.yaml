@@ -1,7 +1,7 @@
+#####
 # This loads up my media player configurations
 #
 # https://www.home-assistant.io/integrations/media_player/
+#####
 
-# Disabled since 0.104 changed how LG TV webOS integration works
-# media_player: !include_dir_list ../entities/media_players
 media_player: !include_dir_merge_named ../entities/media_players

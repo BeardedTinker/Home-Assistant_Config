@@ -3,6 +3,7 @@
 #
 # https://www.home-assistant.io/integrations/influxdb/ 
 ####
+
 influxdb:
 
   # This is where host and port pare defined.

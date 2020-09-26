@@ -20,8 +20,3 @@ webostv:
       - Netflix
       - PS4
       - YouTube
-      
-# v0.109 update - commented out those... Hope it still will work
-#notify:
-
-#media_player:

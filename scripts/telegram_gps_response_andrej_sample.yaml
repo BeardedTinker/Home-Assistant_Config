@@ -2,7 +2,7 @@
 # Andrej GPS response for Telegram
 #####
 
-andrej_gps_notify_telegram:    
+andrej_gps_notify_telegram:
  alias: Script for Telegram Notify - Andrej's Location
  sequence:
    - service: telegram_bot.send_location

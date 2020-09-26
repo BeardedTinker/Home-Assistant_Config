@@ -3,11 +3,11 @@
 # https://www.home-assistant.io/integrations/sensor.mqtt/
 
 sensor plant:
-  - platform: mqtt    
+  - platform: mqtt
     name: Plant_salt_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.salt.salt }}"
-    unit_of_measurement: 'q' 
+    unit_of_measurement: 'q'
     icon: mdi:bottle-tonic
   - platform: mqtt
     name: Plant_Time_2
@@ -18,52 +18,52 @@ sensor plant:
     name: Plant_Date_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.date.date }}"
-    icon: mdi:calendar    
+    icon: mdi:calendar
   - platform: mqtt
     name: Plant_Soil_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.soil.soil }}"
-    unit_of_measurement: '%' 
+    unit_of_measurement: '%'
     icon: mdi:water-percent
   - platform: mqtt
     name: Plant_Temp_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.temp.temp }}"
-    unit_of_measurement: 'C' 
+    unit_of_measurement: 'C'
     icon: mdi:home-thermometer
   - platform: mqtt
     name: Plant_Humid_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.humid.humid }}"
-    unit_of_measurement: '%' 
+    unit_of_measurement: '%'
     icon: mdi:water-percent
   - platform: mqtt
     name: Plant_Lux_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.lux.lux }}"
-    unit_of_measurement: 'lx' 
+    unit_of_measurement: 'lx'
     icon: mdi:brightness-4
   - platform: mqtt
     name: Plant_Battery_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.bat.bat }}"
-    unit_of_measurement: '%' 
+    unit_of_measurement: '%'
     icon: mdi:battery-20
   - platform: mqtt
     name: Plant_Sleep_counter_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.sleep5Count.sleep5Count }}"
-#    unit_of_measurement: '%' 
+#    unit_of_measurement: '%'
     icon: mdi:sleep
   - platform: mqtt
     name: Plant_Boot_Count_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.bootCount.bootCount }}"
-#    unit_of_measurement: '%' 
+#    unit_of_measurement: '%'
     icon: mdi:cached
   - platform: mqtt
     name: Plant_FW_release_2
     state_topic: "Tgrow_HIGrow/246f28b218ec"
     value_template: "{{ value_json.rel.rel }}"
-#    unit_of_measurement: '%' 
+#    unit_of_measurement: '%'
     icon: mdi:delta

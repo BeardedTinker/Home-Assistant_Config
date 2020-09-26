@@ -2,6 +2,7 @@
 # Home Assistant Re-Start script
 # Not used at the moment
 #####
+
 googlescriptharestart:
   sequence:
   - service: media_player.volume_set
@@ -14,8 +15,8 @@ googlescriptharestart:
     data:
       message: >
        {{ [
-       "Home Assistant is restarting. Hold on.", 
+       "Home Assistant is restarting. Hold on.",
        "Home Assistant Restarting, please wait",
-       "I''m restarting Home Assistant", 
+       "I''m restarting Home Assistant",
        "Home Assistant started reincarnation",
        ] | random }}

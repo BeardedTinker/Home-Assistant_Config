@@ -2,6 +2,7 @@
 # NodeRED in Docker container 
 # Need to transfer all and make it work as add-on
 #####
+
 nodered:
   title: 'Node-RED'
   url: !secret url_nodered 

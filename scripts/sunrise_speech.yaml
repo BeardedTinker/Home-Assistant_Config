@@ -2,21 +2,22 @@
 # Sunrise speech
 # Need to disable on weekends and before 7AM
 #####
+
 sunrisespeech:
   sequence:
   - service: media_player.volume_set
     data:
       entity_id: media_player.display_me
       volume_level: 0.5
-  - delay: 00:00:01  
+  - delay: 00:00:01
   - service: tts.google_say
     entity_id: media_player.display_me
     data:
       message: >
        {{ [
-       "Good morning Vietnam!", 
+       "Good morning Vietnam!",
        "Good morning sunshine!",
-       "Rise and shine!", 
+       "Rise and shine!",
        "What a beautiful day",
        "Let there be sun!",
        ] | random }}

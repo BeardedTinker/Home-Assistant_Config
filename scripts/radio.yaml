@@ -2,6 +2,7 @@
 # Another try on Radio script
 # Not used at the moment
 #####
+
 radio:
   alias: Play Radio on Chromecast Audio
   sequence:
@@ -13,7 +14,7 @@ radio:
         {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
         {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
         {% endif %}
-      volume_level: '{{  states.input_number.volume_radio.state  }}' 
+      volume_level: '{{  states.input_number.volume_radio.state  }}'
   - service: media_player.play_media
     data:
       entity_id: >

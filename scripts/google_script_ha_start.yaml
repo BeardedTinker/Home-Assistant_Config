@@ -2,13 +2,14 @@
 # Home Assistant Start script
 # Runs as soon as HA is up
 #####
+
 googlescripthastart:
   sequence:
   - service: media_player.volume_set
     data:
       entity_id: media_player.display_me
       volume_level: 0.5
-  - delay: 00:00:01    
+  - delay: 00:00:01
   - service: tts.google_say
     entity_id: media_player.display_me
     data:

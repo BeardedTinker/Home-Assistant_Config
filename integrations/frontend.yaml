@@ -1,7 +1,9 @@
+#####
 # Configures the official Home Assistant frontend.
 #
 # https://www.home-assistant.io/components/frontend/
-#
+#####
+
 frontend:
   # Version of the JavaScript to serve to clients.
   #javascript_version: auto
