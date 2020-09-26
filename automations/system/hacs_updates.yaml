@@ -10,12 +10,12 @@ mode: single
 trigger:
   - platform: state
     entity_id: sensor.hacs
-  
+
 condition:
   - condition: numeric_state
     entity_id: sensor.hacs
     above: 0
-  
+
 action:
 - service: script.notify_engine
   data:

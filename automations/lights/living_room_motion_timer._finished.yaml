@@ -10,7 +10,7 @@ trigger:
   event_data:
     entity_id: timer.living_room_motion
   platform: event
-  
+
 action:
 - service: light.turn_off
   entity_id: light.stairs

@@ -4,11 +4,13 @@
 
 alias: Telegram - Start Command
 id: dd0aff34-9380-416c-be81-5cb1701ab4c0
+
 trigger:
   event_data:
     command: /start
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     data:

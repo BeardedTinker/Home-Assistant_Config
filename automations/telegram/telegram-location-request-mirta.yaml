@@ -4,11 +4,13 @@
 
 alias: Telegram - GPS Notify Mirta
 id: 9c48281e-2372-4e68-9b12-5c3b3013ca29
+
 trigger:
   event_data:
     command: /mirta
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     message: Mirta GPS Position

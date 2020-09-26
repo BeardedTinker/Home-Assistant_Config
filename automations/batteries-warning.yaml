@@ -4,19 +4,22 @@
 
 alias: Low battery notification
 id: 405c1997-e24b-4c74-99b9-3cd29bb4b797
+
 trigger:
   entity_id: sensor.low_batteries
   platform: state
+
 condition:
   condition: template
   value_template: '{% if states("sensor.low_batteries") %}true{% else %}false{% endif %}'
+
 action:
 - service: script.notify_engine
   data:
     who: 'telegram'
     title: '*Information*'
     value1: 'There are low batteries: {{ states("sensor.low_batteries") }}'
-    tag_id: 'information'  
+    tag_id: 'information'
     sticky: 'true'
     group: system
     color: '#ff0000'

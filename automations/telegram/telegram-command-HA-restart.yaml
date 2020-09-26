@@ -10,6 +10,7 @@ trigger:
     command: /harestart
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     message: HA - Restart - Triggered

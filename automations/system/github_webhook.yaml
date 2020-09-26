@@ -17,7 +17,7 @@ condition:
         {%- else -%}
           False
         {%- endif -%}
-        
+
 action:
   - service: notify.discord_bot
     data:

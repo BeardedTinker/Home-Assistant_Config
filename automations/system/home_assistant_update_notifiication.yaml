@@ -5,6 +5,7 @@
 
 id: c57b0367-ca6f-4e7b-8e18-307c4b44cf8b
 alias: Home Assistant Update Notification
+
 trigger:
   - platform: homeassistant
     event: start
@@ -42,27 +43,6 @@ action:
 #    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
 
-#- service: notify.mobile_app_eml_l29
-#  data:
-#    message: >
-#      There is an update to Home Assistant Supervised
-#        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
-#        Triggering Travis build...
-#    title: Update Home Assistant
-#    data:
-#      sticky: 'true'
-#      group: updates
-#      tag: update_ha
-#      color: '#ff8c00'
-#      clickAction: /hassio/dashboard
-#- service: notify.discord_bot
-#  data:
-#    target: !secret discord_github_id
-#    message: >-
-#      There is an update to Home Assistant Supervised
-#        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
-#        Triggering Travis build...
-
 - service: persistent_notification.create
   data:
     title: Update Home Assistant
@@ -98,23 +78,6 @@ action:
     color: '#ff8c00'
 #    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
-    
-#- service: notify.mobile_app_eml_l29
-#  data:
-#    message: >
-#      There is an update to Home Assistant Supervised
-#        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
-#        Travis Build has started
-#    title: Update Home Assistant
-#    data:
-#      sticky: 'true'
-#      tag: update_ha
-#      color: '#ff8c00'
-#      clickAction: /hassio/dashboard
-#- service: notify.discord_bot
-#  data:
-#    target: !secret discord_github_id
-#    message: "Travis Build has started"
 
 - service: persistent_notification.create
   data:
@@ -139,23 +102,6 @@ action:
     color: '#ff8c00'
 #    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
-
-#- service: notify.mobile_app_eml_l29
-#  data:
-#    message: >
-#      There is an update to Home Assistant Supervised
-#        * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
-#        Travis Build has {{states('sensor.beardedtinker_home_assistant_config_state')}}
-#    title: Update Home Assistant
-#    data:
-#      sticky: 'true'
-#      tag: update_ha
-#      color: '#ff8c00'
-#      clickAction: /hassio/dashboard
-#- service: notify.discord_bot
-#  data:
-#    target: !secret discord_github_id
-#    message: "Travis Build has {{states('sensor.beardedtinker_home_assistant_config_state') }}"
 
 - service: persistent_notification.create
   data:

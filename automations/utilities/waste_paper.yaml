@@ -14,7 +14,7 @@ trigger:
 condition:
 - condition: state
   entity_id: sensor.paper_waste
-  state: 'today'  
+  state: 'today'
 
 action:
 - service: script.notify_engine
@@ -22,6 +22,6 @@ action:
     who: 'parents'
     title: '♻ Garbage day'
     value1: 'Take out paper for recycling.'
-    tag_id: 'information' 
+    tag_id: 'information'
     sticky: 'true'
     target_id: !secret telegram_bot_chat_id

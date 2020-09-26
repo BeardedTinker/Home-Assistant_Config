@@ -4,9 +4,11 @@
 
 alias: Set Chromecast Radio Volume
 id: ca8069cd-269a-4338-8310-e22bc4c1b04d
+
 trigger:
   platform: state
   entity_id: input_number.volume_radio
+
 action:
   service: media_player.volume_set
   data:

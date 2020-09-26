@@ -14,7 +14,7 @@ condition:
   condition: state
   entity_id: input_boolean.ups_on_batteries
   state: 'on'
-  
+
 action:
 - service: script.notify_engine
   data:

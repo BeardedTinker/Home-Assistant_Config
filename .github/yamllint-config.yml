@@ -8,7 +8,7 @@ extends: default
 rules:
   line-length: disable
 #  comments: disable
-#  comments-indentation: disable
+  comments-indentation: disable
   document-start: disable
   indentation: disable
 
@@ -17,3 +17,4 @@ ignore: |
   custom_components/
   .git
   .github/workflows/yaml-lint.yaml
+  themes/

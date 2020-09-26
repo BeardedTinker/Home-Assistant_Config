@@ -10,6 +10,7 @@ trigger:
   event_type: telegram_command
   event_data:
     command: '/camera'
+
 action:
 - service: notify.ebroz_bot
   data:

@@ -12,7 +12,7 @@ trigger:
 condition:
   condition: template
   value_template: '{{ ''slide'' == trigger.payload_json.action }}'
-  
+
 action:
   data:
     entity_id: switch.piano

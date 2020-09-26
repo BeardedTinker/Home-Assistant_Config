@@ -4,11 +4,13 @@
 
 alias: Telegram - GPS Notify ZIta
 id: 2d31cfcf-75f6-4619-af95-8e2a0c734b35
+
 trigger:
   event_data:
     command: /zita
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     message: Zita GPS Position

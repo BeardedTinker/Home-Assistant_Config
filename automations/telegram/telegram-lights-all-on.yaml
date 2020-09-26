@@ -4,11 +4,13 @@
 
 alias: Telegram - All Light On
 id: 3effd570-7069-4d28-bac2-e7e474f94468
+
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
     data: /lighton
+
 action:
 - service: telegram_bot.answer_callback_query
   data:

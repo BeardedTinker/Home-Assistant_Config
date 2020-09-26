@@ -4,11 +4,13 @@
 
 alias: System status
 id: 3cb3b274-3f57-40e8-ad25-d6b1e2b70e30
+
 trigger:
   event_data:
     data: /system
   event_type: telegram_callback
   platform: event
+
 action:
 - service: telegram_bot.answer_callback_query
   data:
@@ -16,10 +18,10 @@ action:
     message: System Status
 - service: notify.ebroz_bot
   data:
-    message: >- 
+    message: >-
       {{ "\U0001F4BB" }} *System*:
-      
-      ------------------------------------------------        
+
+      ------------------------------------------------
 
       *CPU Usage*:   {{ states('sensor.synology_cpu_load_total') }} %
 
@@ -35,5 +37,3 @@ action:
     data:
       inline_keyboard:
       - '{{ "\u21a9\ufe0f" }} Control Panel:/cp'
-    
-  

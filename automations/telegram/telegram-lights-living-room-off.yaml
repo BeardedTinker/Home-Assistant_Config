@@ -4,11 +4,13 @@
 
 alias: Telegram - Living Room Light OFF
 id: 172b22ca-495e-4297-b233-646ab76c5e60
+
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
     data: /living_off
+
 action:
 - service: telegram_bot.answer_callback_query
   data:

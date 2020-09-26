@@ -4,11 +4,13 @@
 
 alias: 'telegram ping pong'
 id: 6a2ee31e-193b-4ed2-a167-cc9582e7e64f
+
 trigger:
   - platform: event
     event_type: telegram_callback
     event_data:
       data: '/ping'
+
 action:
   - service: telegram_bot.answer_callback_query
     data:

@@ -4,11 +4,13 @@
 
 alias: Telegram - Ceiling Light OFF
 id: c7750701-f3fd-4e9f-8d5d-168546ba99ae
+
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
     data: /ceiling_off
+
 action:
 - service: telegram_bot.answer_callback_query
   data:

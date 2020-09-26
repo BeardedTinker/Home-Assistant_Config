@@ -15,13 +15,13 @@ condition:
   condition: state
   entity_id: binary_sensor.people_home
   state: 'off'
-  
+
 action:
 - service: script.notify_engine
   data:
     who: 'parents'
     value1: "Living room motion and none at home!"
-    tag_id: 'emergency'  
+    tag_id: 'emergency'
     target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me

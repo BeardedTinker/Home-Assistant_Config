@@ -5,20 +5,23 @@
 
 alias: Front Door alert when none home
 id: 639975e4-2bb8-4945-88a5-f3e7dbca8e04
+
 trigger:
   entity_id: binary_sensor.front_door_contact
   platform: state
   to: 'on'
+
 condition:
   condition: state
   entity_id: binary_sensor.people_home
   state: 'off'
+
 action:
 - service: script.notify_engine
   data:
     who: 'family'
     value1: "Motion in apartment! No family member is home"
-    tag_id: 'emergency'  
+    tag_id: 'emergency'
     target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me

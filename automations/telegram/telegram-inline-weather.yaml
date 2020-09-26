@@ -4,11 +4,13 @@
 
 alias: Weather Info
 id: d9e0a1dc-519f-4706-bc95-e816c64a5fed
+
 trigger:
 - platform: event
   event_type: telegram_callback
   event_data:
     data: /weather
+
 action:
 - service: telegram_bot.answer_callback_query
   data:
@@ -19,15 +21,15 @@ action:
   data:
     message: >- 
       {{ "\U00002600" }} *Weather*:
-      
+
       ------------------------------------------------
-      
+
       *Temperature*:   {{ state_attr('weather.dark_sky', 'temperature') }} °C
 
       *Humidity*:      {{ state_attr('weather.dark_sky', 'humidity') }} %
 
       *Pressure*:      {{ state_attr('weather.dark_sky', 'pressure') }} hPa
-      
+
     data:
       inline_keyboard:
       - '{{ "\u21a9\ufe0f" }} Control Panel:/cp'

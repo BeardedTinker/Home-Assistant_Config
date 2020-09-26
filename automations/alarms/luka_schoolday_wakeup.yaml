@@ -29,7 +29,7 @@ action:
     who: 'luka'
     title: '⏲ Good morning Luka'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
-    tag_id: 'information'  
+    tag_id: 'information'
 - data:
     entity_id: media_player.whatever_me
     volume_level: 0.3

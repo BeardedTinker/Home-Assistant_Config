@@ -10,6 +10,7 @@ trigger:
     data: /cp
   event_type: telegram_callback
   platform: event
+
 action:
   service: notify.ebroz_bot
   data:

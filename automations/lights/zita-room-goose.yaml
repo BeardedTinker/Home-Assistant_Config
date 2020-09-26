@@ -14,7 +14,7 @@ condition:
   condition: state
   entity_id: binary_sensor.people_home
   state: 'on'
-  
+
 action:
   data:
     entity_id: light.goose_light

@@ -9,6 +9,7 @@ id: c20a3759-8477-498e-9aba-c9736459c1a5
 trigger:
   platform: sun
   event: sunrise
+
 action:
 - service: utility_meter.select_tariff ###### Tariff change to night
   data:

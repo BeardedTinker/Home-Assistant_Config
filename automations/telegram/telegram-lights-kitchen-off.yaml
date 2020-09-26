@@ -4,11 +4,13 @@
 
 alias: Telegram - kitchen Light OFF
 id: 9841fdee-b023-4028-892f-0bed116bc222
+
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
     data: /kitchen_off
+
 action:
 - service: telegram_bot.answer_callback_query
   data:

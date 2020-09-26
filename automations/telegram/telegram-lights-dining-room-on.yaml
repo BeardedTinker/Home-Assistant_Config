@@ -4,11 +4,13 @@
 
 alias: Telegram - Dining Light On
 id: ae8a8783-a0ff-4c23-8eb7-28d302b36905
+
 trigger:
   platform: event
   event_type: telegram_callback
   event_data:
     data: /dining_on
+
 action:
 - service: telegram_bot.answer_callback_query
   data:

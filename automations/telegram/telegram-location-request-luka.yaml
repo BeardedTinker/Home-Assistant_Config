@@ -1,14 +1,16 @@
 #####
-# Telegram Command - /luka to get GPS location 
+# Telegram Command - /luka to get GPS location
 #####
 
 alias: Telegram - GPS Notify Luka
 id: 68a488ff-e8f2-42c2-b74f-eed29a1d2acc
+
 trigger:
   event_data:
     command: /luka
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     message: Luka GPS Position

@@ -4,8 +4,10 @@
 
 alias: Listen Radio
 id: ef260499-2ac6-411e-8f08-e1149d16e930
+
 trigger:
   - platform: state
     entity_id: input_select.radio_station
-action: 
+
+action:
   - service: script.radio

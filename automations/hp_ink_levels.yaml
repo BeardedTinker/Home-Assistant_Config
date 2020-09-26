@@ -19,7 +19,7 @@ condition:
   condition: time
   weekday:
     - sat
-    
+
 action:
 - service: persistent_notification.create
   data:

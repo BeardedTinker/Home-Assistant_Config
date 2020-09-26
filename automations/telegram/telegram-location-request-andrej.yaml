@@ -4,11 +4,13 @@
 
 alias: Telegram - GPS Notify Andrej
 id: b2b15b19-cbeb-4be9-9160-327a65647c9b
+
 trigger:
   event_data:
     command: /andrej
   event_type: telegram_command
   platform: event
+
 action:
 - data:
     message: Andrej GPS Position
