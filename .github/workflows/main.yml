@@ -41,7 +41,9 @@ jobs:
           cp -R secrets_github.yaml secrets.yaml 
           cp -R customize_sample.yaml customize.yaml
           cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
-          sudo mkdir -p tmp
+          sudo mkdir -p /github/workspace/tmp
+          sudo touch fullchain.pem
+          sudo touch privkey.pem
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:stable"
         with:
@@ -85,7 +87,9 @@ jobs:
           cp -R secrets_github.yaml secrets.yaml 
           cp -R customize_sample.yaml customize.yaml
           cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
-          sudo mkdir -p ./tmp
+          sudo mkdir -p /github/workspace/tmp
+          sudo touch fullchain.pem
+          sudo touch privkey.pem
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:dev"
         with:
