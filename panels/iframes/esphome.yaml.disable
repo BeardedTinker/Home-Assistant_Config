@@ -1,7 +1,0 @@
-#####
-# ESPHome disabled since I'm using now add-on
-#####
-esphome:
-  title: 'ESPHome'
-  url: !secret url_esphome 
-  icon: 'mdi:chip'   

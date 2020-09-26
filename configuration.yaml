@@ -1,7 +1,7 @@
 #####
 # This is all that remains of Configuration.yaml file.
 # By using packages: I'm pulling all other configuration files 
-# from individual golders, starting with Integrations
+# from individual folders, starting with Integrations
 #####
 
 homeassistant:

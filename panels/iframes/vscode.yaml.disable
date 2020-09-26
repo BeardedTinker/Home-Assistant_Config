@@ -1,8 +1,0 @@
-#####
-# Visual Studio Code - Docker container install
-# Migrated to HASSIO add-on
-#####
-vscode:
-  title: 'VSCode'
-  url: !secret url_vscode
-  icon: mdi:code-braces

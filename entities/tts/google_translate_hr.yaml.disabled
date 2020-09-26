@@ -10,5 +10,5 @@ service_name: google_say_hr
 language: 'hr'
 base_url: !secret my_full_url 
 cache: true
-cache_dir: /tmp/tts
+cache_dir: /config/tts
 time_memory: 300
