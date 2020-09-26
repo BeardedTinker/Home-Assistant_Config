@@ -63,8 +63,8 @@ jobs:
           cp -R customize_sample.yaml customize.yaml
           cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
           sudo mkdir -p /github/workspace/tmp
-          sudo fullchain.pem
-          sudo privkey.pem
+          sudo touch fullchain.pem
+          sudo touch privkey.pem
       - name: Home Assistant Version
         uses: "docker://homeassistant/home-assistant:beta"
         with:

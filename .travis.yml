@@ -9,13 +9,11 @@ before_install:
   - mv 0d25726f0c18_sample.json 0d25726f0c18.json
   - "sudo mkdir -p /ssl/ && sudo touch /ssl/fullchain.pem"
   - "sudo mkdir -p /ssl/ && sudo touch /ssl/privkey.pem"
-#  - "sudo mkdir -p /config"
   - "sudo mkdir -p /config/tmp"
   - sudo apt-get install -y libudev-dev
 install:
   - pip3 install homeassistant
 script:
   - hass --version
-#  - hass -c . --script check_config --info all
   - "hass -c . --script check_config --info all | tee check.output"
   - '! less check.output | grep -q "Failed config"'

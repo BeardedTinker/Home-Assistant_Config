@@ -13,4 +13,3 @@ http:
   ssl_key: !secret privkey_pem
   ip_ban_enabled: true
   login_attempts_threshold: 5
-
