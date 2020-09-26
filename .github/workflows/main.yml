@@ -51,7 +51,7 @@ jobs:
       - name: Home Assistant Check
         uses: "docker://homeassistant/home-assistant:stable"
         with:
-          args: python -m homeassistant --script check_config --info all
+          args: python -m homeassistant --config  /github/workspace/ --script check_config --info all
   home_assistant_beta:
     runs-on: ubuntu-latest
     needs: [yamllint, remarklint]
