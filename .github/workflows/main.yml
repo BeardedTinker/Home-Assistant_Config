@@ -9,6 +9,14 @@ on:
     - cron: 0 12 * * *
 
 jobs:
+  lintAllTheThings:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: yaml-lint
+      uses: ibiqlik/action-yamllint@v1
+      with:
+        config_file: .github/yamllint-config.yml
   yamllint:
     runs-on: ubuntu-latest
     steps:
