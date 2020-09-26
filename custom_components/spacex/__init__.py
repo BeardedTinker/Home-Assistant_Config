@@ -114,9 +114,9 @@ class SpaceXUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.info("SpaceX API: %s", error)
             raise ConfigEntryNotReady from error
 
-        return [
-            spacex_starman,
-            spacex_next_launch,
-            spacex_latest_launch,
-        ]
+        return {
+            "starman": spacex_starman,
+            "next_launch": spacex_next_launch,
+            "latest_launch": spacex_latest_launch,
+        }
 
