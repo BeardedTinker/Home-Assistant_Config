@@ -4,15 +4,18 @@
 
 alias: SS Balcony webhook
 id: a778d90b-3c32-4f1d-af3b-a87637c9e3d2
+
 trigger:
   platform: webhook
   webhook_id: motion_balcony_hook
+
 condition: []
+
 action:
-- data:
-    entity_id: camera.terasa2
-    filename: /config/tmp/balcony.jpg
-  service: camera.snapshot
-- data:
-    entity_id: image_processing.facebox_saved_image
-  service: image_processing.scan
+  - data:
+      entity_id: camera.terasa2
+      filename: /config/tmp/balcony.jpg
+    service: camera.snapshot
+  - data:
+      entity_id: image_processing.facebox_saved_image
+    service: image_processing.scan

@@ -10,7 +10,9 @@ trigger:
   for: 00:15:00
   platform: state
   to: Nickelodeon
+
 condition: []
+
 action:
 - data:
     message: Zita, već gledaš Nikelodeon 15 minuta!

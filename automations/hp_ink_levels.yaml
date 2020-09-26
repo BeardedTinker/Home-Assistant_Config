@@ -14,10 +14,12 @@ trigger:
       - sensor.hp_deskjet_3520_series_magenta_ink
       - sensor.hp_deskjet_3520_series_yellow_ink
     below: 25
+
 condition:
   condition: time
   weekday:
     - sat
+    
 action:
 - service: persistent_notification.create
   data:
@@ -28,7 +30,7 @@ action:
   data:
     value1: "{{ trigger.to_state.attributes.friendly_name }} is at {{ trigger.to_state.state }} "
     who: 'telegram'
-    tag_id: 'information'  
+    tag_id: 'information'
     sticky: 'true'
     group: system
     color: '#ff0000'

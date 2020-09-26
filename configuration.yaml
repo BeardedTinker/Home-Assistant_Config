@@ -1,11 +1,11 @@
 #####
 # This is all that remains of Configuration.yaml file.
-# By using packages: I'm pulling all other configuration files 
+# By using packages: I'm pulling all other configuration files
 # from individual folders, starting with Integrations
 #####
 
 homeassistant:
   customize: !include customize.yaml
-  packages: !include_dir_named integrations     # package setup / added config split
+  packages: !include_dir_named integrations     # package setup/config split
   allowlist_external_dirs:
     - !secret allow_dir

@@ -5,15 +5,17 @@
 
 alias: Stream camera on motion
 id: cdb7d334-883a-41a2-8062-5eb08612f0e9
-trigger:
-- entity_id: binary_sensor.living_room_motion_occupancy
-  platform: state
-  to: 'on'
-condition: []
-action:
-- data:
-    entity_id: camera.elevator
-    media_player: media_player.display_me
-    format: hls
-  service: camera.play_stream
 
+trigger:
+  - entity_id: binary_sensor.living_room_motion_occupancy
+    platform: state
+    to: 'on'
+
+condition: []
+
+action:
+  - data:
+      entity_id: camera.elevator
+      media_player: media_player.display_me
+      format: hls
+    service: camera.play_stream
