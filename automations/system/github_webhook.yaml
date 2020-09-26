@@ -12,6 +12,8 @@ condition:
       value_template: >-
         {%- if trigger.json.action == "created" or "closed" or "opened" or "reopened" or trigger.json.ref %}
           True
+        {%- elif trigger.json.action != "edited" or "labeled" or "unlabeled" or "pinned" or "unpinned" %}
+          False
         {%- else -%}
           False
         {%- endif -%}
