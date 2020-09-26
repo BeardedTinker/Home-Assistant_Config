@@ -8,4 +8,4 @@
 text_notifications:
   name: Text Notifications
   icon: mdi:cellphone-wireless
-  initial: on
+  initial: true

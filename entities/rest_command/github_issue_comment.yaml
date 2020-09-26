@@ -8,4 +8,4 @@ github_issue_comment:
   method: POST
   headers:
     Authorization: !secret github_token2
-  payload: '{"state":"{{ status }}","body":"{{ message }}"}' 
+  payload: '{"state":"{{ status }}","body":"{{ message }}"}'

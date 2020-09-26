@@ -7,6 +7,6 @@ api_key: !secret emby_key
 user_id: !secret emby_user_id
 host: !secret emby_ip
 port: 8096
-ssl: False
+ssl: false
 max: 5
 use_backdrop: true

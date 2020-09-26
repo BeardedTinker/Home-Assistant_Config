@@ -4,7 +4,7 @@
 #####
 
 platform: gtfs
-name: XVI 
+name: XVI
 origin: 169
 #    origin: 104
 destination: 299

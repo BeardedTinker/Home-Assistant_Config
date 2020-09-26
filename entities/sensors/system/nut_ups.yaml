@@ -4,7 +4,7 @@
 #####
 
 platform: nut
-name: UPS 
+name: UPS
 host: !secret ups_host
 port: !secret ups_port
 alias: ups
@@ -13,4 +13,4 @@ resources:
   - ups.realpower.nominal
   - input.voltage
   - battery.runtime
-  - ups.status.display 
+  - ups.status.display

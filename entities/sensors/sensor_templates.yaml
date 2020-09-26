@@ -48,7 +48,7 @@ sensors:
     friendly_name: "School week"
     value_template: >-
       {% set week_number = now().isocalendar()[1] %}
-      Week {{'A' if week_number % 2 == 0 else 'B'}} 
+      Week {{'A' if week_number % 2 == 0 else 'B'}}
 #      Week {{'A' if week_number % 2 == 0 else 'B'}} (#{{week_number}})
 
 #####
@@ -58,7 +58,7 @@ sensors:
 
   facebox_detection:
     friendly_name: 'Facebox Detection'
-    value_template: '{{ states.image_processing.facebox_saved_image.attributes.faces[0]["name"].title()}}' # old - to be removed after testing
+    value_template: '{{ states.image_processing.facebox_saved_image.attributes.faces[0]["name"].title()}}'   # old - to be removed after testing
 #    value_template: '{{ state_attr("image_processing.facebox_saved_image", "faces[0][''name''].title()")}}'
 
 # Check for low batteries

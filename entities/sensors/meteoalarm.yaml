@@ -14,12 +14,12 @@ sensors:
   meteoalarm_instruction:
     friendly_name: "Instruction"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'instruction') }}"
-  meteoalarm_event: 
+  meteoalarm_event:
     friendly_name: "Event"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'event') }}"
   meteoalarm_onset:
     friendly_name: "Onset"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'onset') }}"
-  meteoalarm_expires: 
+  meteoalarm_expires:
     friendly_name: "Expires"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'expires') }}"

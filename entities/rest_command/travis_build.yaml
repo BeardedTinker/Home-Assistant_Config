@@ -1,7 +1,7 @@
 #####
 # Travis CI build
 #
-#### 
+####
 
 travis_build:
   url: https://api.travis-ci.org/repo/BeardedTinker%2FHome-Assistant_Config/requests

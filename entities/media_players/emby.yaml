@@ -3,5 +3,5 @@
 ###
 
 platform: emby
-host: !secret emby_ip 
+host: !secret emby_ip
 api_key: !secret emby_key

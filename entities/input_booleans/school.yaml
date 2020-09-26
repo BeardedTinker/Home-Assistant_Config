@@ -1,6 +1,6 @@
 #####
 # General boolean for School
-# If off, it's break time, if on - school is ongoing 
+# If off, it's break time, if on - school is ongoing
 #####
 
 school:

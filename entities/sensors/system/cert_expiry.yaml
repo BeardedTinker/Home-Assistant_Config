@@ -7,5 +7,5 @@
 #####
 
 platform: cert_expiry
-host: !secret cert_host 
+host: !secret cert_host
 port: 8123

@@ -5,6 +5,6 @@
 
 name: Office
 latitude: !secret office_lat
-longitude: !secret office_long 
+longitude: !secret office_long
 radius: 75
-icon: mdi:worker
+icon: mdi:domain

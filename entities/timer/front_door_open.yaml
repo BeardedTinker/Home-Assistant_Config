@@ -1,7 +1,8 @@
 #####
-# Timer for front-door. 
+# Timer for front-door.
 # Still thinking on should I used alert or timer
 #####
+
 front_door_open:
   duration: '00:05:00'
   name: Front Door Open Timer

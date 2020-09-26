@@ -6,4 +6,4 @@
 platform: tado
 username: !secret tado_username
 password: !secret tado_password
-home_id: !secret tado_home 
+home_id: !secret tado_home
