@@ -7,8 +7,10 @@ extends: default
 
 rules:
   line-length: disable
-  comments: disable
-  comments-indentation: disable
+#  comments: disable
+#  comments-indentation: disable
+  document-start: disable
+  indentation: disable
 
 ignore: |
   lovelace-ui.yaml
