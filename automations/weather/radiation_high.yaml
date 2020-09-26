@@ -20,21 +20,20 @@ action:
     who: 'family'
     title: '☢ Radiation Level Alert!'
     value1: 'Radiation is currently {{ states("sensor.geiger_counter_2") }} CPM. Normal value is below 0.5'
-    tag_id: 'warning'  
+    tag_id: 'warning'
     sticky: 'true'
     group: weather
     color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - data:
-    entity_id: 
+    entity_id:
       - media_player.display_me
       - media_player.clock_me
     volume_level: 0.5
   service: media_player.volume_set
 - data:
-    entity_id: 
+    entity_id:
       - media_player.display_me
       - media_player.clock_me
     message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter_2") }} and normal value should be below 0.5'
   service: tts.google_say
-

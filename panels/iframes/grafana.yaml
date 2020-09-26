@@ -6,4 +6,4 @@
 grafana:
   title: 'Grafana'
   icon: 'mdi:chart-areaspline'
-  url: !secret url_grafana 
+  url: !secret url_grafana

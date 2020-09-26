@@ -10,7 +10,7 @@ sensors:
     value_template: '{{ state_attr("climate.luka_room","hvac_action") == "heating" }}'
   zita_room_heating:
     friendly_name: "Heating in Zita Room"
-    value_template: '{{ state_attr("climate.zita_room","hvac_action") == "heating" }}'  
+    value_template: '{{ state_attr("climate.zita_room","hvac_action") == "heating" }}'
   living_room_heating:
     friendly_name: "Heating in Living Room"
     value_template: '{{ state_attr("climate.living_room","hvac_action") == "heating" }}'

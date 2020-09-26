@@ -4,4 +4,4 @@
 
 platform: local_file
 name: Saved Image
-file_path: /config/tmp/balcony.jpg 
+file_path: /config/tmp/balcony.jpg

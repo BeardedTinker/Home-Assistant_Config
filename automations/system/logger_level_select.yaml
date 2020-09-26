@@ -1,5 +1,5 @@
 #####
-# Automagicly change level for logger 
+# Automagicly change level for logger
 # Upon change of input_select.logger_level use logger.set_level to change level
 #####
 

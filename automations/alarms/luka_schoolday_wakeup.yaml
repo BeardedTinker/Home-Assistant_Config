@@ -22,7 +22,7 @@ condition:
   - condition: state
     entity_id: sensor.current_week
     state: 'Week B'
-  
+
 action:
 - service: script.notify_engine
   data:

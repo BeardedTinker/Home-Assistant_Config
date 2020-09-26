@@ -11,7 +11,7 @@ trigger:
   event: sunrise
 
 action:
-- service: utility_meter.select_tariff ###### Tariff change to night
+- service: utility_meter.select_tariff    # Tariff change to night
   data:
     entity_id:
     - utility_meter.sun_energy

@@ -1,2 +1,6 @@
+#####
+# Used to track the latest available update version
+#
+#####
 version_latest_notified:
   name: Home assistant update version notified

@@ -2,6 +2,7 @@
 # Set People Home to "Home" if anyone is home
 # Currently using tado - some delay
 #####
+
 platform: template
 sensors:
   people_home:

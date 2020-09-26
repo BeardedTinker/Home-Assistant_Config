@@ -2,6 +2,7 @@
 # USGS - United States Geological Survey - WorldWide Earthquake sensor
 # https://www.home-assistant.io/integrations/usgs_earthquakes_feed/
 #####
+
 platform: usgs_earthquakes_feed
 feed_type: 'past_week_all_earthquakes'
 radius: 350

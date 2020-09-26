@@ -10,7 +10,7 @@ trigger:
   platform: homeassistant
   event: start
 
-condition: 
+condition:
   condition: state
   entity_id: input_boolean.ups_on_batteries
   state: 'on'

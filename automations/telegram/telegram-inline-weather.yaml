@@ -19,7 +19,7 @@ action:
     target: !secret telegram_bot_chat_id
 - service: notify.ebroz_bot
   data:
-    message: >- 
+    message: >-
       {{ "\U00002600" }} *Weather*:
 
       ------------------------------------------------

@@ -24,7 +24,7 @@ action:
       target: !secret discord_github_id
       message: >-
         {%- if trigger.json.pull_request -%}
-          Pull request 
+          Pull request
           {% if trigger.json.comment %}
             New comment on {{trigger.json.pull_request.title }} - Pull Request #{{
             trigger.json.pull_request.number}} from {{ trigger.json.comment.sender.login }}
@@ -35,7 +35,7 @@ action:
           {{trigger.json.pull_request.html_url}}
         {%- elif trigger.json.issue -%}
           {% if trigger.json.comment %}
-            New comment on {{trigger.json.issue.title }} - Issue #{{ 
+            New comment on {{trigger.json.issue.title }} - Issue #{{
             trigger.json.issue.number}} from {{ trigger.json.comment.user.login }}
           {% else -%}
           {{ trigger.json.issue.title }} - Issue #{{ trigger.json.issue.number}} {{

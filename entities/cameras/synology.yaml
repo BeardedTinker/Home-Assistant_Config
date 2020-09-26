@@ -3,7 +3,7 @@
 #####
 
 platform: synology
-url: !secret syno_url 
+url: !secret syno_url
 username: !secret syno_name
 password: !secret syno_pwd
 verify_ssl: false

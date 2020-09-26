@@ -16,7 +16,7 @@ condition:
 
 action:
 - data:
-    entity_id: 
+    entity_id:
       - light.living_room_lights
     transition: 60
     brightness: 48

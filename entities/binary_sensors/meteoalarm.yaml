@@ -1,10 +1,10 @@
 #####
 # Check MeteoAlarm for Croatia/Zagreb regija - used for weather warnings in Telegram
-#
 # https://www.home-assistant.io/integrations/meteoalarm/
 #
 # Used for Telegram notifications and voice notifications
 #####
+
 platform: meteoalarm
 country: 'HR'
 province: 'Zagreb regija'

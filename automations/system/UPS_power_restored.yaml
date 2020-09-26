@@ -1,5 +1,5 @@
 #####
-# When main power restored, notify 
+# When main power restored, notify
 # Change input_boolean.ups_on_batteries to off
 #####
 

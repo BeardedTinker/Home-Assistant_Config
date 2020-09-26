@@ -5,5 +5,5 @@
 
 portainer:
   title: 'Portainer'
-  url: !secret url_portainer 
+  url: !secret url_portainer
   icon: 'mdi:docker'

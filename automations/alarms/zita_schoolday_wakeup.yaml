@@ -21,12 +21,12 @@ condition:
     state: 'on'
 
 action:
-#- service: script.notify_engine
+# - service: script.notify_engine
 #  data:
 #    who: 'zita'
 #    title: 'Good morning Zita'
 #    value1: 'It is {{ states("sensor.time") }} - time to wake up'
-#    tag_id: 'information'  
+#    tag_id: 'information'
 - data:
     entity_id: media_player.mini_me
     volume_level: 0.3
@@ -36,7 +36,7 @@ action:
     message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to wake up.'
   service: tts.google_say
 - data:
-    entity_id: 
+    entity_id:
       - light.goose_light
       - light.zita_ceiling_light
     brightness: 64
