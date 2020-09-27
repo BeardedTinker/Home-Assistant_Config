@@ -484,16 +484,18 @@ class GarbageCollection(RestoreEntity):
         first_day = day1
         # Check if there are holidays within holiday offset that would fall into day1
         if len(self._holidays) > 0 and self._holiday_move_offset > 0:
+            look_back = self._holiday_move_offset
+            if self._holiday_in_week_move:  # If holiday in week, check from Monday
+                look_back = -day1.weekday()
             check_near = list(
                 filter(
-                    lambda date: date + relativedelta(days=self._holiday_move_offset)
-                    >= day1
+                    lambda date: date + relativedelta(days=look_back) >= day1
                     and date <= day1,
                     self._holidays,
                 )
             )
             if len(check_near) > 0:
-                first_day -= relativedelta(days=self._holiday_move_offset)
+                first_day -= relativedelta(days=look_back)
         while True:
             try:
                 next_date = await self._async_find_candidate_date(first_day)
@@ -554,7 +556,7 @@ class GarbageCollection(RestoreEntity):
             except ValueError:
                 raise
             date_ok = True
-            # Ifit is today and after expiration, search from tomorrow
+            # If it is today and after expiration, search from tomorrow
             now = dt_util.now()
             expiration = (
                 self._expire_after
