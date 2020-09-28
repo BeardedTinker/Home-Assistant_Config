@@ -1,0 +1,62 @@
+- id: '1601242981115'
+  name: Movie time
+  entities:
+    light.bar_light:
+      brightness: 78
+      linkquality: 34
+      state: 'on'
+      update_available: false
+      friendly_name: Bar light
+      supported_features: 41
+    light.tv:
+      min_mireds: 153
+      max_mireds: 500
+      brightness: 0
+      color:
+        x: 0.4599
+        y: 0.4106
+      color_temp: 500
+      linkquality: 31
+      state: 'off'
+      update_available: false
+      friendly_name: TV
+      supported_features: 43
+    light.standing:
+      min_mireds: 153
+      max_mireds: 500
+      brightness: 0
+      color:
+        x: 0.4599
+        y: 0.4106
+      color_temp: 500
+      linkquality: 23
+      state: 'off'
+      update_available: false
+      friendly_name: Standing
+      supported_features: 43
+    light.corner:
+      min_mireds: 153
+      max_mireds: 500
+      brightness: 126
+      color_temp: 500
+      color:
+        x: 0.4599
+        y: 0.4106
+      linkquality: 23
+      state: 'on'
+      update_available: false
+      friendly_name: Corner
+      supported_features: 43
+    light.entrance:
+      min_mireds: 153
+      max_mireds: 500
+      brightness: 126
+      color_temp: 500
+      color:
+        x: 0.4599
+        y: 0.4106
+      linkquality: 15
+      state: 'on'
+      update_available: false
+      friendly_name: Entrance
+      supported_features: 43
