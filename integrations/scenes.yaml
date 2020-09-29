@@ -1,0 +1,8 @@
+#####
+# Scenes are sometihng that I didn't play with until now
+# For now just testing
+#
+# https://www.home-assistant.io/integrations/scene/
+#####
+
+scene: !include_dir_list ../scenes
