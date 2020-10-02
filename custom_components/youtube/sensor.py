@@ -119,7 +119,7 @@ async def is_live(channel_id, name, hass, session):
         async with async_timeout.timeout(10, loop=hass.loop):
             response = await session.get(url)
             info = await response.text()
-        if 'live-promo' in info:
+        if 'BADGE_STYLE_TYPE_LIVE_NOW' in info:
             returnvalue = True
             _LOGGER.debug('%s - Channel is live', name)
     except Exception as error:  # pylint: disable=broad-except
