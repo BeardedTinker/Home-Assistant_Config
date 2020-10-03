@@ -8,8 +8,13 @@ trigger:
   webhook_id: !secret github_webhook
 
 condition:
-    - condition: template
-      value_template: '{{ trigger.json.action in ["created", "closed", "opened", "reopened"] }}'
+  - condition: template
+    value_template: >-
+      {%- if trigger.json.action in ["created", "closed", "opened", "reopened"] or trigger.json.ref %}
+        True
+      {%- else -%}
+        False
+      {%- endif -%}
 
 action:
   - service: notify.andrej_discord
@@ -25,7 +30,7 @@ action:
             {{ trigger.json.pull_request.title }} - Pull Request #{{ trigger.json.pull_request.number}} {{
             trigger.json.action}} by {{trigger.json.sender.login}}
           {% endif -%}
-          {{trigger.json.pull_request.html_url}}
+          {{trigger.json.pull_request.html_url}} 
         {%- elif trigger.json.issue -%}
           {% if trigger.json.comment %}
             New comment on {{trigger.json.issue.title }} - Issue #{{
@@ -34,11 +39,12 @@ action:
           {{ trigger.json.issue.title }} - Issue #{{ trigger.json.issue.number}} {{
             trigger.json.action }} by {{trigger.json.sender.login}}
           {% endif -%}
-          {{trigger.json.issue.html_url}}
+          {{trigger.json.issue.html_url}} 
         {%- elif trigger.json.ref %}
           {{ trigger.json.commits | count }} commits pushed to Home-Assistant_config:
             {% for commit in trigger.json.commits -%}
-              {{commit.message}}
+              {{commit.message}} 
             {%- endfor %}
             https://github.com/BeardedTinker/Home-Assistant_Config/commits/master
         {%- endif %}
+
