@@ -14,9 +14,9 @@ condition:
   - condition: state
     entity_id: binary_sensor.people_home
     state: 'on'
-  - condition: numeric_state
-    entity_id: sensor.blitzortung_lightning_counter
-    above: 0
+#  - condition: numeric_state
+#    entity_id: sensor.blitzortung_lightning_counter
+#    above: 0
   - condition: numeric_state
     entity_id: sensor.blitzortung_lightning_distance
     below: 10
