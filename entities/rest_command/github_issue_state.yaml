@@ -1,0 +1,11 @@
+#####
+# RESTful command to change state to the issue based on issue_number
+#
+#####
+
+github_issue_state:
+  url: "https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/{{issue_number}}"
+  method: POST
+  headers:
+    Authorization: !secret github_token2
+  payload: '{ "state":"{{ status }}" }'

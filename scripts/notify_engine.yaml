@@ -34,9 +34,10 @@ notify_engine:
         target: "{{ target_id }}"
         data:
           attachment:
-            url: "{{ url }}"
+            url: "{{ clickAction }}"
             content-type: "{{ content_type }}"
             hide-thumbnail: false
+          clickAction: "{{ clickAction }}"
           apns_headers:
             'apns-collapse-id': "{{ tag_id }}"
           tag: "{{ tag_id }}"

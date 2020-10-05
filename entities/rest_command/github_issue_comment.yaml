@@ -4,8 +4,8 @@
 #####
 
 github_issue_comment:
-  url: "https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/{{ issue_number }}/comments"
+  url: "https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/{{issue_number}}/comments"
   method: POST
   headers:
     Authorization: !secret github_token2
-  payload: '{"state":"{{ status }}","body":"{{ message }}"}'
+  payload: '{ "body":"{{ message }}" }'
