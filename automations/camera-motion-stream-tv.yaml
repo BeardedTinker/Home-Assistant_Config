@@ -15,7 +15,7 @@ condition: []
 
 action:
   - data:
-      entity_id: camera.elevator
+      entity_id: camera.elevator_profile1
       media_player: media_player.display_me
       format: hls
     service: camera.play_stream

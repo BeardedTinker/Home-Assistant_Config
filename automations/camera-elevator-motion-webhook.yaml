@@ -10,7 +10,7 @@ trigger:
 condition: []
 action:
 - data:
-    entity_id: camera.lift
+    entity_id: camera.elevator_profile1
     filename: /config/tmp/elevator.jpg
   service: camera.snapshot
 - data:

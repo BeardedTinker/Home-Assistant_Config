@@ -13,7 +13,7 @@ condition: []
 
 action:
   - data:
-      entity_id: camera.terasa2
+      entity_id: camera.balcony_profile1
       filename: /config/tmp/balcony.jpg
     service: camera.snapshot
   - data:
