@@ -1,5 +1,6 @@
 #####
 # Pull all cameras from Synology Surveilence station
+# Removed since 0.116
 #####
 
 platform: synology
