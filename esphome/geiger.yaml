@@ -30,6 +30,8 @@ api:
 ota:
   password: !secret ota_password
 
+esp32_ble_tracker:
+
 sensor:
   - platform: pulse_counter
     pin: GPIO36
@@ -55,3 +57,12 @@ sensor:
     accuracy_decimals: 4
     filters:
     - lambda: return x / 123.147092360319;
+
+binary_sensor:
+  - platform: xiaomi_wx08zm
+    name: Mosquito
+    mac_address: "74:A3:4A:BE:3F:D3"
+    tablet:
+      name: "WX08ZM Mosquito Tablet"
+    battery_level:
+      name: "WX08ZM Battery Level"
