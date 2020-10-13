@@ -1,0 +1,3 @@
+platform: ffmpeg
+name: FFmpeg RLC-410
+input: -rtsp_transport tcp -i rtsp://admin:1q2w3e4r@192.168.1.111:554/h264Preview_01_sub

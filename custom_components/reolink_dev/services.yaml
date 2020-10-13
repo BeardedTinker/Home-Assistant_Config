@@ -1,0 +1,69 @@
+enable_ftp:
+  description: Enable FTP upload on motion recording.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+disable_ftp:
+  description: Disable FTP upload on motion recording.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+enable_email:
+  description: Enable email functionality on motion detection.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+disable_email:
+  description: Disable email functionality on motion detection.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+enable_ir_lights:
+  description: Enable the infrared lights (nightvision) of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+disable_ir_lights:
+  description: Disable the infrared lights (nightvision) of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+enable_recording:
+  description: Enable the motion recording of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+disable_recording:
+  description: Disable the motion recording of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+
+enable_motion_detection:
+  description: Enable the motion detection of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
+      
+disable_motion_detection:
+  description: Disable the motion detection of the Reolink camera.
+  fields:
+    entity_id:
+      description: Name of the Reolink camera entity to set.
+      example: 'camera.frontdoor'
