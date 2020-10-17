@@ -1,9 +1,7 @@
-""" config flow """
+""" Config flow """
 from collections import OrderedDict
-import logging
 from homeassistant.core import callback
 import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
 from homeassistant import config_entries
 from datetime import datetime
 import uuid
@@ -19,14 +17,11 @@ from .const import (
     DEFAULT_UNIT_OF_MEASUREMENT,
     DEFAULT_ID_PREFIX,
     DEFAULT_ONE_TIME,
-    CONF_SENSOR,
-    CONF_ENABLED,
     CONF_ICON_NORMAL,
     CONF_ICON_TODAY,
     CONF_ICON_SOON,
     CONF_DATE,
     CONF_DATE_FORMAT,
-    CONF_SENSORS,
     CONF_SOON,
     CONF_HALF_ANNIVERSARY,
     CONF_UNIT_OF_MEASUREMENT,
@@ -35,8 +30,6 @@ from .const import (
 )
 
 from homeassistant.const import CONF_NAME
-
-_LOGGER = logging.getLogger(__name__)
 
 
 @config_entries.HANDLERS.register(DOMAIN)
@@ -58,7 +51,7 @@ class AnniversariesFlowHandler(config_entries.ConfigFlow):
                 self.init_info = user_input
                 return await self.async_step_icons()
         return await self._show_user_form(user_input)
-    
+
     async def async_step_icons(self, user_input=None):
         self._errors = {}
         if user_input is not None:
@@ -152,7 +145,8 @@ def is_not_date(date, one_time):
         return False
     except ValueError:
         return True
-        
+
+
 class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self.config_entry = config_entry
