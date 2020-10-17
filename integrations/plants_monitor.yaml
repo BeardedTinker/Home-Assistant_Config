@@ -3,32 +3,32 @@
 # https://www.home-assistant.io/integrations/plant
 #####
 
-plant:
-  cherry_tomatoes:
-    sensors:
-      moisture: sensor.cherry_tomatoes_soil
-      battery: sensor.cherry_tomatoes_battery
-      temperature: sensor.cherry_tomatoes_temperature
-      conductivity: sensor.cherry_tomatoes_fertilizer
-      brightness: sensor.cherry_tomatoes_lux
-    min_moisture: 30
-    max_moisture: 85
-    min_battery: 5
-    min_conductivity: 1
-    min_temperature: 10
-    min_brightness: 500
-    check_days: 3
-  ficus_benjamina:
-    sensors:
-      moisture: sensor.ficus_benjamina_soil
-      battery: sensor.ficus_benjamina_battery
-      temperature: sensor.ficus_benjamina_temperature
-      conductivity: sensor.ficus_benjamina_fertilizer
-      brightness: sensor.ficus_benjamina_lux
-    min_moisture: 20
-    max_moisture: 75
-    min_battery: 5
-    min_conductivity: 1
-    min_temperature: 19
-    min_brightness: 500
-    check_days: 3
+plant: !include_dir_merge_named ../entities/plants
+#  cherry_tomatoes:
+#    sensors:
+#      moisture: sensor.cherry_tomatoes_soil
+#      battery: sensor.cherry_tomatoes_battery
+#      temperature: sensor.cherry_tomatoes_temperature
+#      conductivity: sensor.cherry_tomatoes_fertilizer
+#      brightness: sensor.cherry_tomatoes_lux
+#    min_moisture: 60
+#    max_moisture: 85
+#    min_battery: 5
+#    min_conductivity: 1
+#    min_temperature: 7
+#    min_brightness: 500
+#    check_days: 3
+#  ficus_benjamina:
+#    sensors:
+#      moisture: sensor.ficus_benjamina_soil
+#      battery: sensor.ficus_benjamina_battery
+#      temperature: sensor.ficus_benjamina_temperature
+#      conductivity: sensor.ficus_benjamina_fertilizer
+#      brightness: sensor.ficus_benjamina_lux
+#    min_moisture: 30
+#    max_moisture: 75
+#    min_battery: 5
+#    min_conductivity: 1
+#    min_temperature: 19
+#    min_brightness: 500
+#    check_days: 3
