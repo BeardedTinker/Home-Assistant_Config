@@ -4,12 +4,12 @@
 
 chromecast_radio:
   name: 'Select Speakers:'
-  initial: Display Me
+  initial: 'Display me'
   icon: mdi:speaker-wireless
   options:
-    - Living Room TV
-    - Loft TV
-    - Display Me
-    - Clock Me
-    - Whatever Me
-    - Mini Me
+    - 'Living room'
+    - 'Loft TV'
+    - 'Display me'
+    - 'Clock me'
+    - 'Whatever me'
+    - 'Mini me'

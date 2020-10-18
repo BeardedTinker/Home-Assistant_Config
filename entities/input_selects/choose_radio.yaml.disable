@@ -2,15 +2,15 @@
 # Not used - list of radio stations
 #####
 
-radio_station:
-  name: 'Select Radio Station:'
+choose_radio:
+  name: Choose Radio Station
+  icon: mdi:radio
   options:
-    - 'Antena Zagreb'
+    - 'Antena'
     - 'Narodni'
     - 'Otvoreni'
     - 'yammat FM'
     - 'HKR'
     - 'Radio Marija'
     - 'Radio Postaja Mir Medugorje'
-  initial: Antena Zagreb
-  icon: mdi:radio
+  initial: Antena

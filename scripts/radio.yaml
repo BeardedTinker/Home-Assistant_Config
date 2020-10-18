@@ -1,6 +1,6 @@
 #####
-# Another try on Radio script
-# Not used at the moment
+# Radio script is now working. Still need to optimise the code.
+# Can be used.
 #####
 
 radio:
@@ -10,21 +10,31 @@ radio:
     data:
       entity_id: >
         {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
-        {% elif is_state("input_select.chromecast_radio", "Bedroom") %} media_player.loft_tv
+        {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
         {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
         {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+        {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+        {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
         {% endif %}
-      volume_level: '{{  states.input_number.volume_radio.state  }}'
+      volume_level: '{{  states("input_number.volume_radio")  }}'
   - service: media_player.play_media
     data:
       entity_id: >
         {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
-        {% elif is_state("input_select.chromecast_radio", "Bedroom") %} media_player.loft_tv
+        {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
         {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
         {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+        {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+        {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
         {% endif %}
       media_content_id: >
         {% if is_state("input_select.radio_station", "HKR") %} http://stream.hkr.hr:8000/hkr.aac
+        {% elif is_state("input_select.radio_station", "Otvoreni") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Antena Zagreb") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Narodni") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "yammat FM") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Radio Marija") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Radio Postaja Mir Medugorje") %} http://proxima.shoutca.st:8357/stream
         {% elif is_state("input_select.radio_station", "HRT1") %} http://19513.live.streamtheworld.com:80/PROGRAM1AAC_SC
         {% elif is_state("input_select.radio_station", "Mix 94-5") %} http://sc01.scahw.com.au/6mix_32
         {% elif is_state("input_select.radio_station", "96FM") %} https://icy.ihrcast.arn.com.au/au_012_icy
@@ -40,6 +50,6 @@ radio:
         {% elif is_state("input_select.radio_station", "DI Chill & Tropical House") %} http://pub1.diforfree.org:8000/di_chillntropicalhouse_hi
         {% elif is_state("input_select.radio_station", "DI Disco House") %} http://pub1.diforfree.org:8000/di_discohouse_hihttps://ebroz.xyz:5002/scripts/ext-3/resources/images/default/s.gif
         {% elif is_state("input_select.radio_station", "DI Funky House") %} http://pub1.diforfree.org:8000/di_funkyhouse_hi
-        {% elif is_state("input_select.radio_station", "DI Liquid D&B") %} http://pub1.diforfree.org:8000/di_liquiddnb_hi
+        {% elif is_state("input_select.radio_station", "Otvoreni") %} http://proxima.shoutca.st:8357/stream
         {% endif %}
       media_content_type: 'audio/mp4'

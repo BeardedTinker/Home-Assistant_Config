@@ -1,0 +1,9 @@
+# Play TuneIn radio - not working!
+
+playradio:
+  sequence:
+  - service: media_player.play_media
+    data:
+      entity_id: '{{ "media_player." + states("input_select.chromecast_radio") }}'
+      media_content_id: '{{ states("input_select.radio_station") }}'
+      media_content_type: 'TUNEIN'
