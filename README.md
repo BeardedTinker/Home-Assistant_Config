@@ -135,6 +135,30 @@ Insipred by [Franck](https://github.com/frenck/home-assistant-config) I've broke
 
 It looks overwhelming at first, but when you get the hang of it, this structure is much easier to maintain and find something. Also disabeling parts of the integrations is just a rename away :)
 
+## Counters
+
+Current count of various things in Home Assistant
+
+| Type                 | Count |
+| -------------------- |:-----:|
+| Alerts               | 1     |
+| Automations          | 109   |
+| Binary sensors       | 84    |
+| Cameras              | 11    |
+| Climates             | 3     |
+| Device trackers      | 64    |
+| Entities             | 1144  |
+| Groups               | 16    |
+| Lights               | 35    |
+| Media players        | 30    |
+| Lines of code (YAML) | 9821  |
+| Persons              | 6     |
+| Scripts              | 15    |
+| Sensors              | 650   |
+| Switches             | 57    |
+| Timers               | 3     |
+| Weather              | 2     |
+
 
 ### Missing files
 
