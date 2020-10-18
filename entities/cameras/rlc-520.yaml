@@ -1,8 +1,0 @@
-platform: reolink_dev
-host: !secret reolink_1_ip
-username: !secret reolink_1_user
-password: !secret reolink_1_pass
-name: Reolink RLC-520
-stream: sub
-protocol: rtsp
-scan_interval: 10

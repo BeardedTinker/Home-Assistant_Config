@@ -1,4 +1,0 @@
-platform: generic
-stream_source: rtsp://admin:1q2w3e4r@192.168.1.119:554/h264Preview_01_sub
-name: Generic RLC-520
-still_image_url: "http://192.168.1.119/cgi-bin/api.cgi?cmd=Snap&amp;channel=0&amp;rs=wuuPhkmUCeI9WG7C&amp;user=admin&amp;password=1q2w3e4r"
