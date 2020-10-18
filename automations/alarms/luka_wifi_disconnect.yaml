@@ -1,0 +1,23 @@
+#####
+# Warning if WIFI is NOT connected
+# Stil work in progress
+#####
+
+alias: WiFi disconnect Luka
+id: 1a0ac26e-e6ee-4c07-9573-db3132ac5096
+
+trigger:
+  entity_id: sensor.atu_l21_wifi_connection
+  platform: state
+  to: '<not connected>'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'luka'
+    title: '📶 WiFi Disconnected'
+    value1: 'Check your WiFi'
+    tag_id: 'information'
+    sticky: 'false'
+    group: status
+    color: '#ff0000'

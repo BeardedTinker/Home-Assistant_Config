@@ -1,0 +1,23 @@
+#####
+# Notify when WIFI connection is restored
+# Stil work in progress
+#####
+
+alias: WiFi connect Luka
+id: 0121580a-aac1-4c27-ac8d-88f45de8430f
+
+trigger:
+  entity_id: sensor.atu_l21_wifi_connection
+  platform: state
+  from: '<not connected>'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'luka'
+    title: '📶 WiFi Connected'
+    value1: ' {{ states("sensor.atu_l21_wifi_connection") }} WiFi is connected - well done!'
+    tag_id: 'information'
+    sticky: 'true'
+    group: status
+    color: '#ff0000'

@@ -1,0 +1,23 @@
+#####
+# Notify when WIFI connection is restored
+# Stil work in progress
+#####
+
+alias: WiFi connect Mirta
+id: a6e89460-682b-4be2-a019-fb3698936d1f
+
+trigger:
+  entity_id: sensor.fig_lx1_wifi_connection
+  platform: state
+  from: '<not connected>'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'mirta'
+    title: '📶 WiFi Connected'
+    value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
+    tag_id: 'information'
+    sticky: 'false'
+    group: status
+    color: '#ff0000'
