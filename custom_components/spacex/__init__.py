@@ -107,6 +107,12 @@ class SpaceXUpdateCoordinator(DataUpdateCoordinator):
             spacex_starman = await self.api.get_roadster_status()
             spacex_next_launch = await self.api.get_next_launch()
             spacex_latest_launch = await self.api.get_latest_launch()
+
+            return {
+                "starman": spacex_starman,
+                "next_launch": spacex_next_launch,
+                "latest_launch": spacex_latest_launch,
+            }
         except ConnectionError as error:
             _LOGGER.info("SpaceX API: %s", error)
             raise PlatformNotReady from error
@@ -114,9 +120,5 @@ class SpaceXUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.info("SpaceX API: %s", error)
             raise ConfigEntryNotReady from error
 
-        return {
-            "starman": spacex_starman,
-            "next_launch": spacex_next_launch,
-            "latest_launch": spacex_latest_launch,
-        }
+        
 
