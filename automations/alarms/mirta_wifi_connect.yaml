@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'mirta'
-    title: '📶 WiFi Connected'
+    title: '📶 *WiFi Connected*'
     value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
     tag_id: 'information'
     sticky: 'false'

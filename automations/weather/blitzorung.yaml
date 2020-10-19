@@ -25,7 +25,7 @@ action:
   - service: script.notify_engine
     data:
       who: 'family'
-      title: 'Lightning Warning!'
+      title: '*Lightning Warning!*'
       value1: 'Lightning has been detected within {{states("sensor.blitzortung_lightning_distance") | round (1, "floor")}} km from our place.'
       tag_id: 'warning'
       sticky: 'true'

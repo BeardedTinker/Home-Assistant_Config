@@ -19,8 +19,8 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: "🌅 Sunset"
-    value1: "Sun setting, turning lights on."
+    title: '🌅 *Sunset*'
+    value1: 'Sun setting, turning lights on.'
     tag_id: 'information'
 - data:
     entity_id: light.living_room_lights

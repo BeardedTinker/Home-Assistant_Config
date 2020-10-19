@@ -32,7 +32,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: 'Update Home Assistant'
+    title: '*Update Home Assistant*'
     value1: 'There is an update to Home Assistant Supervise'
     value2: '{{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}'
     value3: 'Triggering Travis build...'
@@ -45,7 +45,7 @@ action:
 
 - service: persistent_notification.create
   data:
-    title: Update Home Assistant
+    title: '*Update Home Assistant*'
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
@@ -72,7 +72,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: 'Update Home Assistant'
+    title: '*Update Home Assistant*'
     value1: 'Travis Build has started'
     tag_id: 'update_ha'
     sticky: 'true'
@@ -83,7 +83,7 @@ action:
 
 - service: persistent_notification.create
   data:
-    title: Update Home Assistant
+    title: '*Update Home Assistant*'
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
@@ -96,7 +96,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: 'Update Home Assistant'
+    title: '*Update Home Assistant*'
     value1: 'Travis Build has {{states("sensor.beardedtinker_home_assistant_config_state")}}'
     tag_id: 'update_ha'
     sticky: 'true'
@@ -107,7 +107,7 @@ action:
 
 - service: persistent_notification.create
   data:
-    title: Update Home Assistant
+    title: '*Update Home Assistant*'
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}

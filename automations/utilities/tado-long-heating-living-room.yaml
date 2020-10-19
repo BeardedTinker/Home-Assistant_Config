@@ -19,7 +19,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: "♨ HEATING WARNING!"
-    value1: "Living Room Heating ON for > 60 minutes"
+    title: '♨ *HEATING WARNING!*'
+    value1: 'Living Room Heating ON for > 60 minutes'
     tag_id: 'warning'
     target_id: !secret telegram_bot_chat_id

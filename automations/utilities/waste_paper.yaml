@@ -20,7 +20,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: '♻ Garbage day'
+    title: '♻ *Garbage day*'
     value1: 'Take out paper for recycling.'
     tag_id: 'information'
     sticky: 'true'

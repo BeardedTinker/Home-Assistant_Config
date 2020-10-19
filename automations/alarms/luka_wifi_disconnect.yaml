@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'luka'
-    title: '📶 WiFi Disconnected'
+    title: '📶 *WiFi Disconnected*'
     value1: 'Check your WiFi'
     tag_id: 'information'
     sticky: 'false'

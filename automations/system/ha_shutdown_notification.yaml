@@ -13,7 +13,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: 'HA shutdown'
+    title: '*HA shutdown*'
     value1: 'Home Assistant shutting down at {{ states("sensor.time") }}'
     tag_id: 'system'
     sticky: 'false'

@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: "🌅 Sunrise"
+    title: '🌅 *Sunrise*'
     value1: "It is {{ states('sensor.time') }} and the sun is up. Wake Up!"
     tag_id: 'information'
 - data:

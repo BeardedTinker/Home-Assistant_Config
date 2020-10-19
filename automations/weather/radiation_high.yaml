@@ -18,7 +18,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '☢ Radiation Level Alert!'
+    title: '☢ *Radiation Level Alert!*'
     value1: 'Radiation is currently {{ states("sensor.geiger_counter_2") }} CPM. Normal value is below 0.5'
     tag_id: 'warning'
     sticky: 'true'
