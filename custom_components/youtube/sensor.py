@@ -19,7 +19,6 @@ CONF_CHANNEL_ID = 'channel_id'
 ICON = 'mdi:youtube'
 
 BASE_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id={}'
-BASE_URL_LIVE = "https://www.youtube.com/channel/{}"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_CHANNEL_ID): cv.string,
@@ -71,7 +70,7 @@ class YoutubeSensor(Entity):
                 info.split('<title>')[2].split('</')[0])
             url = info.split('<link rel="alternate" href="')[2].split('"/>')[0]
             if self.live or url != self.url:
-                self.live = await is_live(self.channel_id, self._name, self.hass, self.session)
+                self.live = await is_live(url, self._name, self.hass, self.session)
             else:
                 _LOGGER.debug('%s - Skipping live check', self._name)
             self.url = url
@@ -111,17 +110,16 @@ class YoutubeSensor(Entity):
                 'live': self.live}
 
 
-async def is_live(channel_id, name, hass, session):
+async def is_live(url, name, hass, session):
     """Return bool if channel is live"""
     returnvalue = False
-    url = BASE_URL_LIVE.format(channel_id)
     try:
         async with async_timeout.timeout(10, loop=hass.loop):
             response = await session.get(url)
             info = await response.text()
-        if 'BADGE_STYLE_TYPE_LIVE_NOW' in info:
+        if 'Started streaming' in info:
             returnvalue = True
-            _LOGGER.debug('%s - Channel is live', name)
+            _LOGGER.debug('%s - Latest Video is live', name)
     except Exception as error:  # pylint: disable=broad-except
         _LOGGER.debug('%s - Could not update - %s', name, error)
     return returnvalue
