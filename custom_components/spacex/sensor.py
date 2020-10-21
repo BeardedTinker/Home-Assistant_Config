@@ -1,6 +1,8 @@
 """Definition and setup of the SpaceX Binary Sensors for Home Assistant."""
 
 import logging
+import time
+import datetime
 
 from homeassistant.util.dt import as_local, utc_from_timestamp
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
@@ -49,6 +51,16 @@ async def async_setup_entry(hass, entry, async_add_entities):
             coordinator,
             "Next Launch Time",
             "spacex_next_launch_time",
+            "mdi:clock-outline",
+            "spacexlaunch",
+        )
+    )
+
+    sensors.append(
+        SpaceXSensor(
+            coordinator,
+            "Next Launch Countdown",
+            "spacex_next_launch_countdown",
             "mdi:clock-outline",
             "spacexlaunch",
         )
@@ -250,7 +262,7 @@ class SpaceXSensor(CoordinatorEntity):
 
         if self._kind == "spacex_next_launch_mission":
             self.attrs["mission_patch"] = launch_data["links"].get("mission_patch")
-            if launch_data.get("details") is not None:
+            if launch_data.get("details"):
                 self.attrs["details"] = launch_data["details"][0:255]
             self.attrs["video_link"] = launch_data["links"].get("video_link")
 
@@ -258,8 +270,35 @@ class SpaceXSensor(CoordinatorEntity):
             self.attrs["launch_date_unix"] = launch_data["launch_date_unix"]
             self.attrs["launch_date_utc"] = launch_data["launch_date_utc"]
 
+        elif self._kind == "spacex_next_launch_countdown":
+            if launch_data["is_tentative"]:
+                self.attrs["t0_countdown"] = "NA"
+            else:
+                t0_countdown = int(launch_data["launch_date_unix"]) - int(time.time())
+                day = t0_countdown // (24 * 3600)
+                t0_countdown = t0_countdown % (24 * 3600)
+                hour = t0_countdown // 3600
+                t0_countdown %= 3600
+                minutes = t0_countdown // 60
+                t0_countdown %= 60
+                seconds = t0_countdown
+
+                countdown_string = ""
+                if day > 0:
+                    countdown_string = f"{day} days, "
+
+                if hour > 0:
+                    countdown_string = f"{countdown_string}{hour} hours, "
+
+                if minutes > 0:
+                    countdown_string = f"{countdown_string}{minutes} minutes, "
+
+                countdown_string = f"{countdown_string}{seconds} seconds until the launch of {launch_data['mission_name']}."
+                
+                self.attrs["t0_countdown"] = countdown_string
+
         elif self._kind == "spacex_next_confirmed_launch_day":
-            if launch_data["is_tentative"] is True:
+            if launch_data["is_tentative"]:
                 self.attrs["launch_date_unix"] = "NA"
                 self.attrs["launch_date_utc"] = "NA"
             else:
@@ -324,7 +363,7 @@ class SpaceXSensor(CoordinatorEntity):
 
         elif self._kind == "spacex_latest_launch_mission":
             self.attrs["mission_patch"] = latest_launch_data["links"].get("mission_patch")
-            if latest_launch_data.get("details") is not None:
+            if latest_launch_data.get("details"):
                 self.attrs["details"] = latest_launch_data["details"][0:255]
             self.attrs["video_link"] = latest_launch_data["links"].get("video_link")
 
@@ -435,8 +474,15 @@ class SpaceXSensor(CoordinatorEntity):
                 launch_data["launch_date_unix"]
             )).strftime("%I:%M %p")
 
+        elif self._kind == "spacex_next_launch_countdown":
+            if launch_data["is_tentative"]:
+                self._state = None
+            else:
+                t0_countdown = int(launch_data["launch_date_unix"]) - int(time.time())
+                self._state = str(datetime.timedelta(seconds=t0_countdown))
+
         elif self._kind == "spacex_next_confirmed_launch_day":
-            if launch_data["is_tentative"] is True:
+            if launch_data["is_tentative"]:
                 self._state = None
             else:
                 self._state = as_local(utc_from_timestamp(
@@ -444,7 +490,7 @@ class SpaceXSensor(CoordinatorEntity):
                 )).strftime("%d-%b-%Y")
 
         elif self._kind == "spacex_next_confirmed_launch_time":
-            if launch_data["is_tentative"] is True:
+            if launch_data["is_tentative"]:
                 self._state = None
             else:
                 self._state = as_local(utc_from_timestamp(
