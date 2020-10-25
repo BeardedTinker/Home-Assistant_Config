@@ -1,0 +1,16 @@
+#####
+# Radio player - used to start radio with script
+#
+#####
+
+platform: template
+switches:
+  radio_play:
+    icon_template: 'mdi:play'
+    value_template: 'on'
+    turn_on:
+      service: script.turn_on
+      entity_id: script.radio_play
+    turn_off:
+      service: script.turn_on
+      entity_id: script.radio_play

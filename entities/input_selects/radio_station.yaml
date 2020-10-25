@@ -1,5 +1,5 @@
 #####
-# Not used - list of radio stations
+# Radio player - containes list of available radio stations
 #####
 
 radio_station:
@@ -7,10 +7,13 @@ radio_station:
   options:
     - 'Antena Zagreb'
     - 'Narodni'
-    - 'Otvoreni'
-    - 'yammat FM'
     - 'HKR'
+    - 'HRT1'
+    - 'HRT2'
+    - 'Otvoreni'
     - 'Radio Marija'
-    - 'Radio Postaja Mir Medugorje'
+    - 'Radio Postaja Mir Međugorje'
+    - 'yammat FM'
+    - 'Stopped'
   initial: Antena Zagreb
   icon: mdi:radio

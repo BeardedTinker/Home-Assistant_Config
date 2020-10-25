@@ -1,0 +1,41 @@
+#####
+# Radio player - script to start playing radio with selected values.
+# 
+#####
+
+radio_play:
+  alias: Play Radio on Chromecast Audio
+  sequence:
+  - service: media_player.volume_set
+    data:
+      entity_id: >
+        {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
+        {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
+        {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
+        {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+        {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+        {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
+        {% endif %}
+      volume_level: '{{  states("input_number.volume_radio")  }}'
+  - service: media_player.play_media
+    data:
+      entity_id: >
+        {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
+        {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
+        {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
+        {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+        {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+        {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
+        {% endif %}
+      media_content_id: >
+        {% if is_state("input_select.radio_station", "HKR") %} http://stream.hkr.hr:8000/hkr.aac
+        {% elif is_state("input_select.radio_station", "Otvoreni") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Antena Zagreb") %} http://live.antenazagreb.hr:8000/stream
+        {% elif is_state("input_select.radio_station", "Narodni") %} http://live.narodni.hr:8059/stream
+        {% elif is_state("input_select.radio_station", "yammat FM") %} http://live.narodni.hr:8059/stream
+        {% elif is_state("input_select.radio_station", "Radio Marija") %} https://dreamsiteradiocp2.com/proxy/rmcroatia?mp=/stream
+        {% elif is_state("input_select.radio_station", "Radio Postaja Mir Međugorje") %} http://213.133.102.58:23565/stream
+        {% elif is_state("input_select.radio_station", "HRT1") %} https://21223.live.streamtheworld.com/PROGRAM1AAC_SC
+        {% elif is_state("input_select.radio_station", "HRT2") %} https://20073.live.streamtheworld.com:3690/PROGRAM2AAC_SC
+        {% endif %}
+      media_content_type: 'audio/mp4'

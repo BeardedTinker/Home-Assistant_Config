@@ -1,0 +1,8 @@
+#####
+# Radio player - Allows to inpute Radio Station URL by hand
+# 
+#####
+
+custom_radio:
+  name: Radio station URL
+  icon: mdi:link-variant

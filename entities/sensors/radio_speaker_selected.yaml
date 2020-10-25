@@ -1,0 +1,11 @@
+#####
+# Radio player - showes current speaker taht is selected for radio
+#
+#####
+
+platform: template
+sensors:
+  speaker_selected:
+    value_template: '{{ states("input_select.chromecast_radio") }}'
+    friendly_name: 'Speaker Selected'
+    icon_template: mdi:speaker-wireless

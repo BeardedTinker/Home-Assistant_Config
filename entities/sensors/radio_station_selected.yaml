@@ -1,0 +1,11 @@
+#####
+# Radio player - sensor taht shows current radio station selection
+#
+#####
+
+platform: template
+sensors:
+  radio_station_selected:
+    value_template: '{{ states("input_select.radio_station") }}'
+    friendly_name: 'Station Selected'
+    icon_template: mdi:radio

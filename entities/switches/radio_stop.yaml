@@ -1,0 +1,16 @@
+#####
+# Radio player - used to stop radio with script
+#
+#####
+
+platform: template
+switches:
+  radio_stop:
+    icon_template: 'mdi:stop'
+    value_template: 'on'
+    turn_on:
+      service: script.turn_on
+      entity_id: script.radio_stop
+    turn_off:
+      service: script.turn_on
+      entity_id: script.radio_stop

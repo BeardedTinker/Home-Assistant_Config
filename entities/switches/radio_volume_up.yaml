@@ -1,0 +1,32 @@
+#####
+# Radio player - volume up control
+#
+#####
+
+platform: template
+switches: 
+  radio_volume_up:
+    icon_template: 'mdi:volume-plus'
+    value_template: 'on'
+    turn_on:
+      service: media_player.volume_up
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
+          {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
+          {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
+          {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+          {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+          {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
+          {% endif %}
+    turn_off:
+      service: media_player.volume_up
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.chromecast_radio", "Living room") %} media_player.living_room_tv_2
+          {% elif is_state("input_select.chromecast_radio", "Loft TV") %} media_player.loft_tv
+          {% elif is_state("input_select.chromecast_radio", "Display me") %} media_player.display_me
+          {% elif is_state("input_select.chromecast_radio", "Mini me") %} media_player.mini_me
+          {% elif is_state("input_select.chromecast_radio", "Whatever me") %} media_player.whatever_me
+          {% elif is_state("input_select.chromecast_radio", "Clock me") %} media_player.clock_me
+          {% endif %}
