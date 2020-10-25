@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of input text
+#
+#####
+
+platform: template
+sensors:
+  alert_count:
+    friendly_name: 'Number of Input Texts'
+    value_template: >-
+      {{ states.input_text | list | count }}

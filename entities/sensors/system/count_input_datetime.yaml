@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of input date/time
+#
+#####
+
+platform: template
+sensors:
+  alert_count:
+    friendly_name: 'Number of Input Date/Time'
+    value_template: >-
+      {{ states.input_datetime | list | count }}
