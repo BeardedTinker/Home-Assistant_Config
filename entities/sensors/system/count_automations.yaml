@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  automation_count:
+  count_automations:
     friendly_name: 'Number of Automations'
     value_template: >-
       {{ states.automation | list | count }}

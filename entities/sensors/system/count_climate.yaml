@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  climate_count:
+  count_climate:
     friendly_name: 'Number of Climates'
     value_template: >-
       {{ states.climate | list | count }}

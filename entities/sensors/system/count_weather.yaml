@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  weather_count:
+  count_weather:
     friendly_name: 'Number of Weather'
     value_template: >-
       {{ states.weather | list | count }}

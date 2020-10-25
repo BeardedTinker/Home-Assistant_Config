@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  sensor_count:
+  count_sensor:
     friendly_name: 'Number of Sensors'
     value_template: >-
       {{ states.sensor | list | count }}

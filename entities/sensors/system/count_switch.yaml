@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  switch_count:
+  count_switch:
     friendly_name: 'Number of Switches'
     value_template: >-
       {{ states.switch | list | count }}

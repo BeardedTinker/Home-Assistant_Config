@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  alert_count:
+  count_number:
     friendly_name: 'Number of Input Numbers'
     value_template: >-
       {{ states.input_number | list | count }}

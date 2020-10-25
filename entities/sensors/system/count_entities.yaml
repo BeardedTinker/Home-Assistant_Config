@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  entities_count:
+  count_entities:
     friendly_name: 'Number of Entities'
     value_template: >
       {{ states | length }}

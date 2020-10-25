@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  alert_count:
+  count_boolean:
     friendly_name: 'Number of Input Booleans'
     value_template: >-
       {{ states.input_boolean | list | count }}

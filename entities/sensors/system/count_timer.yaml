@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  timer_count:
+  count_timer:
     friendly_name: 'Number of Timers'
     value_template: >-
       {{ states.timer | list | count }}

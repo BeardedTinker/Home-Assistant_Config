@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  groups_count:
+  count_groups:
     friendly_name: 'Number of Groups'
     value_template: >-
       {{ states.group | list | count }}

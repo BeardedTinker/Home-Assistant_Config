@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  script_count:
+  count_script:
     friendly_name: 'Number of Scripts'
     value_template: >
       {{ states.script | list | count }}

@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  alert_count:
+  count_datetime:
     friendly_name: 'Number of Input Date/Time'
     value_template: >-
       {{ states.input_datetime | list | count }}

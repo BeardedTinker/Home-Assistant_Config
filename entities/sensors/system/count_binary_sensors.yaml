@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  binary_sensor_count:
+  count_binary_sensor:
     friendly_name: 'Number of Binary Sensors'
     value_template: >-
       {{ states.binary_sensor | list | count }}
