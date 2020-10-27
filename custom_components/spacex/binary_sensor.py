@@ -115,10 +115,6 @@ class SpaceXBinarySensor(BinarySensorEntity):
     @property
     def device_state_attributes(self):
         """Return the attributes."""
-        launch_data = self.coordinator.data["next_launch"]
-
-        self.attrs["last_updated"] = launch_data["last_date_update"]
-
         return self.attrs
 
     @property

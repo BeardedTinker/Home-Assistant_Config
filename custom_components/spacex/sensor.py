@@ -258,8 +258,6 @@ class SpaceXSensor(CoordinatorEntity):
         launch_data = coordinator_data["next_launch"]
         latest_launch_data = coordinator_data["latest_launch"]
 
-        self.attrs["last_updated"] = launch_data["last_date_update"]
-
         if self._kind == "spacex_next_launch_mission":
             self.attrs["mission_patch"] = launch_data["links"].get("mission_patch")
             if launch_data.get("details"):
