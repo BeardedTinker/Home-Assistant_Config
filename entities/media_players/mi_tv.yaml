@@ -8,3 +8,9 @@ host: 192.168.1.122
 name: "Mi TV"
 adb_server_ip: 127.0.0.1
 adb_server_port: 5037
+apps:
+  com.google.android.youtube.tv: 'YouTube'
+  com.netflix.ninja: 'Netflix'
+  tv.emby.embyatv: 'Emby'
+  org.videolan.vlc: 'VLC'
+  
