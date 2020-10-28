@@ -6,6 +6,6 @@
 platform: template
 sensors:
   speaker_selected:
-    value_template: '{{ states("input_select.chromecast_radio") }}'
+    value_template: '{{ states("input_select.radio_speaker") }}'
     friendly_name: 'Speaker Selected'
     icon_template: mdi:speaker-wireless

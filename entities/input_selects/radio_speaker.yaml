@@ -2,7 +2,7 @@
 # Radio plyer - used to select speaker for Radio 
 #####
 
-chromecast_radio:
+radio_speaker:
   name: 'Select Speakers:'
   initial: 'Display me'
   icon: mdi:speaker-wireless

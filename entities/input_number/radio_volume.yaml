@@ -2,7 +2,7 @@
 # Used to make "slider" for volume control - not used
 #####
 
-volume_radio:
+radio_volume:
   name: Volume
   icon: mdi:volume-high
   initial: 0.3

@@ -6,6 +6,6 @@ radio:
   name: Radio
   entities:
   - input_select.radio_station
-  - input_select.chromecast_radio
-  - script.radio
-  - input_number.volume_radio
+  - input_select.radio_speaker
+  - script.radio_play
+  - input_number.radio_volume
