@@ -1,0 +1,10 @@
+#####
+# Android TV integration for Mi TV stick
+# https://www.home-assistant.io/integrations/androidtv/
+#####
+
+platform: androidtv
+host: 192.168.1.122
+name: "Mi TV"
+adb_server_ip: 127.0.0.1
+adb_server_port: 5037
