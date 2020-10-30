@@ -1,3 +1,8 @@
+#####
+# Webhook for GitHub
+# Used to get inforamtion about changes in repository
+#####
+
 id: '724c3e88-97c6-4193-b06f-ce468c411e92'
 alias: github webhook
 

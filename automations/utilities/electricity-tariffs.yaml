@@ -1,5 +1,6 @@
 #####
-# Triggers change of tariffs - sometimes fails
+# Triggers change of tariffs 
+# Used to switch between expensive/cheaper electricity tariff
 #####
 
 alias: Peak and Offpeak tariffs
