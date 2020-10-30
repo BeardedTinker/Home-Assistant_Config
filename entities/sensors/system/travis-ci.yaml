@@ -11,3 +11,6 @@ monitored_conditions:
   - last_build_started_at
   - last_build_state
   - state
+repository:
+  - Home-Assistant_Config
+  - Home-Assistant_Config_rec
