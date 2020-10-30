@@ -1,13 +1,13 @@
   <h4>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions"><img src="https://img.shields.io/github/workflow/status/BeardedTinker/Home-Assistant_Config/Home%20Assistant%20CI?label=GitHub%20CI&style=plastic"/></a>
-    <a href="https://travis-ci.org/BeardedTinker/Home-Assistant_Config"><img src="https://img.shields.io/travis/beardedtinker/home-assistant_config?label=Travis%20CI&style=plastic"/></a>
+    <a href="https://travis-ci.com/BeardedTinker/Home-Assistant_Config"><img src="https://img.shields.io/travis/beardedtinker/home-assistant_config?label=Travis%20CI&style=plastic"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
         <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_config?style=plastic"/></a>
     <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a><br>
 
 
-Each commit is verified automaticlly with <a href="https://travis-ci.org/github/BeardedTinker/Home-Assistant_Config">Travis CI</a>, but also with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Latest, Dev and Beta release
+Each commit is verified automaticlly with <a href="https://travis-ci.com/github/BeardedTinker/Home-Assistant_Config">Travis CI</a>, but also with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Latest, Dev and Beta release
   </h4>
 
 
@@ -142,28 +142,28 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     1 |
-| Automations          |   109 |
+| Automations          |    98 |
 | Binary sensors       |    84 |
-| Cameras              |    10 |
+| Cameras              |    11 |
 | Climates             |     3 |
 | Device trackers      |    64 |
-| Entities             |  1147 |
+| Entities             |  1141 |
 | Groups               |    16 |
 | Input Boolean        |     6 |
 | Input Date/Time      |     4 |
-| Input Number         |     7 |
-| Input Select         |     8 |
+| Input Number         |     8 |
+| Input Select         |     9 |
 | Input Text           |     4 |
-| Lights               |    32 |
-| Media players        |    29 |
-| Lines of code (YAML) | 10054 |
+| Lights               |    33 |
+| Media players        |    30 |
+| Lines of code (YAML) | 10161 |
 | Persons              |     6 |
 | Scripts              |    14 |
-| Sensors              |   657 |
-| Switches             |    60 |
+| Sensors              |   654 |
+| Switches             |    63 |
 | Timers               |     3 |
 | Weather              |     2 |
-| -------------------- |:-----:|
+
 
 ### Missing files
 
