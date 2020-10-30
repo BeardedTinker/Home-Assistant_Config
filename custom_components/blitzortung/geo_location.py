@@ -1,5 +1,6 @@
 """Support for Blitzortung geo location events."""
 import bisect
+import hashlib
 import logging
 import time
 
@@ -142,7 +143,7 @@ class BlitzortungEvent(GeolocationEvent):
         self._time = time
         self._publication_date = time / 1e9
         self._remove_signal_delete = None
-        self._strike_id = f"{latitude}_{longitude}".replace(".", "_")
+        self._strike_id = hashlib.sha1(f"{latitude}_{longitude}_{time}".encode()).hexdigest()
         self._unit_of_measurement = unit
         self.entity_id = "geo_location.lightning_strike_{0}".format(self._strike_id)
 
