@@ -1,0 +1,15 @@
+#####
+# Alert for Cherry Tomatoes
+#####
+
+daisy_plant:
+  name: Cherry tomatoes need help
+  entity_id: plant.cherry_tomatoes
+  state: 'problem'
+  repeat: 60
+  can_acknowledge: true
+  skip_first: true
+  message: "Plant {{ state_attr('plant.cherry_tomatoes', 'friendly_name') }} needs help ({{ state_attr('plant.daisy', 'problem') }})"
+  done_message: Cherry tomatoes are fine now
+  notifiers:
+    - ebroz_bot
