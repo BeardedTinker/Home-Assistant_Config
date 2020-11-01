@@ -2,7 +2,7 @@
 # Alert for Ficus Benjamina
 #####
 
-daisy_plant:
+ficus_benjamina_plant:
   name: Ficus benjamina needs help
   entity_id: plant.ficus_benjamina
   state: 'problem'

@@ -2,7 +2,7 @@
 # Alert for Cherry Tomatoes
 #####
 
-daisy_plant:
+cherry_tomatoes_plant:
   name: Cherry tomatoes need help
   entity_id: plant.cherry_tomatoes
   state: 'problem'
