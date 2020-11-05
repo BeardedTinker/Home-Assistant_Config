@@ -1,0 +1,4 @@
+platform: tts
+name: on_the_display_me
+tts_service: tts.google_say
+media_player: media_player.display_me

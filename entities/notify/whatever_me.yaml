@@ -1,0 +1,4 @@
+platform: tts
+name: on_the_whatever_me
+tts_service: tts.google_say
+media_player: media_player.whatever_me
