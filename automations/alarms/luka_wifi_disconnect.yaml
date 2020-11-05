@@ -7,9 +7,9 @@ alias: WiFi disconnect Luka
 id: 1a0ac26e-e6ee-4c07-9573-db3132ac5096
 
 trigger:
-  entity_id: sensor.atu_l21_wifi_connection
+  entity_id: sensor.iphone_connection_type
   platform: state
-  to: '<not connected>'
+  from: 'Wi-Fi'
 
 action:
 - service: script.notify_engine

@@ -3,20 +3,20 @@
 # Stil work in progress
 #####
 
-alias: WiFi connect Mirta
-id: a6e89460-682b-4be2-a019-fb3698936d1f
+alias: WiFi connect Zita
+id: 36762fab-017b-427b-a0be-3ff75f35f202
 
 trigger:
-  entity_id: sensor.eml_l29_wifi_connection
+  entity_id: sensor.fig_lx1_wifi_connection
   platform: state
   from: '<not connected>'
 
 action:
 - service: script.notify_engine
   data:
-    who: 'mirta'
+    who: 'zita'
     title: '📶 *WiFi Connected*'
-    value1: ' {{ states("sensor.eml_l29_wifi_connection") }} WiFi is connected - well done!'
+    value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
     tag_id: 'information'
     sticky: 'false'
     group: status
