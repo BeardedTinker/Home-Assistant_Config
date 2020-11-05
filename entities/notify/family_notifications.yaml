@@ -6,8 +6,8 @@
 platform: group
 name: family
 services:
-  - service: mobile_app_fig_lx1
   - service: mobile_app_eml_l29
-  - service: mobile_app_atu_l21
-#  - service: one_phone_missing
+  - service: mobile_app_ele_l29
+  - service: mobile_app_fig_lx1
+  - service: mobile_app_iphone
   - service: ebroz_bot
