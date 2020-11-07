@@ -325,9 +325,13 @@ class SpaceXSensor(CoordinatorEntity):
                     "landing_vehicle"
                 ]
                 core_counter = core_counter + 1
-            self.attrs["fairings_reused"] = launch_data["rocket"]["fairings"][
-                "reused"
-            ]
+
+            if launch_data["rocket"].get("fairings"):
+                self.attrs["fairings_reused"] = launch_data["rocket"]["fairings"].get(
+                    "reused"
+                )
+            else:
+                self.attrs["fairings_reused"] = "NA"
         
         elif self._kind == "spacex_next_launch_payload":
             self.attrs["nationality"] = launch_data["rocket"]["second_stage"][
