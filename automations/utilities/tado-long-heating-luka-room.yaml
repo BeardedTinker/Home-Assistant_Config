@@ -9,7 +9,7 @@ description: ''
 
 trigger:
   entity_id: binary_sensor.luka_room_heating
-  for: 00:60:00
+  for: 01:30:00
   platform: state
   to: 'on'
 
@@ -20,6 +20,6 @@ action:
   data:
     who: 'parents'
     title: '♨ *HEATING WARNING!!?'
-    value1: 'Luka Room Heating ON for > 60 minutes'
+    value1: 'Luka Room Heating ON for > 90 minutes'
     tag_id: 'warning'
     target_id: !secret telegram_bot_chat_id

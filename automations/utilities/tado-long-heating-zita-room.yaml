@@ -9,7 +9,7 @@ description: ''
 
 trigger:
   entity_id: binary_sensor.zita_room_heating
-  for: 00:60:00
+  for: 01:30:00
   platform: state
   to: 'on'
 
