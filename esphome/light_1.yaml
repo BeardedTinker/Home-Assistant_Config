@@ -12,7 +12,7 @@ wifi:
     password: "ACiX7CPWcDLm"
   manual_ip:
     # Set this to the IP of the ESP
-    static_ip: 192.168.1.58
+    static_ip: 192.168.1.55
     # Set this to the IP address of the router. Often ends with .1
     gateway: 192.168.1.1
     # The subnet of the network. 255.255.255.0 works for most home networks.
