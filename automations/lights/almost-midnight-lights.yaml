@@ -19,7 +19,7 @@ action:
     entity_id:
       - light.living_room_lights
     transition: 60
-    brightness: 48
+    brightness: 64
   service: light.turn_on
 - data:
     entity_id:

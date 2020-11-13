@@ -22,8 +22,9 @@ action:
     title: '🌅 *Sunset*'
     value1: 'Sun setting, turning lights on.'
     tag_id: 'information'
-- data:
+- service: light.turn_on
+  data:
     entity_id: light.living_room_lights
     transition: 60
-  service: light.turn_on
+    brightness: 128
 - service: script.eveninglightsspeach
