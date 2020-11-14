@@ -5,6 +5,7 @@ name: Home Assistant CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:
     - cron: 0 12 * * *
 
@@ -35,6 +36,10 @@ jobs:
     steps:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
       - name: Copy stub files into configuration folder
         run: |
           cp -R secrets_github.yaml secrets.yaml
@@ -96,5 +101,6 @@ jobs:
             python -m homeassistant --version
       - name: Home Assistant Check
         uses: "docker://homeassistant/home-assistant:dev"
+        continue-on-error: true
         with:
           args: python -m homeassistant --config ./ --script check_config --info all

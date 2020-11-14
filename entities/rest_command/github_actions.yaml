@@ -1,0 +1,12 @@
+#####
+# Run GitHub workflow actions
+#
+#####
+
+github_actions:
+  url: https://api.github.com/BeardedTinker/Home-Assistant_Config/actions/workflows/main.yml/dispatches
+  method: POST
+  headers:
+    authorization: !secret github_token2
+    Accept: "application/vnd.github.v3+json"
+  payload: '{"ref":"master"}'
