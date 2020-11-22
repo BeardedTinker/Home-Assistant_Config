@@ -191,7 +191,7 @@ class GarbageCollection(RestoreEntity):
         self._icon_today = config.get(CONF_ICON_TODAY)
         self._icon_tomorrow = config.get(CONF_ICON_TOMORROW)
         exp = config.get(CONF_EXPIRE_AFTER)
-        self._expire_after = (
+        self.expire_after = (
             None if exp is None else datetime.strptime(exp, "%H:%M").time()
         )
         self._date_format = config.get(CONF_DATE_FORMAT, DEFAULT_DATE_FORMAT)
@@ -559,9 +559,7 @@ class GarbageCollection(RestoreEntity):
             # If it is today and after expiration, search from tomorrow
             now = dt_util.now()
             expiration = (
-                self._expire_after
-                if self._expire_after is not None
-                else time(23, 59, 59)
+                self.expire_after if self.expire_after is not None else time(23, 59, 59)
             )
             if next_date == now.date():
                 if (
@@ -614,7 +612,7 @@ class GarbageCollection(RestoreEntity):
         else:
             try:
                 if self._next_date == today and (
-                    now.time() >= self._expire_after
+                    now.time() >= self.expire_after
                     or self.last_collection.date() == today
                 ):
                     ready_for_update = True
@@ -631,6 +629,7 @@ class GarbageCollection(RestoreEntity):
                 next_date = await self._async_candidate_with_incl_excl(today)
             except ValueError:
                 raise
+            _LOGGER.debug("(%s) Next date candidate (%s)", self._name, next_date)
             if not self.date_inside(next_date):
                 if self._first_month <= self._last_month:
                     next_year = date(year + 1, self._first_month, 1)
@@ -657,6 +656,16 @@ class GarbageCollection(RestoreEntity):
                         )
                     except ValueError:
                         raise
+                include_dates = list(
+                    filter(lambda date: date >= today, self._include_dates)
+                )
+                if len(include_dates) > 0 and include_dates[0] < next_date:
+                    _LOGGER.debug(
+                        "(%s) Using include date outside the date range %s",
+                        self._name,
+                        include_dates[0],
+                    )
+                    next_date = include_dates[0]
         else:
             if self._first_month <= self._last_month and month > self._last_month:
                 next_year = date(year + 1, self._first_month, 1)
@@ -678,6 +687,16 @@ class GarbageCollection(RestoreEntity):
                     next_date = await self._async_candidate_with_incl_excl(next_year)
                 except ValueError:
                     raise
+            include_dates = list(
+                filter(lambda date: date >= today, self._include_dates)
+            )
+            if len(include_dates) > 0 and include_dates[0] < next_date:
+                _LOGGER.debug(
+                    "(%s) Using include date outside the date range %s",
+                    self._name,
+                    include_dates[0],
+                )
+                next_date = include_dates[0]
         return next_date
 
     async def async_update(self) -> None:

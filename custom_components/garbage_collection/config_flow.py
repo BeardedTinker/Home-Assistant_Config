@@ -475,7 +475,7 @@ def string_to_list(string) -> list:
     """Convert comma separated text to list."""
     if string is None or string == "":
         return []
-    return list(map(lambda x: x.strip(), string.split(",")))
+    return list(map(lambda x: x.strip("'\" "), string.split(",")))
 
 
 def days_to_list(src):
