@@ -9,7 +9,7 @@ wifi:
 
   manual_ip:
     # Set this to the IP of the ESP
-    static_ip: 192.168.1.58
+    static_ip: 192.168.1.55
     # Set this to the IP address of the router. Often ends with .1
     gateway: 192.168.1.1
     # The subnet of the network. 255.255.255.0 works for most home networks.
@@ -51,11 +51,11 @@ light:
       - addressable_rainbow:
           name: Rainbow Effect With Custom Values
           speed: 10
-          width: 512
+          width: 256
       - addressable_rainbow:
           name: Rainbow mega fast
           speed: 20
-          width: 150
+          width: 64
       - addressable_color_wipe:
       - addressable_scan:
       - addressable_twinkle:
