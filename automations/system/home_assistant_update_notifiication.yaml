@@ -40,7 +40,7 @@ action:
     sticky: 'true'
     group: ha_status
     color: '#ff8c00'
-#    clickAction: /hassio/dashboard
+    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
 
 - service: persistent_notification.create
@@ -80,7 +80,7 @@ action:
     sticky: 'true'
     group: ha_status
     color: '#ff8c00'
-#    clickAction: /hassio/dashboard
+    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
 
 - service: persistent_notification.create
