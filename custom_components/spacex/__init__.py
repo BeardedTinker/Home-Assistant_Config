@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, PlatformNotReady
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import COORDINATOR, DOMAIN, SPACEX_API
 
@@ -118,7 +118,7 @@ class SpaceXUpdateCoordinator(DataUpdateCoordinator):
             raise PlatformNotReady from error
         except ValueError as error:
             _LOGGER.info("SpaceX API: %s", error)
-            raise ConfigEntryNotReady from error
+            raise UpdateFailed from error
 
         
 

@@ -5,7 +5,7 @@
   "documentation": "https://github.com/djtimca/haspacex",
   "issue_tracker": "https://github.com/djtimca/HASpaceX/issues",
   "requirements": [
-    "spacexpypi==0.0.8"
+    "spacexpypi==0.0.11"
   ],
   "ssdp": [],
   "zeroconf": [],

@@ -104,7 +104,7 @@ class SpaceXBinarySensor(BinarySensorEntity):
         launch_data = self.coordinator.data["next_launch"]
 
         if self._kind == "spacex_next_launch_confirmed":
-            if launch_data.get("is_tentative") is True:
+            if launch_data.get("tbd") is True:
                 return "mdi:do-not-disturb"
             else:
                 return "mdi:check-circle"
@@ -141,23 +141,23 @@ class SpaceXBinarySensor(BinarySensorEntity):
         launch_data = self.coordinator.data["next_launch"]
 
         if self._kind == "spacex_next_launch_confirmed":
-            if launch_data["is_tentative"] is True:
+            if launch_data["tbd"] is True:
                 return False
             else:
                 return True
 
         elif self._kind == "spacex_launch_24_hour_warning":
-            if launch_data["launch_date_unix"] < (
+            if launch_data["date_unix"] < (
                 time.time() + (24 * 60 * 60)
-            ) and launch_data["launch_date_unix"] > (time.time()):
+            ) and launch_data["date_unix"] > (time.time()):
                 return True
             else:
                 return False
 
         elif self._kind == "spacex_launch_20_minute_warning":
-            if launch_data["launch_date_unix"] < (
+            if launch_data["date_unix"] < (
                 time.time() + (20 * 60)
-            ) and launch_data["launch_date_unix"] > (time.time()):
+            ) and launch_data["date_unix"] > (time.time()):
                 return True
             else:
                 return False

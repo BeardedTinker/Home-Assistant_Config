@@ -259,20 +259,20 @@ class SpaceXSensor(CoordinatorEntity):
         latest_launch_data = coordinator_data["latest_launch"]
 
         if self._kind == "spacex_next_launch_mission":
-            self.attrs["mission_patch"] = launch_data["links"].get("mission_patch")
+            self.attrs["mission_patch"] = launch_data["links"].get("patch",{}).get("large")
             if launch_data.get("details"):
                 self.attrs["details"] = launch_data["details"][0:255]
-            self.attrs["video_link"] = launch_data["links"].get("video_link")
+            self.attrs["video_link"] = launch_data["links"].get("webcast")
 
         elif self._kind == "spacex_next_launch_day":
-            self.attrs["launch_date_unix"] = launch_data["launch_date_unix"]
-            self.attrs["launch_date_utc"] = launch_data["launch_date_utc"]
+            self.attrs["launch_date_unix"] = launch_data["date_unix"]
+            self.attrs["launch_date_utc"] = launch_data["date_utc"]
 
         elif self._kind == "spacex_next_launch_countdown":
-            if launch_data["is_tentative"]:
+            if launch_data["tbd"]:
                 self.attrs["t0_countdown"] = "NA"
             else:
-                t0_countdown = int(launch_data["launch_date_unix"]) - int(time.time())
+                t0_countdown = int(launch_data["date_unix"]) - int(time.time())
                 day = t0_countdown // (24 * 3600)
                 t0_countdown = t0_countdown % (24 * 3600)
                 hour = t0_countdown // 3600
@@ -291,143 +291,146 @@ class SpaceXSensor(CoordinatorEntity):
                 if minutes > 0:
                     countdown_string = f"{countdown_string}{minutes} minutes, "
 
-                countdown_string = f"{countdown_string}{seconds} seconds until the launch of {launch_data['mission_name']}."
+                countdown_string = f"{countdown_string}{seconds} seconds until the launch of {launch_data['name']}."
                 
                 self.attrs["t0_countdown"] = countdown_string
 
         elif self._kind == "spacex_next_confirmed_launch_day":
-            if launch_data["is_tentative"]:
+            if launch_data["tbd"]:
                 self.attrs["launch_date_unix"] = "NA"
                 self.attrs["launch_date_utc"] = "NA"
             else:
-                self.attrs["launch_date_unix"] = launch_data["launch_date_unix"]
-                self.attrs["launch_date_utc"] = launch_data["launch_date_utc"]
+                self.attrs["launch_date_unix"] = launch_data["date_unix"]
+                self.attrs["launch_date_utc"] = launch_data["date_utc"]
 
         elif self._kind == "spacex_next_launch_site":
-            self.attrs["short_name"] = launch_data["launch_site"]["site_name"]
+            self.attrs["short_name"] = launch_data["launch_site"]["name"]
 
         elif self._kind == "spacex_next_launch_rocket":
             core_counter = 1
-            for this_core in launch_data["rocket"]["first_stage"].get("cores"):
-                self.attrs["core_" + str(core_counter) + "_serial"] = this_core[
-                    "core_serial"
+            for this_core in launch_data["cores_detail"]:
+                self.attrs["core_" + str(core_counter) + "_serial"] = this_core["details"][
+                    "serial"
                 ]
                 self.attrs["core_" + str(core_counter) + "_flight"] = this_core[
                     "flight"
                 ]
-                self.attrs["core_" + str(core_counter) + "_block"] = this_core[
+                self.attrs["core_" + str(core_counter) + "_block"] = this_core["details"][
                     "block"
                 ]
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
-                ] = this_core["landing_intent"]
-                self.attrs["core_" + str(core_counter) + "_lz"] = this_core[
-                    "landing_vehicle"
+                ] = this_core["landing_attempt"]
+
+                self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
+                    "name"
+                ]
+
+                self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core["landpad"][
+                    "full_name"
                 ]
                 core_counter = core_counter + 1
 
-            if launch_data["rocket"].get("fairings"):
-                self.attrs["fairings_reused"] = launch_data["rocket"]["fairings"].get(
+            if launch_data.get("fairings"):
+                self.attrs["fairings_reused"] = launch_data["fairings"].get(
                     "reused"
                 )
             else:
                 self.attrs["fairings_reused"] = "NA"
         
         elif self._kind == "spacex_next_launch_payload":
-            self.attrs["nationality"] = launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("nationality")
-            self.attrs["manufacturer"] = launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("manufacturer")
-            self.attrs["payload_type"] = launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("payload_type")
+            if len(launch_data["payloads_detail"]):
+                if len(launch_data["payloads_detail"][0]["nationalities"]):
+                    self.attrs["nationality"] = launch_data["payloads_detail"][0]["nationalities"][0]
+                else:
+                    self.attrs["nationality"] = "NA"
+                if len(launch_data["payloads_detail"][0]["manufacturers"]):
+                    self.attrs["manufacturer"] = launch_data["payloads_detail"][0]["manufacturers"][0]
+                else:
+                    self.attrs["manufacturer"] = "NA"
+                    
+            self.attrs["payload_type"] = launch_data["payloads_detail"][0]["type"]
             self.attrs["payload_mass"] = (
                 str(
-                    launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                        "payload_mass_kg"
-                    )
+                    launch_data["payloads_detail"][0]["mass_kg"]
                 )
                 + " kg"
             )
             self.attrs["payload_mass_us"] = (
                 str(
-                    launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                        "payload_mass_lbs"
-                    )
+                    launch_data["payloads_detail"][0]["mass_lbs"]
                 )
                 + " lbs"
             )
-            self.attrs["orbit"] = launch_data["rocket"]["second_stage"]["payloads"][
-                0
-            ].get("orbit")
+            self.attrs["orbit"] = launch_data["payloads_detail"][0]["orbit"]
 
         elif self._kind == "spacex_latest_launch_mission":
-            self.attrs["mission_patch"] = latest_launch_data["links"].get("mission_patch")
+            self.attrs["mission_patch"] = latest_launch_data["links"].get("patch",{}).get("large")
             if latest_launch_data.get("details"):
                 self.attrs["details"] = latest_launch_data["details"][0:255]
-            self.attrs["video_link"] = latest_launch_data["links"].get("video_link")
+            self.attrs["video_link"] = latest_launch_data["links"].get("webcast")
 
         elif self._kind == "spacex_latest_launch_day":
-            self.attrs["launch_date_unix"] = latest_launch_data["launch_date_unix"]
-            self.attrs["launch_date_utc"] = latest_launch_data["launch_date_utc"]
+            self.attrs["launch_date_unix"] = latest_launch_data["date_unix"]
+            self.attrs["launch_date_utc"] = latest_launch_data["date_utc"]
 
         elif self._kind == "spacex_latest_launch_site":
-            self.attrs["short_name"] = latest_launch_data["launch_site"]["site_name"]
+            self.attrs["short_name"] = latest_launch_data["launch_site"]["name"]
 
         elif self._kind == "spacex_latest_launch_rocket":
             core_counter = 1
-            for this_core in latest_launch_data["rocket"]["first_stage"].get("cores"):
-                self.attrs["core_" + str(core_counter) + "_serial"] = this_core[
-                    "core_serial"
+            for this_core in latest_launch_data["cores_detail"]:
+                self.attrs["core_" + str(core_counter) + "_serial"] = this_core["details"][
+                    "serial"
                 ]
                 self.attrs["core_" + str(core_counter) + "_flight"] = this_core[
                     "flight"
                 ]
-                self.attrs["core_" + str(core_counter) + "_block"] = this_core[
+                self.attrs["core_" + str(core_counter) + "_block"] = this_core["details"][
                     "block"
                 ]
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
-                ] = this_core["landing_intent"]
-                self.attrs["core_" + str(core_counter) + "_lz"] = this_core[
-                    "landing_vehicle"
+                ] = this_core["landing_attempt"]
+
+                self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
+                    "name"
+                ]
+
+                self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core["landpad"][
+                    "full_name"
                 ]
                 core_counter = core_counter + 1
-            self.attrs["fairings_reused"] = latest_launch_data["rocket"]["fairings"][
-                "reused"
-            ]
+            self.attrs["fairings_reused"] = latest_launch_data["fairings"].get(
+                    "reused"
+                )
 
         elif self._kind == "spacex_latest_launch_payload":
-            self.attrs["nationality"] = latest_launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("nationality")
-            self.attrs["manufacturer"] = latest_launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("manufacturer")
-            self.attrs["payload_type"] = latest_launch_data["rocket"]["second_stage"][
-                "payloads"
-            ][0].get("payload_type")
-            self.attrs["payload_mass"] = (
-                str(
-                    latest_launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                        "payload_mass_kg"
+            if len(latest_launch_data["payloads_detail"]):
+                if len(latest_launch_data["payloads_detail"][0]["nationalities"]):
+                    self.attrs["nationality"] = latest_launch_data["payloads_detail"][0]["nationalities"][0]
+                else:
+                    self.attrs["nationality"] = "NA"
+                if len(latest_launch_data["payloads_detail"][0]["manufacturers"]):
+                    self.attrs["manufacturer"] = latest_launch_data["payloads_detail"][0]["manufacturers"][0]
+                else:
+                    self.attrs["manufacturer"] = "NA"
+                
+                self.attrs["payload_type"] = latest_launch_data["payloads_detail"][0]["type"]
+                self.attrs["payload_mass"] = (
+                    str(
+                        latest_launch_data["payloads_detail"][0]["mass_kg"]
                     )
+                    + " kg"
                 )
-                + " kg"
-            )
-            self.attrs["payload_mass_us"] = (
-                str(
-                    latest_launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                        "payload_mass_lbs"
+                self.attrs["payload_mass_us"] = (
+                    str(
+                        latest_launch_data["payloads_detail"][0]["mass_lbs"]
                     )
+                    + " lbs"
                 )
-                + " lbs"
-            )
-            self.attrs["orbit"] = latest_launch_data["rocket"]["second_stage"]["payloads"][
-                0
-            ].get("orbit")
+                self.attrs["orbit"] = latest_launch_data["payloads_detail"][0]["orbit"]
+
 
         elif self._kind == "spacex_starman_speed":
             self.attrs["machspeed"] = float(starman_data["speed_kph"]) / 1235
@@ -464,75 +467,71 @@ class SpaceXSensor(CoordinatorEntity):
         latest_launch_data = coordinator_data["latest_launch"]
 
         if self._kind == "spacex_next_launch_mission":
-            self._state = launch_data["mission_name"]
+            self._state = launch_data["name"]
 
         elif self._kind == "spacex_next_launch_day":
             self._state = as_local(utc_from_timestamp(
-                launch_data["launch_date_unix"]
+                launch_data["date_unix"]
             )).strftime("%d-%b-%Y")
             
         elif self._kind == "spacex_next_launch_time":
             self._state = as_local(utc_from_timestamp(
-                launch_data["launch_date_unix"]
+                launch_data["date_unix"]
             )).strftime("%I:%M %p")
 
         elif self._kind == "spacex_next_launch_countdown":
-            if launch_data["is_tentative"]:
+            if launch_data["tbd"]:
                 self._state = None
             else:
-                t0_countdown = int(launch_data["launch_date_unix"]) - int(time.time())
+                t0_countdown = int(launch_data["date_unix"]) - int(time.time())
                 self._state = str(datetime.timedelta(seconds=t0_countdown))
 
         elif self._kind == "spacex_next_confirmed_launch_day":
-            if launch_data["is_tentative"]:
+            if launch_data["tbd"]:
                 self._state = None
             else:
                 self._state = as_local(utc_from_timestamp(
-                    launch_data["launch_date_unix"]
+                    launch_data["date_unix"]
                 )).strftime("%d-%b-%Y")
 
         elif self._kind == "spacex_next_confirmed_launch_time":
-            if launch_data["is_tentative"]:
+            if launch_data["tbd"]:
                 self._state = None
             else:
                 self._state = as_local(utc_from_timestamp(
-                    launch_data["launch_date_unix"]
+                    launch_data["date_unix"]
                 )).strftime("%I:%M %p")
 
         elif self._kind == "spacex_next_launch_site":
-            self._state = launch_data["launch_site"]["site_name_long"]
+            self._state = launch_data["launch_site"]["full_name"]
 
         elif self._kind == "spacex_next_launch_rocket":
-            self._state = launch_data["rocket"]["rocket_name"]
+            self._state = launch_data["rocket"]["name"]
 
         elif self._kind == "spacex_next_launch_payload":
-            self._state = launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                "payload_id"
-            )
+            self._state = launch_data["payloads_detail"][0]["name"]
 
         elif self._kind == "spacex_latest_launch_mission":
-            self._state = latest_launch_data["mission_name"]
+            self._state = latest_launch_data["name"]
             
         elif self._kind == "spacex_latest_launch_day":
             self._state = as_local(utc_from_timestamp(
-                latest_launch_data["launch_date_unix"]
+                latest_launch_data["date_unix"]
             )).strftime("%d-%b-%Y")
             
         elif self._kind == "spacex_latest_launch_time":
             self._state = as_local(utc_from_timestamp(
-                latest_launch_data["launch_date_unix"]
+                latest_launch_data["date_unix"]
             )).strftime("%I:%M %p")
 
         elif self._kind == "spacex_latest_launch_site":
-            self._state = latest_launch_data["launch_site"]["site_name_long"]
+            self._state = latest_launch_data["launch_site"]["full_name"]
 
         elif self._kind == "spacex_latest_launch_rocket":
-            self._state = latest_launch_data["rocket"]["rocket_name"]
+            self._state = latest_launch_data["rocket"]["name"]
             
         elif self._kind == "spacex_latest_launch_payload":
-            self._state = latest_launch_data["rocket"]["second_stage"]["payloads"][0].get(
-                "payload_id"
-            )
+            self._state = latest_launch_data["payloads_detail"][0]["name"]
             
         elif self._kind == "spacex_starman_speed":
             self._state = int(starman_data["speed_kph"])
