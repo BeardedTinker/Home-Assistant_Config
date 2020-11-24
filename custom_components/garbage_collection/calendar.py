@@ -114,13 +114,16 @@ class EntitiesCalendarData:
                     event = {
                         "uid": entity,
                         "summary": garbage_collection.name,
-                        "start": {"date": start.strftime("%Y-%m-%d %H:%M")},
-                        "end": {
-                            "date": datetime.combine(
-                                start, garbage_collection.expire_after
-                            ).strftime("%Y-%m-%d %H:%M")
-                        },
-                        "allDay": False,
+                        "start": {"date": start.strftime("%Y-%m-%d")},
+                        "end": {"date": end.strftime("%Y-%m-%d")},
+                        "allDay": True,
+                        # "start": {"date": start.strftime("%Y-%m-%d %H:%M")},
+                        # "end": {
+                        #     "date": datetime.combine(
+                        #         start, garbage_collection.expire_after
+                        #     ).strftime("%Y-%m-%d %H:%M")
+                        # },
+                        # "allDay": False,
                     }
                 events.append(event)
                 start = await garbage_collection.async_find_next_date(
@@ -155,13 +158,16 @@ class EntitiesCalendarData:
                     event = {
                         "uid": entity,
                         "summary": state_object.attributes.get("friendly_name"),
-                        "start": {"date": start.strftime("%Y-%m-%d %H:%M")},
-                        "end": {
-                            "date": datetime.combine(
-                                start, garbage_collection.expire_after
-                            ).strftime("%Y-%m-%d %H:%M")
-                        },
-                        "allDay": False,
+                        "start": {"date": start.strftime("%Y-%m-%d")},
+                        "end": {"date": end.strftime("%Y-%m-%d")},
+                        "allDay": True,
+                        # "start": {"date": start.strftime("%Y-%m-%d %H:%M")},
+                        # "end": {
+                        #     "date": datetime.combine(
+                        #         start, garbage_collection.expire_after
+                        #     ).strftime("%Y-%m-%d %H:%M")
+                        # },
+                        # "allDay": False,
                     }
                 events.append(event)
         events.sort(key=lambda x: x["start"]["date"])
