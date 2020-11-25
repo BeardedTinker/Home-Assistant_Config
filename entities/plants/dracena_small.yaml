@@ -1,0 +1,19 @@
+#####
+# Plant monitor integration. Using LilyGO HiGrow board with pesor firmware
+# https://www.home-assistant.io/integrations/plant
+#####
+
+dracena_marginata_small:
+  sensors:
+    moisture: sensor.dracena_marginata_small_soil
+    battery: sensor.dracena_marginata_small_battery
+    temperature: sensor.dracena_marginata_small_temperature
+    conductivity: sensor.dracena_marginata_small_fertilizer
+    brightness: sensor.dracena_marginata_small_lux
+  min_moisture: 30
+  max_moisture: 75
+  min_battery: 5
+  min_conductivity: 1
+  min_temperature: 7
+  min_brightness: 500
+  check_days: 3
