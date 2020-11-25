@@ -5,7 +5,7 @@ import time
 import datetime
 
 from homeassistant.util.dt import as_local, utc_from_timestamp
-from homeassistant.components.sensor import ENTITY_ID_FORMAT
+from homeassistant.components.sensor import ENTITY_ID_FORMAT, DEVICE_CLASS_TIMESTAMP
 from homeassistant.const import LENGTH_KILOMETERS, SPEED_KILOMETERS_PER_HOUR, ATTR_NAME
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import (
@@ -268,6 +268,11 @@ class SpaceXSensor(CoordinatorEntity):
             self.attrs["launch_date_unix"] = launch_data["date_unix"]
             self.attrs["launch_date_utc"] = launch_data["date_utc"]
 
+        elif self._kind == "spacex_next_launch_time":
+            self.attrs["launch_time_24h"] = self._state = as_local(utc_from_timestamp(
+                launch_data["date_unix"]
+            )).strftime("%H:%M")
+
         elif self._kind == "spacex_next_launch_countdown":
             if launch_data["tbd"]:
                 self.attrs["t0_countdown"] = "NA"
@@ -303,6 +308,11 @@ class SpaceXSensor(CoordinatorEntity):
                 self.attrs["launch_date_unix"] = launch_data["date_unix"]
                 self.attrs["launch_date_utc"] = launch_data["date_utc"]
 
+        elif self._kind == "spacex_next_confirmed_launch_time":
+            self.attrs["launch_time_24h"] = self._state = as_local(utc_from_timestamp(
+                launch_data["date_unix"]
+            )).strftime("%H:%M")
+
         elif self._kind == "spacex_next_launch_site":
             self.attrs["short_name"] = launch_data["launch_site"]["name"]
 
@@ -321,14 +331,18 @@ class SpaceXSensor(CoordinatorEntity):
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
                 ] = this_core["landing_attempt"]
-
-                self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
-                    "name"
-                ]
-
-                self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core["landpad"][
-                    "full_name"
-                ]
+                
+                if this_core.get("landpad"):
+                    self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
+                        "name"
+                    ]
+                    self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core["landpad"][
+                        "full_name"
+                    ]
+                else:
+                    self.attrs["core_" + str(core_counter) + "_lz"] = "NA"
+                    self.attrs["core_" + str(core_counter) + "_lz_long"] = "NA"
+                
                 core_counter = core_counter + 1
 
             if launch_data.get("fairings"):
@@ -348,7 +362,7 @@ class SpaceXSensor(CoordinatorEntity):
                     self.attrs["manufacturer"] = launch_data["payloads_detail"][0]["manufacturers"][0]
                 else:
                     self.attrs["manufacturer"] = "NA"
-                    
+
             self.attrs["payload_type"] = launch_data["payloads_detail"][0]["type"]
             self.attrs["payload_mass"] = (
                 str(
@@ -373,6 +387,11 @@ class SpaceXSensor(CoordinatorEntity):
         elif self._kind == "spacex_latest_launch_day":
             self.attrs["launch_date_unix"] = latest_launch_data["date_unix"]
             self.attrs["launch_date_utc"] = latest_launch_data["date_utc"]
+
+        elif self._kind == "spacex_latest_launch_time":
+            self.attrs["launch_time_24h"] = self._state = as_local(utc_from_timestamp(
+                latest_launch_data["date_unix"]
+            )).strftime("%H:%M")
 
         elif self._kind == "spacex_latest_launch_site":
             self.attrs["short_name"] = latest_launch_data["launch_site"]["name"]
