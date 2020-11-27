@@ -22,21 +22,21 @@ action:
   data:
     who: 'family'
     title: '💨 *{{state_attr("binary_sensor.meteoalarm", "event")}}*'
-    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is valid from {{state_attr("binary_sensor.meteoalarm", "onset")}}'
+    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is valid from {{state_attr("binary_sensor.meteoalarm", "effective")}}'
     tag_id: 'warning'
     sticky: 'true'
     group: weather
     color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
-- data:
+- service: media_player.volume_set
+  data:
     entity_id:
       - media_player.display_me
-      - media_player.clock.me
-    volume_level: 0.5
-  service: media_player.volume_set
-- data:
+      - media_player.clock_me
+    volume_level: 0.3
+- service: tts.google_say
+  data:
     entity_id:
       - media_player.display_me
       - media_player.clock_me
     message: 'Meteorological warning. {{state_attr("binary_sensor.meteoalarm", "event")}}. {{state_attr("binary_sensor.meteoalarm", "description")}}'
-  service: tts.google_say

@@ -8,7 +8,7 @@ influxdb:
 
   # This is where host and port pare defined.
   host: !secret influxdb_host
-#  port: 8086
+  port: 8086
 
   # The database name to store all the metrics in.
   database: homeassistant
