@@ -1,0 +1,13 @@
+#####
+# Heating statistics for last 30 days
+# Luka room
+#####
+
+platform: history_stats
+name: Heating Luka Room Last 30d
+entity_id: sensor.heating_luka_room_action
+state: 'heating'
+type: time
+end: '{{ now() }}'
+duration:
+  days: 30

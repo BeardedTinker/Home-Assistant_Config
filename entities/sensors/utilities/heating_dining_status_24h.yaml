@@ -1,0 +1,13 @@
+#####
+# Heating statistics for last 24 hrous
+# Dining room
+#####
+
+platform: history_stats
+name: Heating Dining Room Last 24hr
+entity_id: sensor.heating_dining_room_action
+state: 'heating'
+type: time
+end: '{{ now() }}'
+duration:
+  hours: 24

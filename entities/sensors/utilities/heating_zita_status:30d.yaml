@@ -1,0 +1,13 @@
+#####
+# Heating statistics for last 30 days
+# Zita room
+#####
+
+platform: history_stats
+name: Heating Zita Room Last 30d
+entity_id: sensor.heating_zita_room_action
+state: 'heating'
+type: time
+end: '{{ now() }}'
+duration:
+  days: 30

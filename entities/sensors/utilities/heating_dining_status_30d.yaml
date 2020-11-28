@@ -1,0 +1,13 @@
+#####
+# Heating statistics for last 30 days
+# Dining room
+#####
+
+platform: history_stats
+name: Heating Dining Room Last 30d
+entity_id: sensor.heating_dining_room_action
+state: 'heating'
+type: time
+end: '{{ now() }}'
+duration:
+  days: 30

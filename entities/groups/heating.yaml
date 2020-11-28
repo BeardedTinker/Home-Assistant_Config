@@ -1,0 +1,10 @@
+#####
+# Trying to combine all tado devices in on
+# Would add overall status ability
+#####
+
+heating:
+  - climate.dining_room
+  - climate.living_room
+  - climate.luka_room
+  - climate.zita_room
