@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of Plants 
+# Thanks to @pesor
+#####
+
+platform: template
+sensors:
+  count_plants:
+    friendly_name: 'Number of Plants'
+    value_template: >-
+      {{ states.plant | list | count }}
