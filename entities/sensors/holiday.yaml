@@ -1,0 +1,18 @@
+#####
+# Template to create sensor with name of holiday
+# Tracking local Croatian holidays and also Catholic holidays 
+# althoug later should overlap with Croatian
+#####
+
+platform: template
+sensors:
+  holiday:
+    friendly_name: 'Holiday'
+    value_template: >-
+        {% if states.calendar.holidays_in_croatia.state == 'on' %}
+          {{ states.calendar.holidays_in_croatia.attributes.message }}
+        {% elif states.calendar.krscanski_blagdani.state == 'on' %}
+          {{ states.calendar.calendar.krscanski_blagdani.message }}
+        {% else %}
+          none
+        {% endif %}

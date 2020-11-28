@@ -1,0 +1,10 @@
+#####
+# Create sensor that holds today's day
+# Will be used for TTS
+#####
+
+platform: template
+sensors: 
+  today_is:
+    friendly_name: 'Today is'
+    value_template: "{{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}" 
