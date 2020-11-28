@@ -1,0 +1,17 @@
+#####
+# Create sensors that checks Zita calendar if tomorrow is school day
+# Used to create notifications and alerts
+# Inspired by Jeffrey Stone https://github.com/thejeffreystone/home-assistant-configuration/
+#####
+
+platform: template
+sensors:
+  zita_school_tomorrow:
+    friendly_name: 'Zita School Tomorrow'
+    value_template: >-
+      {%- set tempt=(as_timestamp(now())+ (86400)) | timestamp_custom("%Y-%m-%d",true) %}
+      {% if states.calendar.zita_school.attributes.start_time == tempt + " 08:00:00" %}
+        on
+      {% else %}
+        off
+      {% endif %}
