@@ -156,7 +156,7 @@ Current count of various things in Home Assistant
 | Input Text           |     4 |
 | Lights               |    32 |
 | Media players        |    30 |
-| Lines of code (YAML) |  9759 |
+| Lines of code (YAML) |  9757 |
 | Persons              |     6 |
 | Plants               |     4 |
 | Scripts              |    14 |
