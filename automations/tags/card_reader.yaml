@@ -1,0 +1,18 @@
+#####
+# Test tag automation to see if it works
+# Card scanned by reader
+#####
+
+id: '1606681922837'
+alias: Tag Card @reader is scanned
+description: ''
+trigger:
+- platform: tag
+  tag_id: B3-C4-6C-40
+condition: []
+action:
+- type: flash
+  device_id: c26b19768ef89d949a99888484eebd76
+  entity_id: light.tagreader_led
+  domain: light
+mode: single
