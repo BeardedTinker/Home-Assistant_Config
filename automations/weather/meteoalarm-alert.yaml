@@ -22,7 +22,7 @@ action:
   data:
     who: 'family'
     title: '💨 *{{state_attr("binary_sensor.meteoalarm", "event")}}*'
-    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is valid from {{state_attr("binary_sensor.meteoalarm", "effective")}}'
+    value1: '{{state_attr("binary_sensor.meteoalarm", "description")}} is expected at {{state_attr("binary_sensor.meteoalarm", "onset")}}'
     tag_id: 'warning'
     sticky: 'true'
     group: weather
