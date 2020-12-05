@@ -142,7 +142,7 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     2 |
-| Automations          |   108 |
+| Automations          |   113 |
 | Binary sensors       |   118 |
 | Cameras              |    11 |
 | Climates             |     4 |
@@ -150,17 +150,17 @@ Current count of various things in Home Assistant
 | Entities             |  1300 |
 | Groups               |    17 |
 | Input Boolean        |     6 |
-| Input Date/Time      |     4 |
+| Input Date/Time      |     8 |
 | Input Number         |     8 |
 | Input Select         |     9 |
 | Input Text           |     4 |
 | Lights               |    33 |
 | Media players        |    30 |
-| Lines of code (YAML) | 10136 |
+| Lines of code (YAML) | 10357 |
 | Persons              |     6 |
 | Plants               |     4 |
 | Scripts              |    14 |
-| Sensors              |   758 |
+| Sensors              |   749 |
 | Switches             |    64 |
 | Timers               |     3 |
 | Weather              |     2 |

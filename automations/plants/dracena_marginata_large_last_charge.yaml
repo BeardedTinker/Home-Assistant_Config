@@ -1,0 +1,19 @@
+#####
+#
+#
+#####
+
+id: f3ef3949-b711-4f77-ba08-79454ad810bf
+alias: Dracena Marginata large last charge
+description: ''
+trigger:
+- platform: state
+  entity_id: sensor.dracena_marginata_large_charging
+  to: charging
+condition: []
+action:
+- service: input_datetime.set_datetime
+  data:
+    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  entity_id: input_datetime.dracena_marginata_large_last_changed
+mode: single

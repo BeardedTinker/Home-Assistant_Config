@@ -1,0 +1,23 @@
+#####
+# Track when was the last time plant sensor was charged
+#
+#####
+
+#  platform: history_stats
+#  name: Dracena Marginata small last charge
+#  entity_id: sensor.dracena_marginata_small_charging
+#  state: 'charging'
+#  type: time
+#  start: '{{ now().replace(hour=0, minute=0, second=0) }}'
+#  end: '{{ now() }}'
+
+platform: template
+sensors:
+  dracena_marginata_small_last_charge:
+    entity_id: sensor.time
+    friendly_name: Dracena Marginata small last charge
+    icon_template: mdi:clock-outline
+    unit_of_measurement: days
+     #device_class: timestamp
+#    value_template: "{{ relative_time(states('input_datetime.dracena_marginata_small_last_changed')) }}"
+    value_template: "{{ (((as_timestamp(now())-states.input_datetime.dracena_marginata_small_last_changed.attributes.timestamp)) | int /60/1440) | round(0) }}"

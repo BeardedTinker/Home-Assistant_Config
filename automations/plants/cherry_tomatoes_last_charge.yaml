@@ -1,0 +1,19 @@
+#####
+#
+#
+#####
+
+id: 90ff4257-3fc7-421d-9c3b-878a6aea9f16
+alias: Cherry Tomatoes last charge
+description: ''
+trigger:
+- platform: state
+  entity_id: sensor.cherry_tomatoes_charging
+  to: charging
+condition: []
+action:
+- service: input_datetime.set_datetime
+  data:
+    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  entity_id: input_datetime.cherry_tomatoes_last_changed
+mode: single

@@ -1,0 +1,19 @@
+#####
+#
+#
+#####
+
+id: 6acc9b09-2202-496f-93f5-dd4e01eb8464
+alias: Ficus Benjamina last charge
+description: ''
+trigger:
+- platform: state
+  entity_id: sensor.ficus_benjamina_charging
+  to: charging
+condition: []
+action:
+- service: input_datetime.set_datetime
+  data:
+    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  entity_id: input_datetime.ficus_benjamina_last_changed
+mode: single
