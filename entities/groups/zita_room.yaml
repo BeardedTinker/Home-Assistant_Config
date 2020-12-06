@@ -5,4 +5,5 @@
 zita_room:
   - light.goose_light
   - light.zita_ceiling_light
-  - light.zita_desk_back_light
+  - light.zita_tabletop_light
+  - light.zita_desk_lights

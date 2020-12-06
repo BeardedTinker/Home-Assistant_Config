@@ -14,5 +14,5 @@ condition: []
 
 action:
   data:
-    entity_id: light.zita_desk_back_light
+    entity_id: light.zita_ceiling_light
   service: light.toggle
