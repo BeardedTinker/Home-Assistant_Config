@@ -1,0 +1,8 @@
+#####
+# Online school boolean Zita
+# Is Zita going to schhol or logging in
+#####
+
+zita_school_online:
+  name: School OnLine for Zita
+  icon: mdi:virus-outline

@@ -1,0 +1,10 @@
+#####
+# Last day of (high) school
+# for Luka
+#####
+
+school_last_day_luka:
+  name: Luka Last Day of School
+  has_date: true
+  has_time: false
+  initial: '2021-06-18'

@@ -1,0 +1,10 @@
+#####
+#
+#
+#####
+
+school_day_end_zita:
+  name: Zita School Day End
+  has_date: false
+  has_time: true
+  initial: '11:45:00'

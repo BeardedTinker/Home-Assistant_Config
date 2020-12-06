@@ -3,7 +3,7 @@
 # not used
 ####
 
-schoolnightzitabedtime:
+schoolnight_bedtime_zita:
   sequence:
   - service: media_player.volume_set
     data:

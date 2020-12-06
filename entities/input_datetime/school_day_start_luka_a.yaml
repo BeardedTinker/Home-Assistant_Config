@@ -1,0 +1,10 @@
+#####
+#
+#
+#####
+
+school_day_start_luka_a:
+  name: Luka School Day Start Week A
+  has_date: false
+  has_time: true
+  initial: '08:00:00'

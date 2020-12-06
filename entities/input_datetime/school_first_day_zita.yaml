@@ -1,0 +1,10 @@
+#####
+# First day of school
+# for Zita
+#####
+
+school_first_day_zita:
+  name: Zita First Day of School
+  has_date: true
+  has_time: false
+  initial: '2020-09-07'
