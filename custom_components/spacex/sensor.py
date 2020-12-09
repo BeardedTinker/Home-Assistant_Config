@@ -420,9 +420,11 @@ class SpaceXSensor(CoordinatorEntity):
                     "full_name"
                 ]
                 core_counter = core_counter + 1
-            self.attrs["fairings_reused"] = latest_launch_data["fairings"].get(
-                    "reused"
-                )
+            
+            if latest_launch_data.get("fairings"):
+                self.attrs["fairings_reused"] = latest_launch_data["fairings"].get(
+                        "reused"
+                    )
 
         elif self._kind == "spacex_latest_launch_payload":
             if len(latest_launch_data["payloads_detail"]):
