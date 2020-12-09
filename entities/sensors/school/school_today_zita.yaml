@@ -1,0 +1,16 @@
+#####
+# Create sensors that checks Zita calendar if today is school day
+# Used to create notifications and alerts
+#####
+
+platform: template
+sensors:
+  zita_school_today:
+    friendly_name: 'Zita School Today'
+    value_template: >-
+      {%- set tempt=as_timestamp(now()) | timestamp_custom("%Y-%m-%d",true) %}
+      {% if states.calendar.zita_school.attributes.start_time == tempt + " 08:00:00" %}
+        on
+      {% else %}
+        off
+      {% endif %}

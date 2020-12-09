@@ -1,0 +1,18 @@
+#####
+# Create sensors that checks Luka calendar if tomorrow is school day
+# Used to create notifications and alerts
+#####
+
+platform: template
+sensors:
+  luka_school_today:
+    friendly_name: 'Luka School Today'
+    value_template: >-
+      {%- set tempt=as_timestamp(now()) | timestamp_custom("%Y-%m-%d",true) %}
+      {% if states.calendar.luka_school.attributes.start_time == tempt + " 08:00:00" %}
+        on
+      {% elif states.calendar.luka_school.attributes.start_time == tempt + " 14:00:00" %}
+        on
+      {% else %}
+        off
+      {% endif %}

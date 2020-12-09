@@ -1,0 +1,9 @@
+#####
+# Time when morning report will be played
+# TBU
+#####
+
+morning_report:
+  name: Morning Report
+  has_date: false
+  has_time: true

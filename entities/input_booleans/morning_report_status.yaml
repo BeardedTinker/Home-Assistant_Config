@@ -1,0 +1,7 @@
+#####
+# This boolean will track if Morning report was played
+# TBU (to be used)
+#####
+
+morning_report_done:
+  name: Morning Report done

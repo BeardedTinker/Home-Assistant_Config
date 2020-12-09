@@ -1,0 +1,8 @@
+#####
+# This boolean tracks if Audio notifications are on or not
+# They can be triggered by silent hours on/off - TBU
+#####
+
+audio_notifications:
+  name: Audio Notifications
+  icon: mdi:speaker-wireless

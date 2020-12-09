@@ -8,4 +8,3 @@ sensors:
   school_end_days_zita:
     value_template: '{{ (((states.input_datetime.school_last_day_zita.attributes.timestamp)-as_timestamp(now())) | int /60/1440) | round(0) }}'
     unit_of_measurement: 'Days'
-    entity_id: input_datetime.school_last_day_zita,sensor.time

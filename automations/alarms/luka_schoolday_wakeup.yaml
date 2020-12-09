@@ -7,8 +7,17 @@ alias: Luka School Day Wake up
 id: d7b4d3a8-8268-4f18-b3bb-be96c4c119e2
 
 trigger:
-  at: '06:02:00'
-  platform: time
+  platform: template
+  value_template: >
+    {% if states('sensor.time') == "07:40" and is_state('input_boolean.luka_school_online','on')  and is_state('sensor.current_week','Week A') and is_state('binary_sensor.workday_today','on') and is_state('input_boolean.school','on') %}
+      True
+    {% elif states('sensor.time') == "06:05" and is_state('input_boolean.luka_school_online','off') and is_state('sensor.current_week','Week A') and is_state('binary_sensor.workday_today','on') and is_state('input_boolean.school','on') %}
+      True
+    {% else %}
+      False
+    {% endif %}	
+#  at: '06:02:00'
+#  platform: time
 
 condition:
   condition: and

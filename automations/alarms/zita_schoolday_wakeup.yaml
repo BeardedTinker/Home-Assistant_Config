@@ -7,8 +7,17 @@ alias: Zita School Day Wake up
 id: 97d8e2b1-6e89-499a-9823-aa03d6273378
 
 trigger:
-  at: '06:30:00'
-  platform: time
+  platform: template
+  value_template: >
+    {% if states('sensor.time') == "07:40" and is_state('input_boolean.zita_school_online','on') and is_state('binary_sensor.workday_today','on') and is_state('input_boolean.school','on') %}
+      True
+    {% elif states('sensor.time') == "06:30" and is_state('input_boolean.zita_school_online','off') and is_state('binary_sensor.workday_today','on') and is_state('input_boolean.school','on') %}
+      True
+    {% else %}
+      False
+    {% endif %}	
+#  at: '06:30:00'
+#  platform: time
 
 condition:
   condition: and
