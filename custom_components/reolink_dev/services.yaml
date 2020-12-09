@@ -1,69 +1,46 @@
-enable_ftp:
-  description: Enable FTP upload on motion recording.
+ptz_control:
+  description: Execute a PTZ command.
   fields:
     entity_id:
-      description: Name of the Reolink camera entity to set.
+      description: Name(s) of the Reolink camera entity to execute the command on.
       example: 'camera.frontdoor'
-      
-disable_ftp:
-  description: Disable FTP upload on motion recording.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-enable_email:
-  description: Enable email functionality on motion detection.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-disable_email:
-  description: Disable email functionality on motion detection.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-enable_ir_lights:
-  description: Enable the infrared lights (nightvision) of the Reolink camera.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-disable_ir_lights:
-  description: Disable the infrared lights (nightvision) of the Reolink camera.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-enable_recording:
-  description: Enable the motion recording of the Reolink camera.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
-      
-disable_recording:
-  description: Disable the motion recording of the Reolink camera.
-  fields:
-    entity_id:
-      description: Name of the Reolink camera entity to set.
-      example: 'camera.frontdoor'
+    command:
+      description: >-
+        Command to execute. Possible values are:
+        AUTO DOWN FOCUSDEC FOCUSINC LEFT LEFTDOWN LEFTUP
+        RIGHT RIGHTDOWN RIGHTUP STOP TOPOS UP ZOOMDEC ZOOMINC
+      example: LEFTUP
+    preset:
+      description: (Optional) In case of the command TOPOS. The available presets are listed as attribute on the camera.
+      example:
+    speed:
+      description: (Optional) Speed at which the movement takes place.
+      example: 25
 
-enable_motion_detection:
-  description: Enable the motion detection of the Reolink camera.
+set_sensitivity:
+  description: Set the motion detection sensitivity.
   fields:
     entity_id:
-      description: Name of the Reolink camera entity to set.
+      description: Name(s) of the Reolink camera entity for which the sensitivity value should be set.
       example: 'camera.frontdoor'
-      
-disable_motion_detection:
-  description: Disable the motion detection of the Reolink camera.
+    sensitivity:
+      description: New sensitivity, value between 1 (low sensitivity) and 50 (high sensitivity)
+      example: 25
+    preset:
+      description: >-
+        (Optional) Set the sensitivity of a specific preset (time schedule). When no value is supplied,
+        all presets will be changed.
+
+set_daynight:
+  description: Set day and night parameter.
   fields:
     entity_id:
-      description: Name of the Reolink camera entity to set.
+      description: Name(s) of the Reolink camera entity for which the day and night value should be set.
       example: 'camera.frontdoor'
+    mode:
+      description: >-
+        The day and night mode parameter supports the following values:
+          AUTO: Auto switch between black & white mode
+          COLOR: Always record videos in color mode
+          BLACKANDWHITE: Always record videos in black & white mode
+      example: AUTO

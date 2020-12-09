@@ -1,8 +1,13 @@
 {
-    "domain": "reolink_dev",
-    "name": "Reolink IP camera",
-    "documentation": "https://github.com/fwestenberg/reolink",
-    "issue_tracker": "https://github.com/fwestenberg/reolink/issues",
-    "dependencies": ["ffmpeg"],
-    "codeowners": ["@fwestenberg"]
-  }
+  "domain": "reolink_dev",
+  "name": "Reolink IP camera",
+  "documentation": "https://github.com/fwestenberg/reolink_dev",
+  "issue_tracker": "https://github.com/fwestenberg/reolink_dev/issues",
+  "requirements": ["reolink==0.0.9"],
+  "dependencies": ["ffmpeg"],
+  "codeowners": ["@fwestenberg"],
+  "config_flow": true,
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {}
+}
