@@ -20,16 +20,18 @@ radio_play:
   - service: media_player.play_media
     data:
       entity_id: >
-        {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv_2
-        {% elif is_state("input_select.radio_speaker", "Loft TV") %} media_player.loft_tv
+        {% if is_state("input_select.radio_speaker", "Downstairs") %} media_player.downstairs
+        {% elif is_state("input_select.radio_speaker", "Upstairs") %} media_player.upper_floor
         {% elif is_state("input_select.radio_speaker", "Display me") %} media_player.display_me
         {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me
         {% elif is_state("input_select.radio_speaker", "Whatever me") %} media_player.whatever_me
         {% elif is_state("input_select.radio_speaker", "Clock me") %} media_player.clock_me
+        {% elif is_state("input_select.radio_speaker", "All speakers") %} media_player.all_speakers        
         {% endif %}
       media_content_id: >
         {% if is_state("input_select.radio_station", "HKR") %} http://stream.hkr.hr:8000/hkr.aac
         {% elif is_state("input_select.radio_station", "Otvoreni") %} http://proxima.shoutca.st:8357/stream
+        {% elif is_state("input_select.radio_station", "Antena Christmas") %} http://live.antenazagreb.hr:8015/stream
         {% elif is_state("input_select.radio_station", "Antena Zagreb") %} http://live.antenazagreb.hr:8000/stream
         {% elif is_state("input_select.radio_station", "Narodni") %} http://live.narodni.hr:8059/stream
         {% elif is_state("input_select.radio_station", "yammat FM") %} http://live.narodni.hr:8059/stream

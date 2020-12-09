@@ -4,12 +4,13 @@
 
 radio_speaker:
   name: 'Select Speakers:'
-  initial: 'Display me'
-  icon: mdi:speaker-wireless
   options:
-    - 'Living room'
-    - 'Loft TV'
+    - 'Downstairs'
+    - 'Upstairs'
     - 'Display me'
     - 'Clock me'
     - 'Whatever me'
     - 'Mini me'
+    - 'All speakers'
+  initial: 'Display me'
+  icon: mdi:speaker-wireless

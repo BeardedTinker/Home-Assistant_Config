@@ -5,6 +5,7 @@
 radio_station:
   name: 'Select Radio Station:'
   options:
+    - 'Antena Christmas'
     - 'Antena Zagreb'
     - 'Narodni'
     - 'HKR'
@@ -15,5 +16,5 @@ radio_station:
     - 'Radio Postaja Mir Međugorje'
     - 'yammat FM'
     - 'Stopped'
-  initial: Antena Zagreb
+  initial: Antena Christmas
   icon: mdi:radio
