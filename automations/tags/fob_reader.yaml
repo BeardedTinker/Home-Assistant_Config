@@ -15,4 +15,6 @@ action:
   device_id: c26b19768ef89d949a99888484eebd76
   entity_id: light.tagreader_led
   domain: light
+- service: script.radio_play
+  data: {}
 mode: single

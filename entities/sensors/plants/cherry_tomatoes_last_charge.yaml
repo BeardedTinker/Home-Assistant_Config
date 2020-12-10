@@ -14,7 +14,7 @@
 platform: template
 sensors:
   cherry_tomatoes_last_charge:
-    entity_id: sensor.time
+#    entity_id: sensor.time
     friendly_name: Cherry Tomatoes last charge
     icon_template: mdi:clock-outline
     unit_of_measurement: days

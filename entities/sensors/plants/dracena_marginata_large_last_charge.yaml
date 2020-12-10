@@ -14,7 +14,7 @@
 platform: template
 sensors:
   dracena_marginata_large_last_charge:
-    entity_id: sensor.time
+#    entity_id: sensor.time
     friendly_name: Dracena Marginata large last charge
     icon_template: mdi:clock-outline
     unit_of_measurement: days
