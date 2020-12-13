@@ -1,0 +1,43 @@
+#####
+# School day bedtime notification for Zita
+# Stil work in progress
+#####
+
+alias: Zita School Day bedtime
+id: 1f422df6-8148-4612-b58e-fe20893d4e99
+
+trigger:
+  platform: template
+  value_template: >
+    {% if states('sensor.time') == "21:30" and is_state('input_boolean.zita_school_online','on') %}
+      True
+    {% elif states('sensor.time') == "21:00" and is_state('input_boolean.zita_school_online','off')  %}
+      True
+    {% else %}
+      False
+    {% endif %}	
+#  at: '06:30:00'
+#  platform: time
+
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: sensor.zita_school_tomorrow
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.workday_tomorrow
+    state: 'on'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'zita'
+    title: '⏲ *Bedtime Zita*'
+    value1: 'It is {{ states("sensor.time") }} - time to go to bed'
+    tag_id: 'information'
+- data:
+    entity_id: media_player.mini_me
+    volume_level: 0.3
+  service: media_player.volume_set
+- service: script.schoolnight_bedtime_zita

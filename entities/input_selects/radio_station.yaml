@@ -7,6 +7,8 @@ radio_station:
   options:
     - 'Antena Christmas'
     - 'Antena Zagreb'
+    - 'Antena Love'
+    - 'Antena Rock'
     - 'Narodni'
     - 'HKR'
     - 'HRT1'
