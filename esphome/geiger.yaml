@@ -1,5 +1,9 @@
+substitutions:
+  devicename: geiger
+  upper_devicename: Geiger Counter
+  
 esphome:
-  name: geiger
+  name: $devicename
   platform: ESP32
   board: esp-wrover-kit
 
@@ -9,7 +13,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Geiger Fallback Hotspot"
+    ssid: ${upper_devicename} Fallback Hotspot
     password: "IRAstmr7OHH6"
   manual_ip:
     # Set this to the IP of the ESP
@@ -17,7 +21,7 @@ wifi:
     # Set this to the IP address of the router. Often ends with .1
     gateway: 192.168.1.1
     # The subnet of the network. 255.255.255.0 works for most home networks.
-    subnet: 255.255.255.0
+    subnet: 255.255.252.0
 captive_portal:
 
 # Enable logging
@@ -32,12 +36,40 @@ ota:
 
 esp32_ble_tracker:
 
+switch:
+  - platform: restart
+    name: ${upper_devicename} Restart
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${upper_devicename} IP Address
+    ssid:
+      name: ${upper_devicename} Connected SSID
+    bssid:
+      name: ${upper_devicename} Connected BSSID
+
 sensor:
   - platform: pulse_counter
     pin: GPIO36
-    name: "Geiger Counter"
-    update_interval: 15s
-    unit_of_measurement: CPM
+    name: ${upper_devicename}
+    id: "geiger_counter"
+    unit_of_measurement: 'CPM'
+    on_raw_value:
+      - sensor.template.publish:
+          id: radiation_level
+          state: !lambda 'return x / 153.8;'
+  - platform: template
+    name: "Radiation Level"
+    id: "radiation_level"
+    unit_of_measurement: 'µSv/h'
+    icon: mdi:radioactive
+    accuracy_decimals: 5
+#  - platform: pulse_counter
+#    pin: GPIO36
+#    name: "Geiger Counter"
+#    update_interval: 15s
+#    unit_of_measurement: CPM
 #    accuracy_decimals: 4
 #    count_mode:
 #      rising_edge: DISABLE
@@ -46,19 +78,30 @@ sensor:
 #    count_mode:
 #      rising_edge: INCREMENT
 #      falling_edge: DISABLE
-    filters:
-      - multiply: 0.00812037037037
+#    filters:
+#      - multiply: 0.00812037037037
 #      - devide: 123.147092360319
-  - platform: pulse_counter
-    pin: GPIO36
-    name: "Radiation level"
-    update_interval: 15s
-    unit_of_measurement: 'µSv/h'
-    accuracy_decimals: 4
-    filters:
-    - lambda: return x / 123.147092360319;
+#  - platform: pulse_counter
+#    pin: GPIO36
+#    name: "Radiation level"
+#    update_interval: 15s
+#    unit_of_measurement: 'µSv/h'
+#    accuracy_decimals: 4
+#    filters:
+#    - lambda: return x / 123.147092360319;
 
 binary_sensor:
+  - platform: template
+    device_class: safety
+    name: "Radiation Warning"
+    lambda: |-
+      if (id(geiger_counter).state > 100) {
+        // High Count.
+        return true;
+      } else {
+        // Normal Count.
+        return false;
+      }
   - platform: xiaomi_wx08zm
     name: Mosquito
     mac_address: "74:A3:4A:BE:3F:D3"
