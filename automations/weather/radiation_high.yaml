@@ -7,19 +7,19 @@ alias: Radiation Alert
 id: e0df13b6-00ac-4b3e-9b2b-f6aca28a6da5
 trigger:
   - platform: state
-    entity_id: sensor.geiger_counter_2
+    entity_id: sensor.geiger_counter
 
 condition:
   - condition: numeric_state
-    entity_id: sensor.geiger_counter_2
-    above: 0.9
+    entity_id: sensor.geiger_counter
+    above: 40
 
 action:
 - service: script.notify_engine
   data:
     who: 'family'
     title: '☢ *Radiation Level Alert!*'
-    value1: 'Radiation is currently {{ states("sensor.geiger_counter_2") }} CPM. Normal value is below 0.5'
+    value1: 'Radiation is currently {{ states("sensor.geiger_counter") }} CPM. Normal value is below 25'
     tag_id: 'warning'
     sticky: 'true'
     group: weather
@@ -35,5 +35,5 @@ action:
     entity_id:
       - media_player.display_me
       - media_player.clock_me
-    message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter_2") }} and normal value should be below 0.5'
+    message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter") }} CPM and normal value should be below 25'
   service: tts.google_say
