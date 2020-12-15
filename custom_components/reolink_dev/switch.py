@@ -45,12 +45,12 @@ class FTPSwitch(ReolinkEntity, ToggleEntity):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_ftpSwitch_{self._base.api.mac_address}"
+        return f"reolink_ftpSwitch_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return f"{self._base.api.name} FTP"
+        return f"{self._base.name} FTP"
 
     @property
     def is_on(self):
@@ -92,12 +92,12 @@ class EmailSwitch(ReolinkEntity, ToggleEntity):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_emailSwitch_{self._base.api.mac_address}"
+        return f"reolink_emailSwitch_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return f"{self._base.api.name} email"
+        return f"{self._base.name} email"
 
     @property
     def is_on(self):
@@ -139,12 +139,12 @@ class IRLightsSwitch(ReolinkEntity, ToggleEntity):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_irLightsSwitch_{self._base.api.mac_address}"
+        return f"reolink_irLightsSwitch_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return f"{self._base.api.name} IR lights"
+        return f"{self._base.name} IR lights"
 
     @property
     def is_on(self):
@@ -186,12 +186,12 @@ class RecordingSwitch(ReolinkEntity, ToggleEntity):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_recordingSwitch_{self._base.api.mac_address}"
+        return f"reolink_recordingSwitch_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return f"{self._base.api.name} recording"
+        return f"{self._base.name} recording"
 
     @property
     def is_on(self):
@@ -233,12 +233,12 @@ class AudioSwitch(ReolinkEntity, ToggleEntity):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_audioSwitch_{self._base.api.mac_address}"
+        return f"reolink_audioSwitch_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return f"{self._base.api.name} record audio"
+        return f"{self._base.name} record audio"
 
     @property
     def is_on(self):

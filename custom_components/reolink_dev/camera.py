@@ -1,5 +1,6 @@
 """This component provides support for Reolink IP cameras."""
 import asyncio
+from datetime import datetime
 import logging
 
 from haffmpeg.camera import CameraMjpeg
@@ -8,7 +9,10 @@ import voluptuous as vol
 from homeassistant.components.camera import SUPPORT_STREAM, Camera
 from homeassistant.components.ffmpeg import DATA_FFMPEG
 from homeassistant.helpers import config_validation as cv, entity_platform
-from homeassistant.helpers.aiohttp_client import async_aiohttp_proxy_stream
+from homeassistant.helpers.aiohttp_client import (
+    async_aiohttp_proxy_web,
+    async_get_clientsession,
+)
 
 from .const import SERVICE_PTZ_CONTROL, SERVICE_SET_DAYNIGHT, SERVICE_SET_SENSITIVITY
 from .entity import ReolinkEntity
@@ -91,12 +95,12 @@ class ReolinkCamera(ReolinkEntity, Camera):
     @property
     def unique_id(self):
         """Return Unique ID string."""
-        return f"reolink_{self._base.api.mac_address}"
+        return f"reolink_camera_{self._base.unique_id}"
 
     @property
     def name(self):
         """Return the name of this camera."""
-        return self._base.api.name
+        return self._base.name
 
     @property
     def ptz_support(self):
@@ -104,11 +108,18 @@ class ReolinkCamera(ReolinkEntity, Camera):
         return self._base.api.ptz_support
 
     @property
-    def state_attributes(self):
+    def device_state_attributes(self):
         """Return the camera state attributes."""
         attrs = {}
         if self._base.api.ptz_support:
             attrs["ptz_presets"] = self._base.api.ptz_presets
+
+        for key, value in self._daynight_modes.items():
+            if value == self._base.api.daynight_state:
+                attrs["daynight_state"] = key
+
+        if self._base.api.sensitivity_presets:
+            attrs["sensitivity"] = self.get_sensitivity_presets()
 
         return attrs
 
@@ -125,19 +136,10 @@ class ReolinkCamera(ReolinkEntity, Camera):
         """Generate an HTTP MJPEG stream from the camera."""
         stream_source = await self.stream_source()
 
-        stream = CameraMjpeg(self._ffmpeg.binary)
-        await stream.open_camera(stream_source)
+        websession = async_get_clientsession(self._hass)
+        stream_coro = websession.get(stream_source, timeout=10)
 
-        try:
-            stream_reader = await stream.get_reader()
-            return await async_aiohttp_proxy_stream(
-                self._hass,
-                request,
-                stream_reader,
-                self._ffmpeg.ffmpeg_stream_content_type,
-            )
-        finally:
-            await stream.close()
+        return await async_aiohttp_proxy_web(self._hass, request, stream_coro)
 
     async def async_camera_image(self):
         """Return a still image response from the camera."""
@@ -152,6 +154,27 @@ class ReolinkCamera(ReolinkEntity, Camera):
         await self._base.api.set_ptz_command(
             command=self._ptz_commands[command], **kwargs
         )
+
+    def get_sensitivity_presets(self):
+        """Get formatted sensitivity presets."""
+        presets = list()
+        preset = dict()
+
+        for api_preset in self._base.api.sensitivity_presets:
+            preset["id"] = api_preset["id"]
+            preset["sensitivity"] = api_preset["sensitivity"]
+
+            time_string = f'{api_preset["beginHour"]}:{api_preset["beginMin"]}'
+            begin = datetime.strptime(time_string, "%H:%M")
+            preset["begin"] = begin.strftime("%H:%M")
+
+            time_string = f'{api_preset["endHour"]}:{api_preset["endMin"]}'
+            end = datetime.strptime(time_string, "%H:%M")
+            preset["end"] = end.strftime("%H:%M")
+
+            presets.append(preset.copy())
+
+        return presets
 
     async def set_sensitivity(self, sensitivity, **kwargs):
         """Set the sensitivity to the camera."""

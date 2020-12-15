@@ -23,10 +23,11 @@ class ReolinkEntity(CoordinatorEntity):
         """Information about this entity/device."""
         return {
             "connections": {(CONNECTION_NETWORK_MAC, self._base.api.mac_address)},
-            "name": self._base.api.name,
+            "name": self._base.name,
             "sw_version": self._base.api.sw_version,
             "model": self._base.api.model,
             "manufacturer": self._base.api.manufacturer,
+            "channel": self._base.api._channel
         }
 
     @property
