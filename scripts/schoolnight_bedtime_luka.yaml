@@ -1,0 +1,32 @@
+####
+# School night audio warning
+# not used
+####
+
+schoolnight_bedtime_luka:
+  sequence:
+  - service: media_player.volume_set
+    data:
+      entity_id:
+        - media_player.display_me
+        - media_player.whatever_me
+        - media_player.clock_me
+      volume_level: 0.4
+  - delay: 00:00:01
+  - service: tts.google_say
+    entity_id: media_player.display_me
+    data:
+      message: >
+
+        {{ [
+        "Luka, it's bed time!",
+        "10 o'clock, get ready for bed Luka.",
+        "Luka, let's go to bathroom and bed.",
+        "Getting late Luka, get ready for bed.",
+        "Luka! Tomorrow is school day, get ready for sleep.",
+        ] | random }}
+#       "Zita, vrijeme je za spavanje!",
+#       "9 sati je, spremi se za krpe Zita.",
+#       "Zitice, ajmo kupaonica i krpe.",
+#       "Kasno je Zita, kreni se spremati",
+#       "Zita! Sutra je škola, kreni se spremati?",

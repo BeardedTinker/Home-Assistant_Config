@@ -1,0 +1,43 @@
+#####
+# School day bedtime notification for Zita
+# Stil work in progress
+#####
+
+alias: Luka School Day bedtime
+id: 49354363-ff87-4670-82b2-5886a2c86a73
+
+trigger:
+  platform: template
+  value_template: >
+    {% if states('sensor.time') == "22:30" and is_state('input_boolean.luka_school_online','on') %}
+      True
+    {% elif states('sensor.time') == "22:00" and is_state('input_boolean.luka_school_online','off')  %}
+      True
+    {% else %}
+      False
+    {% endif %}	
+#  at: '06:30:00'
+#  platform: time
+
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: sensor.luka_school_tomorrow
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.workday_tomorrow
+    state: 'on'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'luka'
+    title: '⏲ *Bedtime Luka*'
+    value1: 'It is {{ states("sensor.time") }} - time to go to bed'
+    tag_id: 'information'
+- data:
+    entity_id: media_player.mini_me
+    volume_level: 0.3
+  service: media_player.volume_set
+- service: script.schoolnight_bedtime_luka

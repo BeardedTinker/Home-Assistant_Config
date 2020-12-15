@@ -1,0 +1,98 @@
+blueprint:
+  name: Wake-up light alarm with sunrise effect
+  description: A wake-up light alarm with a brightness and color temperature sunrise
+    effect using an existing timestamp sensor as source. Requires date_time_iso sensor
+    in configuration!
+  domain: automation
+  input:
+    light_entity:
+      name: Wake-up light entity
+      description: The light to control. Turning it off during the sunrise will keep
+        it off. Color temperature range is auto-detected.
+      selector:
+        entity:
+          domain: light
+    timestamp_sensor:
+      name: Alarm timestamp sensor
+      description: 'Sensor with timestamp of next alarm (e.g. _next_alarm from companion
+        app). Requires device_class: timestamp!'
+      selector:
+        entity:
+          device_class: timestamp
+    sunrise_duration:
+      name: Sunrise duration
+      description: 'The sunrise will start the configured number of minutes before
+        the timestamp. (suggestion: 25)'
+      selector:
+        number:
+          min: 5.0
+          max: 60.0
+          step: 5.0
+          unit_of_measurement: min
+          mode: slider
+    max_brightness:
+      name: Maximum brightness
+      description: 'The brightness will be transitioned from 1% to the configured
+        percentage. (suggestion: 100)'
+      selector:
+        number:
+          min: 5.0
+          max: 100.0
+          step: 1.0
+          unit_of_measurement: '%'
+          mode: slider
+    pre_sunrise_actions:
+      name: Pre-sunrise actions
+      description: Actions to run before sunrise starts (set e.g. a Delay with value
+        00:00:00 if you don't want to do anything)
+      selector:
+        action: {}
+  source_url: https://community.home-assistant.io/t/wake-up-light-alarm-with-sunrise-effect/255193
+variables:
+  light_entity: !input 'light_entity'
+  timestamp_sensor: !input 'timestamp_sensor'
+  sunrise_duration: !input 'sunrise_duration'
+  max_brightness: !input 'max_brightness'
+  start_mired: '{{ state_attr(light_entity, ''max_mireds'') }}'
+  end_mired: '{{ state_attr(light_entity, ''min_mireds'') }}'
+trigger:
+- platform: time_pattern
+  minutes: '*'
+condition: []
+action:
+- wait_template: '{{ as_timestamp(states(timestamp_sensor)) != None }}'
+- wait_template: '{{ 0 < as_timestamp(states(timestamp_sensor)) - as_timestamp(states(''sensor.date_time_iso''))
+    < 60 * float(sunrise_duration) }}'
+- choose: []
+  default: !input 'pre_sunrise_actions'
+- service: light.turn_on
+  data:
+    brightness_pct: 1
+    color_temp: '{{ start_mired }}'
+  entity_id: !input 'light_entity'
+- repeat:
+    while:
+    - condition: template
+      value_template: '{{ as_timestamp(states(timestamp_sensor)) != None }}'
+    - condition: template
+      value_template: '{{ 0 < as_timestamp(states(timestamp_sensor)) - as_timestamp(states(''sensor.date_time_iso''))
+        < 60 * float(sunrise_duration) }}'
+    sequence:
+    - delay: 00:00:05
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: !input 'light_entity'
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          data:
+            brightness_pct: '{{ (float(max_brightness) - (float(max_brightness) *
+              (as_timestamp(states(timestamp_sensor)) - as_timestamp(now())) / (float(sunrise_duration)
+              * 60))) | int }}'
+            color_temp: '{{ (float(end_mired) + (float(start_mired) - float(end_mired))
+              * ((as_timestamp(states(timestamp_sensor)) - as_timestamp(now())) /
+              (float(sunrise_duration) * 60))) | int }}'
+          entity_id: !input 'light_entity'
+mode: single
+max_exceeded: silent
