@@ -1,0 +1,14 @@
+#####
+# Turn on Audio notifications at predifined time
+# Used to un-mute TTS at specific time
+#####
+
+id: b43d854f-a9f3-47a2-b0a6-169845fdae40
+alias: Turn On Audio Notifications
+initial_state: true
+trigger:
+  platform: template
+  value_template: "{{ states('sensor.time') == (state_attr('input_datetime.audio_notification_on', 'timestamp') | int | timestamp_custom('%H:%M', False)) }}"
+action:
+- service: input_boolean.turn_on
+  entity_id: input_boolean.audio_notifications

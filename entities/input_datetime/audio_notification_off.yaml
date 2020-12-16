@@ -1,0 +1,9 @@
+#####
+# Time when Audio notifications are turned Off
+# Used to mute TTS
+#####
+
+audio_notification_off:
+  name: Audio Notifications Off
+  has_date: false
+  has_time: true
