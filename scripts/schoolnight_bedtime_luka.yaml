@@ -11,7 +11,7 @@ schoolnight_bedtime_luka:
         - media_player.display_me
         - media_player.whatever_me
         - media_player.clock_me
-      volume_level: 0.4
+      volume_level: 0.5
   - delay: 00:00:01
   - service: tts.google_say
     entity_id: media_player.display_me

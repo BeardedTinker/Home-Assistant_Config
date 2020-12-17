@@ -2,7 +2,7 @@
 # PM10 above 25 and getting worse speech
 ####
 
-pm25_increase_speech:
+pm10_increase_speech:
   sequence:
   - service: media_player.volume_set
     data:

@@ -15,6 +15,6 @@ condition:
       state: 'on'
     - condition: numeric_state
       entity_id: sensor.luftdaten_43996_p25
-      above: 20
+      above: 30
 action:
 - service: script.pm25_increase_speech
