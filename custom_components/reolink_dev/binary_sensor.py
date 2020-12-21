@@ -82,6 +82,10 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             return
 
         self._event_state = event.data["IsMotion"]
+        if self._base.api.channels > 1:
+            # Pull the motion state for the NVR channel, it has only 1 event
+            self._event_state = await self._base.api.get_motion_state()
+
         if self._event_state:
             self._last_motion = datetime.datetime.now()
         else:

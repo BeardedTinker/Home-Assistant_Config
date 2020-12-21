@@ -129,7 +129,7 @@ class ReolinkCamera(ReolinkEntity, Camera):
         return SUPPORT_STREAM
 
     async def stream_source(self):
-        """Return the source of the stream."""
+        """Return the source of the stream."""        
         return await self._base.api.get_stream_source()
 
     async def handle_async_mjpeg_stream(self, request):
