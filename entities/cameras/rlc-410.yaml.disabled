@@ -1,8 +1,0 @@
-platform: reolink_dev
-host: !secret reolink_2_ip
-username: !secret reolink_2_user
-password: !secret reolink_2_pass
-name: Reolink RLC-410-5M
-stream: sub
-protocol: rtsp
-scan_interval: 10
