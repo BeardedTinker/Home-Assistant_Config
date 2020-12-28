@@ -1,0 +1,36 @@
+#####
+# Warning when earthquake notice received
+# Probably late but still
+#####
+
+alias: Earthquake Alert
+id: 3a4e8f05-1526-4341-a675-e15bacfa0955
+trigger:
+  - platform: geo_location
+    source: usgs_earthquakes_feed
+    zone: zone.home
+    event: enter
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '⚠ *Earthquake Alert!*'
+    value1: 'Earthquake detected! Stay calm!'
+    tag_id: 'warning'
+    sticky: 'true'
+    group: weather
+    color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
+- data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    message: 'Earthquake detected! Stay calm!'
+  service: tts.google_say
