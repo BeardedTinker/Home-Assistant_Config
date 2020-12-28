@@ -1,5 +1,6 @@
 """Garbage collection calendar."""
 
+import asyncio
 import logging
 from datetime import date, datetime, timedelta
 
@@ -9,7 +10,7 @@ from homeassistant.util import Throttle
 from .const import CALENDAR_NAME, CALENDAR_PLATFORM, DOMAIN, SENSOR_PLATFORM
 
 _LOGGER = logging.getLogger(__name__)
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=60)
 
 
 async def async_setup_platform(
@@ -134,8 +135,16 @@ class EntitiesCalendarData:
         today = date.today()
         for entity in self.entities:
             garbage_collection = self._hass.data[DOMAIN][SENSOR_PLATFORM][entity]
-            await garbage_collection.async_load_holidays(today)
-            start = await garbage_collection.async_find_next_date(today, True)
+            try:
+                await asyncio.wait_for(
+                    garbage_collection.async_load_holidays(today), timeout=10
+                )
+                start = await asyncio.wait_for(
+                    garbage_collection.async_find_next_date(today, True), timeout=10
+                )
+            except asyncio.TimeoutError:
+                start = None
+                _LOGGER.error("(%s) Timeout looking for the new date", entity)
             try:
                 end = start + timedelta(days=1)
             except TypeError:

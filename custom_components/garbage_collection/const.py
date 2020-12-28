@@ -21,6 +21,7 @@ ATTR_NEXT_DATE = "next_date"
 ATTR_DAYS = "days"
 ATTR_LAST_COLLECTION = "last_collection"
 ATTR_LAST_UPDATED = "last_updated"
+ATTR_HOLIDAYS = "holidays"
 
 # Device classes
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
@@ -349,7 +350,7 @@ class configuration(config_singularity):
             "method": vol.Optional,
             "default": DEFAULT_PERIOD,
             "type": int,
-            "validator": vol.All(vol.Coerce(int), vol.Range(min=1, max=52)),
+            "validator": vol.All(vol.Coerce(int), vol.Range(min=1, max=365)),
         },
         CONF_FIRST_WEEK: {
             "step": 4,

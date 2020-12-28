@@ -1,7 +1,8 @@
 """Sensor platform for garbage_collection."""
+import asyncio
 import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import holidays
 import homeassistant.util.dt as dt_util
@@ -14,6 +15,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from .calendar import EntitiesCalendarData
 from .const import (
     ATTR_DAYS,
+    ATTR_HOLIDAYS,
     ATTR_LAST_COLLECTION,
     ATTR_LAST_UPDATED,
     ATTR_NEXT_DATE,
@@ -172,6 +174,7 @@ class GarbageCollection(RestoreEntity):
         self._holiday_state = config.get(CONF_STATE)
         self._holiday_observed = config.get(CONF_OBSERVED, True)
         self._holidays = []
+        self._holidays_log = ""
         self._period = config.get(CONF_PERIOD)
         self._first_week = config.get(CONF_FIRST_WEEK)
         try:
@@ -200,7 +203,9 @@ class GarbageCollection(RestoreEntity):
 
     async def async_load_holidays(self, today: date) -> None:
         """Load the holidays from from a date."""
-        holidays_log = ""
+        self._holidays_log = ""
+        log = ""
+        year_from_today = today + relativedelta(years=1)
         self._holidays.clear()
         if self._country_holidays is not None and self._country_holidays != "":
             this_year = today.year
@@ -235,14 +240,16 @@ class GarbageCollection(RestoreEntity):
             try:
                 for d, name in hol.items():
                     self._holidays.append(d)
-                    holidays_log += f"\n  {d}: {name}"
+                    log += f"\n  {d}: {name}"
+                    if d >= today and d <= year_from_today:
+                        self._holidays_log += f"\n  {d}: {name}"
             except KeyError:
                 _LOGGER.error(
                     "(%s) Invalid country code (%s)",
                     self._name,
                     self._country_holidays,
                 )
-            _LOGGER.debug("(%s) Found these holidays: %s", self._name, holidays_log)
+            _LOGGER.debug("(%s) Found these holidays: %s", self._name, log)
 
     async def async_added_to_hass(self):
         """When sensor is added to hassio, add it to calendar."""
@@ -329,6 +336,7 @@ class GarbageCollection(RestoreEntity):
         res[ATTR_DAYS] = self._days
         res[ATTR_LAST_COLLECTION] = self.last_collection
         res[ATTR_LAST_UPDATED] = self._last_updated
+        res[ATTR_HOLIDAYS] = self._holidays_log
         return res
 
     @property
@@ -479,57 +487,40 @@ class GarbageCollection(RestoreEntity):
         _LOGGER.error("(%s) Unknown frequency %s", self._name, self._frequency)
         raise ValueError
 
-    async def _async_candidate_date_with_holidays(self, day1: date) -> date:
-        """Find candidate date, automatically skip holidays."""
-        first_day = day1
-        # Check if there are holidays within holiday offset that would fall into day1
-        if len(self._holidays) > 0 and self._holiday_move_offset > 0:
-            look_back = self._holiday_move_offset
-            if self._holiday_in_week_move:  # If holiday in week, check from Monday
-                look_back = -day1.weekday()
-            check_near = list(
+    async def _async_skip_holidays(self, date_candidate: date) -> date:
+        """Skip holidays."""
+        if self._holiday_in_week_move:
+            holidays_in_week = list(
                 filter(
-                    lambda date: date + relativedelta(days=look_back) >= day1
-                    and date <= day1,
+                    lambda date: date
+                    >= (date_candidate - relativedelta(days=date_candidate.weekday()))
+                    and date <= date_candidate,
                     self._holidays,
                 )
             )
-            if len(check_near) > 0:
-                first_day -= relativedelta(days=look_back)
-        while True:
-            try:
-                next_date = await self._async_find_candidate_date(
-                    first_day
-                ) + relativedelta(days=self._offset)
-            except ValueError:
-                raise
-            if bool(self._holiday_in_week_move):
-                start_date = next_date - relativedelta(days=next_date.weekday())
-                delta = relativedelta(days=1)
-                while start_date <= next_date:
-                    if start_date in self._holidays:
-                        _LOGGER.debug(
-                            "(%s) Move possible collection day, "
-                            "because public holiday in week on %s",
-                            self._name,
-                            start_date,
-                        )
-                        next_date = self._skip_holiday(next_date)
-                        break
-                    start_date += delta
-            while next_date in self._holidays:
+            if len(holidays_in_week) > 0:
                 _LOGGER.debug(
-                    "(%s) Skipping public holiday on %s", self._name, next_date
+                    "(%s) Move possible collection day, "
+                    "because public holiday in week on %s",
+                    self._name,
+                    date_candidate,
                 )
-                next_date = self._skip_holiday(next_date)
-            if next_date >= day1:
-                return next_date
-            first_day += relativedelta(days=1)
+                date_candidate = self._skip_holiday(date_candidate)
+        while date_candidate in self._holidays:
+            _LOGGER.debug(
+                "(%s) Skipping public holiday on %s", self._name, date_candidate
+            )
+            date_candidate = self._skip_holiday(date_candidate)
+        return date_candidate
 
-    def _insert_include_date(self, day1: date, next_date: date) -> date:
+    def _insert_include_date(
+        self, day1: date, next_date: Union[date, None]
+    ) -> Union[date, None]:
         """Add include dates."""
         include_dates = list(filter(lambda date: date >= day1, self._include_dates))
-        if len(include_dates) > 0 and include_dates[0] < next_date:
+        if len(include_dates) > 0 and (
+            next_date is None or include_dates[0] < next_date
+        ):
             _LOGGER.debug(
                 "(%s) Inserting include_date %s", self._name, include_dates[0]
             )
@@ -544,48 +535,6 @@ class GarbageCollection(RestoreEntity):
             else self._holiday_move_offset
         )
         return day + relativedelta(days=skip_days)
-
-    async def _async_candidate_with_incl_excl(
-        self, day1: date, ignore_today=False
-    ) -> date:
-        """Find the next date starting from day1."""
-        first_day = day1 - relativedelta(days=self._offset)
-        i = 0
-        while True:
-            try:
-                next_date = self._insert_include_date(
-                    first_day,
-                    await self._async_candidate_date_with_holidays(first_day),
-                )
-            except ValueError:
-                raise
-            date_ok = True
-            # If it is today and after expiration, search from tomorrow
-            now = dt_util.now()
-            expiration = (
-                self.expire_after if self.expire_after is not None else time(23, 59, 59)
-            )
-            if next_date == now.date() and not ignore_today:
-                if (
-                    self.last_collection is not None
-                    and self.last_collection.date() == next_date
-                    and now.time() >= self.last_collection.time()
-                ):
-                    date_ok = False
-                elif now.time() >= expiration:
-                    _LOGGER.debug("(%s) Today's collection expired", self._name)
-                    self.last_collection = datetime.combine(next_date, expiration)
-                    date_ok = False
-            if next_date in self._exclude_dates:
-                _LOGGER.debug("(%s) Skipping exclude_date %s", self._name, next_date)
-                date_ok = False
-            if date_ok:
-                return next_date
-            first_day = next_date + relativedelta(days=1)
-            i += 1
-            if i > 365:
-                _LOGGER.error("(%s) Cannot find any suitable date", self._name)
-                raise ValueError
 
     async def _async_ready_for_update(self) -> bool:
         """Check if the entity is ready for the update.
@@ -624,100 +573,99 @@ class GarbageCollection(RestoreEntity):
                 pass
         return ready_for_update
 
-    async def async_find_next_date(self, today: date, ignore_today=False) -> date:
-        """Get date within configured date range."""
-        year = today.year
-        month = today.month
-        if self.date_inside(today):
-            try:
-                next_date = await self._async_candidate_with_incl_excl(
-                    today, ignore_today
+    def move_to_range(self, day: date) -> date:
+        """If the date is not in range, move to the range."""
+        if not (day in self._include_dates or self.date_inside(day)):
+            year = day.year
+            month = day.month
+            if self._first_month <= self._last_month and month > self._last_month:
+                _LOGGER.debug(
+                    "(%s) %s outside the range, lookig from %s next year",
+                    self._name,
+                    day,
+                    MONTH_OPTIONS[self._first_month - 1],
                 )
+                return date(year + 1, self._first_month, 1)
+            else:
+                _LOGGER.debug(
+                    "(%s) %s outside the range, searching from %s",
+                    self._name,
+                    day,
+                    MONTH_OPTIONS[self._first_month - 1],
+                )
+                return date(year, self._first_month, 1)
+        return day
+
+    async def async_find_next_date(self, first_date: date, ignore_today=False):
+        """Get date within configured date range."""
+        # Today's collection can be triggered by past collection with offset
+        if self._holiday_in_week_move:
+            look_back = max(
+                self._offset, self._holiday_move_offset, first_date.weekday()
+            )
+        else:
+            look_back = max(self._offset, self._holiday_move_offset)
+        day1 = first_date - relativedelta(days=look_back)
+        # Move starting date if today is out of range
+        day1 = self.move_to_range(day1)
+        next_date = None
+        while next_date is None:
+            try:
+                next_date = await self._async_find_candidate_date(day1) + relativedelta(
+                    days=self._offset
+                )
+                next_date = await self._async_skip_holidays(next_date)
             except ValueError:
                 raise
-            _LOGGER.debug("(%s) Next date candidate (%s)", self._name, next_date)
-            if not self.date_inside(next_date):
-                if self._first_month <= self._last_month:
-                    next_year = date(year + 1, self._first_month, 1)
-                    _LOGGER.debug(
-                        "(%s) Did not find a date this year, " "lookig at next year",
-                        self._name,
-                    )
-                    try:
-                        next_date = await self._async_candidate_with_incl_excl(
-                            next_year
-                        )
-                    except ValueError:
-                        raise
-                else:
-                    next_year = date(year, self._first_month, 1)
-                    _LOGGER.debug(
-                        "(%s) Date not within the range, " "searching again from %s",
-                        self._name,
-                        MONTH_OPTIONS[self._first_month - 1],
-                    )
-                    try:
-                        next_date = await self._async_candidate_with_incl_excl(
-                            next_year
-                        )
-                    except ValueError:
-                        raise
-                include_dates = list(
-                    filter(lambda date: date >= today, self._include_dates)
-                )
-                if len(include_dates) > 0 and include_dates[0] < next_date:
-                    _LOGGER.debug(
-                        "(%s) Using include date outside the date range %s",
-                        self._name,
-                        include_dates[0],
-                    )
-                    next_date = include_dates[0]
-        else:
-            if self._first_month <= self._last_month and month > self._last_month:
-                next_year = date(year + 1, self._first_month, 1)
-                _LOGGER.debug(
-                    "(%s) Date outside range, lookig at next year", self._name
-                )
-                try:
-                    next_date = await self._async_candidate_with_incl_excl(next_year)
-                except ValueError:
-                    raise
+            # Check if the date is within the range
+            new_date = self.move_to_range(next_date)
+            if new_date != next_date:
+                day1 = new_date  # continue from next year
+                next_date = None
             else:
-                next_year = date(year, self._first_month, 1)
-                _LOGGER.debug(
-                    "(%s) Current date is outside of the range, "
-                    "starting from first month",
-                    self._name,
-                )
-                try:
-                    next_date = await self._async_candidate_with_incl_excl(next_year)
-                except ValueError:
-                    raise
-            include_dates = list(
-                filter(lambda date: date >= today, self._include_dates)
-            )
-            if len(include_dates) > 0 and include_dates[0] < next_date:
-                _LOGGER.debug(
-                    "(%s) Using include date outside the date range %s",
-                    self._name,
-                    include_dates[0],
-                )
-                next_date = include_dates[0]
+                # Date is before starting date
+                if next_date < first_date:
+                    next_date = None
+                # Today's expiration
+                now = dt_util.now()
+                if not ignore_today and next_date == now.date():
+                    expiration = (
+                        self.expire_after
+                        if self.expire_after is not None
+                        else time(23, 59, 59)
+                    )
+                    if now.time() > expiration or (
+                        self.last_collection is not None
+                        and self.last_collection.date() == now.date()
+                        and now.time() >= self.last_collection.time()
+                    ):
+                        next_date = None
+                # Remove exclude dates
+                if next_date in self._exclude_dates:
+                    _LOGGER.debug(
+                        "(%s) Skipping exclude_date %s", self._name, next_date
+                    )
+                    next_date = None
+                day1 += relativedelta(days=1)  # look from the next day
+        next_date = self._insert_include_date(first_date, next_date)
         return next_date
 
     async def async_update(self) -> None:
         """Get the latest data and updates the states."""
-        now = dt_util.now()
-        today = now.date()
         if not await self._async_ready_for_update():
-            # _LOGGER.debug(
-            #     "(%s) Skipping the update, already did it today",
-            #     self._name)
             return
         _LOGGER.debug("(%s) Calling update", self._name)
-        await self.async_load_holidays(today)
+        now = dt_util.now()
+        today = now.date()
         self._last_updated = now
-        self._next_date = await self.async_find_next_date(today)
+        try:
+            await asyncio.wait_for(self.async_load_holidays(today), timeout=10)
+            self._next_date = await asyncio.wait_for(
+                self.async_find_next_date(today), timeout=10
+            )
+        except asyncio.TimeoutError:
+            _LOGGER.error("(%s) Timeout looking for the new date", self._name)
+            self._next_date = None
         if self._next_date is not None:
             self._days = (self._next_date - today).days
             next_date_txt = self._next_date.strftime(self._date_format)
