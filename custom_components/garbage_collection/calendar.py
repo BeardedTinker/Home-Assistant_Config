@@ -1,8 +1,7 @@
 """Garbage collection calendar."""
 
-import asyncio
 import logging
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from homeassistant.components.calendar import CalendarEventDevice
 from homeassistant.util import Throttle
@@ -10,7 +9,7 @@ from homeassistant.util import Throttle
 from .const import CALENDAR_NAME, CALENDAR_PLATFORM, DOMAIN, SENSOR_PLATFORM
 
 _LOGGER = logging.getLogger(__name__)
-MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=60)
+MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 
 
 async def async_setup_platform(
@@ -131,33 +130,21 @@ class EntitiesCalendarData:
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         """Get the latest data."""
-        events = []
-        today = date.today()
+        next_dates = {}
         for entity in self.entities:
-            garbage_collection = self._hass.data[DOMAIN][SENSOR_PLATFORM][entity]
-            try:
-                await asyncio.wait_for(
-                    garbage_collection.async_load_holidays(today), timeout=10
-                )
-                start = await asyncio.wait_for(
-                    garbage_collection.async_find_next_date(today, True), timeout=10
-                )
-            except asyncio.TimeoutError:
-                start = None
-                _LOGGER.error("(%s) Timeout looking for the new date", entity)
-            try:
-                end = start + timedelta(days=1)
-            except TypeError:
-                continue
-            if start is not None:
-                event = {
-                    "uid": entity,
-                    "summary": garbage_collection.name,
-                    "start": {"date": start.strftime("%Y-%m-%d")},
-                    "end": {"date": end.strftime("%Y-%m-%d")},
-                    "allDay": True,
-                }
-                events.append(event)
-        events.sort(key=lambda x: x["start"]["date"])
-        if len(events) > 0:
-            self.event = events[0]
+            if self._hass.data[DOMAIN][SENSOR_PLATFORM][entity]._next_date is not None:
+                next_dates[entity] = self._hass.data[DOMAIN][SENSOR_PLATFORM][
+                    entity
+                ]._next_date
+        if len(next_dates) > 0:
+            entity_id = min(next_dates.keys(), key=(lambda k: next_dates[k]))
+            start = next_dates[entity_id]
+            end = start + timedelta(days=1)
+            name = self._hass.data[DOMAIN][SENSOR_PLATFORM][entity_id].name
+            self.event = {
+                "uid": entity_id,
+                "summary": name,
+                "start": {"date": start.strftime("%Y-%m-%d")},
+                "end": {"date": end.strftime("%Y-%m-%d")},
+                "allDay": True,
+            }
