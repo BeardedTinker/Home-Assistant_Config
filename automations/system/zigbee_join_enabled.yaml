@@ -8,7 +8,7 @@ id: b55231ab-bb1f-474a-8041-2c8d7b4012fd
 
 trigger:
   platform: state
-  entity_id: switch.zigbee2mqtt_main_join
+  entity_id: switch.zigbee2mqtt_join
   to: "on"
 
 action:
