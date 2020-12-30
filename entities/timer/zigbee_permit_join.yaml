@@ -1,0 +1,7 @@
+#####
+# Timer to enable Zigbee2MQTT join
+#
+#####
+
+zigbee_permit_join:
+  name: Time remaining

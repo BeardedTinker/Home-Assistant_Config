@@ -1,0 +1,12 @@
+#####
+# Input number to select minutes join is enabled
+# for Zigbee2MQTT
+#####
+
+zigbee2mqtt_join_minutes:
+  name: "Zigbee2MQTT join minutes"
+  initial: 2
+  min: 1
+  max: 5
+  step: 1
+  mode: slider
