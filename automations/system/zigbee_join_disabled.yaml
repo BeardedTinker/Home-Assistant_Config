@@ -20,4 +20,4 @@ action:
     data:
       entity_id: timer.zigbee_permit_join
   - service: switch.turn_off
-    entity_id: switch.zigbee2mqtt_main_join
+    entity_id: switch.zigbee2mqtt_join
