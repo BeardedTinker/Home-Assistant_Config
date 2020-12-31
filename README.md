@@ -43,13 +43,14 @@ From other devices I use, here is a list:
   - Xiaomi Aqara human body movement and illuminance sensor [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
   - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
-  - NEW Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+  - Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+  - Xiaomi Mosquitto Repellent 
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
   - [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
-  - ESPHome compatible Smart Plug - removed
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
   - LG webOS TV
+  - Mi TV stick
   - tado° [Smart Thermostat](https://www.tado.com/hr/)
   - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
   - various PoE IP cameras 
@@ -65,13 +66,13 @@ From other devices I use, here is a list:
 As I'm running this on Synology, I have mix of Docker containers and hass.io add-ons. Here is a list:
 
 Add-ons:
-  - Check Home Assistant configuration - [link](https://github.com/home-assistant/hassio-addons/tree/master/check_config)
+  - ADB Android Debug Bridge - [link](https://github.com/hassio-addons/addon-adb)
+  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio)
   - ESPHome - [link](https://esphome.io/) - migrated from Docker container
+  - Mosquitto Broker - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto)
   - Node-RED - [link](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
   - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
-  - Zigbee2MQTT Assistant - [link](https://github.com/yllibed/Zigbee2MqttAssistant)
   - Zigbee2MQTT -[link](https://github.com/danielwelch/hassio-zigbee2mqtt)
-  - MQTT - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto)
 
 Containers:
   - AdGuard Home 
@@ -84,7 +85,7 @@ Containers:
   - Zigbee2MQTT - REMOVED, now using Add-on
   - MQTT - REMOVED, now using Add-on
 
- plus some others too - not directly related to Home Assistant (Minecraft, Storj node,...)
+ plus some others too - not directly related to Home Assistant (Minecraft/PaperMC, Storj node,...)
 
 
 ### Integrations
@@ -120,12 +121,13 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Network UPS Tool
   - ONVIF
   - OpenUV
+  - Reolink
   - Shelly
+  - SpaceX
   - SpeedTest
   - Synology DSM
   - Tado
   - Tile
-  - UPnP
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
 
 
@@ -137,31 +139,31 @@ It looks overwhelming at first, but when you get the hang of it, this structure 
 
 ## Counters
 
-Current count of various things in Home Assistant
+Current count of various things in Home Assistant 
 
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     2 |
-| Automations          |   119 |
-| Binary sensors       |   120 |
-| Cameras              |    10 |
+| Automations          |   123 |
+| Binary sensors       |   119 |
+| Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    62 |
-| Entities             |  1340 |
+| Entities             |  1372 |
 | Groups               |    17 |
 | Input Boolean        |    11 |
 | Input Date/Time      |    20 |
-| Input Number         |     8 |
+| Input Number         |     9 |
 | Input Select         |     9 |
 | Input Text           |     4 |
 | Lights               |    34 |
-| Media players        |    30 |
-| Lines of code (YAML) | 11314 |
+| Media players        |    31 |
+| Lines of code (YAML) | 11788 |
 | Persons              |     6 |
 | Plants               |     4 |
-| Scripts              |    15 |
-| Sensors              |   772 |
-| Switches             |    61 |
+| Scripts              |    16 |
+| Sensors              |   787 |
+| Switches             |    64 |
 | Timers               |     3 |
 | Weather              |     2 |
 
