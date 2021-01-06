@@ -67,6 +67,14 @@ class garbage_collection_shared:
         self.errors = {}
         if user_input is not None:
             validation = config_definition.compile_schema(step=1)
+            if CONF_INCLUDE_DATES in user_input:
+                user_input[CONF_INCLUDE_DATES] = string_to_list(
+                    user_input[CONF_INCLUDE_DATES]
+                )
+            if CONF_EXCLUDE_DATES in user_input:
+                user_input[CONF_EXCLUDE_DATES] = string_to_list(
+                    user_input[CONF_EXCLUDE_DATES]
+                )
             # Name is not used in OptionsFlow
             if defaults is not None and CONF_NAME in validation:
                 del validation[CONF_NAME]
@@ -75,6 +83,12 @@ class garbage_collection_shared:
             except vol.Invalid as exception:
                 error = str(exception)
                 if (
+                    CONF_INCLUDE_DATES in error
+                    or CONF_EXCLUDE_DATES in error
+                    or CONF_FIRST_DATE in error
+                ):
+                    self.errors["base"] = "date"
+                elif (
                     CONF_ICON_NORMAL in error
                     or CONF_ICON_TODAY in error
                     or CONF_ICON_TOMORROW in error
@@ -194,14 +208,6 @@ class garbage_collection_shared:
                     step=4, valid_for=self._data[CONF_FREQUENCY]
                 )
             )
-            if CONF_INCLUDE_DATES in updates:
-                updates[CONF_INCLUDE_DATES] = string_to_list(
-                    updates[CONF_INCLUDE_DATES]
-                )
-            if CONF_EXCLUDE_DATES in updates:
-                updates[CONF_EXCLUDE_DATES] = string_to_list(
-                    updates[CONF_EXCLUDE_DATES]
-                )
             if CONF_HOLIDAY_POP_NAMED in updates:
                 updates[CONF_HOLIDAY_POP_NAMED] = string_to_list(
                     updates[CONF_HOLIDAY_POP_NAMED]
@@ -209,16 +215,8 @@ class garbage_collection_shared:
             try:
                 updates = validation(updates)
             except vol.Invalid as exception:
-                error = str(exception)
-                if (
-                    CONF_INCLUDE_DATES in error
-                    or CONF_EXCLUDE_DATES in error
-                    or CONF_FIRST_DATE in error
-                ):
-                    self.errors["base"] = "date"
-                else:
-                    self.errors["base"] = "value"
-                    _LOGGER.error(f"Unknown exception: {exception}")
+                self.errors["base"] = "value"
+                _LOGGER.error(f"Unknown exception: {exception}")
             if self._data[CONF_FREQUENCY] in MONTHLY_FREQUENCY:
                 if self._data[CONF_FORCE_WEEK_NUMBERS]:
                     if len(updates[CONF_WEEK_ORDER_NUMBER]) == 0:

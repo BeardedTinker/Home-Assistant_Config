@@ -291,6 +291,18 @@ class configuration(config_singularity):
             "type": str,
             "validator": cv.string,
         },
+        CONF_INCLUDE_DATES: {
+            "step": 1,
+            "method": vol.Optional,
+            "type": str,
+            "validator": vol.All(cv.ensure_list, [date_text]),
+        },
+        CONF_EXCLUDE_DATES: {
+            "step": 1,
+            "method": vol.Optional,
+            "type": str,
+            "validator": vol.All(cv.ensure_list, [date_text]),
+        },
         CONF_DATE: {
             "step": 2,
             "valid_for": lambda f: f in ANNUAL_FREQUENCY,
@@ -366,20 +378,6 @@ class configuration(config_singularity):
             "method": vol.Optional,
             "type": str,
             "validator": date_text,
-        },
-        CONF_INCLUDE_DATES: {
-            "step": 4,
-            "valid_for": lambda f: f in EXCEPT_ANNUAL_GROUP,
-            "method": vol.Optional,
-            "type": str,
-            "validator": vol.All(cv.ensure_list, [date_text]),
-        },
-        CONF_EXCLUDE_DATES: {
-            "step": 4,
-            "valid_for": lambda f: f in EXCEPT_ANNUAL_GROUP,
-            "method": vol.Optional,
-            "type": str,
-            "validator": vol.All(cv.ensure_list, [date_text]),
         },
         CONF_MOVE_COUNTRY_HOLIDAYS: {
             "step": 4,
