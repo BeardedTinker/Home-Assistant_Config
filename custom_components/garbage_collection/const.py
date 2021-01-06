@@ -175,6 +175,11 @@ COUNTRY_CODES = [
     "UK",
     "US",
     "ZA",
+    "England",
+    "Wales",
+    "Scotland",
+    "IsleOfMan",
+    "NorthernIreland",
 ]
 
 
