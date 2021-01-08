@@ -1,0 +1,111 @@
+  - panel: false
+    path: default_view
+    title: Home
+    icon: 'mdi:home'
+    badges: []
+    cards:
+      - entities:
+          - entity: sensor.speedtest_download
+            index: 0
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: climate.living_room
+          - entity: climate.luka_room
+          - entity: climate.zita_room
+          - entity: climate.dining_room
+        type: entities
+      - entities:
+          - entity: binary_sensor.people_home
+            name: People home
+        type: entities
+      - entities:
+          - entity: sensor.total_tv_time
+          - entity: sensor.current_version
+          - entity: sensor.uptime
+        show_header_toggle: false
+        title: Statistics
+        type: entities
+      - entities:
+          - entity: sensor.moon
+          - entity: sensor.season
+          - entity: binary_sensor.workday_today
+          - entity: binary_sensor.workday_tomorrow
+        type: glance
+      - entities:
+          - entity: sensor.storj_balance
+        type: entities
+      - entities:
+          - entity: sensor.next_launch
+          - entity: sensor.next_launch_day
+          - entity: sensor.next_launch_countdown
+          - entity: sensor.next_launch_mission
+          - entity: sensor.next_launch_site
+        show_header_toggle: false
+        title: Rocket launch
+        type: entities
+      - entities:
+          - entity: sensor.bio_waste
+          - entity: sensor.mixed_waste
+          - entity: sensor.paper_waste
+          - entity: sensor.plastic_waste
+        show_header_toggle: false
+        title: 'Waste '
+        type: entities
+      - entities:
+          - entity: sensor.beardedtinker
+          - entity: sensor.social_blade
+        show_header_toggle: false
+        title: BeardedTinker Channel
+        type: entities
+      - type: glance
+        entities:
+          - entity: person.andrej
+            name: Andrej
+          - entity: person.mirta
+            name: Mirta
+          - entity: person.luka
+            name: Luka
+          - entity: person.zita
+            name: Zita
+        title: The Family
+        show_name: true
+        show_icon: true
+        show_state: true
+      - type: vertical-stack
+        cards:
+          - entities:
+              - entity: sensor.croatia_coronavirus_confirmed
+                icon: 'mdi:emoticon-neutral-outline'
+                name: Confirmed
+              - entity: sensor.croatia_coronavirus_current
+                icon: 'mdi:emoticon-frown-outline'
+                name: Current
+              - entity: sensor.croatia_coronavirus_recovered
+                icon: 'mdi:emoticon-happy-outline'
+                name: Recovered
+              - entity: sensor.croatia_coronavirus_deaths
+                icon: 'mdi:emoticon-dead-outline'
+                name: Deaths
+            show_icon: true
+            show_name: true
+            show_state: true
+            title: Croatia
+            type: glance
+          - entities:
+              - entity: sensor.worldwide_coronavirus_confirmed
+                icon: 'mdi:emoticon-neutral-outline'
+                name: Confirmed
+              - entity: sensor.worldwide_coronavirus_current
+                icon: 'mdi:emoticon-frown-outline'
+                name: Current
+              - entity: sensor.worldwide_coronavirus_recovered
+                icon: 'mdi:emoticon-happy-outline'
+                name: Recovered
+              - entity: sensor.worldwide_coronavirus_deaths
+                icon: 'mdi:emoticon-dead-outline'
+                name: Deaths
+            show_icon: true
+            show_name: true
+            show_state: true
+            title: Worldwide
+            type: glance

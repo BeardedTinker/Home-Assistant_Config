@@ -1,0 +1,99 @@
+  - badges: []
+    cards:
+      - entity: sensor.synology_cpu_load_total
+        max: 100
+        min: 0
+        name: CPU load
+        severity:
+          green: 0
+          red: 90
+          yellow: 80
+        theme: default
+        type: gauge
+      - entity: sensor.synology_memory_usage_real
+        max: 100
+        min: 0
+        name: RAM usage
+        severity:
+          green: 0
+          red: 90
+          yellow: 70
+        theme: default
+        type: gauge
+      - entity: sensor.synology_volume_used_volume_1
+        max: 100
+        min: 0
+        name: HDD usage
+        severity:
+          green: 0
+          red: 90
+          yellow: 70
+        theme: default
+        type: gauge
+      - entities:
+          - sensor.synology_network_down
+          - sensor.synology_network_up
+        icon: 'mdi:network'
+        name: Network
+        type: 'custom:mini-graph-card'
+      - entities:
+          - sensor.synology_temperature_sda
+          - sensor.synology_temperature_sdb
+          - sensor.synology_temperature_sdc
+          - sensor.synology_temperature_sdd
+        icon: 'mdi:harddisk'
+        name: Disk temperature
+        show:
+          labels: hover
+          legend: false
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.ups_battery_runtime
+          - entity: sensor.ups_input_voltage
+          - entity: sensor.ups_nominal_real_power
+          - entity: sensor.ups_status
+          - entity: sensor.ups_status_data
+          - entity: sensor.ups_battery_charge
+          - entity: input_boolean.ups_on_batteries
+        type: entities
+      - entity: sensor.ups_load
+        max: 100
+        min: 0
+        severity:
+          green: 0
+          red: 60
+          yellow: 35
+        theme: default
+        type: gauge
+      - entities:
+          - entity: binary_sensor.ebroznas_security_status
+        type: entities
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: sensor.synology_average_disk_temp_volume_1
+          - entity: sensor.synology_maximum_disk_temp_volume_1
+          - entity: sensor.synology_status_volume_1
+          - entity: sensor.synology_temperature_sda
+          - entity: sensor.synology_total_size_volume_1
+      - type: entities
+        entities:
+          - device_tracker.mikrotik_ether1
+          - sensor.mikrotik_ether1_rx
+          - sensor.mikrotik_ether1_tx
+          - switch.mikrotik_port_ether1
+      - type: entities
+        entities:
+          - device_tracker.mikrotik_iskon_internet
+          - sensor.mikrotik_iskon_internet_rx
+          - sensor.mikrotik_iskon_internet_tx
+          - switch.mikrotik_port_iskon_internet
+      - type: entities
+        entities:
+          - sensor.mikrotik_cpu_load
+          - binary_sensor.mikrotik_firmware_update
+          - sensor.mikrotik_hdd_usage
+          - sensor.mikrotik_memory_usage
+          - sensor.mikrotik_temperature
+    icon: 'mdi:nas'
+    title: Backend

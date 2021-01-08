@@ -1,0 +1,80 @@
+  - badges: []
+    cards:
+      - entity: weather.dark_sky
+        type: 'custom:weather-card'
+        number_of_forecasts: '5'
+        name: DS
+      - aspect_ratio: 75%
+        type: iframe
+        url: >-
+          https://embed.windy.com/embed2.html?lat=45.804&lon=15.905&zoom=11&level=surface&overlay=rain&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=45.809&detailLon=15.921&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1
+      - type: 'custom:weather-card'
+        entity: weather.accuweather
+        number_of_forecasts: '5'
+        name: AW
+      - entities:
+          - entity: binary_sensor.meteoalarm
+          - entity: sensor.meteoalarm_event
+          - entity: sensor.meteoalarm_onset
+          - entity: sensor.meteoalarm_severity
+          - entity: sensor.meteoalarm_description
+          - entity: sensor.meteoalarm_instruction
+          - entity: sensor.meteoalarm_expires
+        show_header_toggle: false
+        title: Weather warning
+        type: entities
+      - entities:
+          - entity: binary_sensor.protection_window
+          - entity: sensor.current_uv_index
+          - entity: sensor.current_uv_level
+          - entity: sensor.max_uv_index
+        show_header_toggle: false
+        title: UV levels
+        type: entities
+      - entities:
+          - entity: sensor.u_s_air_pollution_level
+          - entity: sensor.u_s_air_quality_index
+          - entity: sensor.u_s_main_pollutant
+          - entity: sensor.current_ozone_level
+        show_header_toggle: false
+        title: 'Air quality '
+        type: entities
+      - entities:
+          - entity: sensor.luftdaten_43996_p25
+          - entity: sensor.luftdaten_43996_p10
+        title: 'Luftdaten '
+        type: entities
+      - entities:
+          - entity: sensor.indoor_aq_humidity
+          - entity: sensor.indoor_aq_temperature
+          - entity: sensor.indoor_aq_pm2_5
+          - entity: sensor.indoor_aq_pm10
+        title: Luftdaten local
+        type: entities
+      - entities:
+          - sensor.luftdaten_43996_p10
+        hours_to_show: 96
+        name: PM10
+        points_per_hour: 0.25
+        show:
+          fill: false
+          labels: true
+        type: 'custom:mini-graph-card'
+      - entities:
+          - sensor.luftdaten_43996_p25
+        hours_to_show: 96
+        name: PM2.5
+        points_per_hour: 0.25
+        show:
+          fill: false
+          labels: true
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.blitzortung_lightning_azimuth
+          - entity: sensor.blitzortung_lightning_counter
+          - entity: sensor.blitzortung_lightning_distance
+        show_header_toggle: false
+        title: Lightnings
+        type: entities
+    icon: 'mdi:weather-sunset'
+    title: Outdoor

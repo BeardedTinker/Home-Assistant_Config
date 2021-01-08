@@ -1,0 +1,30 @@
+  - badges: []
+    cards:
+      - entity: sensor.adguard_average_processing_speed
+        max: 1
+        min: 0
+        name: Average Processing
+        theme: default
+        type: gauge
+      - entity: sensor.adguard_dns_queries_blocked_ratio
+        max: 100
+        min: 0
+        name: DSN queries blocked
+        theme: default
+        type: gauge
+      - entities:
+          - entity: sensor.adguard_dns_queries
+            index: 0
+        name: DNS queries
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.adguard_dns_queries_blocked
+          - entity: sensor.adguard_parental_control_blocked
+          - entity: sensor.adguard_safe_browsing_blocked
+        type: entities
+      - entities:
+          - entity: switch.adguard_protection
+        type: entities
+    icon: 'mdi:skull'
+    path: adguard-home
+    title: AdGuard Home

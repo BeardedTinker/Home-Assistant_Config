@@ -1,0 +1,47 @@
+  - badges: []
+    cards:
+      - type: picture-entity
+        entity: camera.ebroznas_rlc_410_5mp
+        image: 'https://demo.home-assistant.io/stub_config/bedroom.png'
+        camera_image: camera.ebroznas_rlc_410_5mp
+      - camera_image: camera.saved_image
+        entities: []
+        title: saved image
+        type: picture-glance
+      - aspect_ratio: 0%
+        camera_image: camera.elevator_profile1
+        camera_view: live
+        entities:
+          - entity: camera.elevator_profile1
+        title: Elevator
+        type: picture-glance
+      - camera_image: camera.saved_elevator_image
+        entities: []
+        title: saved image
+        type: picture-glance
+      - type: picture-glance
+        title: RLC-410-5MP
+        image: 'https://demo.home-assistant.io/stub_config/kitchen.png'
+        entities:
+          - entity: switch.rlc_410_5mp_ir_lights
+          - entity: binary_sensor.rlc_410_5mp_motion
+          - entity: switch.rlc_410_5mp_record_audio
+        camera_image: camera.rlc_410_5mp
+        camera_view: live
+      - aspect_ratio: 0%
+        camera_image: camera.ebroznas_indoor2
+        camera_view: live
+        entities:
+          - entity: camera.ebroznas_indoor2
+        title: Indoor 2
+        type: picture-glance
+      - entities:
+          - entity: image_processing.facebox_saved_image
+          - entity: camera.saved_image
+          - entity: camera.saved_elevator_image
+          - entity: automation.ss_balcony_webhook
+          - entity: automation.ss_elevator_webhook_2
+          - entity: binary_sensor.front_door_contact
+        type: entities
+    icon: 'mdi:cctv'
+    title: Cameras

@@ -1,0 +1,63 @@
+  - badges: []
+    cards:
+      - entity: plant.cherry_tomatoes
+        name: Cherry Tomatoes
+        type: plant-status
+      - entity: plant.ficus_benjamina
+        name: Ficus Benjamina
+        type: plant-status
+      - type: plant-status
+        entity: plant.dracena_marginata_small
+        name: Dracena Marginata - small
+      - type: plant-status
+        entity: plant.dracena_marginata_large
+        name: Dracena Marginata - large
+      - type: 'custom:battery-state-card'
+        title: Battery levels
+        entities:
+          - entity: sensor.cherry_tomatoes_battery
+            name: Cherry Tomatoes battery
+          - entity: sensor.ficus_benjamina_battery
+            name: Ficus Benjamina battery
+          - entity: sensor.dracena_marginata_small_battery
+            name: Dracena Marginata small
+          - entity: sensor.dracena_marginata_large_battery
+            name: Dracena Marginata large
+      - entities:
+          - entity: sensor.cherry_tomatoes_date
+          - entity: sensor.cherry_tomatoes_time
+          - entity: sensor.ficus_benjamina_date
+          - entity: sensor.ficus_benjamina_time
+          - entity: sensor.dracena_marginata_large_date
+          - entity: sensor.dracena_marginata_large_time
+          - entity: sensor.dracena_marginata_small_date
+          - entity: sensor.dracena_marginata_small_time
+          - entity: sensor.cherry_tomatoes_humidity
+          - entity: sensor.cherry_tomatoes_fertilize_state
+          - entity: sensor.cherry_tomatoes_charging
+          - entity: sensor.cherry_tomatoes_bootcount
+          - entity: sensor.cherry_tomatoes_sleep5count
+          - entity: sensor.ficus_benjamina_humidity
+          - entity: sensor.ficus_benjamina_fertilize_state
+          - entity: sensor.ficus_benjamina_charging
+          - entity: sensor.ficus_benjamina_bootcount
+          - entity: sensor.ficus_benjamina_sleep5count
+          - entity: sensor.dracena_marginata_large_time
+          - entity: sensor.dracena_marginata_large_time
+        show_header_toggle: false
+        title: My plant
+        type: entities
+      - type: entities
+        entities:
+          - entity: sensor.cherry_tomatoes_last_charge
+          - entity: input_datetime.cherry_tomatoes_last_changed
+          - entity: sensor.dracena_marginata_large_last_charge
+          - entity: input_datetime.dracena_marginata_large_last_changed
+          - entity: sensor.dracena_marginata_small_last_charge
+          - entity: input_datetime.dracena_marginata_small_last_changed
+          - entity: sensor.ficus_benjamina_last_charge
+          - entity: input_datetime.ficus_benjamina_last_changed
+        title: Last charge for plant sensors
+    icon: 'mdi:flower'
+    path: plants
+    title: Plants

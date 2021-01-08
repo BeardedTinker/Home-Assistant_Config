@@ -1,0 +1,59 @@
+  - title: Battery
+    path: battery
+    icon: 'mdi:battery-charging-medium'
+    badges: []
+    cards:
+      - type: 'custom:battery-state-card'
+        title: Plant batteries
+        entities:
+          - entity: sensor.cherry_tomatoes_battery
+            name: Cherry Tomatoes battery
+          - entity: sensor.ficus_benjamina_battery
+            name: Ficus Benjamina battery
+          - entity: sensor.dracena_marginata_large_battery
+            name: Dracena Marginata large
+          - entity: sensor.dracena_marginata_small_battery
+            name: Dracena Marginata small
+      - type: 'custom:battery-state-card'
+        title: Phone battery levels
+        entities:
+          - entity: sensor.ele_l29_battery_level
+            name: Andrej phone battery
+          - entity: sensor.eml_l29_battery_level
+            name: Mirta phone battery
+          - entity: sensor.iphone_battery_level
+            name: Luka phone battery
+          - entity: sensor.fig_lx1_battery_level
+            name: Zita phone battery
+      - type: 'custom:battery-state-card'
+        title: Xiaomi battery levels
+        entities:
+          - entity: sensor.bathroom_battery
+            name: Bathroom humidity & temp
+          - entity: sensor.0x00158d00039dc604_battery
+            name: Vibration sensor
+          - entity: sensor.cube_battery
+            name: Cube
+          - entity: sensor.front_door_battery
+            name: Front door sensor
+          - entity: sensor.living_room_motion_battery
+            name: Living room sensor
+          - entity: sensor.luka_switch_battery
+            name: Luka room button
+          - entity: sensor.zita_switch_battery
+            name: Zita room button
+          - entity: sensor.wx08zm_battery_level
+            name: Mosquito Repellent
+      - type: 'custom:battery-state-card'
+        title: IKEA battery levels
+        entities:
+          - entity: sensor.bedroom_dimmer_battery
+            name: Bedroom dimmer
+          - entity: sensor.ceiling_dimmer_battery
+            name: Ceiling dimmer
+          - entity: sensor.dining_room_dimmer_battery
+            name: Dining room dimmer
+          - entity: sensor.kitchen_dimmer_battery
+            name: Kitchen dimmer
+          - entity: sensor.living_room_remote_battery
+            name: Living room remote

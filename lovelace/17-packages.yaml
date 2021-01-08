@@ -1,0 +1,23 @@
+  - badges: []
+    cards:
+      - card:
+          show_header_toggle: false
+          title: Packages
+          type: entities
+        filter:
+          include:
+            - entity_id: sensor.seventeentrack_package_*
+              options:
+                secondary_info: last-changed
+        type: 'custom:auto-entities'
+      - entities:
+          - entity: sensor.seventeentrack_packages_not_found
+          - entity: sensor.seventeentrack_packages_in_transit
+          - entity: sensor.seventeentrack_packages_ready_to_be_picked_up
+          - entity: sensor.seventeentrack_packages_delivered
+          - entity: sensor.seventeentrack_packages_returned
+          - entity: sensor.seventeentrack_packages_undelivered
+          - entity: sensor.seventeentrack_packages_expired
+        type: entities
+    icon: 'mdi:package-variant'
+    title: Package tracking

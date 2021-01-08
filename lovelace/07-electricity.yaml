@@ -1,0 +1,254 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.shelly_em_total_consumption
+            index: 0
+        hours_to_show: 168
+        points_per_hour: 0.25
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.shelly_em_current_consumption
+        hours_to_show: 168
+        points_per_hour: 0.25
+        show:
+          graph: bar
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.daily_energy_peak
+            name: Peak
+          - entity: sensor.daily_energy_offpeak
+            name: Offpeak
+        name: Daily Energy Usage
+        show:
+          graph: bar
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.washing_machine_current_consumption
+        hours_to_show: 168
+        points_per_hour: 0.25
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.monthly_energy_peak
+            name: Peak
+          - entity: sensor.monthly_energy_offpeak
+            name: Offpeak
+        name: Monthly Energy Usage
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.washing_machine_total_consumption
+        hours_to_show: 168
+        points_per_hour: 0.25
+        type: 'custom:mini-graph-card'
+      - cards:
+          - entities:
+              - sensor.daily_energy_peak
+            font_size: 75
+            line_color: blue
+            line_width: 8
+            name: Daily Peak
+            type: 'custom:mini-graph-card'
+          - entities:
+              - sensor.daily_energy_offpeak
+            font_size: 75
+            line_color: var(--accent-color)
+            line_width: 8
+            name: Daily OffPeak
+            type: 'custom:mini-graph-card'
+        type: horizontal-stack
+      - cards:
+          - entities:
+              - sensor.monthly_energy_peak
+            font_size: 75
+            line_color: blue
+            line_width: 8
+            name: Monthly Peak
+            type: 'custom:mini-graph-card'
+          - entities:
+              - sensor.monthly_energy_offpeak
+            font_size: 75
+            line_color: var(--accent-color)
+            line_width: 8
+            name: Monthly OffPeak
+            type: 'custom:mini-graph-card'
+        type: horizontal-stack
+      - entities:
+          - entity: switch.washing_machine
+          - entity: utility_meter.daily_energy
+          - entity: utility_meter.monthly_energy
+          - entity: sensor.shelly_em_voltage
+        show_header_toggle: false
+        title: shelly
+        type: entities
+      - entities:
+          - entity: sensor.ender_3_current_consumption
+        title: 3D Printer
+        type: entities
+      - entities:
+          - entity: sensor.ender_3_current_consumption
+          - entity: sensor.ender_3_total_consumption
+        hours_to_show: 168
+        points_per_hour: 0.25
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.daily_energy_offpeak
+          - entity: sensor.daily_energy_peak
+          - entity: sensor.daily_energy_total
+          - entity: sensor.daily_offpeak_energy_cost
+          - entity: sensor.daily_peak_energy_cost
+          - entity: sensor.daily_total_energy_cost
+          - entity: utility_meter.daily_energy
+        title: Daily energy
+        type: entities
+      - entities:
+          - entity: sensor.monthly_energy_offpeak
+          - entity: sensor.monthly_energy_peak
+          - entity: sensor.monthly_energy_total
+          - entity: sensor.monthly_offpeak_energy_cost
+          - entity: sensor.monthly_peak_energy_cost
+          - entity: sensor.monthly_total_energy_cost
+          - entity: utility_meter.monthly_energy
+        show_header_toggle: false
+        title: Monthly energy
+        type: entities
+      - entities:
+          - entity: sensor.quarterly_energy_offpeak
+          - entity: sensor.quarterly_energy_peak
+          - entity: sensor.quarterly_energy_total
+        title: Quarterly energy
+        type: entities
+      - entities:
+          - entity: sensor.yearly_energy_offpeak
+          - entity: sensor.yearly_energy_peak
+          - entity: sensor.yearly_energy_total
+        title: Yearly energy
+        type: entities
+      - entities:
+          - entity: sensor.sun_energy_day
+          - entity: sensor.sun_energy_night
+        title: Day/night energy
+        type: entities
+      - color_thresholds:
+          - color: '#039BE5'
+            value: 0
+          - color: '#0da035'
+            value: 600
+          - color: '#e0b400'
+            value: 1200
+          - color: '#e45e65'
+            value: 2400
+        color_thresholds_transition: hard
+        entities:
+          - sensor.shelly_em_current_consumption
+          - color: 'rgba(0,0,255,1)'
+            entity: binary_sensor.dark_outside
+            show_line: false
+            y_axis: secondary
+        group: false
+        hour24: true
+        hours_to_show: 24
+        line_width: 4
+        points_per_hour: 4
+        show:
+          extrema: true
+          fill: fade
+          icon: true
+          labels: false
+          name: true
+          state: true
+        state_map:
+          - label: Day
+            value: 'off'
+          - label: Night
+            value: 'on'
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        type: 'custom:mini-graph-card'
+      - color_thresholds:
+          - color: '#039BE5'
+            value: 0
+          - color: '#0da035'
+            value: 600
+          - color: '#e0b400'
+            value: 1200
+          - color: '#e45e65'
+            value: 2400
+        color_thresholds_transition: hard
+        entities:
+          - sensor.shelly_em_voltage
+        group: false
+        hour24: true
+        hours_to_show: 24
+        line_width: 4
+        points_per_hour: 4
+        show:
+          extrema: true
+          fill: fade
+          icon: true
+          labels: false
+          name: true
+          state: true
+        state_map:
+          - label: Day
+            value: 'off'
+          - label: Night
+            value: 'on'
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        type: 'custom:mini-graph-card'
+      - type: 'custom:power-distribution-card'
+        title: ''
+        entities:
+          - decimals: 2
+            display_abs: true
+            name: grid
+            unit_of_display: W
+            icon: 'mdi:transmission-tower'
+            entity: sensor.shelly_em_current_consumption
+            preset: grid
+          - decimals: '2'
+            display_abs: true
+            name: Washing
+            unit_of_display: W
+            consumer: true
+            icon: 'mdi:washing-machine'
+            entity: sensor.washing_machine_current_consumption
+            preset: consumer
+            icon_color:
+              bigger: ''
+              equal: ''
+              smaller: ''
+          - decimals: 2
+            display_abs: true
+            name: home
+            unit_of_display: W
+            consumer: true
+            icon: 'mdi:home-assistant'
+            entity: sensor.shelly_em_current_consumption
+            preset: home
+          - decimals: '2'
+            display_abs: true
+            name: Ender 3
+            unit_of_display: W
+            consumer: true
+            icon: 'mdi:printer-3d'
+            entity: sensor.ender_3_current_consumption
+            preset: consumer
+            icon_color:
+              bigger: ''
+              equal: ''
+              smaller: ''
+        center:
+          type: none
+          content:
+            - preset: autarky
+              name: autarky
+            - preset: ratio
+              name: ratio
+        animation: slide
+    icon: 'mdi:flash'
+    path: electricity
+    title: Electricity

@@ -1,0 +1,68 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.beardedtinker_home_assistant_config_last_build_duration
+          - entity: sensor.beardedtinker_home_assistant_config_last_build_started_at
+          - entity: sensor.beardedtinker_home_assistant_config_last_build_finished_at
+          - entity: sensor.beardedtinker_home_assistant_config_last_build_id
+          - entity: sensor.beardedtinker_home_assistant_config_last_build_state
+          - entity: sensor.beardedtinker_home_assistant_config_state
+        show_header_toggle: false
+        title: Travis-CI for BeardedTinker HA Config
+        type: entities
+      - entities:
+          - entity: input_select.logger_level
+        show_header_toggle: false
+        title: Logger
+        type: entities
+      - entities:
+          - entity: sensor.bt_s_ha_config
+          - entity: sensor.frenck_s_ha_config
+          - entity: sensor.carlo_s_ha_config
+          - entity: sensor.pesor_s_higrow_repo
+          - entity: sensor.ha_core_repo
+        title: GitHub repositories
+        type: glance
+      - entities:
+          - entity: input_text.version_latest_notified
+        title: HA Update
+        type: entities
+      - entities:
+          - entity: sensor.count_alert
+          - entity: sensor.count_automations
+          - entity: sensor.count_binary_sensor
+          - entity: sensor.count_camera
+          - entity: sensor.count_climate
+          - entity: sensor.count_devices
+          - entity: sensor.count_entities
+          - entity: sensor.count_groups
+          - entity: sensor.count_boolean
+          - entity: sensor.count_datetime
+          - entity: sensor.count_number
+          - entity: sensor.count_select
+          - entity: sensor.count_text
+          - entity: sensor.count_lights
+          - entity: sensor.count_media_player
+          - entity: sensor.number_of_lines_of_code_yaml
+          - entity: sensor.count_person
+          - entity: sensor.count_plants
+          - entity: sensor.count_script
+          - entity: sensor.count_sensor
+          - entity: sensor.count_switch
+          - entity: sensor.count_timer
+          - entity: sensor.count_weather
+        title: System statistics
+        type: entities
+      - entities:
+          - entity: sensor.hacs
+        type: entities
+      - entities:
+          - entity: binary_sensor.proxmox_beardedhassio_running
+          - entity: binary_sensor.proxmox_beardedha_core_running
+          - entity: binary_sensor.proxmox_xpenology_tmp_running
+          - entity: binary_sensor.proxmox_xpenology_tmp_running_2
+        title: Proxmox
+        type: entities
+    icon: 'mdi:bug'
+    path: system
+    title: System

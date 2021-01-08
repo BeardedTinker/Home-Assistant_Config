@@ -1,0 +1,86 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.media_content_type
+          - entity: sensor.media_source
+          - entity: sensor.media_player_title
+          - entity: media_player.lg_tv
+        show_header_toggle: false
+        title: LG TV
+        type: entities
+      - cards:
+          - entity: media_player.clock_me
+            group: true
+            icon: 'mdi:google-home'
+            icon_state: true
+            tts:
+              language: en
+              platform: google
+            type: 'custom:mini-media-player'
+          - entity: media_player.whatever_me
+            group: true
+            icon: 'mdi:google-home'
+            icon_state: true
+            tts:
+              language: en
+              platform: google
+            type: 'custom:mini-media-player'
+          - entity: media_player.mini_me
+            group: true
+            icon: 'mdi:google-home'
+            icon_state: true
+            tts:
+              language: en
+              platform: google
+            type: 'custom:mini-media-player'
+          - entity: media_player.display_me
+            group: true
+            icon: 'mdi:google-home'
+            icon_state: true
+            tts:
+              language: en
+              platform: google
+            type: 'custom:mini-media-player'
+        type: vertical-stack
+      - cards:
+          - artwork: cover
+            entity: media_player.lg_tv
+            icon: 'mdi:tv'
+            type: 'custom:mini-media-player'
+          - artwork: cover
+            entity: media_player.mi_tv
+            icon: 'mdi:cast'
+            type: 'custom:mini-media-player'
+          - artwork: cover
+            entity: media_player.living_room_tv
+            icon: 'mdi:cast'
+            type: 'custom:mini-media-player'
+          - entity: media_player.loft_tv
+            type: 'custom:mini-media-player'
+          - artwork: cover
+            entity: media_player.emby_mi_tv_stick
+            icon: 'mdi:cast'
+            type: 'custom:mini-media-player'
+        type: vertical-stack
+      - entities:
+          - entity: input_select.radio_station
+          - entity: input_select.radio_speaker
+          - entity: input_number.radio_volume
+          - entity: script.radio_play
+        type: entities
+        title: Radio
+      - entity: sensor.emby_latest_catroons
+        image_style: fanart
+        title: Latest Cartoons
+        type: 'custom:upcoming-media-card'
+      - entity: sensor.emby_latest_movies
+        image_style: fanart
+        title: Latest Movies
+        type: 'custom:upcoming-media-card'
+      - entity: sensor.emby_latest_tv_shows
+        image_style: fanart
+        title: Latest TV Shows
+        type: 'custom:upcoming-media-card'
+    icon: 'mdi:youtube-tv'
+    path: media
+    title: Media

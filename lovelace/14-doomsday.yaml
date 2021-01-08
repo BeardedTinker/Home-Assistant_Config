@@ -1,0 +1,56 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.radiation_level
+            index: 0
+        icon: 'mdi:radioactive'
+        type: 'custom:mini-graph-card'
+      - entities:
+          - entity: sensor.croatia_coronavirus_confirmed
+            icon: 'mdi:emoticon-neutral-outline'
+            name: Confirmed
+          - entity: sensor.croatia_coronavirus_current
+            icon: 'mdi:emoticon-frown-outline'
+            name: Current
+          - entity: sensor.croatia_coronavirus_recovered
+            icon: 'mdi:emoticon-happy-outline'
+            name: Recovered
+          - entity: sensor.croatia_coronavirus_deaths
+            icon: 'mdi:emoticon-dead-outline'
+            name: Deaths
+        show_icon: true
+        show_name: true
+        show_state: true
+        title: Croatia
+        type: glance
+      - entities:
+          - entity: sensor.worldwide_coronavirus_confirmed
+            icon: 'mdi:emoticon-neutral-outline'
+            name: Confirmed
+          - entity: sensor.worldwide_coronavirus_current
+            icon: 'mdi:emoticon-frown-outline'
+            name: Current
+          - entity: sensor.worldwide_coronavirus_recovered
+            icon: 'mdi:emoticon-happy-outline'
+            name: Recovered
+          - entity: sensor.worldwide_coronavirus_deaths
+            icon: 'mdi:emoticon-dead-outline'
+            name: Deaths
+        show_icon: true
+        show_name: true
+        show_state: true
+        title: Worldwide
+        type: glance
+      - entity: sensor.gdacs_45_0_15_0
+        type: entity
+      - geo_location_sources:
+          - all
+        type: map
+      - type: entities
+        entities:
+          - entity: binary_sensor.radiation_warning
+          - entity: sensor.radiation_level
+          - entity: sensor.geiger_counter
+    icon: 'mdi:nuke'
+    path: apokalipsa
+    title: Doomsday

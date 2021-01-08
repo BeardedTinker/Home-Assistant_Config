@@ -1,0 +1,30 @@
+  - icon: 'mdi:tune-vertical'
+    title: Configuration
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: input_boolean.zita_school_online
+          - entity: input_boolean.luka_school_online
+        title: Is school online?
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: input_datetime.text_notification_off
+          - entity: input_datetime.text_notification_on
+          - entity: input_datetime.audio_notification_off
+          - entity: input_datetime.audio_notification_on
+        title: Silent hours
+      - type: entities
+        entities:
+          - entity: input_datetime.evening_report
+          - entity: input_datetime.morning_report
+        title: Report times
+      - type: entities
+        entities:
+          - entity: input_boolean.audio_notifications
+          - entity: input_boolean.text_notifications
+        title: Notifications
+        show_header_toggle: false
+      - type: entity
+        entity: input_boolean.guest_mode

@@ -1,0 +1,221 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: device_tracker.fig_lx1
+        show_name: false
+        show_state: true
+        title: Zita location
+        type: glance
+      - type: grid
+        cards:
+          - type: light
+            entity: light.zita_tabletop_light
+            name: Tabletop
+          - type: light
+            entity: light.zita_ceiling_light
+            name: Ceiling
+          - type: light
+            entity: light.goose_light
+      - entity: climate.zita_room
+        type: thermostat
+      - cards:
+          - entities:
+              - entity: input_select.radio_station
+              - entity: input_text.custom_radio
+              - entity: input_select.radio_speaker
+              - entity: switch.radio_volume_down
+              - entity: switch.radio_mute
+              - entity: switch.radio_volume_up
+              - entity: switch.radio_stop
+              - entity: switch.radio_play
+            entity: input_select.radio_station
+            state_image:
+              Antena Zagreb: /local/radio/antena-zagreb.jpg
+              Antena Christmas: /local/radio/antena-zagreb.jpg
+              Antena Live: /local/radio/antena-zagreb.jpg
+              Antena Rock: /local/radio/antena-zagreb.jpg
+              Narodni: /local/radio/narodni-radio.jpg
+              HKR: /local/radio/otvoreni.jpg
+              HRT1: /local/radio/otvoreni.jpg
+              HRT2: /local/radio/otvoreni.jpg
+              Otvoreni: /local/radio/otvoreni.jpg
+              Radio Marija: /local/radio/otvoreni.jpg
+              Radio Postaja Mir Međugorje: /local/radio/otvoreni.jpg
+              yammat FM: /local/radio/yammat-fm.jpg
+              Stopped: /local/radio/otvoreni.jpg
+            type: picture-glance
+          - entities:
+              - entity: sensor.radio_station_selected
+              - entity: sensor.speaker_selected
+              - entity: input_number.radio_volume
+            show_header_toggle: false
+            type: entities
+          - entity: media_player.mini_me
+            group: true
+            hide:
+              controls: true
+            icon: 'mdi:google-home'
+            icon_state: true
+            tts:
+              language: en
+              platform: google
+            type: 'custom:mini-media-player'
+        type: vertical-stack
+      - type: grid
+        cards:
+          - type: entity
+            entity: input_boolean.zita_school_online
+            name: Online
+          - type: entity
+            entity: sensor.current_week
+            name: Week
+          - type: entity
+            entity: sensor.zita_school_tomorrow
+            name: Tomorrow
+          - type: entity
+            entity: sensor.zita_school_today
+            name: Today
+          - type: entity
+            entity: sensor.school_end_days_zita
+            name: Days left
+      - entities:
+          - entity: person.zita
+        hours_to_show: 0
+        type: map
+        title: Luka location
+      - shorten_cards: true
+        consolidate_entities: false
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        hide_header: false
+        child_card: false
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list:
+          - Android
+          - Blink
+          - Blink Rainbow
+          - Bouncing Balls
+          - Bpm
+          - Breathe
+          - Candle
+          - Candle Multi
+          - Chase
+          - Chase Flash
+          - Chase Flash Rnd
+          - Chase Rainbow
+          - Chase Random
+          - ChunChun
+          - Circus
+          - Colorful
+          - Colorloop
+          - Colortwinkles
+          - Colorwaves
+          - Dancing Shadows
+          - Dissolve
+          - Dissolve Rnd
+          - Drip
+          - Dynamic
+          - Fade
+          - Fill Noise
+          - Fire 2012
+          - Fire Flicker
+          - Fireworks
+          - Fireworks 1D
+          - Fireworks Starburst
+          - Flow
+          - Glitter
+          - Gradient
+          - Halloween
+          - Halloween Eyes
+          - Heartbeat
+          - ICU
+          - Juggle
+          - Lake
+          - Lighthouse
+          - Lightning
+          - Loading
+          - Merry Christmas
+          - Meteor
+          - Meteor Smooth
+          - Multi Comet
+          - Noise 1
+          - Noise 2
+          - Noise 3
+          - Noise 4
+          - Oscillate
+          - Pacifica
+          - Palette
+          - Percent
+          - Phased
+          - Phased Noise
+          - Plasma
+          - Police
+          - Police All
+          - Popcorn
+          - Pride 2015
+          - Railway
+          - Rain
+          - Rainbow
+          - Rainbow Runner
+          - Random Colors
+          - Red & Blue
+          - Ripple
+          - Ripple Rainbow
+          - Running
+          - Running 2
+          - Saw
+          - Scan
+          - Scan Dual
+          - Scanner
+          - Scanner Dual
+          - Sine
+          - Sinelon
+          - Sinelon Dual
+          - Sinelon Rainbow
+          - Solid
+          - Solid Pattern
+          - Solid Pattern Tri
+          - Sparkle
+          - Sparkle Dark
+          - Sparkle+
+          - Spots
+          - Spots Fade
+          - Stream
+          - Stream 2
+          - Strobe
+          - Strobe Mega
+          - Strobe Rainbow
+          - Sunrise
+          - Sweep
+          - Sweep Random
+          - Theater
+          - Theater Rainbow
+          - Traffic Light
+          - Tri Chase
+          - Tri Fade
+          - Tri Wipe
+          - Twinkle
+          - Twinklecat
+          - Twinklefox
+          - Twinkleup
+          - Two Areas
+          - Two Dots
+          - Washingup
+          - Wipe
+          - Wipe Random
+        entity: light.zita_desk_lights
+        group: true
+        header: Zita desk light
+        type: 'custom:light-entity-card'
+    icon: 'mdi:alpha-z-box'
+    path: zita-room
+    title: Zita room
