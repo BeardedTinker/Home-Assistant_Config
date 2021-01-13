@@ -1,6 +1,6 @@
 #####
 # GTFS component - test
-# https://www.home-assistant.io/integrations/gtfs/
+# https://www.home-assistant.io/integrations/webos/
 #####
 
 platform: gtfs

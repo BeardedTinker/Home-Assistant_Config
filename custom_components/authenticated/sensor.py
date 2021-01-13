@@ -395,6 +395,10 @@ class IPData:
             country = "**Country:**   {}".format(self.country)
         else:
             country = ""
+        if self.hostname is not None:
+            hostname = "**Hostname:**   {}".format(self.hostname)
+        else:
+            hostname = ""
         if self.region is not None:
             region = "**Region:**   {}".format(self.region)
         else:
@@ -418,6 +422,7 @@ class IPData:
             self.ip_address,
             self.username,
             country,
+            hostname,
             region,
             city,
             last_used_at.replace("T", " "),

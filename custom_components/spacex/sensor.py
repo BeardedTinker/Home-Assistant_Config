@@ -262,6 +262,14 @@ class SpaceXSensor(CoordinatorEntity):
             self.attrs["mission_patch"] = launch_data["links"].get("patch",{}).get("large")
             if launch_data.get("details"):
                 self.attrs["details"] = launch_data["details"][0:255]
+                if len(launch_data["details"]) > 255:
+                    self.attrs["details2"] = launch_data["details"][255:510]
+                else:
+                    self.attrs["details2"] = ""
+                if len(launch_data["details"]) > 510:
+                    self.attrs["details3"] = launch_data["details"][510:765]
+                else:
+                    self.attrs["details3"] = ""
             self.attrs["video_link"] = launch_data["links"].get("webcast")
 
         elif self._kind == "spacex_next_launch_day":
@@ -319,18 +327,16 @@ class SpaceXSensor(CoordinatorEntity):
         elif self._kind == "spacex_next_launch_rocket":
             core_counter = 1
             for this_core in launch_data["cores_detail"]:
-                self.attrs["core_" + str(core_counter) + "_serial"] = this_core["details"][
-                    "serial"
-                ]
-                self.attrs["core_" + str(core_counter) + "_flight"] = this_core[
+                self.attrs["core_" + str(core_counter) + "_serial"] = this_core.get(
+                    "details",{}).get("serial")
+                self.attrs["core_" + str(core_counter) + "_flight"] = this_core.get(
                     "flight"
-                ]
-                self.attrs["core_" + str(core_counter) + "_block"] = this_core["details"][
-                    "block"
-                ]
+                )
+                self.attrs["core_" + str(core_counter) + "_block"] = this_core.get(
+                    "details",{}).get("block")
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
-                ] = this_core["landing_attempt"]
+                ] = this_core.get("landing_attempt")
                 
                 if this_core.get("landpad"):
                     self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
@@ -346,7 +352,7 @@ class SpaceXSensor(CoordinatorEntity):
                 core_counter = core_counter + 1
 
             if launch_data.get("fairings"):
-                self.attrs["fairings_reused"] = launch_data["fairings"].get(
+                self.attrs["fairings_reused"] = launch_data.get("fairings",{}).get(
                     "reused"
                 )
             else:
@@ -382,6 +388,14 @@ class SpaceXSensor(CoordinatorEntity):
             self.attrs["mission_patch"] = latest_launch_data["links"].get("patch",{}).get("large")
             if latest_launch_data.get("details"):
                 self.attrs["details"] = latest_launch_data["details"][0:255]
+                if len(latest_launch_data["details"]) > 255:
+                    self.attrs["details2"] = latest_launch_data["details"][255:510]
+                else:
+                    self.attrs["details2"] = ""
+                if len(latest_launch_data["details"]) > 510:
+                    self.attrs["details3"] = latest_launch_data["details"][510:765]
+                else:
+                    self.attrs["details3"] = ""
             self.attrs["video_link"] = latest_launch_data["links"].get("webcast")
 
         elif self._kind == "spacex_latest_launch_day":
