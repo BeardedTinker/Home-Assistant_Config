@@ -5,6 +5,7 @@ DOMAIN_DATA = "reolink_dev_devices"
 EVENT_DATA_RECEIVED = "reolink_dev-event"
 COORDINATOR = "coordinator"
 BASE = "base"
+PUSH_MANAGER = "push_manager"
 SESSION_RENEW_THRESHOLD = 300
 
 CONF_STREAM = "stream"

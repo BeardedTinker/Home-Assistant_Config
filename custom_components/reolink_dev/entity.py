@@ -22,12 +22,13 @@ class ReolinkEntity(CoordinatorEntity):
     def device_info(self):
         """Information about this entity/device."""
         return {
+            "identifiers": {(DOMAIN, self._base.unique_id)},
             "connections": {(CONNECTION_NETWORK_MAC, self._base.api.mac_address)},
             "name": self._base.name,
             "sw_version": self._base.api.sw_version,
             "model": self._base.api.model,
             "manufacturer": self._base.api.manufacturer,
-            "channel": self._base.api._channel
+            "channel": self._base.channel
         }
 
     @property

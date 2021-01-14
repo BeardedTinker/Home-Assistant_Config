@@ -2,7 +2,6 @@
 import asyncio
 from datetime import timedelta
 import logging
-import re
 
 import async_timeout
 
@@ -16,10 +15,10 @@ from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.network import get_url
+from homeassistant.helpers import device_registry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .base import ReolinkBase
+from .base import ReolinkBase, ReolinkPush
 from .const import (
     BASE,
     CONF_CHANNEL,
@@ -29,6 +28,7 @@ from .const import (
     COORDINATOR,
     DOMAIN,
     EVENT_DATA_RECEIVED,
+    PUSH_MANAGER,
     SERVICE_PTZ_CONTROL,
     SERVICE_SET_DAYNIGHT,
     SERVICE_SET_SENSITIVITY,
@@ -61,27 +61,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data,
         entry.options
     )
-
     base.sync_functions.append(entry.add_update_listener(update_listener))
 
     if not await base.connect_api():
         return False
-
-    webhook_id = await register_webhook(hass, base.event_id)
-    webhook_url = "{}{}".format(
-      get_url(hass, prefer_external=False),
-      hass.components.webhook.async_generate_path(webhook_id)
-    )
-
-    await base.subscribe(webhook_url)
-
     hass.data[DOMAIN][entry.entry_id] = {BASE: base}
+
+    try:
+        """Get a push manager, there should be one push manager per mac address"""
+        push = hass.data[DOMAIN][entry.entry_id][base.push_manager]
+    except KeyError:
+        push = ReolinkPush(hass, base.api.host, base.api.onvif_port, entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD])
+        await push.subscribe(base.event_id)
+        hass.data[DOMAIN][entry.entry_id][base.push_manager] = push
 
     async def async_update_data():
         """Perform the actual updates."""
 
         async with async_timeout.timeout(base.timeout):
-            await base.renew()
+            await push.renew()
             await base.update_states()
 
     coordinator = DataUpdateCoordinator(
@@ -117,71 +115,27 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     await base.set_stream(entry.options[CONF_STREAM])
 
 
-async def handle_webhook(hass, webhook_id, request):
-    """Handle incoming webhook from Reolink for inbound messages and calls."""
-    _LOGGER.debug("Reolink webhook triggered")
-
-    if not request.body_exists:
-        _LOGGER.debug("Webhook triggered without payload")
-
-    data = await request.text()
-    if not data:
-        _LOGGER.debug("Webhook triggered with unknown payload")
-        return
-
-    _LOGGER.debug(data)
-    matches = re.findall(r'Name="IsMotion" Value="(.+?)"', data)
-    if matches:
-        is_motion = matches[0] == "true"
-    else:
-        _LOGGER.debug("Webhook triggered with unknown payload")
-        return
-
-    handlers = hass.data["webhook"]
-    for wid, info in handlers.items():
-        if wid == webhook_id:
-            event_id = info["name"]
-            hass.bus.async_fire(event_id, {"IsMotion": is_motion})
-
-
-async def register_webhook(hass, event_id):
-    """
-    Register a webhook for motion events if it does not exist yet (in case of NVR).
-    The webhook name (in info) contains the event id (contains mac address op the camera).
-    So when motion triggers the webhook, it triggers this event. The event is handled by
-    the binary sensor, in case of NVR the binary sensor also figures out what channel has
-    the motion. So the flow is: camera onvif event->webhook->HA event->binary sensor.
-    """
-    handlers = hass.data["webhook"]
-    _LOGGER.debug("Registering webhook for event ID %s", event_id)
-
-    for webhook_id, info in handlers.items():
-        _LOGGER.debug("Webhook: %s", webhook_id)
-        _LOGGER.debug(info)
-        if info["name"] == event_id:
-            return webhook_id
-
-    webhook_id = hass.components.webhook.async_generate_id()
-    hass.components.webhook.async_register(DOMAIN, event_id, webhook_id, handle_webhook)
-
-    return webhook_id
-
-
-async def unregister_webhook(hass: HomeAssistant, event_id):
-    """Unregister the webhook for motion events."""
-    handlers = hass.data["webhook"]
-
-    for webhook_id, info in handlers.items():  # ToDo: check other NVR streams still use this 
-        if info["name"] == event_id:
-            _LOGGER.info("Unregistering webhook %s", info.name)
-            hass.components.webhook.async_unregister(webhook_id)
-
-
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     base = hass.data[DOMAIN][entry.entry_id][BASE]
+    push = hass.data[DOMAIN][entry.entry_id][base.push_manager]
 
-    await unregister_webhook(hass, base.event_id)
+    keep_subscription = False
+    for entry_id in hass.data[DOMAIN]:
+        if entry_id == entry.entry_id:
+            continue
+        _LOGGER.debug(entry_id)
+        
+        base_entry = hass.data[DOMAIN][entry_id][BASE]
+        _LOGGER.debug(base_entry.event_id)
+
+        if base_entry.event_id == base.event_id and base_entry.unique_id != base.unique_id:
+            keep_subscription = True
+            break
+
+    if not keep_subscription:
+        push.unsubscribe()
+
     await base.stop()
 
     unload_ok = all(

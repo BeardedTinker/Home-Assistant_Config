@@ -44,16 +44,15 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
         SERVICE_SET_DAYNIGHT,
     )
 
-    if camera.ptz_support:
-        platform.async_register_entity_service(
-            SERVICE_PTZ_CONTROL,
-            {
-                vol.Required("command"): cv.string,
-                vol.Optional("preset"): cv.positive_int,
-                vol.Optional("speed"): cv.positive_int,
-            },
-            SERVICE_PTZ_CONTROL,
-        )
+    platform.async_register_entity_service(
+        SERVICE_PTZ_CONTROL,
+        {
+            vol.Required("command"): cv.string,
+            vol.Optional("preset"): cv.positive_int,
+            vol.Optional("speed"): cv.positive_int,
+        },
+        SERVICE_PTZ_CONTROL,
+    )
 
     async_add_devices([camera])
 

@@ -54,7 +54,7 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 if self.channels > 1:
                     return await self.async_step_nvr()
 
-                self.data["channel"] = 1
+                self.data[CONF_CHANNEL] = 1
                 await self.async_set_unique_id(f"{self.mac_address}{user_input[CONF_CHANNEL]}")
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=self.info["title"], data=self.data)
@@ -98,7 +98,7 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="nvr",
             data_schema=vol.Schema(
                 {
-                    vol.Required("channel"): vol.All(vol.Coerce(int), vol.Range(min=1, max=self.channels)),
+                    vol.Required(CONF_CHANNEL): vol.All(vol.Coerce(int), vol.Range(min=1, max=self.channels)),
                 }
             ),
             errors=errors,
