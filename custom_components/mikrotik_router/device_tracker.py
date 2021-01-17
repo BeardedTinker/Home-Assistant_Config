@@ -1,6 +1,7 @@
 """Support for the Mikrotik Router device tracker."""
 
 import logging
+from typing import Any, Dict
 from datetime import timedelta
 
 from homeassistant.components.device_tracker.config_entry import ScannerEntity
@@ -25,22 +26,6 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-DEVICE_ATTRIBUTES_IFACE = [
-    "running",
-    "enabled",
-    "comment",
-    "client-ip-address",
-    "client-mac-address",
-    "port-mac-address",
-    "last-link-down-time",
-    "last-link-up-time",
-    "link-downs",
-    "actual-mtu",
-    "type",
-    "name",
-    "default-name",
-]
 
 DEVICE_ATTRIBUTES_HOST = [
     "host-name",
@@ -112,22 +97,20 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, tr
     # Add switches
     for sid, sid_uid, sid_name, sid_ref, sid_func in zip(
         # Data point name
-        ["interface", "host"],
+        ["host"],
         # Data point unique id
-        ["default-name", "mac-address"],
+        ["mac-address"],
         # Entry Name
-        ["name", "host-name"],
+        ["host-name"],
         # Entry Unique id
-        ["port-mac-address", "mac-address"],
+        ["mac-address"],
         # Tracker function
-        [MikrotikControllerPortDeviceTracker, MikrotikControllerHostDeviceTracker],
+        [
+            MikrotikControllerHostDeviceTracker,
+        ],
     ):
         for uid in mikrotik_controller.data[sid]:
             if (
-                # Skip if interface is wlan
-                sid == "interface"
-                and mikrotik_controller.data[sid][uid]["type"] == "wlan"
-            ) or (
                 # Skip if host tracking is disabled
                 sid == "host"
                 and not config_entry.options.get(CONF_TRACK_HOSTS, DEFAULT_TRACK_HOSTS)
@@ -183,7 +166,7 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
         return True
 
     async def async_added_to_hass(self):
-        """Device tracker entity created."""
+        """Run when entity about to be added to hass."""
         _LOGGER.debug(
             "New device tracker %s (%s %s)",
             self._inst,
@@ -195,21 +178,21 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
         """Synchronize state with controller."""
 
     @property
-    def source_type(self):
+    def source_type(self) -> str:
         """Return the source type of the port."""
         return SOURCE_TYPE_ROUTER
 
     @property
-    def name(self):
-        """Return the name of the port."""
+    def name(self) -> str:
+        """Return the name."""
         if self._sid_data["sid"] == "interface":
             return f"{self._inst} {self._data[self._sid_data['sid_name']]}"
 
         return f"{self._data[self._sid_data['sid_name']]}"
 
     @property
-    def unique_id(self):
-        """Return a unique identifier for this port."""
+    def unique_id(self) -> str:
+        """Return a unique id for this entity."""
         return f"{self._inst.lower()}-{self._sid_data['sid']}-{self._data[self._sid_data['sid_ref']]}"
 
     @property
@@ -218,7 +201,7 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
         return self._ctrl.connected()
 
     @property
-    def device_info(self):
+    def device_info(self) -> Dict[str, Any]:
         """Return a description for device registry."""
         info = {
             "connections": {
@@ -233,53 +216,14 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
         return info
 
     @property
-    def device_state_attributes(self):
-        """Return the port state attributes."""
+    def device_state_attributes(self) -> Dict[str, Any]:
+        """Return the state attributes."""
         attributes = self._attrs
-        for variable in DEVICE_ATTRIBUTES_IFACE:
-            if variable in self._data:
-                attributes[format_attribute(variable)] = self._data[variable]
-
         return attributes
 
-
-# ---------------------------
-#   MikrotikControllerPortDeviceTracker
-# ---------------------------
-class MikrotikControllerPortDeviceTracker(MikrotikControllerDeviceTracker):
-    """Representation of a network port."""
-
-    def __init__(self, inst, uid, mikrotik_controller, config_entry, sid_data):
-        """Set up tracked port."""
-        super().__init__(inst, uid, mikrotik_controller, config_entry, sid_data)
-
     @property
-    def is_connected(self):
-        """Return true if the port is connected to the network."""
-        return self._data["running"]
-
-    @property
-    def icon(self):
-        """Return the icon."""
-        if self._data["running"]:
-            icon = "mdi:lan-connect"
-        else:
-            icon = "mdi:lan-pending"
-
-        if not self._data["enabled"]:
-            icon = "mdi:lan-disconnect"
-
-        return icon
-
-    @property
-    def device_state_attributes(self):
-        """Return the port state attributes."""
-        attributes = self._attrs
-        for variable in DEVICE_ATTRIBUTES_IFACE:
-            if variable in self._data:
-                attributes[format_attribute(variable)] = self._data[variable]
-
-        return attributes
+    def is_connected(self) -> bool:
+        return False
 
 
 # ---------------------------
@@ -306,7 +250,7 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
         return timedelta(seconds=track_network_hosts_timeout)
 
     @property
-    def is_connected(self):
+    def is_connected(self) -> bool:
         """Return true if the host is connected to the network."""
         if not self.option_track_network_hosts:
             return False
@@ -331,7 +275,7 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
         return self._ctrl.connected()
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         """Return the icon."""
         if self._data["source"] in ["capsman", "wireless"]:
             if self._data["available"]:
@@ -348,8 +292,8 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
         return "mdi:lan-disconnect"
 
     @property
-    def device_state_attributes(self):
-        """Return the host state attributes."""
+    def device_state_attributes(self) -> Dict[str, Any]:
+        """Return the state attributes."""
         attributes = self._attrs
         for variable in DEVICE_ATTRIBUTES_HOST:
             if variable not in self._data:
@@ -377,3 +321,20 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
                     attributes[format_attribute(variable)] = self._data[variable]
 
         return attributes
+
+    @property
+    def device_info(self) -> Dict[str, Any]:
+        """Return a description for device registry."""
+        info = {
+            "connections": {
+                (CONNECTION_NETWORK_MAC, self._data[self._sid_data["sid_ref"]])
+            },
+            "default_name": self._data[self._sid_data["sid_name"]],
+        }
+        if self._data["manufacturer"] != "":
+            info["manufacturer"] = self._data["manufacturer"]
+
+        if self._sid_data["sid"] == "interface":
+            info["name"] = f"{self._inst} {self._data[self._sid_data['sid_name']]}"
+
+        return info

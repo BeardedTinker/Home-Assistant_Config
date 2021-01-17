@@ -5,7 +5,8 @@
     "documentation": "https://github.com/tomaae/homeassistant-mikrotik_router",
     "dependencies": [],
     "requirements": [
-        "librouteros==3.0.0"
+        "librouteros==3.0.0",
+        "mac-vendor-lookup==0.1.11"
     ],
     "codeowners": [
         "@tomaae"

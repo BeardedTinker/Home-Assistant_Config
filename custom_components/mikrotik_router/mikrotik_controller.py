@@ -1,9 +1,11 @@
 """Mikrotik Controller for Mikrotik Router."""
 
+import re
 import asyncio
 import logging
 from datetime import timedelta
 from ipaddress import ip_address, IPv4Network
+from mac_vendor_lookup import AsyncMacLookup
 
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -30,7 +32,24 @@ from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_UNIT_OF_MEASUREMENT,
-    CONF_TRACK_HOSTS_TIMEOUT,
+    CONF_SENSOR_PORT_TRAFFIC,
+    DEFAULT_SENSOR_PORT_TRAFFIC,
+    CONF_SENSOR_CLIENT_TRAFFIC,
+    DEFAULT_SENSOR_CLIENT_TRAFFIC,
+    CONF_SENSOR_SIMPLE_QUEUES,
+    DEFAULT_SENSOR_SIMPLE_QUEUES,
+    CONF_SENSOR_NAT,
+    DEFAULT_SENSOR_NAT,
+    CONF_SENSOR_MANGLE,
+    DEFAULT_SENSOR_MANGLE,
+    CONF_SENSOR_KIDCONTROL,
+    DEFAULT_SENSOR_KIDCONTROL,
+    CONF_SENSOR_PPP,
+    DEFAULT_SENSOR_PPP,
+    CONF_SENSOR_SCRIPTS,
+    DEFAULT_SENSOR_SCRIPTS,
+    CONF_SENSOR_ENVIRONMENT,
+    DEFAULT_SENSOR_ENVIRONMENT,
 )
 from .exceptions import ApiEntryNotFound
 from .helper import parse_api
@@ -61,6 +80,10 @@ class MikrotikControllerData:
             "bridge_host": {},
             "arp": {},
             "nat": {},
+            "kid-control": {},
+            "mangle": {},
+            "ppp_secret": {},
+            "ppp_active": {},
             "fw-update": {},
             "script": {},
             "queue": {},
@@ -73,6 +96,7 @@ class MikrotikControllerData:
             "host": {},
             "host_hass": {},
             "accounting": {},
+            "environment": {},
         }
 
         self.listeners = []
@@ -96,15 +120,22 @@ class MikrotikControllerData:
         )
 
         self.nat_removed = {}
+        self.mangle_removed = {}
         self.host_hass_recovered = False
         self.host_tracking_initialized = False
 
         self.support_capsman = False
         self.support_wireless = False
+        self.support_ppp = False
+
+        self.major_fw_version = 0
 
         self._force_update_callback = None
         self._force_fwupdate_check_callback = None
         self._async_ping_tracked_hosts_callback = None
+
+        self.async_mac_lookup = AsyncMacLookup()
+        # self.async_mac_lookup.update_vendors()
 
     async def async_init(self):
         self._force_update_callback = async_track_time_interval(
@@ -134,6 +165,90 @@ class MikrotikControllerData:
     def option_track_network_hosts(self):
         """Config entry option to not track ARP."""
         return self.config_entry.options.get(CONF_TRACK_HOSTS, DEFAULT_TRACK_HOSTS)
+
+    # ---------------------------
+    #   option_sensor_port_traffic
+    # ---------------------------
+    @property
+    def option_sensor_port_traffic(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_PORT_TRAFFIC, DEFAULT_SENSOR_PORT_TRAFFIC
+        )
+
+    # ---------------------------
+    #   option_sensor_client_traffic
+    # ---------------------------
+    @property
+    def option_sensor_client_traffic(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_CLIENT_TRAFFIC, DEFAULT_SENSOR_CLIENT_TRAFFIC
+        )
+
+    # ---------------------------
+    #   option_sensor_simple_queues
+    # ---------------------------
+    @property
+    def option_sensor_simple_queues(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_SIMPLE_QUEUES, DEFAULT_SENSOR_SIMPLE_QUEUES
+        )
+
+    # ---------------------------
+    #   option_sensor_nat
+    # ---------------------------
+    @property
+    def option_sensor_nat(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(CONF_SENSOR_NAT, DEFAULT_SENSOR_NAT)
+
+    # ---------------------------
+    #   option_sensor_mangle
+    # ---------------------------
+    @property
+    def option_sensor_mangle(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(CONF_SENSOR_MANGLE, DEFAULT_SENSOR_MANGLE)
+
+    # ---------------------------
+    #   option_sensor_kidcontrol
+    # ---------------------------
+    @property
+    def option_sensor_kidcontrol(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_KIDCONTROL, DEFAULT_SENSOR_KIDCONTROL
+        )
+
+    # ---------------------------
+    #   option_sensor_ppp
+    # ---------------------------
+    @property
+    def option_sensor_ppp(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(CONF_SENSOR_PPP, DEFAULT_SENSOR_PPP)
+
+    # ---------------------------
+    #   option_sensor_scripts
+    # ---------------------------
+    @property
+    def option_sensor_scripts(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_SCRIPTS, DEFAULT_SENSOR_SCRIPTS
+        )
+
+    # ---------------------------
+    #   option_sensor_environment
+    # ---------------------------
+    @property
+    def option_sensor_environment(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_ENVIRONMENT, DEFAULT_SENSOR_ENVIRONMENT
+        )
 
     # ---------------------------
     #   option_scan_interval
@@ -190,6 +305,13 @@ class MikrotikControllerData:
         return self.api.update(path, param, value, mod_param, mod_value)
 
     # ---------------------------
+    #   execute
+    # ---------------------------
+    def execute(self, path, command, param, value):
+        """Change value using Mikrotik API"""
+        return self.api.execute(path, command, param, value)
+
+    # ---------------------------
     #   run_script
     # ---------------------------
     def run_script(self, name):
@@ -231,12 +353,20 @@ class MikrotikControllerData:
             ],
         )
 
+        if "ppp" in packages:
+            self.support_ppp = packages["ppp"]["enabled"]
+
         if "wireless" in packages:
             self.support_capsman = packages["wireless"]["enabled"]
             self.support_wireless = packages["wireless"]["enabled"]
         else:
             self.support_capsman = False
             self.support_wireless = False
+
+        if self.major_fw_version >= 7:
+            self.support_capsman = True
+            self.support_wireless = True
+            self.support_ppp = True
 
     # ---------------------------
     #   async_get_host_hass
@@ -263,17 +393,18 @@ class MikrotikControllerData:
         except:
             return
 
-        await self.hass.async_add_executor_job(self.get_capabilities)
+        await self.hass.async_add_executor_job(self.get_firmware_update)
+
+        if self.api.connected():
+            await self.hass.async_add_executor_job(self.get_capabilities)
+
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_system_routerboard)
 
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_system_resource)
 
-        if self.api.connected():
-            await self.hass.async_add_executor_job(self.get_system_health)
-
-        if self.api.connected():
+        if self.api.connected() and self.option_sensor_scripts:
             await self.hass.async_add_executor_job(self.get_script)
 
         if self.api.connected():
@@ -403,23 +534,42 @@ class MikrotikControllerData:
         if self.api.connected():
             await self.async_process_host()
 
-        if self.api.connected():
+        if self.api.connected() and self.option_sensor_port_traffic:
             await self.hass.async_add_executor_job(self.get_interface_traffic)
 
         if self.api.connected():
             await self.hass.async_add_executor_job(self.process_interface_client)
 
-        if self.api.connected():
+        if self.api.connected() and self.option_sensor_nat:
             await self.hass.async_add_executor_job(self.get_nat)
+
+        if self.api.connected() and self.option_sensor_kidcontrol:
+            await self.hass.async_add_executor_job(self.get_kidcontrol)
+
+        if self.api.connected() and self.option_sensor_mangle:
+            await self.hass.async_add_executor_job(self.get_mangle)
+
+        if self.api.connected() and self.support_ppp and self.option_sensor_ppp:
+            await self.hass.async_add_executor_job(self.get_ppp)
 
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_system_resource)
 
-        if self.api.connected():
+        if (
+            self.api.connected()
+            and self.option_sensor_client_traffic
+            and 0 < self.major_fw_version < 7
+        ):
             await self.hass.async_add_executor_job(self.process_accounting)
 
-        if self.api.connected():
+        if self.api.connected() and self.option_sensor_simple_queues:
             await self.hass.async_add_executor_job(self.get_queue)
+
+        if self.api.connected() and self.option_sensor_environment:
+            await self.hass.async_add_executor_job(self.get_environment)
+
+        if self.api.connected():
+            await self.hass.async_add_executor_job(self.get_system_health)
 
         async_dispatcher_send(self.hass, self.signal_update)
         self.lock.release()
@@ -452,12 +602,34 @@ class MikrotikControllerData:
                 {"name": "link-downs"},
                 {"name": "tx-queue-drop"},
                 {"name": "actual-mtu"},
+                {"name": "about", "source": ".about", "default": ""},
             ],
             ensure_vals=[
                 {"name": "client-ip-address"},
                 {"name": "client-mac-address"},
                 {"name": "rx-bits-per-second", "default": 0},
                 {"name": "tx-bits-per-second", "default": 0},
+            ],
+            skip=[
+                {"name": "type", "value": "bridge"},
+                {"name": "type", "value": "ppp-in"},
+                {"name": "type", "value": "pptp-in"},
+                {"name": "type", "value": "sstp-in"},
+                {"name": "type", "value": "l2tp-in"},
+                {"name": "type", "value": "pppoe-in"},
+                {"name": "type", "value": "ovpn-in"},
+            ],
+        )
+
+        self.data["interface"] = parse_api(
+            data=self.data["interface"],
+            source=self.api.path("/interface/ethernet"),
+            key="default-name",
+            key_secondary="name",
+            vals=[
+                {"name": "default-name"},
+                {"name": "name", "default_val": "default-name"},
+                {"name": "poe-out", "default": "N/A"},
             ],
             skip=[
                 {"name": "type", "value": "bridge"},
@@ -586,11 +758,14 @@ class MikrotikControllerData:
             key=".id",
             vals=[
                 {"name": ".id"},
+                {"name": "chain", "default": "unknown"},
+                {"name": "action", "default": "unknown"},
                 {"name": "protocol", "default": "any"},
                 {"name": "dst-port", "default": "any"},
                 {"name": "in-interface", "default": "any"},
+                {"name": "out-interface", "default": "any"},
                 {"name": "to-addresses"},
-                {"name": "to-ports"},
+                {"name": "to-ports", "default": "any"},
                 {"name": "comment"},
                 {
                     "name": "enabled",
@@ -601,12 +776,31 @@ class MikrotikControllerData:
             ],
             val_proc=[
                 [
+                    {"name": "uniq-id"},
+                    {"action": "combine"},
+                    {"key": "chain"},
+                    {"text": ","},
+                    {"key": "action"},
+                    {"text": ","},
+                    {"key": "protocol"},
+                    {"text": ","},
+                    {"key": "in-interface"},
+                    {"text": ":"},
+                    {"key": "dst-port"},
+                    {"text": "-"},
+                    {"key": "out-interface"},
+                    {"text": ":"},
+                    {"key": "to-addresses"},
+                    {"text": ":"},
+                    {"key": "to-ports"},
+                ],
+                [
                     {"name": "name"},
                     {"action": "combine"},
                     {"key": "protocol"},
                     {"text": ":"},
                     {"key": "dst-port"},
-                ]
+                ],
             ],
             only=[{"key": "action", "value": "dst-nat"}],
         )
@@ -615,7 +809,7 @@ class MikrotikControllerData:
         nat_uniq = {}
         nat_del = {}
         for uid in self.data["nat"]:
-            tmp_name = self.data["nat"][uid]["name"]
+            tmp_name = self.data["nat"][uid]["uniq-id"]
             if tmp_name not in nat_uniq:
                 nat_uniq[tmp_name] = uid
             else:
@@ -623,8 +817,8 @@ class MikrotikControllerData:
                 nat_del[nat_uniq[tmp_name]] = 1
 
         for uid in nat_del:
-            if self.data["nat"][uid]["name"] not in self.nat_removed:
-                self.nat_removed[self.data["nat"][uid]["name"]] = 1
+            if self.data["nat"][uid]["uniq-id"] not in self.nat_removed:
+                self.nat_removed[self.data["nat"][uid]["uniq-id"]] = 1
                 _LOGGER.error(
                     "Mikrotik %s duplicate NAT rule %s, entity will be unavailable.",
                     self.host,
@@ -632,6 +826,174 @@ class MikrotikControllerData:
                 )
 
             del self.data["nat"][uid]
+
+    # ---------------------------
+    #   get_mangle
+    # ---------------------------
+    def get_mangle(self):
+        """Get Mangle data from Mikrotik"""
+        self.data["mangle"] = parse_api(
+            data=self.data["mangle"],
+            source=self.api.path("/ip/firewall/mangle"),
+            key=".id",
+            vals=[
+                {"name": ".id"},
+                {"name": "chain"},
+                {"name": "action"},
+                {"name": "comment"},
+                {"name": "address-list"},
+                {"name": "passthrough", "type": "bool", "default": False},
+                {"name": "protocol", "default": "any"},
+                {"name": "src-address", "default": "any"},
+                {"name": "src-port", "default": "any"},
+                {"name": "dst-address", "default": "any"},
+                {"name": "dst-port", "default": "any"},
+                {
+                    "name": "enabled",
+                    "source": "disabled",
+                    "type": "bool",
+                    "reverse": True,
+                },
+            ],
+            val_proc=[
+                [
+                    {"name": "uniq-id"},
+                    {"action": "combine"},
+                    {"key": "chain"},
+                    {"text": ","},
+                    {"key": "action"},
+                    {"text": ","},
+                    {"key": "protocol"},
+                    {"text": ","},
+                    {"key": "src-address"},
+                    {"text": ":"},
+                    {"key": "src-port"},
+                    {"text": "-"},
+                    {"key": "dst-address"},
+                    {"text": ":"},
+                    {"key": "dst-port"},
+                ],
+                [
+                    {"name": "name"},
+                    {"action": "combine"},
+                    {"key": "action"},
+                    {"text": ","},
+                    {"key": "protocol"},
+                    {"text": ":"},
+                    {"key": "dst-port"},
+                ],
+            ],
+            skip=[
+                {"name": "dynamic", "value": True},
+                {"name": "action", "value": "jump"},
+            ],
+        )
+
+        # Remove duplicate Mangle entries to prevent crash
+        mangle_uniq = {}
+        mangle_del = {}
+        for uid in self.data["mangle"]:
+            tmp_name = self.data["mangle"][uid]["uniq-id"]
+            if tmp_name not in mangle_uniq:
+                mangle_uniq[tmp_name] = uid
+            else:
+                mangle_del[uid] = 1
+                mangle_del[mangle_uniq[tmp_name]] = 1
+
+        for uid in mangle_del:
+            if self.data["mangle"][uid]["uniq-id"] not in self.mangle_removed:
+                self.mangle_removed[self.data["mangle"][uid]["uniq-id"]] = 1
+                _LOGGER.error(
+                    "Mikrotik %s duplicate Mangle rule %s, entity will be unavailable.",
+                    self.host,
+                    self.data["mangle"][uid]["name"],
+                )
+
+            del self.data["mangle"][uid]
+
+    # ---------------------------
+    #   get_kidcontrol
+    # ---------------------------
+    def get_kidcontrol(self):
+        """Get Kid-control data from Mikrotik"""
+        self.data["kid-control"] = parse_api(
+            data=self.data["kid-control"],
+            source=self.api.path("/ip/kid-control"),
+            key="name",
+            vals=[
+                {"name": "name"},
+                {"name": "rate-limit"},
+                {"name": "mon", "default": "None"},
+                {"name": "tue", "default": "None"},
+                {"name": "wed", "default": "None"},
+                {"name": "thu", "default": "None"},
+                {"name": "fri", "default": "None"},
+                {"name": "sat", "default": "None"},
+                {"name": "sun", "default": "None"},
+                {"name": "comment"},
+                {"name": "paused", "type": "bool", "reverse": True},
+                {
+                    "name": "enabled",
+                    "source": "disabled",
+                    "type": "bool",
+                    "reverse": True,
+                },
+            ],
+        )
+
+    # ---------------------------
+    #   get_ppp
+    # ---------------------------
+    def get_ppp(self):
+        """Get PPP data from Mikrotik"""
+        self.data["ppp_secret"] = parse_api(
+            data=self.data["ppp_secret"],
+            source=self.api.path("/ppp/secret"),
+            key="name",
+            vals=[
+                {"name": "name"},
+                {"name": "service"},
+                {"name": "profile"},
+                {"name": "comment"},
+                {
+                    "name": "enabled",
+                    "source": "disabled",
+                    "type": "bool",
+                    "reverse": True,
+                },
+            ],
+            ensure_vals=[
+                {"name": "caller-id", "default": ""},
+                {"name": "encoding", "default": ""},
+                {"name": "connected", "default": False},
+            ],
+        )
+
+        self.data["ppp_active"] = parse_api(
+            data={},
+            source=self.api.path("/ppp/active"),
+            key="name",
+            vals=[
+                {"name": "name"},
+                {"name": "service"},
+                {"name": "caller-id"},
+                {"name": "encoding"},
+            ],
+        )
+
+        for uid in self.data["ppp_secret"]:
+            if self.data["ppp_secret"][uid]["name"] in self.data["ppp_active"]:
+                self.data["ppp_secret"][uid]["connected"] = True
+                self.data["ppp_secret"][uid]["caller-id"] = self.data["ppp_active"][
+                    uid
+                ]["caller-id"]
+                self.data["ppp_secret"][uid]["encoding"] = self.data["ppp_active"][uid][
+                    "encoding"
+                ]
+            else:
+                self.data["ppp_secret"][uid]["connected"] = False
+                self.data["ppp_secret"][uid]["caller-id"] = "not connected"
+                self.data["ppp_secret"][uid]["encoding"] = "not connected"
 
     # ---------------------------
     #   get_system_routerboard
@@ -645,7 +1007,11 @@ class MikrotikControllerData:
                 {"name": "routerboard", "type": "bool"},
                 {"name": "model", "default": "unknown"},
                 {"name": "serial-number", "default": "unknown"},
-                {"name": "firmware", "default": "unknown"},
+                {
+                    "name": "firmware",
+                    "source": "current-firmware",
+                    "default": "unknown",
+                },
             ],
         )
 
@@ -657,7 +1023,14 @@ class MikrotikControllerData:
         self.data["health"] = parse_api(
             data=self.data["health"],
             source=self.api.path("/system/health"),
-            vals=[{"name": "temperature", "default": "unknown"}],
+            vals=[
+                {"name": "temperature", "default": "unknown"},
+                {"name": "cpu-temperature", "default": "unknown"},
+                {"name": "power-consumption", "default": "unknown"},
+                {"name": "board-temperature1", "default": "unknown"},
+                {"name": "fan1-speed", "default": "unknown"},
+                {"name": "fan2-speed", "default": "unknown"},
+            ],
         )
 
     # ---------------------------
@@ -672,14 +1045,30 @@ class MikrotikControllerData:
                 {"name": "platform", "default": "unknown"},
                 {"name": "board-name", "default": "unknown"},
                 {"name": "version", "default": "unknown"},
-                {"name": "uptime", "default": "unknown"},
+                {"name": "uptime_str", "source": "uptime", "default": "unknown"},
                 {"name": "cpu-load", "default": "unknown"},
                 {"name": "free-memory", "default": 0},
                 {"name": "total-memory", "default": 0},
                 {"name": "free-hdd-space", "default": 0},
                 {"name": "total-hdd-space", "default": 0},
             ],
+            ensure_vals=[
+                {"name": "uptime", "default": 0},
+            ],
         )
+
+        tmp_uptime = 0
+        tmp = re.split(r"(\d+)[h]", self.data["resource"]["uptime_str"])
+        if len(tmp) > 1:
+            tmp_uptime += int(tmp[1])
+        tmp = re.split(r"(\d+)[d]", self.data["resource"]["uptime_str"])
+        if len(tmp) > 1:
+            tmp_uptime += int(tmp[1]) * 24
+        tmp = re.split(r"(\d+)[w]", self.data["resource"]["uptime_str"])
+        if len(tmp) > 1:
+            tmp_uptime += int(tmp[1]) * 24 * 7
+
+        self.data["resource"]["uptime"] = tmp_uptime
 
         if self.data["resource"]["total-memory"] > 0:
             self.data["resource"]["memory-usage"] = round(
@@ -734,6 +1123,18 @@ class MikrotikControllerData:
         else:
             self.data["fw-update"]["available"] = False
 
+        if self.data["fw-update"]["installed-version"] != "unknown":
+            try:
+                self.major_fw_version = int(
+                    self.data["fw-update"].get("installed-version").split(".")[0]
+                )
+            except:
+                _LOGGER.error(
+                    "Mikrotik %s unable to determine major FW version (%s).",
+                    self.host,
+                    self.data["fw-update"].get("installed-version"),
+                )
+
     # ---------------------------
     #   get_script
     # ---------------------------
@@ -747,6 +1148,21 @@ class MikrotikControllerData:
                 {"name": "name"},
                 {"name": "last-started", "default": "unknown"},
                 {"name": "run-count", "default": "unknown"},
+            ],
+        )
+
+    # ---------------------------
+    #   get_environment
+    # ---------------------------
+    def get_environment(self):
+        """Get list of all environment variables from Mikrotik"""
+        self.data["environment"] = parse_api(
+            data={},
+            source=self.api.path("/system/script/environment"),
+            key="name",
+            vals=[
+                {"name": "name"},
+                {"name": "value"},
             ],
         )
 
@@ -1072,10 +1488,11 @@ class MikrotikControllerData:
                     "mac-address",
                     "interface",
                     "host-name",
+                    "manufacturer",
                     "last-seen",
                     "available",
                 ],
-                ["unknown", "unknown", "unknown", "unknown", False, False],
+                ["unknown", "unknown", "unknown", "unknown", "detect", False, False],
             ):
                 if key not in self.data["host"][uid]:
                     self.data["host"][uid][key] = default
@@ -1151,6 +1568,15 @@ class MikrotikControllerData:
                 # Fallback to mac address for hostname
                 elif self.data["host"][uid]["host-name"] == "unknown":
                     self.data["host"][uid]["host-name"] = uid
+
+            # Resolve manufacturer
+            if vals["manufacturer"] == "detect" and vals["address"] != "unknown":
+                try:
+                    self.data["host"][uid][
+                        "manufacturer"
+                    ] = await self.async_mac_lookup.lookup(vals["mac-address"])
+                except:
+                    self.data["host"][uid]["manufacturer"] = ""
 
     # ---------------------------
     #   process_accounting

@@ -168,6 +168,10 @@ def can_skip(entry, skip) -> bool:
             ret = True
             break
 
+        if val["value"] == "" and val["name"] not in entry:
+            ret = True
+            break
+
     return ret
 
 

@@ -8,7 +8,7 @@ shelly:
   version: true   # add version sensor
   sensors:
     - all
-  discover_by_ip:
-    - '192.168.1.70'
-    - '192.168.1.71'
-    - '192.168.1.72'
+#  discover_by_ip:
+#    - '192.168.1.70'
+#    - '192.168.1.71'
+#    - '192.168.1.72'
