@@ -327,13 +327,14 @@ class SpaceXSensor(CoordinatorEntity):
         elif self._kind == "spacex_next_launch_rocket":
             core_counter = 1
             for this_core in launch_data["cores_detail"]:
-                self.attrs["core_" + str(core_counter) + "_serial"] = this_core.get(
-                    "details",{}).get("serial")
+                if this_core.get("details"):
+                    self.attrs["core_" + str(core_counter) + "_serial"] = this_core["details"].get("serial")
+                    self.attrs["core_" + str(core_counter) + "_block"] = this_core["details"].get("block")
+
                 self.attrs["core_" + str(core_counter) + "_flight"] = this_core.get(
                     "flight"
                 )
-                self.attrs["core_" + str(core_counter) + "_block"] = this_core.get(
-                    "details",{}).get("block")
+                
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
                 ] = this_core.get("landing_attempt")
