@@ -1,0 +1,21 @@
+#####
+# Notify when Washing machine is done
+#####
+
+alias: Washing machine done
+id: 7cc7b31e-f474-4db1-8765-052a9cccaf93
+trigger:
+  platform: numeric_state
+  entity_id: sensor.washing_machine_current_consumption
+  below: '2'
+  for: '00:01:30'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'parents'
+    title: '♨ *Washing done*'
+    value1: 'Washing machine is done. Open the door.'
+    tag_id: 'information'
+    sticky: 'true'
+    target_id: !secret telegram_bot_chat_id

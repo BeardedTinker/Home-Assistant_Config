@@ -21,7 +21,7 @@ All individual files should have comments inside and I'll try to add as much doc
 
 You can follow my [YouTube channel](https://YouTube.com/BeardedTinker) for more information and video guides for various stuff that's included here. 
 
-If you want to get in touch, you can always find me on my Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
+If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
 
 Also, you can try and get in touch while I'm streaming. There should be at least 1 stream each month!
 
@@ -48,6 +48,7 @@ From other devices I use, here is a list:
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
   - [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
+  - Shelly Gas CNG sensor
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
   - LG webOS TV
   - Mi TV stick
@@ -144,12 +145,12 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     2 |
-| Automations          |   123 |
-| Binary sensors       |   119 |
+| Automations          |   129 |
+| Binary sensors       |   147 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    62 |
-| Entities             |  1372 |
+| Entities             |  1452 |
 | Groups               |    17 |
 | Input Boolean        |    11 |
 | Input Date/Time      |    20 |
@@ -158,12 +159,12 @@ Current count of various things in Home Assistant
 | Input Text           |     4 |
 | Lights               |    34 |
 | Media players        |    31 |
-| Lines of code (YAML) | 11788 |
+| Lines of code (YAML) | 14812 |
 | Persons              |     6 |
 | Plants               |     4 |
 | Scripts              |    16 |
-| Sensors              |   787 |
-| Switches             |    64 |
+| Sensors              |   830 |
+| Switches             |    73 |
 | Timers               |     3 |
 | Weather              |     2 |
 
