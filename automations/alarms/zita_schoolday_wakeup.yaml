@@ -11,7 +11,7 @@ trigger:
   value_template: >
     {% if states('sensor.time') == "07:40" and is_state('input_boolean.zita_school_online','on') %}
       True
-    {% elif states('sensor.time') == "06:30" and is_state('input_boolean.zita_school_online','off') %}
+    {% elif states('sensor.time') == "06:40" and is_state('input_boolean.zita_school_online','off') %}
       True
     {% else %}
       False

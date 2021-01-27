@@ -3,7 +3,7 @@
 #####
 
 alias: Washing machine done
-id: 7cc7b31e-f474-4db1-8765-052a9cccaf93
+id: 71bee845-533b-4539-9e5b-4e829c420cb2
 trigger:
   platform: numeric_state
   entity_id: sensor.washing_machine_current_consumption
