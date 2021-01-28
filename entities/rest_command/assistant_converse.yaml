@@ -4,7 +4,7 @@
 #####
 
 assistant_converse:
-  url: http://192.168.10.2:3000/assistant
+  url: http://192.168.1.35:3500/assistant
   method: POST
   content_type: 'application/json'
-  payload: '{"command":"{{ command }}", "user":"username", "converse":true}'
+  payload: '{"command":"{{ command }}", "user":"{{ username }}", "converse":true}'
