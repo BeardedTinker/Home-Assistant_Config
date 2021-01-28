@@ -1,6 +1,6 @@
 #####
-#
-#
+# Assistant Relay rest command used for broadcast
+# https://github.com/Apipa169/Assistant-Relay-for-Hassio
 #####
 
 assistant_broadcast:
