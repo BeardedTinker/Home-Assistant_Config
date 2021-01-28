@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of rest commands
+#
+#####
+
+platform: template
+sensors:
+  count_script:
+    friendly_name: 'Number of Rest commands'
+    value_template: >
+      {{ states.rest_command | list | count }}
