@@ -10,6 +10,11 @@ trigger:
     entity_id: binary_sensor.shelly_gas_10521cef4a01_gas
     to: 'off'
 
+condition:
+  - condition: numeric_state
+    entity_id: sensor.shelly_gas_10521cef4a01_concentration
+    above: 0
+
 action:
 - service: script.notify_engine
   data:
