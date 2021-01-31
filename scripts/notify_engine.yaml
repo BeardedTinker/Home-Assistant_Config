@@ -48,6 +48,12 @@ notify_engine:
           color: "{{ color }}"
           channel: "{{ channel_id }}"
           importance: "{{ importance_id }}"
+    - service: >
+          {% if who == 'printer' %}
+            mqtt.publish:
+              topic: /printer/thermal
+              payload_template: "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
+          {% endif %}
 #          push:
 #            sound: "{{ ios_sound }}"
 #            badge: "{{ ios_badge }}"
