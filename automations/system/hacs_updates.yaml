@@ -37,8 +37,9 @@ action:
   data:
     repo: 'There are {{ states.sensor.hacs.state }} updates to HACS components at {{ states("sensor.time") }}:'
     message: >-
-      {%- for repo in state_attr("sensor.hacs","repositories") -%}
-      {{repo['display_name'] }} {{ repo['installed_version'] }} to {{ repo['available_version'] }}
-      {%- endfor %}
+      HACS updates available: {{ states.sensor.hacs.state }}
+      {% for repo in states.sensor.hacs.attributes.repositories %}
+      {{ repo.display_name }} {{ repo["installed_version"] }} -> {{repo["available_version"] }}
+
+      {% endfor %}
     issue_number: 16
-#    message: 'HACS Update(s) at {{ states("sensor.time") }}. \n {{state_attr("sensor.hacs","repositories")}}. \n There is {{ states.sensor.hacs.state }} update.'
