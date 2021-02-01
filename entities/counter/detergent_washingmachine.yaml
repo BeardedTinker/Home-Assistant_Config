@@ -1,0 +1,11 @@
+#####
+# Used to count Washing machine pods/tablets
+#####
+
+washing_pods:
+  name: Washing pods
+  icon: mdi:washing-machine-alert
+  initial: 35
+  minimum: 0
+  step: 1
+  restore: true

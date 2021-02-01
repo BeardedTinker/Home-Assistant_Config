@@ -1,27 +1,24 @@
 #####
-# Notify when Dishwasher is done
+# Notify when Dishwasher start
 #####
 
-alias: Dishwasher done
-id: 7cc7b31e-f474-4db1-8765-052a9cccaf93
+alias: Dishwasher start
+id: 88a93488-d1fb-476c-98e6-ab2063cf087e
 trigger:
   platform: numeric_state
   entity_id: sensor.dishwasher_current_consumption
-  below: 2
-  for: '00:01:30'
+  above: 5
+  for: '00:03:00'
 
 action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: '♨ *Dishwasher done*'
-    value1: 'Dishwasher is done.'
+    title: '♨ *Dishwasher starting*'
+    value1: 'Dishwasher is starting.'
     tag_id: 'information'
     sticky: 'true'
     target_id: !secret telegram_bot_chat_id
-- service: input_boolean.turn_off
+- service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.dishwasher_on
-- service: counter.decrement
-  data:
-    entity_id: counter.dishwasher_pods

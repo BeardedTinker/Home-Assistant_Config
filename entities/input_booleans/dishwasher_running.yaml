@@ -1,0 +1,9 @@
+#####
+# Dishwasher is turned on 
+# changed to ON after 3 minutes of activity 
+# changed to off after automation triggers
+#####
+
+dishwasher_on:
+  name: Dishwasher
+  icon: mdi:dishwasher

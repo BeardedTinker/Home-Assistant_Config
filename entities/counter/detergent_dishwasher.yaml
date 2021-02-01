@@ -1,0 +1,11 @@
+#####
+# Used to count Dishwasher pods/tablets
+#####
+
+dishwasher_pods:
+  name: Dishwasher pods
+  icon: mdi:dishwasher-alert
+  initial: 75
+  minimum: 0
+  step: 1
+  restore: true

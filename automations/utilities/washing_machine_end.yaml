@@ -7,7 +7,7 @@ id: 71bee845-533b-4539-9e5b-4e829c420cb2
 trigger:
   platform: numeric_state
   entity_id: sensor.washing_machine_current_consumption
-  below: '2'
+  below: 2
   for: '00:01:30'
 
 action:
@@ -19,3 +19,9 @@ action:
     tag_id: 'information'
     sticky: 'true'
     target_id: !secret telegram_bot_chat_id
+- service: input_boolean.turn_off
+  data: {}
+  entity_id: input_boolean.washing_on
+- service: counter.decrement
+  data:
+    entity_id: counter.washing_pods

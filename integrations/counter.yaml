@@ -1,0 +1,6 @@
+#####
+# Counter - will do a lot more here
+# https://www.home-assistant.io/integrations/counter/
+#####
+
+counter: !include_dir_merge_named ../entities/counter
