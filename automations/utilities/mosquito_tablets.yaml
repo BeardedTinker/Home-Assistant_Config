@@ -1,0 +1,25 @@
+#####
+# Mosquito repelent tablet
+# Restock pods as stock is low
+#####
+
+id: a018ae0a-c26b-4f07-b065-3c82b4c0a1c5
+alias: Restock mosquito tablets
+
+trigger:
+  platform: numeric_state
+  entity_id: sensor.wx08zm_mosquito_tablet
+  below: 45
+
+action:
+- service: shopping_list.add_item
+  data:
+    name: Mosquito tablets
+- service: script.notify_engine
+  data:
+    who: 'parents'
+    title: 'Mosquito tablets low'
+    value1: 'Added mosquito tablets to shopping list'
+    tag_id: 'information'
+    sticky: 'true'
+    target_id: !secret telegram_bot_chat_id
