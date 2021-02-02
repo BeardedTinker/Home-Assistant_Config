@@ -12,6 +12,14 @@ trigger:
   below: 10
 
 action:
-  service: shopping_list.add_item
+- service: shopping_list.add_item
   data:
     name: Dishwasher pods
+- service: script.notify_engine
+  data:
+    who: 'parents'
+    title: 'Dishwasher pods low'
+    value1: 'Added dishwasher pods to shopping list'
+    tag_id: 'information'
+    sticky: 'true'
+    target_id: !secret telegram_bot_chat_id

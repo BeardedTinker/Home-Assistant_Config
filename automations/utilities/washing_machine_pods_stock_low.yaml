@@ -12,6 +12,14 @@ trigger:
   below: 10
 
 action:
-  service: shopping_list.add_item
+- service: shopping_list.add_item
   data:
     name: Washing machine pods
+- service: script.notify_engine
+  data:
+    who: 'parents'
+    title: 'Washing machine pods low'
+    value1: 'Added washing machin pods to shopping list'
+    tag_id: 'information'
+    sticky: 'true'
+    target_id: !secret telegram_bot_chat_id
