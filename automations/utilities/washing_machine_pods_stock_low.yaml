@@ -1,0 +1,17 @@
+#####
+# Washing machine detergent pods
+# Restock pods as stock is low
+#####
+
+id: f52703db-c7c8-4124-8e14-d5d5447911aa
+alias: Restock washing machine pods
+
+trigger:
+  platform: numeric_state
+  entity_id: counter.washing_pods
+  below: 10
+
+action:
+  service: shopping_list.add_item
+  data:
+    name: Washing machine pods
