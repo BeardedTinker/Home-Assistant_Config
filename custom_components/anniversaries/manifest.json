@@ -1,6 +1,7 @@
 {
   "domain": "anniversaries",
   "name": "Anniversaries",
+  "version": "4.1.1",
   "documentation": "https://github.com/pinkywafer/Anniversaries",
   "dependencies": [],
   "config_flow": true,
