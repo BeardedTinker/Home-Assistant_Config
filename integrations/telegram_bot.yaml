@@ -8,6 +8,7 @@
 telegram_bot:
   - platform: polling
     api_key: !secret telegram_api
+    parse_mode: html
     allowed_chat_ids:
       - !secret telegram_bot_chat_id2
       - !secret telegram_bot_chat_id

@@ -4,9 +4,9 @@
 #####
 
 platform: google_translate
-service_name: google_say
-language: 'en-uk'
-base_url: !secret my_full_url
 cache: true
 cache_dir: /config/tts
-time_memory: 304
+time_memory: 300
+base_url: !secret my_full_url
+service_name: google_say
+language: 'en-uk'

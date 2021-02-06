@@ -48,13 +48,13 @@ notify_engine:
           color: "{{ color }}"
           channel: "{{ channel_id }}"
           importance: "{{ importance_id }}"
-    - service: mqtt.publish
-      data_template:
-        topic: /printer/thermal
-        payload_template: >-
-          {
-            "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
-          }
+#    - service: mqtt.publish
+#      data_template:
+#        topic: /printer/thermal
+#        payload_template: >-
+#          {
+#            "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
+#          }
 
 #          push:
 #            sound: "{{ ios_sound }}"
