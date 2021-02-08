@@ -46,7 +46,7 @@ action:
 - data:
     entity_id: media_player.whatever_me
     message: 'Good morning Luka. It is {{ states("sensor.time") }} and time for you to wake up. '
-  service: tts.google_say
+  service: tts.google_translate_say
 - data:
     entity_id: light.luka_floor_light
     brightness: 64

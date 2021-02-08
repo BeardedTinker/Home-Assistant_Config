@@ -43,7 +43,7 @@ action:
 - data:
     entity_id: media_player.mini_me
     message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to wake up.'
-  service: tts.google_say
+  service: tts.google_translate_say
 - data:
     entity_id:
       - light.goose_light

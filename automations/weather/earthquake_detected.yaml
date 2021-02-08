@@ -33,4 +33,4 @@ action:
       - media_player.display_me
       - media_player.clock_me
     message: 'Earthquake detected! Stay calm!'
-  service: tts.google_say
+  service: tts.google_translate_say

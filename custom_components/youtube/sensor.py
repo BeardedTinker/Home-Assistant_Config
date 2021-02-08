@@ -13,6 +13,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
+from dateutil.parser import parse
 import re
 
 CONF_CHANNEL_ID = 'channel_id'
@@ -64,6 +65,7 @@ class YoutubeSensor(Entity):
         self.published = None
         self.channel_live = False
         self.channel_image = None
+        self.expiry = parse('01 Jan 1900 00:00:00 UTC')
 
     async def async_update(self):
         """Update sensor."""
@@ -73,6 +75,10 @@ class YoutubeSensor(Entity):
             async with async_timeout.timeout(10, loop=self.hass.loop):
                 response = await self.session.get(url)
                 info = await response.text()
+            exp = parse(response.headers['Expires'])
+            if exp < self.expiry:
+                return
+            self.expiry = exp
             title = html.parser.HTMLParser().unescape(
                 info.split('<title>')[2].split('</')[0])
             url = info.split('<link rel="alternate" href="')[2].split('"/>')[0]
@@ -157,4 +163,3 @@ async def is_channel_live(url, name, hass, session):
     except Exception as error:  # pylint: disable=broad-except
         _LOGGER.debug('%s - Could not update - %s', name, error)
     return live, channel_image
-    

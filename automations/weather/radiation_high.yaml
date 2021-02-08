@@ -36,4 +36,4 @@ action:
       - media_player.display_me
       - media_player.clock_me
     message: 'Radiation warning. Current level of radiation is  {{ states("sensor.geiger_counter") }} CPM and normal value should be below 25'
-  service: tts.google_say
+  service: tts.google_translate_say

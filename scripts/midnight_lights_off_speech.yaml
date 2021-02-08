@@ -10,7 +10,7 @@ midnightlightsoffspeech:
       entity_id: media_player.display_me
       volume_level: 0.2
   - delay: 00:00:02
-  - service: tts.google_say
+  - service: tts.google_translate_say
     entity_id: media_player.display_me
     data:
       message: >

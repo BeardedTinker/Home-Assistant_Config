@@ -20,4 +20,4 @@ action:
 - data:
     entity_id: media_player.display_me
     message: Zita, you are watching Nickelodeon for 15 minutes!
-  service: tts.google_say
+  service: tts.google_translate_say

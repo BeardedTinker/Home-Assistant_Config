@@ -37,4 +37,4 @@ action:
       - media_player.display_me
       - media_player.clock_me
     message: 'Gas leak alert. Current level of gas is  {{ states("sensor.shelly_gas_10521cef4a01_concentration") }} PPM and normal value should be 0.'
-  service: tts.google_say
+  service: tts.google_translate_say
