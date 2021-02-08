@@ -1,6 +1,7 @@
 {
   "domain": "garbage_collection",
   "name": "Garbage Collection",
+  "version": "3.16",
   "documentation": "https://github.com/bruxy70/Garbage-Collection/",
   "issue_tracker": "https://github.com/bruxy70/Garbage-Collection/issues",
   "dependencies": [],

@@ -554,12 +554,21 @@ class GarbageCollection(RestoreEntity):
             for entity_id in self._entities:
                 state_object = self.hass.states.get(entity_id)
                 try:
+                    # Wait for all members to get updated
                     if state_object.attributes.get(ATTR_LAST_UPDATED).date() != today:
                         members_ready = False
                         break
+                    # A member got updated after the group update
+                    if (
+                        state_object.attributes.get(ATTR_LAST_UPDATED)
+                        > self._last_updated
+                    ):
+                        ready_for_update = True
                 except AttributeError:
                     members_ready = False
                     break
+                except TypeError:
+                    ready_for_update = True
             if ready_for_update and not members_ready:
                 ready_for_update = False
         else:
