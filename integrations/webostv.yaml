@@ -12,6 +12,7 @@ webostv:
     service: wake_on_lan.send_magic_packet
     data:
       mac: C8:08:E9:57:F8:8D
+      broadcast_address: 11.22.33.44
   customize:
 # source_list: 3D Smart TV,AV1,AV2,Accessibility,Camera,Component,Device Connector,HBO GO,HDMI3,LG Content Store,LG Photo Editor,LiveTV,Netflix,Notifications,PS4,Scheduler,Screen Share,SmartShare,Streaming Box,TV Guide,User Guide,Web Browser,YouTube,
     sources:
