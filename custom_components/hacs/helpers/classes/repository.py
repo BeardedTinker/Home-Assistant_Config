@@ -228,7 +228,7 @@ class HacsRepository(RepositoryHelpers):
                     self.hacs.session,
                     self.hacs.configuration.token,
                     self.data.full_name,
-                    self.data.etag_repository,
+                    None if self.data.installed else self.data.etag_repository,
                 )
                 self.data.update_data(self.repository_object.attributes)
                 self.data.etag_repository = etag
@@ -258,7 +258,11 @@ class HacsRepository(RepositoryHelpers):
         # Attach repository
         current_etag = self.data.etag_repository
         await common_update_data(self, ignore_issues, force)
-        if (current_etag == self.data.etag_repository) and not force:
+        if (
+            not self.data.installed
+            and (current_etag == self.data.etag_repository)
+            and not force
+        ):
             self.logger.debug(
                 "Did not update %s, content was not modified", self.data.full_name
             )
