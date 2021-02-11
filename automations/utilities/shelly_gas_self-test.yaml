@@ -1,0 +1,36 @@
+#####
+# Alert when Shelly Gas needs self-test
+# Binary sensors changes from off
+#####
+
+alias: Gas Sensor Self-test
+id: d3e11861-2f14-4039-85c3-f58d5aa76bd1
+trigger:
+  - platform: state
+    entity_id: sensor.shelly_gas_10521cef4a01_self_test
+    to: 'not_completed'
+
+#condition:
+#  condition: state
+#  entity_id: input_boolean.audio_notifications
+#  state: 'on'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'parents'
+    title: '☠ *Gas needs Self-test*'
+    value1: 'Gas sensor needs self-test. Press button to start it.'
+    tag_id: 'information'
+    sticky: 'true'
+    group: weather
+    color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
+- data:
+    entity_id: media_player.display_me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data:
+    entity_id: media_player.display_me
+    message: 'Shelly gas sensors needs self-test. Press button on it to start it.'
+  service: tts.google_translate_say
