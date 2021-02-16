@@ -28,7 +28,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
         ReolinkEntity.__init__(self, hass, config)
         BinarySensorEntity.__init__(self)
 
-        self.push_available = False
+        self._available = False
         self._event_state = False
         self._last_motion = datetime.datetime.min
 
@@ -65,7 +65,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return self._base.motion_detection_state
+        return self._available
 
     @property
     def device_class(self):
@@ -78,11 +78,21 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
         self.hass.bus.async_listen(self._base.event_id, self.handle_event)
 
     async def handle_event(self, event):
-        """Handle incoming webhook from Reolink for inbound messages and calls."""
-        if not self._base.motion_detection_state:
+        """Handle incoming event for motion detection and availability."""
+        try:
+            self._available = event.data["available"]
+            return
+        except KeyError:
+            pass
+
+        if not self._available:
             return
 
-        self._event_state = event.data["IsMotion"]
+        try:
+            self._event_state = event.data["motion"]
+        except KeyError:
+            return
+
         if self._base.api.channels > 1:
             # Pull the motion state for the NVR channel, it has only 1 event
             self._event_state = await self._base.api.get_motion_state()

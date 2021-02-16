@@ -69,11 +69,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         """Get a push manager, there should be one push manager per mac address"""
-        push = hass.data[DOMAIN][entry.entry_id][base.push_manager]
+        push = hass.data[DOMAIN][base.push_manager]
     except KeyError:
         push = ReolinkPush(hass, base.api.host, base.api.onvif_port, entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD])
         await push.subscribe(base.event_id)
-        hass.data[DOMAIN][entry.entry_id][base.push_manager] = push
+        hass.data[DOMAIN][base.push_manager] = push
 
     async def async_update_data():
         """Perform the actual updates."""
@@ -118,23 +118,11 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     base = hass.data[DOMAIN][entry.entry_id][BASE]
-    push = hass.data[DOMAIN][entry.entry_id][base.push_manager]
+    push = hass.data[DOMAIN][base.push_manager]
 
-    keep_subscription = False
-    for entry_id in hass.data[DOMAIN]:
-        if entry_id == entry.entry_id:
-            continue
-        _LOGGER.debug(entry_id)
-        
-        base_entry = hass.data[DOMAIN][entry_id][BASE]
-        _LOGGER.debug(base_entry.event_id)
-
-        if base_entry.event_id == base.event_id and base_entry.unique_id != base.unique_id:
-            keep_subscription = True
-            break
-
-    if not keep_subscription:
-        push.unsubscribe()
+    if not await push.count_members() > 1:
+        await push.unsubscribe()
+        hass.data[DOMAIN].pop(base.push_manager)
 
     await base.stop()
 

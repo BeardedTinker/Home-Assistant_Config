@@ -193,6 +193,7 @@ class ReolinkPush:
         self._sman = None
         self._webhook_url = None
         self._webhook_id = None
+        self._event_id = None
 
     @property
     def sman(self):
@@ -201,7 +202,8 @@ class ReolinkPush:
 
     async def subscribe(self, event_id):
         """Subscribe to motion events and set the webhook as callback."""
-        self._webhook_id = await self.register_webhook(event_id)
+        self._event_id = event_id
+        self._webhook_id = await self.register_webhook()
         self._webhook_url = "{}{}".format(
             get_url(self._hass, prefer_external=False),
             self._hass.components.webhook.async_generate_path(self._webhook_id)
@@ -217,9 +219,11 @@ class ReolinkPush:
                 self._webhook_url,
             )
             await self.set_available(True)
+        else:
+            await self.set_available(False)
         return True
 
-    async def register_webhook(self, event_id):
+    async def register_webhook(self):
         """
         Register a webhook for motion events if it does not exist yet (in case of NVR).
         The webhook name (in info) contains the event id (contains mac address op the camera).
@@ -227,10 +231,10 @@ class ReolinkPush:
         the binary sensor, in case of NVR the binary sensor also figures out what channel has
         the motion. So the flow is: camera onvif event->webhook->HA event->binary sensor.
         """
-        _LOGGER.debug("Registering webhook for event ID %s", event_id)
+        _LOGGER.debug("Registering webhook for event ID %s", self._event_id)
 
         webhook_id = self._hass.components.webhook.async_generate_id()
-        self._hass.components.webhook.async_register(DOMAIN, event_id, webhook_id, handle_webhook)
+        self._hass.components.webhook.async_register(DOMAIN, self._event_id, webhook_id, handle_webhook)
 
         return webhook_id
 
@@ -244,15 +248,14 @@ class ReolinkPush:
                 )
                 await self.set_available(False)
                 await self._sman.subscribe(self._webhook_url)
+            else:
+                await self.set_available(True)
+        else:
+            await self.set_available(True)
 
     async def set_available(self, available: bool):
         """Set the availability state to the base object."""
-        event_id = await get_event_by_webhook(self._hass, self._webhook_id)
-
-        for entry_id in self._hass.data[DOMAIN]:
-            base_entry = self._hass.data[DOMAIN][entry_id][BASE]
-            if base_entry.event_id == event_id:
-                base_entry.motion_detection_state = available
+        self._hass.bus.async_fire(self._event_id, {"available": available})
 
     async def unsubscribe(self):
         """Unsubscribe from the motion events."""
@@ -266,6 +269,25 @@ class ReolinkPush:
         _LOGGER.debug("Unregistering webhook %s", self._webhook_id)
         self._hass.components.webhook.async_unregister(self._webhook_id)
 
+    async def count_members(self):
+        """Count the number of camera's using this push manager."""
+        members = 0
+        for entry_id in self._hass.data[DOMAIN]:
+            _LOGGER.debug("Got data entry: %s", entry_id)
+
+            if PUSH_MANAGER in entry_id:
+                continue  # Count config entries only
+
+            try:
+                base = self._hass.data[DOMAIN][entry_id][BASE]
+                if base.event_id == self._event_id:
+                    members += 1
+            except AttributeError:
+                pass
+            except KeyError: 
+                pass
+        _LOGGER.debug("Found %d listeners for event %s", members, self._event_id)
+        return members
 
 async def handle_webhook(hass, webhook_id, request):
     """Handle incoming webhook from Reolink for inbound messages and calls."""
@@ -291,7 +313,7 @@ async def handle_webhook(hass, webhook_id, request):
     if not event_id:
         _LOGGER.error("Webhook triggered without event to fire")
 
-    hass.bus.async_fire(event_id, {"IsMotion": is_motion})
+    hass.bus.async_fire(event_id, {"motion": is_motion})
 
 
 async def get_webhook_by_event(hass: HomeAssistant, event_id):
@@ -301,7 +323,7 @@ async def get_webhook_by_event(hass: HomeAssistant, event_id):
     except KeyError:
         return
 
-    for wid, info in handlers.items():  # ToDo: check other NVR streams still use this
+    for wid, info in handlers.items():
         _LOGGER.debug("Webhook: %s", wid)
         _LOGGER.debug(info)
         if info["name"] == event_id:
