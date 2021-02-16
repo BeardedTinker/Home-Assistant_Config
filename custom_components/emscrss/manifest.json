@@ -1,0 +1,15 @@
+{
+  "domain": "emscrss",
+  "name": "EMSC Earthquake RSS Feed",
+  "version": "1.0",
+  "documentation": "https://github.com/msekoranja/emsc-hacs-repository",
+  "issue_tracker": "https://github.com/msekoranja/emsc-hacs-repository/issues",
+  "dependencies": [],
+  "config_flow": false,
+  "codeowners": [
+    "@msekoranja"
+  ],
+  "requirements": [
+    "georss_emsc_csem_earthquakes_client==0.3"
+  ]
+}
