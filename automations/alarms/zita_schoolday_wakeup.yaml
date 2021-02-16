@@ -42,7 +42,7 @@ action:
   service: media_player.volume_set
 - data:
     entity_id: media_player.mini_me
-    message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to wake up.'
+    message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to get up.'
   service: tts.google_translate_say
 - data:
     entity_id:

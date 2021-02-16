@@ -30,7 +30,7 @@ condition:
     state: 'on'
   - condition: state
     entity_id: sensor.current_week
-    state: 'Week B'
+    state: 'Week A'
 
 action:
 - service: script.notify_engine
@@ -45,7 +45,7 @@ action:
   service: media_player.volume_set
 - data:
     entity_id: media_player.whatever_me
-    message: 'Good morning Luka. It is {{ states("sensor.time") }} and time for you to wake up. '
+    message: 'Good morning Luka. It is {{ states("sensor.time") }} and time for you to get up. '
   service: tts.google_translate_say
 - data:
     entity_id: light.luka_floor_light

@@ -1,6 +1,7 @@
 #####
 # NUT - Network UPS Tool component
 # https://www.home-assistant.io/integrations/nut/
+# OBSOLETE: Component is now configured via UI
 #####
 
 platform: nut

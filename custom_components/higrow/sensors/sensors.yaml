@@ -2,15 +2,17 @@ info: This file contains the MAC_ID of the sensors already registred for Autodis
 info: You can reinitiate Autodiscover for a single MAC_ID, by removing it from the list, or you can initiate a full renewal of sensors to Autodiscover,
 info: By removing all MAC_IDs below these comments lines
 info: DO NOT REMOVE THESE FOUR INFO LINES.
-mac_id: fcf5c40d5344
-name: Cherry_tomatoes
-mac_id: fcf5c40d4f24
-name: Ficus_Benjamina
 mac_id: 7c9ebdfbf0c8
 name: Dracena_Marginata_large
+mac_id: fcf5c40d4f24
+name: Ficus_Benjamina
+mac_id: fcf5c40d5344
+name: Cherry_tomatoes
+mac_id: c44f337fc209
+name: parthenocissus
+mac_id: c44f337fc531
+name: schefflera_arboricola
 mac_id: 7c9ebdfbefa0
 name: Dracena_Marginata_small
-mac_id: c44f337fc531
-name: SCHEFFLERA_ARBORICOLA
-mac_id: c44f337fc209
-name: PARTHENOCISSUS
+mac_id: c44f337fcbad
+name: Ficus_Benjamina_Natasja
