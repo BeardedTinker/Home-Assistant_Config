@@ -1,14 +1,14 @@
 {
   "domain": "anniversaries",
   "name": "Anniversaries",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "documentation": "https://github.com/pinkywafer/Anniversaries",
   "dependencies": [],
   "config_flow": true,
   "codeowners": ["@pinkywafer"],
   "requirements": [
-    "python-dateutil",
-    "integrationhelper",
-    "voluptuous"
+    "python-dateutil>=2.8.1",
+    "integrationhelper>=0.2.2",
+    "voluptuous>=0.12.1"
   ]
 }
