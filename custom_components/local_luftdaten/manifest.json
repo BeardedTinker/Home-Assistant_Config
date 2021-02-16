@@ -2,7 +2,9 @@
   "domain": "local_luftdaten",
   "name": "Local Luftdaten sensor",
   "documentation": "https://github.com/lichtteil/local_luftdaten/",
+  "issue_tracker": "https://github.com/lichtteil/local_luftdaten/issues",
   "dependencies": [],
   "codeowners": ["@lichtteil"],
-  "requirements": []
+  "requirements": [],
+  "version": "1.8"
 }
