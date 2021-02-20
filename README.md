@@ -67,13 +67,13 @@ From other devices I use, here is a list:
 As I'm running this on Synology, I have mix of Docker containers and hass.io add-ons. Here is a list:
 
 Add-ons:
-  - ADB Android Debug Bridge - [link](https://github.com/hassio-addons/addon-adb)
+  - ADB Android Debug Bridge - [link](https://github.com/hassio-addons/addon-adb) - REMOVED
   - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio)
   - ESPHome - [link](https://esphome.io/) - migrated from Docker container
-  - Mosquitto Broker - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto)
+  - Mosquitto Broker - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto) - REMOVED
   - Node-RED - [link](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
   - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
-  - Zigbee2MQTT -[link](https://github.com/danielwelch/hassio-zigbee2mqtt)
+  - Zigbee2MQTT -[link](https://github.com/danielwelch/hassio-zigbee2mqtt) - REMOVED
 
 Containers:
   - AdGuard Home 
@@ -83,8 +83,8 @@ Containers:
   - InfluxDB
   - Node-RED
   - Portainer
-  - Zigbee2MQTT - REMOVED, now using Add-on
-  - MQTT - REMOVED, now using Add-on
+  - Zigbee2MQTT 
+  - MQTT 
 
  plus some others too - not directly related to Home Assistant (Minecraft/PaperMC, Storj node,...)
 
@@ -145,27 +145,27 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     2 |
-| Automations          |   132 |
-| Binary sensors       |   147 |
+| Automations          |   139 |
+| Binary sensors       |   186 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    62 |
-| Entities             |  1471 |
+| Entities             |  1587 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
-| Input Date/Time      |    20 |
+| Input Date/Time      |    23 |
 | Input Number         |    11 |
 | Input Select         |     9 |
 | Input Text           |     4 |
-| Lights               |    34 |
-| Media players        |    31 |
-| Lines of code (YAML) | 15117 |
+| Lights               |    39 |
+| Media players        |    33 |
+| Lines of code (YAML) | 15937 |
 | Persons              |     6 |
-| Plants               |     4 |
+| Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   840 |
-| Switches             |    73 |
+| Sensors              |   893 |
+| Switches             |    77 |
 | Timers               |     3 |
 | Weather              |     2 |
 

@@ -1,0 +1,19 @@
+#####
+#
+#
+#####
+
+id: 8819e213-cda5-440f-9105-232189ba1ae7
+alias: Schefflera Arboricola last charge
+description: ''
+trigger:
+- platform: state
+  entity_id: sensor.schefflera_arboricola_charging
+  to: charging
+condition: []
+action:
+- service: input_datetime.set_datetime
+  data:
+    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  entity_id: input_datetime.schefflera_arboricola_last_charged
+mode: single

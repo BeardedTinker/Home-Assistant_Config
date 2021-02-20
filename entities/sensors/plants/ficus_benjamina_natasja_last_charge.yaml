@@ -5,7 +5,7 @@
 
 #  platform: history_stats
 #  name: Ficus Benjamina last charge
-#  entity_id: sensor.ficus_benjamina_charging
+#  entity_id: sensor.ficus_benjamina_natasja_charging
 #  state: 'charging'
 #  type: time
 #  start: '{{ now().replace(hour=0, minute=0, second=0) }}'
@@ -13,11 +13,11 @@
 
 platform: template
 sensors:
-  ficus_benjamina_nastja_last_charge:
+  ficus_benjamina_natasja_last_charge:
 #    entity_id: sensor.time
-    friendly_name: Ficus Benjamina Nastja last charge
+    friendly_name: Ficus Benjamina Natasja last charge
     icon_template: mdi:clock-outline
     unit_of_measurement: days
      #device_class: timestamp
 #    value_template: "{{ relative_time(states('input_datetime.ficus_benjamina_nastja_last_changed')) }}"
-    value_template: "{{ (((as_timestamp(now())-states.input_datetime.ficus_benjamina_nastja_last_changed.attributes.timestamp)) | int /60/1440) | round(0) }}"
+    value_template: "{{ (((as_timestamp(now())-states.input_datetime.ficus_benjamina_natasja_last_changed.attributes.timestamp)) | int /60/1440) | round(0) }}"
