@@ -1,6 +1,7 @@
 {
   "domain": "calendarific",
   "name": "Calendarific",
+  "version": "0.13.0",
   "documentation": "https://github.com/pinkywafer/Calendarific",
   "dependencies": [],
   "config_flow": true,
