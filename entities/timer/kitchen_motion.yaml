@@ -1,0 +1,8 @@
+#####
+# Kitchen motion timer
+# Used for night-lights
+#####
+
+kitchen_motion:
+  duration: '00:02:00'
+  name: Kitchen motion timer

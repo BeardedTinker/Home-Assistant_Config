@@ -101,11 +101,15 @@ KEY_PAYLOAD_OFF = "pl_off"
 KEY_PAYLOAD_ON = "pl_on"
 KEY_PAYLOAD_OPEN = "pl_open"
 KEY_PAYLOAD_STOP = "pl_stop"
+KEY_POSITION_TEMPLATE = "pos_tpl"
 KEY_POSITION_TOPIC = "pos_t"
 KEY_QOS = "qos"
 KEY_RETAIN = "ret"
-KEY_SET_POSITION_TOPIC = "set_pos_t"
 KEY_SET_POSITION_TEMPLATE = "set_pos_tpl"
+KEY_SET_POSITION_TOPIC = "set_pos_t"
+KEY_STATE_CLOSING = "stat_closing"
+KEY_STATE_OPENING = "stat_opening"
+KEY_STATE_STOPPED = "stat_stopped"
 KEY_STATE_TEMPLATE = "stat_tpl"
 KEY_STATE_TOPIC = "stat_t"
 KEY_SUBTYPE = "stype"
@@ -366,7 +370,6 @@ TPL_OVERPOWER_VALUE_TO_JSON = "{{{^overpower_value^:value}|tojson}}"
 TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
 TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
-TPL_ROLLER_TO_JSON = "{{{^roller_state^:value}|tojson}}"
 TPL_RSSI = "{{value_json[^wifi_sta^].rssi}}"
 TPL_IP = "{{value_json.ip}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
@@ -398,10 +401,13 @@ VALUE_1 = "1"
 VALUE_BUTTON_LONG_PRESS = "button_long_press"
 VALUE_BUTTON_SHORT_PRESS = "button_short_press"
 VALUE_CLOSE = "close"
+VALUE_CLOSE = "close"
 VALUE_FALSE = "false"
 VALUE_OFF = "off"
 VALUE_ON = "on"
 VALUE_OPEN = "open"
+VALUE_OPEN = "open"
+VALUE_STOP = "stop"
 VALUE_STOP = "stop"
 VALUE_TRIGGER = "trigger"
 VALUE_TRUE = "true"
@@ -1840,16 +1846,20 @@ for roller_id in range(rollers):
             KEY_NAME: roller_name,
             KEY_COMMAND_TOPIC: command_topic,
             KEY_POSITION_TOPIC: position_topic,
-            KEY_VALUE_TEMPLATE: position_template,
+            KEY_STATE_TOPIC: state_topic,
+            KEY_STATE_CLOSING: VALUE_CLOSE,
+            KEY_STATE_OPENING: VALUE_OPEN,
+            KEY_STATE_STOPPED: VALUE_STOP,
+            KEY_POSITION_TEMPLATE: position_template,
             KEY_SET_POSITION_TOPIC: set_position_topic,
             KEY_PAYLOAD_OPEN: VALUE_OPEN,
             KEY_PAYLOAD_CLOSE: VALUE_CLOSE,
             KEY_PAYLOAD_STOP: VALUE_STOP,
-            KEY_OPTIMISTIC: VALUE_FALSE,
             KEY_AVAILABILITY_TOPIC: availability_topic,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_UNIQUE_ID: unique_id,
+            KEY_OPTIMISTIC: VALUE_FALSE,
             KEY_QOS: qos,
             KEY_DEVICE: {
                 KEY_IDENTIFIERS: [mac],
@@ -1859,8 +1869,6 @@ for roller_id in range(rollers):
                 KEY_MANUFACTURER: ATTR_MANUFACTURER,
             },
             "~": default_topic,
-            KEY_JSON_ATTRIBUTES_TOPIC: f"~roller/{roller_id}",
-            KEY_JSON_ATTRIBUTES_TEMPLATE: TPL_ROLLER_TO_JSON,
         }
     else:
         payload = ""
