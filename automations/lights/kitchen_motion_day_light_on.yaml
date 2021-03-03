@@ -7,7 +7,6 @@ alias: Kitchen motion day light on
 id: 962990c3-07ef-4e97-a2c2-3477eeb323d6
 
 trigger:
-#- entity_id: binary_sensor.shellymotionsensor_60a4239768f8_motion
 - entity_id: binary_sensor.kitchen_motion
   platform: state
   to: 'on'
@@ -18,9 +17,8 @@ trigger:
 #    condition: time
 
 action:
-#- service: timer.start
-#  entity_id: timer.kitchen_motion
-#  duration: 00:02:00
+- service: timer.cancel
+  entity_id: timer.kitchen_motion
 - service: light.turn_on
   data:
     entity_id: light.kitchen_lights

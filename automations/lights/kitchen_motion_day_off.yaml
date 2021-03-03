@@ -7,18 +7,12 @@ alias: Kitchen motion day light off
 id: f20274dc-abaa-417d-87c0-56af3d982a78
 
 trigger:
-#- entity_id: binary_sensor.shellymotionsensor_60a4239768f8_motion
-- entity_id: binary_sensor.kitchen_motion
-  platform: state
-  to: 'off'
-
-#condition:
-#  - after: 00:00:00
-#    before: 06:00:00
-#    condition: time
+- event_type: timer.finished
+  event_data:
+    entity_id: timer.kitchen_motion
+  platform: event
 
 action:
-- delay:  00:01:00
 - service: light.turn_off
   data:
     entity_id: light.kitchen_lights

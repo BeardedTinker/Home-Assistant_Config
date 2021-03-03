@@ -1,0 +1,32 @@
+#####
+# Stop light on motion 
+# need to adapt to take into account lux/summer
+#####
+
+alias: Kitchen motion stopped timer start
+id: f53fc49a-9cbb-4899-9ec0-837cd51ee920
+
+trigger:
+- entity_id: binary_sensor.kitchen_motion
+  platform: state
+  to: 'off'
+
+#condition:
+#  - after: 00:00:00
+#    before: 06:00:00
+#    condition: time
+
+action:
+  - service: timer.start
+    entity_id: timer.kitchen_motion
+#  - service: timer.start
+#    data_template:
+#      entity_id: timer.kitchen_motion
+#      duration: >-
+#        {%- if is_state("sensor.time_of_day", "Day") -%}
+#          '00:10:00'
+#        {%- elif is_state("sensor.time_of_day", "Evening") -%}
+#          '00:05:00'
+#        {%- elif is_state("sensor.time_of_day", "Night") -%}
+#          '00:02:00'
+#        {%- endif -%}
