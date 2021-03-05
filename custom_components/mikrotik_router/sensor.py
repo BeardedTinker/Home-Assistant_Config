@@ -528,7 +528,7 @@ class MikrotikAccountingSensor(MikrotikControllerSensor):
             "connections": {(CONNECTION_NETWORK_MAC, self._data["mac-address"])},
             "default_name": self._data["host-name"],
         }
-        if self._data["manufacturer"] != "":
+        if "manufacturer" in self._data and self._data["manufacturer"] != "":
             info["manufacturer"] = self._data["manufacturer"]
 
         return info
@@ -581,9 +581,18 @@ class MikrotikControllerEnvironmentSensor(MikrotikControllerSensor):
     def device_info(self) -> Dict[str, Any]:
         """Return a description for device registry."""
         info = {
+            "identifiers": {
+                (
+                    DOMAIN,
+                    "serial-number",
+                    self._ctrl.data["routerboard"]["serial-number"],
+                    "sensor",
+                    "Environment",
+                )
+            },
             "manufacturer": self._ctrl.data["resource"]["platform"],
             "model": self._ctrl.data["resource"]["board-name"],
-            "name": f"{self._inst} {self._sid_data['sid']}",
+            "name": f"{self._inst} Environment",
         }
 
         return info

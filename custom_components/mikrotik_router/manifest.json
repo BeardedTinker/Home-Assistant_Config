@@ -3,6 +3,7 @@
     "name": "Mikrotik Router",
     "config_flow": true,
     "documentation": "https://github.com/tomaae/homeassistant-mikrotik_router",
+    "issue_tracker": "https://github.com/tomaae/homeassistant-mikrotik_router/issues",
     "dependencies": [],
     "requirements": [
         "librouteros==3.0.0",
@@ -10,5 +11,6 @@
     ],
     "codeowners": [
         "@tomaae"
-    ]
+    ],
+    "version": "0.0.0"
 }

@@ -150,6 +150,7 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
 
     def __init__(self, inst, uid, mikrotik_controller, config_entry, sid_data):
         """Set up a device tracker."""
+        _LOGGER.debug("Initializing device tracker sensor: %s", uid)
         self._sid_data = sid_data
         self._inst = inst
         self._ctrl = mikrotik_controller
