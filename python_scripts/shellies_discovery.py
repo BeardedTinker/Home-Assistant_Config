@@ -455,13 +455,13 @@ def get_device_config(dev_id):
         return result
 
 
-def mqtt_publish(topic, payload, retain, qos):
+def mqtt_publish(topic, payload, retain):
     """Publish data to MQTT broker."""
     service_data = {
         "topic": topic,
         "payload": payload,
         "retain": retain,
-        "qos": qos,
+        "qos": 0,
     }
     logger.debug(service_data)
     logger.debug("Sending to MQTT broker: %s %s", topic, payload)  # noqa: F821
@@ -1878,9 +1878,7 @@ for roller_id in range(rollers):
         payload[KEY_DEVICE_CLASS] = device_class
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(
-        config_topic, str(payload).replace("'", '"').replace("^", "'"), retain, qos
-    )
+    mqtt_publish(config_topic, str(payload).replace("'", '"').replace("^", "'"), retain)
 
 # relays
 for relay_id in range(relays):
@@ -1925,7 +1923,7 @@ for relay_id in range(relays):
             payload = ""
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
     # relay's sensors
     if relay_id == relays - 1:
@@ -1969,7 +1967,7 @@ for relay_id in range(relays):
                 payload = ""
             if dev_id.lower() in ignored:
                 payload = ""
-            mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+            mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
     # relay's sensors
     for sensor_id in range(len(relays_sensors)):
@@ -2012,7 +2010,7 @@ for relay_id in range(relays):
             payload = ""
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
     # relay's binary sensors
     for bin_sensor_id in range(len(relays_bin_sensors)):
@@ -2106,7 +2104,7 @@ for relay_id in range(relays):
         if dev_id.lower() in ignored:
             payload = ""
         mqtt_publish(
-            config_topic, str(payload).replace("'", '"').replace("^", "'"), retain, qos
+            config_topic, str(payload).replace("'", '"').replace("^", "'"), retain
         )
 
 # sensors
@@ -2198,9 +2196,7 @@ for sensor_id in range(len(sensors)):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(
-        config_topic, str(payload).replace("'", '"').replace("^", "'"), retain, qos
-    )
+    mqtt_publish(config_topic, str(payload).replace("'", '"').replace("^", "'"), retain)
 
 # inputs
 for input_id in range(inputs):
@@ -2226,9 +2222,7 @@ for input_id in range(inputs):
     }
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(
-        config_topic, str(payload).replace("'", '"').replace("^", "'"), retain, qos
-    )
+    mqtt_publish(config_topic, str(payload).replace("'", '"').replace("^", "'"), retain)
 
 # external temperature sensors
 for sensor_id in range(ext_temp_sensors):
@@ -2269,7 +2263,7 @@ for sensor_id in range(ext_temp_sensors):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+    mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
 # external humidity sensors
 for sensor_id in range(ext_humi_sensors):
@@ -2310,7 +2304,7 @@ for sensor_id in range(ext_humi_sensors):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+    mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
 # binary sensors
 for bin_sensor_id in range(len(bin_sensors)):
@@ -2450,9 +2444,7 @@ for bin_sensor_id in range(len(bin_sensors)):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(
-        config_topic, str(payload).replace("'", '"').replace("^", "'"), retain, qos
-    )
+    mqtt_publish(config_topic, str(payload).replace("'", '"').replace("^", "'"), retain)
 
 # color lights
 for light_id in range(rgbw_lights):
@@ -2534,7 +2526,7 @@ for light_id in range(rgbw_lights):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(config_topic, payload, retain, qos)
+    mqtt_publish(config_topic, payload, retain)
 
     # color light's binary sensors
     for bin_sensor_id in range(len(lights_bin_sensors)):
@@ -2580,7 +2572,7 @@ for light_id in range(rgbw_lights):
             payload = ""
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
     # color light's sensors
     for sensor_id in range(len(lights_sensors)):
@@ -2623,7 +2615,7 @@ for light_id in range(rgbw_lights):
             payload = ""
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
 # white lights
 for light_id in range(white_lights):
@@ -2748,7 +2740,7 @@ for light_id in range(white_lights):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
-    mqtt_publish(config_topic, payload, retain, qos)
+    mqtt_publish(config_topic, payload, retain)
 
     # white light's binary sensors
     for bin_sensor_id in range(len(lights_bin_sensors)):
@@ -2804,7 +2796,7 @@ for light_id in range(white_lights):
                 payload = ""
             if dev_id.lower() in ignored:
                 payload = ""
-            mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+            mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
     # white light's sensors
     for sensor_id in range(len(lights_sensors)):
@@ -2858,7 +2850,7 @@ for light_id in range(white_lights):
             payload = ""
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
 
 # meters
 for meter_id in range(meters):
@@ -2900,4 +2892,4 @@ for meter_id in range(meters):
             payload[KEY_DEVICE_CLASS] = meters_sensors_classes[sensor_id]
         if dev_id.lower() in ignored:
             payload = ""
-        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain, qos)
+        mqtt_publish(config_topic, str(payload).replace("'", '"'), retain)
