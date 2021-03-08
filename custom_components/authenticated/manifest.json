@@ -1,8 +1,10 @@
 {
   "domain": "authenticated",
   "name": "Authenticated",
+  "version": "21.3.0",
   "documentation": "https://github.com/custom-components/authenticated",
-  "dependencies": [],
-  "codeowners": ["@ludeeus"],
-  "requirements": []
+  "issue_tracker": "https://github.com/custom-components/authenticated/issues",
+  "codeowners": [
+    "@ludeeus"
+  ]
 }
