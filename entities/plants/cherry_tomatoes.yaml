@@ -13,6 +13,6 @@ cherry_tomatoes:
   min_moisture: 60
   max_moisture: 85
   min_battery: 10
-  min_conductivity: 1
+#  min_conductivity: 1
   min_brightness: 500
   check_days: 3
