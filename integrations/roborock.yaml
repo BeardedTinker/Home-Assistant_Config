@@ -1,0 +1,9 @@
+#####
+# Roborock S5 max integration for HA
+# As I'm still on 2021.02 - no UI setup for me 
+#####
+
+vacuum:
+  - platform: xiaomi_miio
+    host: 192.168.1.117
+    token: !secret roborock_token
