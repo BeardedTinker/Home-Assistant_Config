@@ -1,0 +1,13 @@
+#####
+# Custom Component to pull Xiaomi/Roborock map 
+#
+#####
+
+platform: xiaomi_cloud_map_extractor
+host: !secret roborock_ip
+token: !secret roborock_token
+username: !secret roborock_user
+password: !secret roborock_pass
+draw: ['all']
+attributes:
+  - calibration_points    
