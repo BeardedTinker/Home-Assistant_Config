@@ -4,7 +4,13 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries, core, data_entry_flow, exceptions
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_TIMEOUT, CONF_USERNAME
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PASSWORD,
+    CONF_PORT,
+    CONF_TIMEOUT,
+    CONF_USERNAME,
+)
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 
@@ -13,11 +19,17 @@ from .const import (
     BASE,
     CONF_CHANNEL,
     CONF_MOTION_OFF_DELAY,
+    CONF_PLAYBACK_MONTHS,
+    CONF_PLAYBACK_THUMBNAILS,
     CONF_PROTOCOL,
     CONF_STREAM,
+    CONF_THUMBNAIL_OFFSET,
     DEFAULT_MOTION_OFF_DELAY,
+    DEFAULT_PLAYBACK_MONTHS,
+    DEFAULT_PLAYBACK_THUMBNAILS,
     DEFAULT_PROTOCOL,
     DEFAULT_STREAM,
+    DEFAULT_THUMBNAIL_OFFSET,
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
@@ -55,7 +67,9 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     return await self.async_step_nvr()
 
                 self.data[CONF_CHANNEL] = 1
-                await self.async_set_unique_id(f"{self.mac_address}{user_input[CONF_CHANNEL]}")
+                await self.async_set_unique_id(
+                    f"{self.mac_address}{user_input[CONF_CHANNEL]}"
+                )
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=self.info["title"], data=self.data)
 
@@ -86,7 +100,9 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self.data.update(user_input)
 
-            await self.async_set_unique_id(f"{self.mac_address}{user_input[CONF_CHANNEL]}")
+            await self.async_set_unique_id(
+                f"{self.mac_address}{user_input[CONF_CHANNEL]}"
+            )
             self._abort_if_unique_id_configured()
 
             await self.base.set_channel(user_input[CONF_CHANNEL])
@@ -98,7 +114,9 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="nvr",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_CHANNEL): vol.All(vol.Coerce(int), vol.Range(min=1, max=self.channels)),
+                    vol.Required(CONF_CHANNEL): vol.All(
+                        vol.Coerce(int), vol.Range(min=1, max=self.channels)
+                    ),
                 }
             ),
             errors=errors,
@@ -106,11 +124,7 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_validate_input(self, hass: core.HomeAssistant, user_input: dict):
         """Validate the user input allows us to connect."""
-        self.base = ReolinkBase(
-            hass,
-            user_input,
-            []
-        )
+        self.base = ReolinkBase(hass, user_input, [])
 
         if not await self.base.connect_api():
             raise CannotConnect
@@ -144,24 +158,42 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_PROTOCOL, 
-                    default=self.config_entry.options.get(
+                    vol.Required(
+                        CONF_PROTOCOL,
+                        default=self.config_entry.options.get(
                             CONF_PROTOCOL, DEFAULT_PROTOCOL
-                        ),): vol.In(
-                        ["rtmp", "rtsp"]
-                    ),
-                    vol.Required(CONF_STREAM, 
-                    default=self.config_entry.options.get(
+                        ),
+                    ): vol.In(["rtmp", "rtsp"]),
+                    vol.Required(
+                        CONF_STREAM,
+                        default=self.config_entry.options.get(
                             CONF_STREAM, DEFAULT_STREAM
-                        ),): vol.In(
-                        ["main", "sub"]
-                    ),
+                        ),
+                    ): vol.In(["main", "sub"]),
                     vol.Required(
                         CONF_MOTION_OFF_DELAY,
                         default=self.config_entry.options.get(
                             CONF_MOTION_OFF_DELAY, DEFAULT_MOTION_OFF_DELAY
                         ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                    vol.Required(
+                        CONF_PLAYBACK_MONTHS,
+                        default=self.config_entry.options.get(
+                            CONF_PLAYBACK_MONTHS, DEFAULT_PLAYBACK_MONTHS
+                        ),
                     ): cv.positive_int,
+                    vol.Optional(
+                        CONF_PLAYBACK_THUMBNAILS,
+                        default=self.config_entry.options.get(
+                            CONF_PLAYBACK_THUMBNAILS, DEFAULT_PLAYBACK_THUMBNAILS
+                        ),
+                    ): cv.boolean,
+                    vol.Optional(
+                        CONF_THUMBNAIL_OFFSET,
+                        default=self.config_entry.options.get(
+                            CONF_THUMBNAIL_OFFSET, DEFAULT_THUMBNAIL_OFFSET
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=60)),
                     vol.Optional(
                         CONF_TIMEOUT,
                         default=self.config_entry.options.get(
@@ -175,6 +207,7 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
 
 class AlreadyConfigured(exceptions.HomeAssistantError):
     """Error to indicate device is already configured."""
+
 
 class CannotConnect(exceptions.HomeAssistantError):
     """Error to indicate we cannot connect."""

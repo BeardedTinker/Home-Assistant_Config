@@ -1,5 +1,10 @@
 ptz_control:
+  name: Pan/Zoom/Tilt Control
   description: Execute a PTZ command.
+  target:
+    entity:
+      integration: reolink_dev
+      domain: camera
   fields:
     entity_id:
       description: Name(s) of the Reolink camera entity to execute the command on.
@@ -12,16 +17,21 @@ ptz_control:
       example: LEFTUP
     preset:
       description: (Optional) In case of the command TOPOS. The available presets are listed as attribute on the camera.
-      example:
+      example: HOME
     speed:
       description: (Optional) Speed at which the movement takes place.
       example: 25
 
 set_sensitivity:
+  name: Set Motion Sensitivity
   description: Set the motion detection sensitivity.
+  target:
+    entity:
+      integration: reolink_dev
+      domain: camera
   fields:
     entity_id:
-      description: Name(s) of the Reolink camera entity for which the sensitivity value should be set.
+      description: Name(s) of the Reolink camera entity to execute the command on.
       example: 'camera.frontdoor'
     sensitivity:
       description: New sensitivity, value between 1 (low sensitivity) and 50 (high sensitivity)
@@ -32,10 +42,15 @@ set_sensitivity:
         all presets will be changed.
 
 set_daynight:
+  name: Set Day/Night Mode
   description: Set day and night parameter.
+  target:
+    entity:
+      integration: reolink_dev
+      domain: camera
   fields:
     entity_id:
-      description: Name(s) of the Reolink camera entity for which the day and night value should be set.
+      description: Name(s) of the Reolink camera entity to execute the command on.
       example: 'camera.frontdoor'
     mode:
       description: >-
@@ -44,3 +59,26 @@ set_daynight:
           COLOR: Always record videos in color mode
           BLACKANDWHITE: Always record videos in black & white mode
       example: AUTO
+
+set_backlight:
+  name: Set backlight
+  description:  >- 
+    Optimizing brightness and contrast levels to compensate for differences 
+    between dark and bright objects using either BLC or WDR mode. 
+    This may improve image clarity in high contrast situations, 
+    but it should be tested at different times of the day and night to ensure there is no negative effect.
+  target:
+    entity:
+      integration: reolink_dev
+      domain: camera
+  fields:
+    entity_id:
+      description: Name(s) of the Reolink camera entity to execute the command on.
+      example: 'camera.frontdoor'
+    mode:
+      description: >-
+        The backlight parameter supports the following values:
+          BACKLIGHTCONTROL: use Backlight Control
+          DYNAMICRANGECONTROL: use Dynamic Range Control
+          OFF: no optimization
+      example: DYNAMICRANGECONTROL

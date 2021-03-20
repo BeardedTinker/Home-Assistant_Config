@@ -14,7 +14,12 @@ from homeassistant.helpers.aiohttp_client import (
     async_get_clientsession,
 )
 
-from .const import SERVICE_PTZ_CONTROL, SERVICE_SET_DAYNIGHT, SERVICE_SET_SENSITIVITY
+from .const import (
+    SERVICE_PTZ_CONTROL,
+    SERVICE_SET_BACKLIGHT,
+    SERVICE_SET_DAYNIGHT,
+    SERVICE_SET_SENSITIVITY,
+)
 from .entity import ReolinkEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +47,14 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
             vol.Required("mode"): cv.string,
         },
         SERVICE_SET_DAYNIGHT,
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_BACKLIGHT,
+        {
+            vol.Required("mode"): cv.string,
+        },
+        SERVICE_SET_BACKLIGHT,
     )
 
     platform.async_register_entity_service(
@@ -91,6 +104,12 @@ class ReolinkCamera(ReolinkEntity, Camera):
             "BLACKANDWHITE": "Black&White",
         }
 
+        self._backlight_modes = {
+            "BACKLIGHTCONTROL": "BackLightControl",
+            "DYNAMICRANGECONTROL": "DynamicRangeControl",
+            "OFF": "Off",
+        }
+
     @property
     def unique_id(self):
         """Return Unique ID string."""
@@ -113,6 +132,10 @@ class ReolinkCamera(ReolinkEntity, Camera):
         if self._base.api.ptz_support:
             attrs["ptz_presets"] = self._base.api.ptz_presets
 
+        for key, value in self._backlight_modes.items():
+            if value == self._base.api.backlight_state:
+                attrs["backlight_state"] = key
+
         for key, value in self._daynight_modes.items():
             if value == self._base.api.daynight_state:
                 attrs["daynight_state"] = key
@@ -128,7 +151,7 @@ class ReolinkCamera(ReolinkEntity, Camera):
         return SUPPORT_STREAM
 
     async def stream_source(self):
-        """Return the source of the stream."""        
+        """Return the source of the stream."""
         return await self._base.api.get_stream_source()
 
     async def handle_async_mjpeg_stream(self, request):
@@ -184,6 +207,10 @@ class ReolinkCamera(ReolinkEntity, Camera):
     async def set_daynight(self, mode):
         """Set the day and night mode to the camera."""
         await self._base.api.set_daynight(value=self._daynight_modes[mode])
+
+    async def set_backlight(self, mode):
+        """Set the backlight mode to the camera."""
+        await self._base.api.set_backlight(value=self._backlight_modes[mode])
 
     async def async_enable_motion_detection(self):
         """Predefined camera service implementation."""

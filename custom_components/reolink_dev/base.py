@@ -22,6 +22,12 @@ from reolink.subscription_manager import Manager
 
 from .const import (
     BASE,
+    CONF_PLAYBACK_MONTHS,
+    CONF_PLAYBACK_THUMBNAILS,
+    CONF_THUMBNAIL_OFFSET,
+    DEFAULT_PLAYBACK_MONTHS,
+    DEFAULT_PLAYBACK_THUMBNAILS,
+    DEFAULT_THUMBNAIL_OFFSET,
     EVENT_DATA_RECEIVED,
     CONF_CHANNEL,
     CONF_MOTION_OFF_DELAY,
@@ -38,6 +44,7 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class ReolinkBase:
     """The implementation of the Reolink IP base class."""
@@ -66,7 +73,7 @@ class ReolinkBase:
             self._stream = options[CONF_STREAM]
 
         if CONF_PROTOCOL not in options:
-            self._protocol= DEFAULT_PROTOCOL
+            self._protocol = DEFAULT_PROTOCOL
         else:
             self._protocol = options[CONF_PROTOCOL]
 
@@ -89,6 +96,21 @@ class ReolinkBase:
             self.motion_off_delay = DEFAULT_MOTION_OFF_DELAY
         else:
             self.motion_off_delay = options[CONF_MOTION_OFF_DELAY]
+
+        if CONF_PLAYBACK_MONTHS not in options:
+            self.playback_months = DEFAULT_PLAYBACK_MONTHS
+        else:
+            self.playback_months = options[CONF_PLAYBACK_MONTHS]
+
+        if CONF_PLAYBACK_THUMBNAILS not in options:
+            self.playback_thumbnails = DEFAULT_PLAYBACK_THUMBNAILS
+        else:
+            self.playback_thumbnails = options[CONF_PLAYBACK_THUMBNAILS]
+
+        if CONF_THUMBNAIL_OFFSET not in options:
+            self.playback_thumbnail_offset = DEFAULT_THUMBNAIL_OFFSET
+        else:
+            self.playback_thumbnail_offset = options[CONF_THUMBNAIL_OFFSET]
 
     @property
     def name(self):
@@ -206,12 +228,10 @@ class ReolinkPush:
         self._webhook_id = await self.register_webhook()
         self._webhook_url = "{}{}".format(
             get_url(self._hass, prefer_external=False),
-            self._hass.components.webhook.async_generate_path(self._webhook_id)
+            self._hass.components.webhook.async_generate_path(self._webhook_id),
         )
 
-        self._sman = Manager(
-            self._host, self._port, self._username, self._password
-        )
+        self._sman = Manager(self._host, self._port, self._username, self._password)
         if await self._sman.subscribe(self._webhook_url):
             _LOGGER.info(
                 "Host %s subscribed successfully to webhook %s",
@@ -234,7 +254,9 @@ class ReolinkPush:
         _LOGGER.debug("Registering webhook for event ID %s", self._event_id)
 
         webhook_id = self._hass.components.webhook.async_generate_id()
-        self._hass.components.webhook.async_register(DOMAIN, self._event_id, webhook_id, handle_webhook)
+        self._hass.components.webhook.async_register(
+            DOMAIN, self._event_id, webhook_id, handle_webhook
+        )
 
         return webhook_id
 
@@ -284,10 +306,11 @@ class ReolinkPush:
                     members += 1
             except AttributeError:
                 pass
-            except KeyError: 
+            except KeyError:
                 pass
         _LOGGER.debug("Found %d listeners for event %s", members, self._event_id)
         return members
+
 
 async def handle_webhook(hass, webhook_id, request):
     """Handle incoming webhook from Reolink for inbound messages and calls."""
