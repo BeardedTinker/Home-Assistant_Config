@@ -72,8 +72,8 @@
         type: entities
       - type: logbook
         entities:
-          - light.zita_ceiling_light
-          - light.zita_desk_lights
+          - light.zita_ceiling
+          - light.zita_desk
           - light.bedroom_light
         hours_to_show: 24
       - entities:

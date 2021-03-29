@@ -5,8 +5,8 @@
 platform: group
 name: Ceiling Lights
 entities:
-  - light.ceiling_one_light
-  - light.ceiling_two_light
-  - light.ceiling_three_light
-  - light.ceiling_four_light
-  - light.ceiling_five_light
+  - light.ceiling_one
+  - light.ceiling_two
+  - light.ceiling_three
+  - light.ceiling_four
+  - light.ceiling_five

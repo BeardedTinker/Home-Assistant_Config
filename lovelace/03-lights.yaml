@@ -94,7 +94,7 @@
         type: entities
       - cards:
           - cards:
-              - entity: light.ceiling_four_light
+              - entity: light.ceiling_four
                 hold_action:
                   action: more-info
                 show_icon: true
@@ -102,7 +102,7 @@
                 tap_action:
                   action: toggle
                 type: entity-button
-              - entity: light.ceiling_five_light
+              - entity: light.ceiling_five
                 hold_action:
                   action: more-info
                 show_icon: true
@@ -112,7 +112,7 @@
                 type: entity-button
             type: horizontal-stack
           - cards:
-              - entity: light.ceiling_one_light
+              - entity: light.ceiling_one
                 hold_action:
                   action: more-info
                 show_icon: true
@@ -120,7 +120,7 @@
                 tap_action:
                   action: toggle
                 type: entity-button
-              - entity: light.ceiling_two_light
+              - entity: light.ceiling_two
                 hold_action:
                   action: more-info
                 show_icon: true
@@ -128,7 +128,7 @@
                 tap_action:
                   action: toggle
                 type: entity-button
-              - entity: light.ceiling_three_light
+              - entity: light.ceiling_three
                 hold_action:
                   action: more-info
                 show_icon: true

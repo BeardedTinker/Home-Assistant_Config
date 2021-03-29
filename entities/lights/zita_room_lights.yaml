@@ -5,6 +5,6 @@
 platform: group
 name: Zita Room Lights
 entities:
-  - light.goose_light
-  - light.zita_ceiling_light
-  - light.zita_desk_lights
+  - light.goose
+  - light.zita_ceiling
+  - light.zita_desk

@@ -6,7 +6,7 @@ living_room:
     - light.corner
     - light.entrance
     - light.standing
-    - light.TV
+    - light.tv
     - light.bar_light
 #    - light.ceiling_one_light
 #    - light.ceiling_two_light

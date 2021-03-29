@@ -2,17 +2,17 @@
 # Action based on switch
 #####
 
-alias: Zita switch triple
-id: 4cd9ce00-f72d-408d-a356-5ecba0396101
+alias: Zita switch quadruple
+id: 0a89ac9c-6ee9-475a-8085-3c990099d804
 
 trigger:
   entity_id: sensor.zita_switch_click
   platform: state
-  to: triple
+  to: quadruple
 
 condition: []
 
 action:
   data:
-    entity_id: light.zita_ceiling
+    entity_id: light.zita_desk_lights
   service: light.toggle

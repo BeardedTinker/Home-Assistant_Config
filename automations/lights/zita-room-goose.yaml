@@ -17,6 +17,6 @@ condition:
 
 action:
   data:
-    entity_id: light.goose_light
+    entity_id: light.goose
     transition: 90
   service: light.turn_on

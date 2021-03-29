@@ -9,13 +9,13 @@
       - type: grid
         cards:
           - type: light
-            entity: light.zita_tabletop_light
+            entity: light.zita_tabletop
             name: Tabletop
           - type: light
-            entity: light.zita_ceiling_light
+            entity: light.zita_ceiling
             name: Ceiling
           - type: light
-            entity: light.goose_light
+            entity: light.goose
       - entity: climate.zita_room
         type: thermostat
       - cards:

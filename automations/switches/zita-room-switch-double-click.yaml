@@ -14,5 +14,5 @@ condition: []
 
 action:
   data:
-    entity_id: light.goose_light
+    entity_id: light.goose
   service: light.toggle

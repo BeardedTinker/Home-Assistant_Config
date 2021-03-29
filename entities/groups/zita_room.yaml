@@ -3,7 +3,7 @@
 #####
 
 zita_room:
-  - light.goose_light
-  - light.zita_ceiling_light
-  - light.zita_tabletop_light
+  - light.goose
+  - light.zita_ceiling
+  - light.zita_tabletop
   - light.zita_desk_lights

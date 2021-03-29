@@ -46,8 +46,8 @@ action:
   service: tts.google_translate_say
 - data:
     entity_id:
-      - light.goose_light
-      - light.zita_ceiling_light
+      - light.goose
+      - light.zita_ceiling
     brightness: 64
   service: light.turn_on
 - delay: '00:00:10'
