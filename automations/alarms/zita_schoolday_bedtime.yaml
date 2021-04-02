@@ -19,15 +19,7 @@ trigger:
 #  at: '06:30:00'
 #  platform: time
 
-condition:
-  condition: and
-  conditions:
-  - condition: state
-    entity_id: sensor.zita_school_tomorrow
-    state: 'on'
-  - condition: state
-    entity_id: binary_sensor.workday_tomorrow
-    state: 'on'
+ho
 
 action:
 - service: script.notify_engine
