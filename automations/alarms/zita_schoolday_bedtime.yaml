@@ -19,8 +19,6 @@ trigger:
 #  at: '06:30:00'
 #  platform: time
 
-ho
-
 action:
 - service: script.notify_engine
   data:
@@ -28,8 +26,8 @@ action:
     title: '⏲ *Bedtime Zita*'
     value1: 'It is {{ states("sensor.time") }} - time to go to bed'
     tag_id: 'information'
-- data:
+- service: media_player.volume_set
+  data:
     entity_id: media_player.mini_me
     volume_level: 0.3
-  service: media_player.volume_set
 - service: script.schoolnight_bedtime_zita

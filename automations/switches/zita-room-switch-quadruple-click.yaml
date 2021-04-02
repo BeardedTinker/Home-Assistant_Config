@@ -3,7 +3,7 @@
 #####
 
 alias: Zita switch quadruple
-id: 0a89ac9c-6ee9-475a-8085-3c990099d804
+id: b03e3638-6e05-4b3b-af8e-f77b5a346f51
 
 trigger:
   entity_id: sensor.zita_switch_click
