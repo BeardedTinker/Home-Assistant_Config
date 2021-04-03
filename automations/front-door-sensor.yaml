@@ -19,14 +19,14 @@ action:
   data:
     who: 'parents'
     title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{state_attr("weather.dark_sky", "temperature")}}°C'
+    value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
     tag_id: 'warning'
     target_id: !secret telegram_bot_chat_id
 - service: script.notify_engine
   data:
     who: 'printer'
     title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{state_attr("weather.dark_sky", "temperature")}}°C'
+    value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
     tag_id: 'warning'
     target_id: !secret telegram_bot_chat_id
 - data:
