@@ -45,16 +45,19 @@ From other devices I use, here is a list:
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Mosquitto Repellent 
+  - Roborock S5 max
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
   - [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
   - Shelly Gas CNG sensor
+  - Shelly Motion sensor
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
   - LG webOS TV
   - Mi TV stick
   - tado° [Smart Thermostat](https://www.tado.com/hr/)
   - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
-  - various PoE IP cameras 
+  - Reolink RLC-410-5MP PoE camera
+  - various DLink PoE IP cameras 
   - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
   - Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
@@ -144,13 +147,13 @@ Current count of various things in Home Assistant
 
 | Type                 | Count |
 | -------------------- |:-----:|
-| Alerts               |     2 |
-| Automations          |   139 |
-| Binary sensors       |   186 |
-| Cameras              |    11 |
+| Alerts               |     0 |
+| Automations          |   144 |
+| Binary sensors       |   189 |
+| Cameras              |    10 |
 | Climates             |     4 |
 | Device trackers      |    62 |
-| Entities             |  1587 |
+| Entities             |  1695 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
@@ -158,15 +161,15 @@ Current count of various things in Home Assistant
 | Input Select         |     9 |
 | Input Text           |     4 |
 | Lights               |    39 |
-| Media players        |    33 |
-| Lines of code (YAML) | 15937 |
+| Media players        |    41 |
+| Lines of code (YAML) | 16700 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   893 |
-| Switches             |    77 |
-| Timers               |     3 |
+| Sensors              |   979 |
+| Switches             |    84 |
+| Timers               |     4 |
 | Weather              |     2 |
 
 
