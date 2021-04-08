@@ -1,11 +1,11 @@
 #####
-# Travis runson every Github commit
+# GitHub workflow runs on every Github commit
 # If it fails, notify!
 #####
 
-alias: Travis build failed
+alias: GitHub workflow failed
 id: ab612ffe-5607-463a-ad84-2ba70cc49c79
-description: 'Triggered when Travis-CI failes'
+description: 'Triggered when GiHub workflow failes'
 
 trigger:
 - entity_id: sensor.beardedtinker_home_assistant_config_last_build_state
@@ -18,7 +18,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: '*Travis failed!*'
+    title: '*GitHub workflow failed!*'
     value1: 'At {{ states("sensor.beardedtinker_home_assistant_config_last_build_finished_at") }} after {{states("sensor.beardedtinker_home_assistant_config_last_build_duration")}} seconds, while building {{ states("sensor.beardedtinker_home_assistant_config_last_build_id") }} '
     tag_id: 'warning'
     sticky: 'true'
