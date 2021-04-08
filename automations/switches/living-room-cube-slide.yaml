@@ -3,7 +3,7 @@
 #####
 
 alias: Cube Piano
-id: 27c190cc-a2fd-456b-a946-91525a48ad12
+id: 5630c87c-8dde-4f9f-b86c-303732b8b86e
 
 trigger:
   platform: mqtt

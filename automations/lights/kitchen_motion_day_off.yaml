@@ -4,7 +4,7 @@
 #####
 
 alias: Kitchen motion day light off
-id: f20274dc-abaa-417d-87c0-56af3d982a78
+id: 5df385e7-122a-4f57-8bd6-a696ebfe5b1f
 
 trigger:
 - event_type: timer.finished

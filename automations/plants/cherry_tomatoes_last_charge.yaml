@@ -3,9 +3,9 @@
 #
 #####
 
-id: 90ff4257-3fc7-421d-9c3b-878a6aea9f16
+id: 32fa5abb-82b8-4895-a66d-d3f2bb70a10d
 alias: Cherry Tomatoes last charge
-description: ''
+description: 'Set time stamp for last charge'
 trigger:
 - platform: state
   entity_id: sensor.cherry_tomatoes_charging
