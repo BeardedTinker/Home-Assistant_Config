@@ -3,6 +3,7 @@
 # https://www.home-assistant.io/integrations/socialblade/
 #
 # "Live" subsrciber counter - sort off
+# REmoved 2021.4 - uses web scrape for data
 #####
 
 platform: socialblade
