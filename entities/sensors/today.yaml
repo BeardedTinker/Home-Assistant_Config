@@ -1,6 +1,7 @@
 #####
 # Create sensor that holds today's day
 # Will be used for TTS
+# 
 #####
 
 platform: template
