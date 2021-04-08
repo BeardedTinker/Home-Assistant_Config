@@ -3,7 +3,6 @@
 #
 #####
 
-
 new_github_issue_replace_battery:
   url: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues
   method: POST
