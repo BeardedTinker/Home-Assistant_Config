@@ -30,7 +30,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities,
+                               discovery_info=None):
     """Create the launch sensor."""
     session = async_create_clientsession(hass)
     ics_data_provider = GetICSData(ICS_URL, session, hass)
@@ -51,12 +52,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     nl_sensors = []
     for option in config.get("rocket_name"):
-        nl_sensors.append(GetNextLaunch(coordinator, option, ics_data_provider))
+        nl_sensors.append(GetNextLaunch(coordinator,
+                                        option, ics_data_provider))
 
     async_add_entities(nl_sensors, True)
 
 
 class GetICSData:
+
     """The class for handling the data retrieval."""
 
     def __init__(self, url, session, hass):
@@ -75,37 +78,37 @@ class GetICSData:
         async with async_timeout.timeout(10, loop=self.hass.loop):
             resp = await self.session.get(self.url)
 
-            if resp.status == 200:
-                raw_ics_file = await resp.text()
-                try:
-                    parsed_ics = Calendar(raw_ics_file)
-                    self.timeline = list(parsed_ics.timeline)
-                    return self.timeline
-                except ValueError as error:
-                    _LOGGER.error(
-                        "Unable (ValueError) to parse ics file: %s (%s)",
-                        error,
-                        self.url,
-                    )
-                    return False
-                except NotImplementedError as error:
-                    _LOGGER.error(
-                        "Unable (NotImplementedError) to parse ics file: %s (%s)",
-                        error,
-                        self.url,
-                    )
-                    return False
-
-            else:
+            if resp.status != 200:
                 _LOGGER.error(
                     "Unable to get ics file: %s (%s)",
-                    raw_ics_file.status_code,
+                    resp.status_code,
+                    self.url,
+                )
+                return False
+
+            raw_ics_file = await resp.text()
+            try:
+                parsed_ics = Calendar(raw_ics_file)
+                self.timeline = list(parsed_ics.timeline)
+                return self.timeline
+            except ValueError as error:
+                _LOGGER.error(
+                    "Unable (ValueError) to parse ics file: %s (%s)",
+                    error,
+                    self.url,
+                )
+                return False
+            except NotImplementedError as error:
+                _LOGGER.error(
+                    "Unable (NotImplementedError) to parse ics file: %s (%s)",
+                    error,
                     self.url,
                 )
                 return False
 
 
 class GetNextLaunch(Entity):
+
     """The class for handling the data."""
 
     def __init__(self, coordinator, rocket_name, ics_data_provider):
@@ -140,7 +143,8 @@ class GetNextLaunch(Entity):
             selected_events = self.ics_data_provider.timeline
         else:
             selected_events = [
-                x for x in self.ics_data_provider.timeline if self.rocket_name in x.name
+                x for x in self.ics_data_provider.timeline
+                if self.rocket_name in x.name
             ]
 
         for event in selected_events:
