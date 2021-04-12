@@ -58,6 +58,29 @@ DEVICE_ATTRIBUTES_IFACE = [
     "poe-out",
 ]
 
+DEVICE_ATTRIBUTES_IFACE_SFP = [
+    "status",
+    "auto-negotiation",
+    "advertising",
+    "link-partner-advertising",
+    "sfp-temperature",
+    "sfp-supply-voltage",
+    "sfp-module-present",
+    "sfp-tx-bias-current",
+    "sfp-tx-power",
+    "sfp-rx-power",
+    "sfp-rx-loss",
+    "sfp-tx-fault",
+    "sfp-type",
+    "sfp-connector-type",
+    "sfp-vendor-name",
+    "sfp-vendor-part-number",
+    "sfp-vendor-revision",
+    "sfp-vendor-serial",
+    "sfp-manufacturing-date",
+    "eeprom-checksum",
+]
+
 DEVICE_ATTRIBUTES_PPP_SECRET = [
     "connected",
     "service",
@@ -77,6 +100,10 @@ def format_attribute(attr):
     res = res.replace(" ip ", " IP ")
     res = res.replace(" mac ", " MAC ")
     res = res.replace(" mtu", " MTU")
+    res = res.replace("Sfp", "SFP")
+    res = res.replace("Poe", "POE")
+    res = res.replace(" tx", " TX")
+    res = res.replace(" rx", " RX")
     return res
 
 
@@ -429,6 +456,11 @@ class MikrotikControllerPortBinarySensor(MikrotikControllerBinarySensor):
         for variable in DEVICE_ATTRIBUTES_IFACE:
             if variable in self._data:
                 attributes[format_attribute(variable)] = self._data[variable]
+
+        if "sfp-shutdown-temperature" in self._data:
+            for variable in DEVICE_ATTRIBUTES_IFACE_SFP:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
 
         return attributes
 

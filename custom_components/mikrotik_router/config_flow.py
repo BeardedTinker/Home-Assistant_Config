@@ -39,6 +39,8 @@ from .const import (
     DEFAULT_SENSOR_NAT,
     CONF_SENSOR_MANGLE,
     DEFAULT_SENSOR_MANGLE,
+    CONF_SENSOR_FILTER,
+    DEFAULT_SENSOR_FILTER,
     CONF_SENSOR_KIDCONTROL,
     DEFAULT_SENSOR_KIDCONTROL,
     CONF_SENSOR_PPP,
@@ -259,6 +261,12 @@ class MikrotikControllerOptionsFlowHandler(OptionsFlow):
                         CONF_SENSOR_MANGLE,
                         default=self.config_entry.options.get(
                             CONF_SENSOR_MANGLE, DEFAULT_SENSOR_MANGLE
+                        ),
+                    ): bool,
+                    vol.Optional(
+                        CONF_SENSOR_FILTER,
+                        default=self.config_entry.options.get(
+                            CONF_SENSOR_FILTER, DEFAULT_SENSOR_FILTER
                         ),
                     ): bool,
                     vol.Optional(

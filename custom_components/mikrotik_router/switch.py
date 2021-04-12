@@ -31,6 +31,29 @@ DEVICE_ATTRIBUTES_IFACE = [
     "poe-out",
 ]
 
+DEVICE_ATTRIBUTES_IFACE_SFP = [
+    "status",
+    "auto-negotiation",
+    "advertising",
+    "link-partner-advertising",
+    "sfp-temperature",
+    "sfp-supply-voltage",
+    "sfp-module-present",
+    "sfp-tx-bias-current",
+    "sfp-tx-power",
+    "sfp-rx-power",
+    "sfp-rx-loss",
+    "sfp-tx-fault",
+    "sfp-type",
+    "sfp-connector-type",
+    "sfp-vendor-name",
+    "sfp-vendor-part-number",
+    "sfp-vendor-revision",
+    "sfp-vendor-serial",
+    "sfp-manufacturing-date",
+    "eeprom-checksum",
+]
+
 DEVICE_ATTRIBUTES_NAT = [
     "protocol",
     "dst-port",
@@ -47,6 +70,23 @@ DEVICE_ATTRIBUTES_MANGLE = [
     "protocol",
     "src-address",
     "src-port",
+    "dst-address",
+    "dst-port",
+    "comment",
+]
+
+DEVICE_ATTRIBUTES_FILTER = [
+    "chain",
+    "action",
+    "address-list",
+    "protocol",
+    "layer7-protocol",
+    "tcp-flags",
+    "connection-state",
+    "in-interface",
+    "src-address",
+    "src-port",
+    "out-interface",
     "dst-address",
     "dst-port",
     "comment",
@@ -106,6 +146,10 @@ def format_attribute(attr):
     res = res.replace(" ip ", " IP ")
     res = res.replace(" mac ", " MAC ")
     res = res.replace(" mtu", " MTU")
+    res = res.replace("Sfp", "SFP")
+    res = res.replace("Poe", "POE")
+    res = res.replace(" tx", " TX")
+    res = res.replace(" rx", " RX")
     return res
 
 
@@ -143,18 +187,37 @@ def update_items(inst, mikrotik_controller, async_add_entities, switches):
     # Add switches
     for sid, sid_uid, sid_name, sid_ref, sid_attr, sid_func in zip(
         # Data point name
-        ["interface", "nat", "mangle", "ppp_secret", "script", "queue", "kid-control"],
+        [
+            "interface",
+            "nat",
+            "mangle",
+            "filter",
+            "ppp_secret",
+            "script",
+            "queue",
+            "kid-control",
+        ],
         # Data point unique id
-        ["name", "uniq-id", "uniq-id", "name", "name", "name", "name"],
+        ["name", "uniq-id", "uniq-id", "uniq-id", "name", "name", "name", "name"],
         # Entry Name
-        ["name", "name", "name", "name", "name", "name", "name"],
+        ["name", "name", "name", "name", "name", "name", "name", "name"],
         # Entry Unique id
-        ["port-mac-address", "uniq-id", "uniq-id", "name", "name", "name", "name"],
+        [
+            "port-mac-address",
+            "uniq-id",
+            "uniq-id",
+            "uniq-id",
+            "name",
+            "name",
+            "name",
+            "name",
+        ],
         # Attr
         [
             DEVICE_ATTRIBUTES_IFACE,
             DEVICE_ATTRIBUTES_NAT,
             DEVICE_ATTRIBUTES_MANGLE,
+            DEVICE_ATTRIBUTES_FILTER,
             DEVICE_ATTRIBUTES_PPP_SECRET,
             DEVICE_ATTRIBUTES_SCRIPT,
             DEVICE_ATTRIBUTES_QUEUE,
@@ -165,6 +228,7 @@ def update_items(inst, mikrotik_controller, async_add_entities, switches):
             MikrotikControllerPortSwitch,
             MikrotikControllerNATSwitch,
             MikrotikControllerMangleSwitch,
+            MikrotikControllerFilterSwitch,
             MikrotikControllerPPPSecretSwitch,
             MikrotikControllerScriptSwitch,
             MikrotikControllerQueueSwitch,
@@ -282,6 +346,22 @@ class MikrotikControllerPortSwitch(MikrotikControllerSwitch):
     def unique_id(self) -> str:
         """Return a unique id for this entity."""
         return f"{self._inst.lower()}-enable_switch-{self._data['port-mac-address']}_{self._data['default-name']}"
+
+    @property
+    def device_state_attributes(self) -> Dict[str, Any]:
+        """Return the state attributes."""
+        attributes = self._attrs
+
+        for variable in self._sid_data["sid_attr"]:
+            if variable in self._data:
+                attributes[format_attribute(variable)] = self._data[variable]
+
+        if "sfp-shutdown-temperature" in self._data:
+            for variable in DEVICE_ATTRIBUTES_IFACE_SFP:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
+
+        return attributes
 
     @property
     def icon(self) -> str:
@@ -519,6 +599,95 @@ class MikrotikControllerMangleSwitch(MikrotikControllerSwitch):
                 f"{self._data['dst-address']}:{self._data['dst-port']}"
             ):
                 value = self._ctrl.data["mangle"][uid][".id"]
+
+        mod_param = "disabled"
+        mod_value = True
+        self._ctrl.set_value(path, param, value, mod_param, mod_value)
+        await self._ctrl.async_update()
+
+
+# ---------------------------
+#   MikrotikControllerFilterSwitch
+# ---------------------------
+class MikrotikControllerFilterSwitch(MikrotikControllerSwitch):
+    """Representation of a Filter switch."""
+
+    def __init__(self, inst, uid, mikrotik_controller, sid_data):
+        """Initialize."""
+        super().__init__(inst, uid, mikrotik_controller, sid_data)
+
+    @property
+    def name(self) -> str:
+        """Return the name."""
+        if self._data["comment"]:
+            return f"{self._inst} Filter {self._data['comment']}"
+
+        return f"{self._inst} Filter {self._data['name']}"
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique id for this entity."""
+        return f"{self._inst.lower()}-enable_filter-{self._data['uniq-id']}"
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        if not self._data["enabled"]:
+            icon = "mdi:filter-variant-remove"
+        else:
+            icon = "mdi:filter-variant"
+
+        return icon
+
+    @property
+    def device_info(self) -> Dict[str, Any]:
+        """Return a description for device registry."""
+        info = {
+            "identifiers": {
+                (
+                    DOMAIN,
+                    "serial-number",
+                    self._ctrl.data["routerboard"]["serial-number"],
+                    "switch",
+                    "Filter",
+                )
+            },
+            "manufacturer": self._ctrl.data["resource"]["platform"],
+            "model": self._ctrl.data["resource"]["board-name"],
+            "name": f"{self._inst} Filter",
+        }
+        return info
+
+    async def async_turn_on(self) -> None:
+        """Turn on the switch."""
+        path = "/ip/firewall/filter"
+        param = ".id"
+        value = None
+        for uid in self._ctrl.data["filter"]:
+            if self._ctrl.data["filter"][uid]["uniq-id"] == (
+                f"{self._data['chain']},{self._data['action']},{self._data['protocol']},{self._data['layer7-protocol']},"
+                f"{self._data['in-interface']}:{self._data['src-address']}:{self._data['src-port']}-"
+                f"{self._data['out-interface']}:{self._data['dst-address']}:{self._data['dst-port']}"
+            ):
+                value = self._ctrl.data["filter"][uid][".id"]
+
+        mod_param = "disabled"
+        mod_value = False
+        self._ctrl.set_value(path, param, value, mod_param, mod_value)
+        await self._ctrl.force_update()
+
+    async def async_turn_off(self) -> None:
+        """Turn off the switch."""
+        path = "/ip/firewall/filter"
+        param = ".id"
+        value = None
+        for uid in self._ctrl.data["filter"]:
+            if self._ctrl.data["filter"][uid]["uniq-id"] == (
+                f"{self._data['chain']},{self._data['action']},{self._data['protocol']},{self._data['layer7-protocol']},"
+                f"{self._data['in-interface']}:{self._data['src-address']}:{self._data['src-port']}-"
+                f"{self._data['out-interface']}:{self._data['dst-address']}:{self._data['dst-port']}"
+            ):
+                value = self._ctrl.data["filter"][uid][".id"]
 
         mod_param = "disabled"
         mod_value = True

@@ -3,6 +3,8 @@
 import re
 import asyncio
 import logging
+import ipaddress
+
 from datetime import timedelta
 from ipaddress import ip_address, IPv4Network
 from mac_vendor_lookup import AsyncMacLookup
@@ -42,6 +44,8 @@ from .const import (
     DEFAULT_SENSOR_NAT,
     CONF_SENSOR_MANGLE,
     DEFAULT_SENSOR_MANGLE,
+    CONF_SENSOR_FILTER,
+    DEFAULT_SENSOR_FILTER,
     CONF_SENSOR_KIDCONTROL,
     DEFAULT_SENSOR_KIDCONTROL,
     CONF_SENSOR_PPP,
@@ -56,6 +60,14 @@ from .helper import parse_api
 from .mikrotikapi import MikrotikAPI
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def is_valid_ip(address):
+    try:
+        ipaddress.ip_address(address)
+        return True
+    except ValueError:
+        return False
 
 
 # ---------------------------
@@ -82,6 +94,7 @@ class MikrotikControllerData:
             "nat": {},
             "kid-control": {},
             "mangle": {},
+            "filter": {},
             "ppp_secret": {},
             "ppp_active": {},
             "fw-update": {},
@@ -121,6 +134,7 @@ class MikrotikControllerData:
 
         self.nat_removed = {}
         self.mangle_removed = {}
+        self.filter_removed = {}
         self.host_hass_recovered = False
         self.host_tracking_initialized = False
 
@@ -211,6 +225,14 @@ class MikrotikControllerData:
     def option_sensor_mangle(self):
         """Config entry option to not track ARP."""
         return self.config_entry.options.get(CONF_SENSOR_MANGLE, DEFAULT_SENSOR_MANGLE)
+
+    # ---------------------------
+    #   option_sensor_filter
+    # ---------------------------
+    @property
+    def option_sensor_filter(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(CONF_SENSOR_FILTER, DEFAULT_SENSOR_FILTER)
 
     # ---------------------------
     #   option_sensor_kidcontrol
@@ -552,6 +574,9 @@ class MikrotikControllerData:
         if self.api.connected() and self.option_sensor_mangle:
             await self.hass.async_add_executor_job(self.get_mangle)
 
+        if self.api.connected() and self.option_sensor_filter:
+            await self.hass.async_add_executor_job(self.get_filter)
+
         if self.api.connected() and self.support_ppp and self.option_sensor_ppp:
             await self.hass.async_add_executor_job(self.get_ppp)
 
@@ -633,6 +658,7 @@ class MikrotikControllerData:
                 {"name": "default-name"},
                 {"name": "name", "default_val": "default-name"},
                 {"name": "poe-out", "default": "N/A"},
+                {"name": "sfp-shutdown-temperature", "default": ""},
             ],
             skip=[
                 {"name": "type", "value": "bridge"},
@@ -652,6 +678,38 @@ class MikrotikControllerData:
                 self.data["interface"][uid][
                     "port-mac-address"
                 ] = f"{vals['port-mac-address']}-{vals['name']}"
+
+            if (
+                "sfp-shutdown-temperature" in vals
+                and vals["sfp-shutdown-temperature"] != ""
+            ):
+                self.data["interface"] = parse_api(
+                    data=self.data["interface"],
+                    source=self.api.get_sfp(uid),
+                    key_search="name",
+                    vals=[
+                        {"name": "status", "default": "unknown"},
+                        {"name": "auto-negotiation", "default": "unknown"},
+                        {"name": "advertising", "default": "unknown"},
+                        {"name": "link-partner-advertising", "default": "unknown"},
+                        {"name": "sfp-temperature", "default": "unknown"},
+                        {"name": "sfp-supply-voltage", "default": "unknown"},
+                        {"name": "sfp-module-present", "default": "unknown"},
+                        {"name": "sfp-tx-bias-current", "default": "unknown"},
+                        {"name": "sfp-tx-power", "default": "unknown"},
+                        {"name": "sfp-rx-power", "default": "unknown"},
+                        {"name": "sfp-rx-loss", "default": "unknown"},
+                        {"name": "sfp-tx-fault", "default": "unknown"},
+                        {"name": "sfp-type", "default": "unknown"},
+                        {"name": "sfp-connector-type", "default": "unknown"},
+                        {"name": "sfp-vendor-name", "default": "unknown"},
+                        {"name": "sfp-vendor-part-number", "default": "unknown"},
+                        {"name": "sfp-vendor-revision", "default": "unknown"},
+                        {"name": "sfp-vendor-serial", "default": "unknown"},
+                        {"name": "sfp-manufacturing-date", "default": "unknown"},
+                        {"name": "eeprom-checksum", "default": "unknown"},
+                    ],
+                )
 
     # ---------------------------
     #   get_interface_traffic
@@ -913,6 +971,101 @@ class MikrotikControllerData:
                 )
 
             del self.data["mangle"][uid]
+
+    # ---------------------------
+    #   get_filter
+    # ---------------------------
+    def get_filter(self):
+        """Get Filter data from Mikrotik"""
+        self.data["filter"] = parse_api(
+            data=self.data["filter"],
+            source=self.api.path("/ip/firewall/filter"),
+            key=".id",
+            vals=[
+                {"name": ".id"},
+                {"name": "chain"},
+                {"name": "action"},
+                {"name": "comment"},
+                {"name": "address-list"},
+                {"name": "protocol", "default": "any"},
+                {"name": "in-interface", "default": "any"},
+                {"name": "out-interface", "default": "any"},
+                {"name": "src-address", "default": "any"},
+                {"name": "src-port", "default": "any"},
+                {"name": "dst-address", "default": "any"},
+                {"name": "dst-port", "default": "any"},
+                {"name": "layer7-protocol", "default": "any"},
+                {"name": "connection-state", "default": "any"},
+                {"name": "tcp-flags", "default": "any"},
+                {
+                    "name": "enabled",
+                    "source": "disabled",
+                    "type": "bool",
+                    "reverse": True,
+                    "default": True,
+                },
+            ],
+            val_proc=[
+                [
+                    {"name": "uniq-id"},
+                    {"action": "combine"},
+                    {"key": "chain"},
+                    {"text": ","},
+                    {"key": "action"},
+                    {"text": ","},
+                    {"key": "protocol"},
+                    {"text": ","},
+                    {"key": "layer7-protocol"},
+                    {"text": ","},
+                    {"key": "in-interface"},
+                    {"text": ":"},
+                    {"key": "src-address"},
+                    {"text": ":"},
+                    {"key": "src-port"},
+                    {"text": "-"},
+                    {"key": "out-interface"},
+                    {"text": ":"},
+                    {"key": "dst-address"},
+                    {"text": ":"},
+                    {"key": "dst-port"},
+                ],
+                [
+                    {"name": "name"},
+                    {"action": "combine"},
+                    {"key": "action"},
+                    {"text": ","},
+                    {"key": "protocol"},
+                    {"text": ":"},
+                    {"key": "dst-port"},
+                ],
+            ],
+            skip=[
+                {"name": "dynamic", "value": True},
+                {"name": "action", "value": "jump"},
+            ],
+        )
+
+        # Remove duplicate filter entries to prevent crash
+        filter_uniq = {}
+        filter_del = {}
+        for uid in self.data["filter"]:
+            tmp_name = self.data["filter"][uid]["uniq-id"]
+            if tmp_name not in filter_uniq:
+                filter_uniq[tmp_name] = uid
+            else:
+                filter_del[uid] = 1
+                filter_del[filter_uniq[tmp_name]] = 1
+
+        for uid in filter_del:
+            if self.data["filter"][uid]["uniq-id"] not in self.filter_removed:
+                self.filter_removed[self.data["filter"][uid]["uniq-id"]] = 1
+                _LOGGER.error(
+                    "Mikrotik %s duplicate Filter rule %s, entity will be unavailable.",
+                    self.host,
+                    self.data["filter"][uid]["name"],
+                )
+
+            del self.data["filter"][uid]
 
     # ---------------------------
     #   get_kidcontrol
@@ -1288,7 +1441,7 @@ class MikrotikControllerData:
             data=self.data["dns"],
             source=self.api.path("/ip/dns/static"),
             key="name",
-            vals=[{"name": "name"}, {"name": "address"}],
+            vals=[{"name": "name"}, {"name": "address"}, {"name": "comment"}],
         )
 
     # ---------------------------
@@ -1302,7 +1455,9 @@ class MikrotikControllerData:
             key="mac-address",
             vals=[
                 {"name": "mac-address"},
+                {"name": "active-mac-address", "default": "unknown"},
                 {"name": "address", "default": "unknown"},
+                {"name": "active-address", "default": "unknown"},
                 {"name": "host-name", "default": "unknown"},
                 {"name": "status", "default": "unknown"},
                 {"name": "last-seen", "default": "unknown"},
@@ -1314,6 +1469,29 @@ class MikrotikControllerData:
 
         dhcpserver_query = False
         for uid in self.data["dhcp"]:
+            # is_valid_ip
+            if self.data["dhcp"][uid]["address"] != "unknown":
+                if not is_valid_ip(self.data["dhcp"][uid]["address"]):
+                    self.data["dhcp"][uid]["address"] = "unknown"
+
+                if (
+                    self.data["dhcp"][uid]["active-address"]
+                    != self.data["dhcp"][uid]["address"]
+                    and self.data["dhcp"][uid]["active-address"] != "unknown"
+                ):
+                    self.data["dhcp"][uid]["address"] = self.data["dhcp"][uid][
+                        "active-address"
+                    ]
+
+                if (
+                    self.data["dhcp"][uid]["mac-address"]
+                    != self.data["dhcp"][uid]["active-mac-address"]
+                    and self.data["dhcp"][uid]["active-mac-address"] != "unknown"
+                ):
+                    self.data["dhcp"][uid]["mac-address"] = self.data["dhcp"][uid][
+                        "active-mac-address"
+                    ]
+
             if (
                 not dhcpserver_query
                 and self.data["dhcp"][uid]["server"] not in self.data["dhcp-server"]
@@ -1546,10 +1724,24 @@ class MikrotikControllerData:
                 if vals["address"] != "unknown":
                     for dns_uid, dns_vals in self.data["dns"].items():
                         if dns_vals["address"] == vals["address"]:
-                            self.data["host"][uid]["host-name"] = dns_vals[
-                                "name"
-                            ].split(".")[0]
+                            if dns_vals["comment"] != "":
+                                self.data["host"][uid]["host-name"] = dns_vals[
+                                    "comment"
+                                ].split("#", 1)[0]
+                            elif (
+                                uid in self.data["dhcp"]
+                                and self.data["dhcp"][uid]["comment"] != ""
+                            ):
+                                # Override name if DHCP comment exists
+                                self.data["host"][uid]["host-name"] = self.data["dhcp"][
+                                    uid
+                                ]["comment"].split("#", 1)[0]
+                            else:
+                                self.data["host"][uid]["host-name"] = dns_vals[
+                                    "name"
+                                ].split(".")[0]
                             break
+
                 # Resolve hostname from DHCP comment
                 if (
                     self.data["host"][uid]["host-name"] == "unknown"
@@ -1558,7 +1750,7 @@ class MikrotikControllerData:
                 ):
                     self.data["host"][uid]["host-name"] = self.data["dhcp"][uid][
                         "comment"
-                    ]
+                    ].split("#", 1)[0]
                 # Resolve hostname from DHCP hostname
                 elif (
                     self.data["host"][uid]["host-name"] == "unknown"

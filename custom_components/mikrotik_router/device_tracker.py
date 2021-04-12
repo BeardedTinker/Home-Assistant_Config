@@ -46,6 +46,10 @@ def format_attribute(attr):
     res = res.replace(" ip ", " IP ")
     res = res.replace(" mac ", " MAC ")
     res = res.replace(" mtu", " MTU")
+    res = res.replace("Sfp", "SFP")
+    res = res.replace("Poe", "POE")
+    res = res.replace(" tx", " TX")
+    res = res.replace(" rx", " RX")
     return res
 
 
@@ -120,6 +124,10 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, tr
             # Update entity
             item_id = f"{inst}-{sid}-{mikrotik_controller.data[sid][uid][sid_uid]}"
             _LOGGER.debug("Updating device_tracker %s", item_id)
+            _LOGGER.debug(
+                "Updating device_tracker data: %s ",
+                mikrotik_controller.data[sid][uid],
+            )
             if item_id in tracked:
                 if tracked[item_id].enabled:
                     tracked[item_id].async_schedule_update_ha_state()

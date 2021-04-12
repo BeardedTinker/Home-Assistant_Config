@@ -346,7 +346,7 @@ class MikrotikAPI:
             )
             return True
 
-        params = {".id": tmp[".id"]}
+        params = {".id": entry_found}
         self.lock.acquire()
         try:
             tuple(response(command, **params))
@@ -488,6 +488,61 @@ class MikrotikAPI:
 
         self.lock.release()
         return traffic if traffic else None
+
+    # ---------------------------
+    #   get_sfp
+    # ---------------------------
+    def get_sfp(self, interfaces) -> Optional(list):
+        """Get sfp info"""
+        if not self.connection_check():
+            return None
+
+        response = self.path("/interface/ethernet", return_list=False)
+        if response is None:
+            return None
+
+        args = {".id": interfaces, "once": True}
+        self.lock.acquire()
+        try:
+            _LOGGER.debug("API query: %s %s", "/interface/ethernet/monitor", interfaces)
+            sfpinfo = response("monitor", **args)
+        except librouteros.exceptions.ConnectionClosed:
+            self.disconnect()
+            self.lock.release()
+            return None
+        except (
+            librouteros.exceptions.TrapError,
+            librouteros.exceptions.MultiTrapError,
+            librouteros.exceptions.ProtocolError,
+            librouteros.exceptions.FatalError,
+            ssl.SSLError,
+            socket_timeout,
+            socket_error,
+            BrokenPipeError,
+            OSError,
+            ValueError,
+        ) as api_error:
+            self.disconnect("get_sfp", api_error)
+            self.lock.release()
+            return None
+        except:
+            self.disconnect("get_sfp")
+            self.lock.release()
+            return None
+
+        try:
+            sfpinfo = list(sfpinfo)
+        except librouteros.exceptions.ConnectionClosed as api_error:
+            self.disconnect("get_sfp", api_error)
+            self.lock.release()
+            return None
+        except:
+            self.disconnect("get_sfp")
+            self.lock.release()
+            return None
+
+        self.lock.release()
+        return sfpinfo if sfpinfo else None
 
     # ---------------------------
     #   arp_ping
