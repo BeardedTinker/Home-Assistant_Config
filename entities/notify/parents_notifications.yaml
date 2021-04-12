@@ -6,6 +6,6 @@
 platform: group
 name: parents
 services:
-  - service: mobile_app_fig_lx1
   - service: mobile_app_ele_l29
+  - service: mobile_app_eml_l29
   - service: ebroz_bot
