@@ -614,6 +614,7 @@ class MikrotikControllerData:
             key_secondary="name",
             vals=[
                 {"name": "default-name"},
+                {"name": ".id"},
                 {"name": "name", "default_val": "default-name"},
                 {"name": "type", "default": "unknown"},
                 {"name": "running", "type": "bool"},
@@ -685,7 +686,7 @@ class MikrotikControllerData:
             ):
                 self.data["interface"] = parse_api(
                     data=self.data["interface"],
-                    source=self.api.get_sfp(uid),
+                    source=self.api.get_sfp(vals[".id"]),
                     key_search="name",
                     vals=[
                         {"name": "status", "default": "unknown"},
