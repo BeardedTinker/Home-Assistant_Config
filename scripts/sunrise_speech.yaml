@@ -5,12 +5,20 @@
 
 sunrisespeech:
   sequence:
-  - service: media_player.volume_set
+  - alias: "Check if audio notifications are on"
+    condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'
+
+  - alias: "Set volume"
+    service: media_player.volume_set
     data:
       entity_id: media_player.display_me
       volume_level: 0.5
-  - delay: 00:00:01
-  - service: tts.google_translate_say
+  - alias: "Wait for 1 seocnd"
+    delay: 00:00:01
+  - alias: "Good morning speech"
+    service: tts.google_translate_say
     entity_id: media_player.display_me
     data:
       message: >
