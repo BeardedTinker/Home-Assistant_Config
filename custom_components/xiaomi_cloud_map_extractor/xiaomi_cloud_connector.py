@@ -7,7 +7,6 @@ import os
 import random
 import requests
 import time
-from Crypto.Hash import MD5, SHA256
 
 from .const import *
 from .map_data_parser import MapDataParser
@@ -57,7 +56,7 @@ class XiaomiCloudConnector:
         }
         fields = {
             "sid": "xiaomiio",
-            "hash": (MD5.new(str.encode(self._password)).hexdigest() + "").upper(),
+            "hash": hashlib.md5(str.encode(self._password)).hexdigest().upper(),
             "callback": "https://sts.api.io.mi.com/sts",
             "qs": "%3Fsid%3Dxiaomiio%26_json%3Dtrue",
             "user": self._username,
@@ -126,14 +125,20 @@ class XiaomiCloudConnector:
             return None
         return api_response["result"]["url"]
 
-    def get_map(self, country, map_name, colors, drawables, texts, sizes, image_config):
+    def get_map(self, country, map_name, colors, drawables, texts, sizes, image_config, store_response=False):
         response = self.get_raw_map_data(country, map_name)
         if response is None:
-            return None
+            return None, False
+        map_stored = False
+        if store_response:
+            file1 = open("/tmp/map_data.gz", "wb")
+            file1.write(response)
+            file1.close()
+            map_stored = True
         unzipped = gzip.decompress(response)
         map_data = MapDataParser.parse(unzipped, colors, drawables, texts, sizes, image_config)
         map_data.map_name = map_name
-        return map_data
+        return map_data, map_stored
 
     def get_raw_map_data(self, country, map_name):
         if map_name is None:
@@ -193,8 +198,7 @@ class XiaomiCloudConnector:
         return "https://" + ("" if country == "cn" else (country + ".")) + "api.io.mi.com/app"
 
     def signed_nonce(self, nonce):
-        hash_object = SHA256.new()
-        hash_object.update(base64.b64decode(self._ssecurity) + base64.b64decode(nonce))
+        hash_object = hashlib.sha256(base64.b64decode(self._ssecurity) + base64.b64decode(nonce))
         return base64.b64encode(hash_object.digest()).decode('utf-8')
 
     @staticmethod

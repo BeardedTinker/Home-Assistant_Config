@@ -26,6 +26,10 @@ DEFAULT_TRIMS = {
 
 DEFAULT_SIZES = {
     CONF_SIZE_VACUUM_RADIUS: 4,
+    CONF_SIZE_IGNORED_OBSTACLE_RADIUS: 3,
+    CONF_SIZE_IGNORED_OBSTACLE_WITH_PHOTO_RADIUS: 3,
+    CONF_SIZE_OBSTACLE_RADIUS: 3,
+    CONF_SIZE_OBSTACLE_WITH_PHOTO_RADIUS: 3,
     CONF_SIZE_CHARGER_RADIUS: 4
 }
 
@@ -74,9 +78,22 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 vol.Optional(CONF_FONT_SIZE, default=0): cv.positive_int
             })]),
         vol.Optional(CONF_SIZES, default=DEFAULT_SIZES): vol.Schema({
-            vol.Optional(CONF_SIZE_VACUUM_RADIUS, default=4): vol.All(vol.Coerce(float), vol.Range(min=0)),
-            vol.Optional(CONF_SIZE_CHARGER_RADIUS, default=4): vol.All(vol.Coerce(float), vol.Range(min=0))
-        })
+            vol.Optional(CONF_SIZE_VACUUM_RADIUS, default=DEFAULT_SIZES[CONF_SIZE_VACUUM_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0)),
+            vol.Optional(CONF_SIZE_IGNORED_OBSTACLE_RADIUS, default=DEFAULT_SIZES[CONF_SIZE_IGNORED_OBSTACLE_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0)),
+            vol.Optional(CONF_SIZE_IGNORED_OBSTACLE_WITH_PHOTO_RADIUS,
+                         default=DEFAULT_SIZES[CONF_SIZE_IGNORED_OBSTACLE_WITH_PHOTO_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0)),
+            vol.Optional(CONF_SIZE_OBSTACLE_RADIUS, default=DEFAULT_SIZES[CONF_SIZE_OBSTACLE_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0)),
+            vol.Optional(CONF_SIZE_OBSTACLE_WITH_PHOTO_RADIUS,
+                         default=DEFAULT_SIZES[CONF_SIZE_OBSTACLE_WITH_PHOTO_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0)),
+            vol.Optional(CONF_SIZE_CHARGER_RADIUS, default=DEFAULT_SIZES[CONF_SIZE_CHARGER_RADIUS]):
+                vol.All(vol.Coerce(float), vol.Range(min=0))
+        }),
+        vol.Optional(CONF_STORE_MAP, default=False): cv.boolean
     })
 
 
@@ -99,14 +116,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     if DRAWABLE_ALL in drawables:
         drawables = CONF_AVAILABLE_DRAWABLES[1:]
     attributes = config[CONF_ATTRIBUTES]
+    store_map = config[CONF_STORE_MAP]
     entity_id = generate_entity_id(ENTITY_ID_FORMAT, name, hass=hass)
     async_add_entities([VacuumCamera(entity_id, host, token, username, password, country, name, should_poll,
-                                     image_config, colors, drawables, sizes, texts, attributes)])
+                                     image_config, colors, drawables, sizes, texts, attributes, store_map)])
 
 
 class VacuumCamera(Camera):
     def __init__(self, entity_id, host, token, username, password, country, name, should_poll, image_config, colors,
-                 drawables, sizes, texts, attributes):
+                 drawables, sizes, texts, attributes, store_map):
         super().__init__()
         self.entity_id = entity_id
         self.content_type = CONTENT_TYPE
@@ -120,6 +138,8 @@ class VacuumCamera(Camera):
         self._sizes = sizes
         self._texts = texts
         self._attributes = attributes
+        self._store_map = store_map
+        self._map_saved = None
         self._image = None
         self._map_data = None
         self._logged_in = False
@@ -152,12 +172,15 @@ class VacuumCamera(Camera):
                 ATTRIBUTE_GOTO: self._map_data.goto,
                 ATTRIBUTE_GOTO_PATH: self._map_data.goto_path,
                 ATTRIBUTE_GOTO_PREDICTED_PATH: self._map_data.predicted_path,
+                ATTRIBUTE_IGNORED_OBSTACLES: self._map_data.ignored_obstacles,
+                ATTRIBUTE_IGNORED_OBSTACLES_WITH_PHOTO: self._map_data.ignored_obstacles_with_photo,
                 ATTRIBUTE_IMAGE: self._map_data.image,
                 ATTRIBUTE_IS_EMPTY: self._map_data.image.is_empty,
                 ATTRIBUTE_MAP_NAME: self._map_data.map_name,
                 ATTRIBUTE_NO_GO_AREAS: self._map_data.no_go_areas,
                 ATTRIBUTE_NO_MOPPING_AREAS: self._map_data.no_mopping_areas,
                 ATTRIBUTE_OBSTACLES: self._map_data.obstacles,
+                ATTRIBUTE_OBSTACLES_WITH_PHOTO: self._map_data.obstacles_with_photo,
                 ATTRIBUTE_PATH: self._map_data.path,
                 ATTRIBUTE_ROOM_NUMBERS: list(self._map_data.rooms.keys()),
                 ATTRIBUTE_ROOMS: self._map_data.rooms,
@@ -168,6 +191,8 @@ class VacuumCamera(Camera):
             }.items():
                 if name in self._attributes:
                     attributes[name] = value
+        if self._store_map:
+            attributes[ATTRIBUTE_MAP_SAVED] = self._map_saved
         return attributes
 
     @property
@@ -197,8 +222,9 @@ class VacuumCamera(Camera):
                 counter = counter - 1
         self._received_map_name_previously = map_name != "retry"
         if self._logged_in and map_name != "retry" and self._country is not None:
-            map_data = self._connector.get_map(self._country, map_name, self._colors, self._drawables, self._texts,
-                                               self._sizes, self._image_config)
+            map_data, map_stored = self._connector.get_map(self._country, map_name, self._colors, self._drawables,
+                                                           self._texts, self._sizes, self._image_config,
+                                                           self._store_map)
             if map_data is not None:
                 # noinspection PyBroadException
                 try:
@@ -206,6 +232,7 @@ class VacuumCamera(Camera):
                     map_data.image.data.save(img_byte_arr, format='PNG')
                     self._image = img_byte_arr.getvalue()
                     self._map_data = map_data
+                    self._map_saved = map_stored
                 except:
                     _LOGGER.warning("Unable to retrieve map data")
             else:
