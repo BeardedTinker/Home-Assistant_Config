@@ -153,7 +153,7 @@ Current count of various things in Home Assistant
 | Cameras              |    10 |
 | Climates             |     4 |
 | Device trackers      |    63 |
-| Entities             |  1703 |
+| Entities             |  1688 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
@@ -161,16 +161,16 @@ Current count of various things in Home Assistant
 | Input Select         |     9 |
 | Input Text           |     4 |
 | Lights               |    39 |
-| Media players        |    41 |
-| Lines of code (YAML) | 16708 |
+| Media players        |    43 |
+| Lines of code (YAML) | 16955 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   988 |
+| Sensors              |   967 |
 | Switches             |    84 |
 | Timers               |     4 |
-| Weather              |     2 |
+| Weather              |     3 |
 
 
 ### Missing files
