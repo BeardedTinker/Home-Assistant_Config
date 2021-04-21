@@ -1,0 +1,17 @@
+#####
+# Custom weather using multiple sources
+# Introduced in 2021.3
+#####
+
+platform: template
+name: "Super Weather station"
+unique_id: e17d521d-14f5-4cbf-a630-1a60a89faff9
+condition_template: "{{ states('weather.dark_sky') }}" 
+temperature_template: "{{ states('sensor.parthenocissus_temperature') | float}}"
+humidity_template: "{{ states('sensor.indoor_aq_humidity') | float }}"
+forecast_template: "{{ states.weather.accuweather.attributes.forecast }}"
+pressure_template:  "{{ states('sensor.rose_1_pressure') | float }}"
+wind_speed_template: "{{ states.weather.dark_sky.attributes.wind_speed }}"
+wind_bearing_template: "{{ states.weather.accuweather.attributes.wind_bearing }}"
+ozone_template: "{{ states('sensor.current_ozone_level') | float}}"
+visibility_template: "{{ states.weather.dark_sky.attributes.visibility }}"
