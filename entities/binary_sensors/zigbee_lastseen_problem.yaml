@@ -1,0 +1,33 @@
+####
+# This binary sensor template is checking lastseen device data to verify
+# if device has been seen by networ or not in last 24 hrs
+####
+
+platform: template
+sensors: 
+  z2m_health:
+    friendly_name: 'Z2M Mesh health'
+    value_template: >-
+      {%- macro CheckDroppedZigbee() -%}
+      {% for state in states.sensor -%}
+        {%- if ("linkquality" in state.name and state_attr(state.entity_id, "last_seen") != None and (as_timestamp(now()) - as_timestamp(state_attr(state.entity_id, "last_seen")) > (24 * 60 * 60))) -%}
+        {{ state.name }}
+        {%- endif -%}
+      {%- endfor %}
+      {%- endmacro -%}
+      {% set output = CheckDroppedZigbee() %}
+      {% if output | trim == "" %}
+      false
+      {%- else -%}
+      true
+      {%- endif -%}
+    attribute_templates:
+      data: >-
+        {%- macro GetDroppedZigbee() -%}
+        {% for state in states.sensor -%}
+          {%- if ("linkquality" in state.name and state_attr(state.entity_id, "last_seen") != None and (as_timestamp(now()) - as_timestamp(state_attr(state.entity_id, "last_seen")) > (24 * 60 * 60))) -%}
+          {{ state.name | regex_replace(find=' linkquality', replace='', ignorecase=False) }} - {{ relative_time(strptime(state_attr(state.entity_id, "last_seen"), '%Y-%m-%dT%H:%M:%S%z')) }} ago {{- '\n' -}}
+          {%- endif -%}
+        {%- endfor %}
+        {%- endmacro -%}
+        {{ GetDroppedZigbee() }}
