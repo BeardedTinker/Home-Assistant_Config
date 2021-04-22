@@ -1,0 +1,14 @@
+#####
+# This script pulls URL from YT sensor
+# And then plays it on pre-selected Chromcast device
+#####
+
+play_bt_yt:
+  alias: Play latest from BeardedTinker
+  sequence:
+  - service: media_extractor.play_media
+    entity_id:
+      - media_player.display_me
+    data_template:
+        media_content_id: "{{state_attr('sensor.beardedtinker', 'url'| string)}}"
+        media_content_type: video/youtube
