@@ -12,7 +12,7 @@ trigger:
 condition:
   - condition: numeric_state
     entity_id: sensor.geiger_counter
-    above: 40
+    above: 50
 
 action:
 - service: script.notify_engine
