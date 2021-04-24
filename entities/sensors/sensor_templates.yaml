@@ -10,18 +10,18 @@ sensors:
 # Calculcate HH:MM:SS from seconds
 #####
 
-  octoprint_time_elapsed_friendly:
-    friendly_name: "OctoPrint Time Elapsed"
-    value_template: "{{ states('sensor.octoprint_time_elapsed') | int | timestamp_custom('%H:%M:%S', 0) }}"
+#  octoprint_time_elapsed_friendly:
+#    friendly_name: "OctoPrint Time Elapsed"
+#    value_template: "{{ states('sensor.octoprint_time_elapsed') | int | timestamp_custom('%H:%M:%S', 0) }}"
 
 #####
 # Octoprint - Time Remaining in HH:MM:SS
 # Calculcate HH:MM:SS from seconds
 #####
 
-  octoprint_time_remaining_friendly:
-    friendly_name: "OctoPrint Time Remaining"
-    value_template: "{{ states('sensor.octoprint_time_remaining') | int | timestamp_custom('%H:%M:%S', 0) }}"
+#  octoprint_time_remaining_friendly:
+#    friendly_name: "OctoPrint Time Remaining"
+#    value_template: "{{ states('sensor.octoprint_time_remaining') | int | timestamp_custom('%H:%M:%S', 0) }}"
 
 #####
 # Get deatiled info from LG TV - used to check if kids watch toom much TV
