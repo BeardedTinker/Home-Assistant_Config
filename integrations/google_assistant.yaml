@@ -13,6 +13,8 @@ google_assistant:
     - switch
     - light
     - group
+    - vacuum
+    - camera
   entity_config:
     group.all_automations:
       expose: false
