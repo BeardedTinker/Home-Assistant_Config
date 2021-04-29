@@ -58,7 +58,8 @@ sensors:
 
   facebox_detection:
     friendly_name: 'Facebox Detection'
-    value_template: '{{ states.image_processing.facebox_saved_image.attributes.faces[0]["name"].title()}}'   # old - to be removed after testing
+    value_template: '{{ state_attr("image_processing.facebox_saved_image", "faces") [0]["name"].title()}}'
+#    value_template: '{{ state.image_processing.facebox_saved_image.attributes.faces[0]["name"].title()}}'   # old - to be removed after testing
 #    value_template: '{{ state_attr("image_processing.facebox_saved_image", "faces[0][''name''].title()")}}'
 
 # Check for low batteries
@@ -76,8 +77,7 @@ sensors:
       {%- endfor -%}
   battery_status:
     friendly_name: Batteries
-    icon_template: '{% if states.sensor.low_batteries.state %}mdi:battery-10{% else %}mdi:battery{% endif %}'
-#    value_template: '{% if states.sensor.low_batteries.state %}{{states.sensor.low_batteries.state}}{% else %}OK{% endif %}' # old - to be removed after testing
+    icon_template: '{% if states("sensor.low_batteries") %}mdi:battery-10{% else %}mdi:battery{% endif %}'
     value_template: '{% if states("sensor.low_batteries") %}{{states("sensor.low_batteries")}}{% else %}OK{% endif %}'
 
 

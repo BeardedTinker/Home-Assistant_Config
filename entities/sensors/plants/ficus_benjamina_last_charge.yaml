@@ -20,4 +20,4 @@ sensors:
     unit_of_measurement: days
      #device_class: timestamp
 #    value_template: "{{ relative_time(states('input_datetime.ficus_benjamina_last_changed')) }}"
-    value_template: "{{ (((as_timestamp(now())-states.input_datetime.ficus_benjamina_last_changed.attributes.timestamp)) | int /60/1440) | round(0) }}"
+    value_template: "{{ (((as_timestamp(now())-state_attr('input_datetime.ficus_benjamina_last_changed', 'timestamp'))) | int /60/1440) | round(0) }}"
