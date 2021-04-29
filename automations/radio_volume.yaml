@@ -20,4 +20,4 @@ action:
       {% elif is_state("input_select.radio_speaker", "Whatever me") %} media_player.whatever_me
       {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me
       {% endif %}
-    volume_level: '{{  states.input_number.radio_volume.state  }}'
+    volume_level: "{{  states('input_number.radio_volume')  }}"

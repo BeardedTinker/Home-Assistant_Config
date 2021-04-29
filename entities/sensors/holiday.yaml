@@ -9,10 +9,10 @@ sensors:
   holiday:
     friendly_name: 'Holiday'
     value_template: >-
-        {% if states.calendar.holidays_in_croatia.state == 'on' %}
-          {{ states.calendar.holidays_in_croatia.attributes.message }}
-        {% elif states.calendar.krscanski_blagdani.state == 'on' %}
-          {{ states.calendar.calendar.krscanski_blagdani.message }}
+        {% if states('calendar.holidays_in_croatia') == 'on' %}
+          {{ state_attr('calendar.holidays_in_croatia', 'message') }}
+        {% elif states('calendar.krscanski_blagdani') == 'on' %}
+          {{ state_attr('calendar.krscanski_blagdani', 'message') }}
         {% else %}
           none
         {% endif %}

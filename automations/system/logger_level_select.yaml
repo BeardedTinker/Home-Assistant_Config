@@ -15,10 +15,10 @@ trigger:
 action:
   - service: logger.set_level
     data:
-      homeassistant.components: "{{ states.input_select.logger_level.state }}"
+      homeassistant.components: "{{ states('input_select.logger_level') }}"
 #  - service: script.tweet_engine_image
 #    data:
-#      tweet: "My logging level has just been set to {{ states.input_select.log_level.state }}"
+#      tweet: "My logging level has just been set to {{ states('input_select.log_level') }}"
 #      image: >-
 #        {{ [
 #        "/config/www/custom_ui/floorplan/images/branding/keyboard.png"

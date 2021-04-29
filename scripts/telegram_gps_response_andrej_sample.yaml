@@ -10,6 +10,6 @@ andrej_gps_notify_telegram:
        caption: 'Andrej location'
        target:
          - !secret telegram_bot_chat_id
-       latitude: '{{ states.device_tracker.google_maps_xxxxxxxxxx.attributes.latitude|float }}'
-       longitude: '{{ states.device_tracker.google_maps_xxxxxxxxxx.attributes.longitude|float }}'
+       latitude: "{{ state_attr('device_tracker.google_maps_xxxxxxxxxx', 'latitude|float') }}"
+       longitude: "{{ state_attr('device_tracker.google_maps_xxxxxxxxxx', 'longitude|float') }}"
        disable_notification: true

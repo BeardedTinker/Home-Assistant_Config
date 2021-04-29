@@ -23,7 +23,7 @@ action:
     title: '*HACS Update*'
     value1: 'HACS Update(s) at {{ states("sensor.time") }}'
     value2: '{{state_attr("sensor.hacs","repositories")}}'
-    value3: 'There is {{ states.sensor.hacs.state }} update.'
+    value3: "There is {{ states('sensor.hacs') }} update."
     tag_id: 'update_hacs'
     sticky: 'true'
     group: ha_status
@@ -35,11 +35,11 @@ action:
     issue_number: 16
 - service: rest_command.github_issue_comment
   data:
-    repo: 'There are {{ states.sensor.hacs.state }} updates to HACS components at {{ states("sensor.time") }}:'
+    repo: "There are {{ states('sensor.hacs') }} updates to HACS components at {{ states('sensor.time') }}:"
     message: >-
-      HACS updates available: {{ states.sensor.hacs.state }}
-      {% for repo in states.sensor.hacs.attributes.repositories %}
-      {{ repo.display_name }} {{ repo["installed_version"] }} -> {{repo["available_version"] }}
+      HACS updates available: {{ states('sensor.hacs') }}
+      {% for repo in state_attr('sensor.hacs', 'repositories') %}
+      {{ repo.display_name }} {{ repo['installed_version'] }} -> {{repo['available_version'] }}
 
       {% endfor %}
     issue_number: 16
