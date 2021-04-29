@@ -1,13 +1,12 @@
   <h4>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions"><img src="https://img.shields.io/github/workflow/status/BeardedTinker/Home-Assistant_Config/Home%20Assistant%20CI?label=GitHub%20CI&style=plastic"/></a>
-    <a href="https://travis-ci.com/BeardedTinker/Home-Assistant_Config"><img src="https://img.shields.io/travis/beardedtinker/home-assistant_config?label=Travis%20CI&style=plastic"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
         <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_config?style=plastic"/></a>
     <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a><br>
 
 
-Each commit is verified automaticlly with <a href="https://travis-ci.com/github/BeardedTinker/Home-Assistant_Config">Travis CI</a>, but also with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Latest, Dev and Beta release
+Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Latest, Dev and Beta release
   </h4>
 
 
@@ -28,41 +27,59 @@ Also, you can try and get in touch while I'm streaming. There should be at least
 
 ### Hardware
 
-This system is running on Synology DS415+ with total of 8GB RAM inside.
-Plugged in Synolgoy is cc2531 Zigbee USB stick with Zigbee2mqtt firmware from Koenkk version [20190608](https://github.com/Koenkk/Z-Stack-firmware/raw/master/coordinator/Z-Stack_Home_1.2/bin/default/CC2531_DEFAULT_20190608.zip)
+This system is running on Synology DS415+ with total of 8GB RAM inside, but I'm in process of upgrade to DS920+ with 20GB RAM.
+
+Plugged in Synology is Zigbee USB CC2652RB stick from slae.sh with Zigbee2mqtt firmware from Koenkk.
 
 From other devices I use, here is a list:
+##### IKEA DEVICES
   - IKEA TRADFRI Gateway - NOT used anymore
   - IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore
   - IKEA TRADFRI remote control (E1524/E1810)
   - IKEA TRADFRI ON/OFF switch (E1743)
   - IKEA TRADFRI control outlet (E1603/E1702)
   - IKEA TRADFRI various bulbs of all sizes and shapes (LED1545G12, LED1623G12, LED1650R5, LED1536G5, LED1649C5, LED1736G9)
+
+##### XIAOMI DEVICES
   - Xiaomi MiJia wireless switch [WXKG01LM](https://www.zigbee2mqtt.io/devices/WXKG01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dW7ZKDA)
   - Xiaomi MiJia temperature & humidity sensor [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
   - Xiaomi Aqara human body movement and illuminance sensor [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
   - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
-  - Xiaomi Mosquitto Repellent 
-  - Roborock S5 max
-  - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
+  - Xiaomi Water sensor []() - []()
+  - Xiaomi Magic Cube []() - []()
+  - Xiaomi Mosquitto Repellent []() - []()
+
+##### SHELLY DEVICES
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
   - [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
   - Shelly Gas CNG sensor
   - Shelly Motion sensor
+  - Shelly Button 2.0
+  - Shelly Humidity and Temperature sensor
+
+##### SMART SPEAKERS, DISPLAYS AND SIMILAR
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
-  - LG webOS TV
-  - Mi TV stick
-  - tado° [Smart Thermostat](https://www.tado.com/hr/)
-  - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
-  - Reolink RLC-410-5MP PoE camera
-  - various DLink PoE IP cameras 
-  - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
   - Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
   - Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
+  - LG webOS TV
+  - Mi TV stick
+
+##### HEATING
+  - tado° [Smart Thermostat](https://www.tado.com/hr/)
+  - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
+  
+##### CAMERAS
+  - Reolink RLC-410-5MP PoE camera
+  - various DLink PoE IP cameras 
+  
+##### OTHER DEVICES
+  - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
   - Elgato [Key Light Air](https://www.elgato.com/en/gaming/key-light-air)
+  - Roborock S5 max
+  - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
 
 
 ### Containers and add-ons
@@ -71,10 +88,9 @@ As I'm running this on Synology, I have mix of Docker containers and hass.io add
 
 Add-ons:
   - ADB Android Debug Bridge - [link](https://github.com/hassio-addons/addon-adb) - REMOVED
-  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio)
+  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED
   - ESPHome - [link](https://esphome.io/) - migrated from Docker container
   - Mosquitto Broker - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto) - REMOVED
-  - Node-RED - [link](https://github.com/hassio-addons/addon-node-red) - in process of migration, still using Docker one
   - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
   - Zigbee2MQTT -[link](https://github.com/danielwelch/hassio-zigbee2mqtt) - REMOVED
 
@@ -116,6 +132,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - GDACS
   - Google Cast
   - HACS
+  - Home Assistant Supervisor
   - Internet Printing Protocol
   - Luftdaten
   - Mikrotik
@@ -127,12 +144,14 @@ Following is a list of active Integrations that are visible at Configuration->In
   - OpenUV
   - Reolink
   - Shelly
+  - Shopping List
   - SpaceX
   - SpeedTest
   - Synology DSM
   - Tado
   - Tile
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
+  - Xiaomi Miio
 
 
 ## Folder structure and files
@@ -148,27 +167,27 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     0 |
-| Automations          |   142 |
-| Binary sensors       |   189 |
+| Automations          |   144 |
+| Binary sensors       |   203 |
 | Cameras              |    10 |
 | Climates             |     4 |
 | Device trackers      |    63 |
-| Entities             |  1688 |
+| Entities             |  1722 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
 | Input Number         |    11 |
 | Input Select         |     9 |
 | Input Text           |     4 |
-| Lights               |    39 |
+| Lights               |    41 |
 | Media players        |    43 |
-| Lines of code (YAML) | 16955 |
+| Lines of code (YAML) | 17186 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   967 |
-| Switches             |    84 |
+| Sensors              |   981 |
+| Switches             |    89 |
 | Timers               |     4 |
 | Weather              |     3 |
 
