@@ -7,4 +7,5 @@ name: Zita Room Lights
 entities:
   - light.goose
   - light.zita_ceiling
-  - light.zita_desk
+  - light.zita_tabletop
+  - light.zita_desk_lights
