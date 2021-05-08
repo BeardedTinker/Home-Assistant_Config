@@ -15,88 +15,19 @@ import async_timeout
 
 import json
 
-from datetime import timedelta
-
 import requests
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
-    CONF_NAME, CONF_RESOURCE, CONF_VERIFY_SSL, CONF_MONITORED_CONDITIONS,
-    TEMP_CELSIUS)
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
 
+from .const import *
+
 
 _LOGGER = logging.getLogger(__name__)
 
-VOLUME_MICROGRAMS_PER_CUBIC_METER = 'µg/m3'
-
-DOMAIN = "local_luftdaten"
-
-SENSOR_TEMPERATURE = 'temperature'
-SENSOR_HUMIDITY = 'humidity'
-SENSOR_BME280_TEMPERATURE = 'BME280_temperature'
-SENSOR_BME280_HUMIDITY = 'BME280_humidity'
-SENSOR_BME280_PRESSURE = 'BME280_pressure'
-SENSOR_BMP_TEMPERATURE = 'BMP_temperature'
-SENSOR_BMP_PRESSURE = 'BMP_pressure'
-SENSOR_BMP280_TEMPERATURE = 'BMP280_temperature'
-SENSOR_BMP280_PRESSURE = 'BMP280_pressure'
-SENSOR_PM1 = 'SDS_P1'
-SENSOR_PM2 = 'SDS_P2'
-SENSOR_WIFI_SIGNAL = 'signal'
-SENSOR_HTU21D_TEMPERATURE = 'HTU21D_temperature'
-SENSOR_HTU21D_HUMIDITY = 'HTU21D_humidity'
-SENSOR_SPS30_P0 = 'SPS30_P0'
-SENSOR_SPS30_P2 = 'SPS30_P2'
-SENSOR_SPS30_P4 = 'SPS30_P4'
-SENSOR_SPS30_P1 = 'SPS30_P1'
-SENSOR_PMS_P0 = 'PMS_P0'
-SENSOR_PMS_P1 = 'PMS_P1'
-SENSOR_PMS_P2 = 'PMS_P2'
-SENSOR_HECA_TEMPERATURE = 'HECA_temperature'
-SENSOR_HECA_HUMIDITY = 'HECA_humidity'
-SENSOR_HPM_P1 = 'HPM_P1'
-SENSOR_HPM_P2 = 'HPM_P2'
-
-
-SENSOR_TYPES = {
-    SENSOR_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_HUMIDITY: ['Humidity', '%', 'humidity'],
-    SENSOR_BME280_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_BME280_HUMIDITY: ['Humidity', '%', 'humidity'],
-    SENSOR_BME280_PRESSURE: ['Pressure', 'Pa', 'pressure'],
-    SENSOR_BMP_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_BMP_PRESSURE: ['Pressure', 'Pa', 'pressure'],
-    SENSOR_BMP280_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_BMP280_PRESSURE: ['Pressure', 'Pa', 'pressure'],
-    SENSOR_PM1: ['PM10', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_PM2: ['PM2.5', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_WIFI_SIGNAL: ['Wifi signal', 'dBm', 'signal_strength'],
-    SENSOR_HTU21D_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_HTU21D_HUMIDITY: ['Humidity', '%', 'humidity'],
-    SENSOR_SPS30_P0: ['PM1', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_SPS30_P2: ['PM2.5', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_SPS30_P4: ['PM4', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_SPS30_P1: ['PM10', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_PMS_P0: ['PM1', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_PMS_P1: ['PM10', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_PMS_P2: ['PM2.5', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_HECA_TEMPERATURE: ['Temperature', TEMP_CELSIUS, 'temperature'],
-    SENSOR_HECA_HUMIDITY: ['Humidity', '%', 'humidity'],
-    SENSOR_HPM_P1: ['PM10', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-    SENSOR_HPM_P2: ['PM2.5', VOLUME_MICROGRAMS_PER_CUBIC_METER, None],
-}
-
-DEFAULT_NAME = 'Luftdaten Sensor'
-DEFAULT_RESOURCE = 'http://{}/data.json'
-DEFAULT_VERIFY_SSL = True
-
-CONF_HOST = 'host'
-
-SCAN_INTERVAL = timedelta(minutes=3)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST): cv.string,
@@ -104,12 +35,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
         vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_RESOURCE, default=DEFAULT_RESOURCE): cv.string,
-    vol.Optional(CONF_VERIFY_SSL, default=DEFAULT_VERIFY_SSL): cv.boolean
+    vol.Optional(CONF_VERIFY_SSL, default=DEFAULT_VERIFY_SSL): cv.boolean,
+    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period
 })
 
 
 @asyncio.coroutine
-async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the Luftdaten sensor."""
     name = config.get(CONF_NAME)
     host = config.get(CONF_HOST)
@@ -124,7 +56,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     for variable in config[CONF_MONITORED_CONDITIONS]:
         devices.append(LuftdatenSensor(rest_client, name, variable))
 
-    async_add_devices(devices, True)
+    async_add_entities(devices, True)
 
 
 class LuftdatenSensor(Entity):
@@ -138,6 +70,7 @@ class LuftdatenSensor(Entity):
         self.sensor_type = sensor_type
         self._unit_of_measurement = SENSOR_TYPES[sensor_type][1]
         self._device_class = SENSOR_TYPES[sensor_type][2]
+        self._unique_id = '{} {}'.format(self._name, SENSOR_TYPES[self.sensor_type][0])
 
     @property
     def name(self):
@@ -162,8 +95,16 @@ class LuftdatenSensor(Entity):
     @property
     def icon(self):
         """Icon of the sensor, if class is None."""
-        if SENSOR_TYPES[self.sensor_type][2] == None:
+        if SENSOR_TYPES[self.sensor_type][0] == "PM2.5":
+            return 'mdi:thought-bubble-outline'
+        elif SENSOR_TYPES[self.sensor_type][0] == "PM10":
+            return 'mdi:thought-bubble'
+        elif SENSOR_TYPES[self.sensor_type][2] == None:
             return 'mdi:cloud-search-outline'
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     async def async_update(self):
         """Get the latest data from REST API and update the state."""

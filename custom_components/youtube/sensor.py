@@ -66,6 +66,7 @@ class YoutubeSensor(Entity):
         self.channel_live = False
         self.channel_image = None
         self.expiry = parse('01 Jan 1900 00:00:00 UTC')
+        self.stream_start = None
 
     async def async_update(self):
         """Update sensor."""
@@ -83,7 +84,7 @@ class YoutubeSensor(Entity):
                 info.split('<title>')[2].split('</')[0])
             url = info.split('<link rel="alternate" href="')[2].split('"/>')[0]
             if self.live or url != self.url:
-                self.stream, self.live = await is_live(url, self._name, self.hass, self.session)
+                self.stream, self.live, self.stream_start = await is_live(url, self._name, self.hass, self.session)
             else:
                 _LOGGER.debug('%s - Skipping live check', self._name)
             self.url = url
@@ -127,6 +128,7 @@ class YoutubeSensor(Entity):
                 'stars': self.stars,
                 'views': self.views,
                 'stream': self.stream,
+                'stream_start': self.stream_start,
                 'live': self.live,
                 'channel_is_live': self.channel_live,
                 'channel_image': self.channel_image}
@@ -135,25 +137,27 @@ async def is_live(url, name, hass, session):
     """Return bool if video is stream and bool if video is live"""
     live = False
     stream = False
+    start = None
     try:
         async with async_timeout.timeout(10, loop=hass.loop):
-            response = await session.get(url)
+            response = await session.get(url, cookies=dict(CONSENT="YES+cb"))
             info = await response.text()
         if 'isLiveBroadcast' in info:
             stream = True
+            start = parse(info.split('startDate" content="')[1].split('"')[0])
             if 'endDate' not in info:
                 live = True
                 _LOGGER.debug('%s - Latest Video is live', name)
     except Exception as error:  # pylint: disable=broad-except
         _LOGGER.debug('%s - Could not update - %s', name, error)
-    return stream, live
+    return stream, live, start
 
 async def is_channel_live(url, name, hass, session):
     """Return bool if channel is live"""
     live = False
     try:
         async with async_timeout.timeout(10, loop=hass.loop):
-            response = await session.get(url)
+            response = await session.get(url, cookies=dict(CONSENT="YES+cb"))
             info = await response.text()
         if '{"iconType":"LIVE"}' in info:
             live = True

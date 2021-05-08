@@ -68,6 +68,7 @@ async def async_setup_entry(hass, config_entry):
     device_registry = await hass.helpers.device_registry.async_get_registry()
     device_registry.async_get_or_create(
         config_entry_id=config_entry.entry_id,
+        connections={(DOMAIN, controller.data["routerboard"]["serial-number"])},
         manufacturer=controller.data["resource"]["platform"],
         model=controller.data["routerboard"]["model"],
         name=controller.data["routerboard"]["model"],

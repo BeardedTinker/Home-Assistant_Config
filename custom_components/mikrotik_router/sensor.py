@@ -16,9 +16,9 @@ from .const import (
 )
 
 from homeassistant.core import callback
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
 
 from .const import DOMAIN, DATA_CLIENT, ATTRIBUTION
 
@@ -343,7 +343,7 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
 # ---------------------------
 #   MikrotikControllerSensor
 # ---------------------------
-class MikrotikControllerSensor(Entity):
+class MikrotikControllerSensor(SensorEntity):
     """Define an Mikrotik Controller sensor."""
 
     def __init__(self, mikrotik_controller, inst, sid_data):
