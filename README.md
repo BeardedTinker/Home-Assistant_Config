@@ -27,7 +27,7 @@ Also, you can try and get in touch while I'm streaming. There should be at least
 
 ### Hardware
 
-This system is running on Synology DS415+ with total of 8GB RAM inside, but I'm in process of upgrade to DS920+ with 20GB RAM.
+Heart of my smart home is Home Assistant running in Virtual Machine on Synology DSM920+.
 
 Plugged in Synology is Zigbee USB CC2652RB stick from slae.sh with Zigbee2mqtt firmware from Koenkk.
 
