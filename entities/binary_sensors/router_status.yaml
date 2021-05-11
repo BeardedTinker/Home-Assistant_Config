@@ -1,0 +1,10 @@
+#####
+# Using PING integration to test and see if router is up or not
+#
+#####
+
+platform: ping
+host: 192.168.1.2
+name: Mikrotik status
+count: 7
+scan_interval: 60
