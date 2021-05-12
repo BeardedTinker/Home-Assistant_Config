@@ -13,7 +13,7 @@ condition: []
 
 action:
   - data:
-      entity_id: camera.elevator_profile1
+      entity_id: camera.ebroz920_lift
       filename: /config/tmp/elevator.jpg
     service: camera.snapshot
   - data:

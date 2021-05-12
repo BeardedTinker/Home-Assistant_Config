@@ -13,7 +13,7 @@ condition: []
 
 action:
   - data:
-      entity_id: camera.ebroznas_rlc_410_5mp
+      entity_id: camera.ebroz920_terasa2
       filename: /config/tmp/balcony.jpg
     service: camera.snapshot
   - data:
