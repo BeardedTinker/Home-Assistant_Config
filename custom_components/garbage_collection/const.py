@@ -102,7 +102,7 @@ EXCEPT_ANNUAL_GROUP = [
     "every-n-days",
     "monthly",
 ]
-WEEKLY_DAILY = ["every-n-weeks", "every-n-days"]
+WEEKLY_DAILY_MONTHLY = ["every-n-weeks", "every-n-days", "monthly"]
 WEEKLY_FREQUENCY_X = ["every-n-weeks"]
 DAILY_FREQUENCY = ["every-n-days"]
 MONTHLY_FREQUENCY = ["monthly"]
@@ -363,7 +363,7 @@ class configuration(config_singularity):
         },
         CONF_PERIOD: {
             "step": 4,
-            "valid_for": lambda f: f in WEEKLY_DAILY,
+            "valid_for": lambda f: f in WEEKLY_DAILY_MONTHLY,
             "method": vol.Optional,
             "default": DEFAULT_PERIOD,
             "type": int,
