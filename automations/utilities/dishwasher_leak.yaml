@@ -1,0 +1,40 @@
+#####
+# Alert when water leak is detected
+# Binary sensors changes from off
+#####
+
+alias: Water Leak Alert
+id: edd5b0f3-c59b-4f09-862b-b6eb5b0c81d0
+trigger:
+  - platform: state
+    entity_id: binary_sensor.leak_sensor_water_leak
+    from: 'off'
+
+condition:
+  - condition: template
+    value_template: >
+      "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '💧 *Water Leak Alert!*'
+    value1: 'Water leak detected - check under dishwasher now!'
+    tag_id: 'warning'
+    sticky: 'true'
+    group: utilities
+    color: '#ff0000'
+    target_id: !secret telegram_bot_chat_id
+- data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    volume_level: 0.5
+  service: media_player.volume_set
+- data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    message: 'Water leak detected. Check under dishwasher now!'
+  service: tts.google_translate_say
