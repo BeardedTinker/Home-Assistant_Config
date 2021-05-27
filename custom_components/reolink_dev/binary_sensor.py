@@ -1,19 +1,14 @@
 """This component provides support for Reolink motion events."""
 import asyncio
 import datetime
-import logging
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
-from .const import EVENT_DATA_RECEIVED
 from .entity import ReolinkEntity
-
-_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_DEVICE_CLASS = "motion"
 
 
-@asyncio.coroutine
 async def async_setup_entry(hass, config_entry, async_add_devices):
     """Set up the Reolink IP Camera switches."""
     sensor = MotionSensor(hass, config_entry)
@@ -30,6 +25,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
         self._available = False
         self._event_state = False
+        self._last_event_state = False
         self._last_motion = datetime.datetime.min
 
     @property
@@ -57,7 +53,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             datetime.datetime.now() - self._last_motion
         ).total_seconds() < self._base.motion_off_delay:
             self._state = True
-        else:
+        else:           
             self._state = False
 
         return self._state
@@ -79,6 +75,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
     async def handle_event(self, event):
         """Handle incoming event for motion detection and availability."""
+
         try:
             self._available = event.data["available"]
             return
@@ -89,6 +86,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             return
 
         try:
+            self._last_event_state = bool(self._event_state)
             self._event_state = event.data["motion"]
         except KeyError:
             return
@@ -99,8 +97,35 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
         if self._event_state:
             self._last_motion = datetime.datetime.now()
+
+            if self._base.api.ai_state:
+                # Pull the AI state only at motion detection
+                await self._base.api.get_ai_state()
         else:
             if self._base.motion_off_delay > 0:
                 await asyncio.sleep(self._base.motion_off_delay)
 
         self.async_schedule_update_ha_state()
+
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        attrs = super().extra_state_attributes
+
+        if attrs is None:
+            attrs = {}
+
+        attrs["bus_event_id"] = self._base.event_id
+
+        if self._base.api.ai_state:
+            for key, value in self._base.api.ai_state.items():
+                if key == "channel":
+                    continue
+                
+                if self._state:
+                    attrs[key] = value == 1
+                else:
+                    # Reset the AI values.
+                    attrs[key] = False
+		
+        return attrs
