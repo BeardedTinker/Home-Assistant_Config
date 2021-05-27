@@ -1,6 +1,7 @@
 #####
 # Luftdaten - air quality sensor
 # https://www.home-assistant.io/integrations/luftdaten/
+# Integration moved to UI configuration
 #####
 
 luftdaten:

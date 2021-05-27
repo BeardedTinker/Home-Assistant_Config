@@ -2,6 +2,7 @@
 # web service to measure network bandwidth performance.
 #
 # https://www.home-assistant.io/integrations/speedtestdotnet
+# Integration moved to UI configuration
 #####
 
 speedtestdotnet:
