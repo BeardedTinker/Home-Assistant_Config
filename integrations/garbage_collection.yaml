@@ -17,10 +17,10 @@ garbage_collection:
     verbose_state: true
     collection_days: "mon"
   - name: "Plastic waste"   # Every odd week Tuesday
-    frequency: "even-weeks"
+    frequency: "odd-weeks"
     verbose_state: true
     collection_days: "tue"
   - name: "Paper waste"   # Every even weeks on Tuesday
-    frequency: "odd-weeks"
+    frequency: "even-weeks"
     verbose_state: true
     collection_days: "tue"
