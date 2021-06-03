@@ -13,3 +13,6 @@ http:
   #ssl_key: !secret privkey_pem
   ip_ban_enabled: true
   login_attempts_threshold: 5
+  use_x_forwarded_for: true
+  trusted_proxies: !secret proxy_list
+
