@@ -5,6 +5,6 @@
 
 platform: etherscan
 address: !secret storj_token
-# token: STORJ
+token: storj
 # token_address: "0xB64ef51C888972c908CFacf59B47C1AfBC0Ab8aC"
 # value_template: '{{ value.replace(",", ""), value.replace(".", ",")  }}'

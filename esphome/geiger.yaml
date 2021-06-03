@@ -90,6 +90,87 @@ sensor:
 #    filters:
 #    - lambda: return x / 123.147092360319;
 
+  - platform: xiaomi_miscale2
+    mac_address: 'DF:F2:FF:EE:0C:33'
+    weight:
+      name: "Xiaomi Mi Body Composition Scale Weight"
+      id: weight_miscale
+      on_value:
+        then:
+          - lambda: |-
+              if (id(weight_miscale).state >= 75 && id(weight_miscale).state <= 85) {
+                return id(weight_user1).publish_state(x);}
+              else if (id(weight_miscale).state >= 45 && id(weight_miscale).state <= 50) {
+                return id(weight_user2).publish_state(x);}
+              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 44.9) {
+                return id(weight_user3).publish_state(x);}
+              else if (id(weight_miscale).state >= 20 && id(weight_miscale).state <= 39) {
+                return id(weight_user4).publish_state(x);}
+
+    impedance:
+      name: "Xiaomi Mi Body Composition Scale Impedance"
+      id: impedance_xiaomi
+      on_value:
+        then:
+          - lambda: |-
+              if (id(weight_miscale).state >= 72 && id(weight_miscale).state <= 85) {
+                return id(impedance_user1).publish_state(x);}
+              else if (id(weight_miscale).state >= 45 && id(weight_miscale).state <= 50) {
+                return id(impedance_user2).publish_state(x);}
+              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 44.9) {
+                return id(impedance_user3).publish_state(x);}
+              else if (id(weight_miscale).state >= 20 && id(weight_miscale).state <= 39) {
+                return id(impedance_user4).publish_state(x);}
+
+  - platform: template
+    name: Weight Andrej
+    id: weight_user1
+    unit_of_measurement: 'kg'
+    icon: mdi:weight-kilogram
+    accuracy_decimals: 2
+  - platform: template
+    name: Impedance Andrej
+    id: impedance_user1
+    unit_of_measurement: 'ohm'
+    icon: mdi:omega
+    accuracy_decimals: 0
+  - platform: template
+    name: Weight Mirta
+    id: weight_user2
+    unit_of_measurement: 'kg'
+    icon: mdi:weight-kilogram
+    accuracy_decimals: 2
+  - platform: template
+    name: Impedance Mirta
+    id: impedance_user2
+    unit_of_measurement: 'ohm'
+    icon: mdi:omega
+    accuracy_decimals: 0
+  - platform: template
+    name: Weight Luka
+    id: weight_user3
+    unit_of_measurement: 'kg'
+    icon: mdi:weight-kilogram
+    accuracy_decimals: 2
+  - platform: template
+    name: Impedance Luka
+    id: impedance_user3
+    unit_of_measurement: 'ohm'
+    icon: mdi:omega
+    accuracy_decimals: 0
+  - platform: template
+    name: Weight Zita
+    id: weight_user4
+    unit_of_measurement: 'kg'
+    icon: mdi:weight-kilogram
+    accuracy_decimals: 2
+  - platform: template
+    name: Impedance Zita
+    id: impedance_user4
+    unit_of_measurement: 'ohm'
+    icon: mdi:omega
+    accuracy_decimals: 0
+
 binary_sensor:
   - platform: template
     device_class: safety
@@ -104,8 +185,17 @@ binary_sensor:
       }
   - platform: xiaomi_wx08zm
     name: Mosquito
-    mac_address: "74:A3:4A:BE:3F:D3"
+    mac_address: "74:A3:4A:BE:3F:D3" 
     tablet:
-      name: "WX08ZM Mosquito Tablet"
+      name: "Luka Mosquito Tablet"
     battery_level:
-      name: "WX08ZM Battery Level"
+      name: "Luka Battery Level"
+  - platform: xiaomi_wx08zm
+    name: Mosquito 2
+    mac_address: "74:A3:4A:C5:ED:30"
+    tablet:
+      name: "Zita Mosquito Tablet"
+    battery_level:
+      name: "Zita Battery Level"
+      
+      
