@@ -1,11 +1,12 @@
 {
   "domain": "anniversaries",
   "name": "Anniversaries",
-  "version": "4.3.0",
+  "version": "4.3.1",
   "documentation": "https://github.com/pinkywafer/Anniversaries",
   "dependencies": [],
   "config_flow": true,
   "codeowners": ["@pinkywafer"],
+  "iot_class": "calculated",
   "requirements": [
     "python-dateutil>=2.8.1",
     "integrationhelper>=0.2.2",
