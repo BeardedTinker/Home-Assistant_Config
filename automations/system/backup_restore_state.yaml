@@ -1,0 +1,19 @@
+#####
+# This is used to restore state of Backup after HA restart
+#
+#####
+
+id: '394ea064-ab8f-433b-b271-0a797b7fa7d6'
+alias: Restore backup state
+
+trigger:
+  - event: start
+    platform: homeassistant
+
+action:
+  - service: hassio.addon_stdin
+    data:
+      addon: 15d21743_samba_backup
+      input: restore-sensor
+
+      mode: single
