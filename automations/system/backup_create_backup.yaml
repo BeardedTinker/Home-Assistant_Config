@@ -1,0 +1,23 @@
+#####
+# Trigger snapshot and use Samba backup AddOn to copy file to Synology
+# Every Monday at 03:00 AM
+#####
+
+id: '8babba9f-1f78-4633-ba42-21fb04f72b50'
+alias: Restore backup state
+
+trigger:
+  platform: time
+  at: '03:00:00'
+
+condition:
+  - condition: time
+    weekday: mon
+
+action:
+  - service: hassio.addon_stdin
+    data:
+      addon: 15d21743_samba_backup
+      input: trigger
+
+mode: single
