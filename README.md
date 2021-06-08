@@ -57,6 +57,9 @@ From other devices I use, here is a list:
   - [Shelly Motion sensor](https://shelly.cloud/shelly-motion-smart-home-automation-sensor/)
   - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
   - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
+  - Shelly 1L
+  - Shelly 1
+  - Shelly Uno
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
@@ -78,8 +81,8 @@ From other devices I use, here is a list:
   - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
   - Elgato [Key Light Air](https://www.elgato.com/en/gaming/key-light-air)
   - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
-  - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips 
-
+  - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
+  - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
 
 ### Containers and add-ons
 
@@ -170,12 +173,12 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     0 |
-| Automations          |   145 |
-| Binary sensors       |   198 |
+| Automations          |   149 |
+| Binary sensors       |   210 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    56 |
-| Entities             |  1643 |
+| Entities             |  1719 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
@@ -184,13 +187,13 @@ Current count of various things in Home Assistant
 | Input Text           |     4 |
 | Lights               |    40 |
 | Media players        |    39 |
-| Lines of code (YAML) | 17712 |
+| Lines of code (YAML) | 18008 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   934 |
-| Switches             |    71 |
+| Sensors              |   990 |
+| Switches             |    75 |
 | Timers               |     4 |
 | Weather              |     3 |
 
