@@ -12,6 +12,7 @@ import logging
 import asyncio
 import aiohttp
 import async_timeout
+import datetime
 
 import json
 
@@ -45,12 +46,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Set up the Luftdaten sensor."""
     name = config.get(CONF_NAME)
     host = config.get(CONF_HOST)
+    scan_interval = config.get(CONF_SCAN_INTERVAL)
+
     verify_ssl = config.get(CONF_VERIFY_SSL)
+    
 
     resource = config.get(CONF_RESOURCE).format(host)
 
     session = async_get_clientsession(hass, verify_ssl)
-    rest_client = LuftdatenClient(hass.loop, session, resource)
+    rest_client = LuftdatenClient(hass.loop, session, resource, scan_interval)
 
     devices = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
@@ -70,7 +74,7 @@ class LuftdatenSensor(Entity):
         self.sensor_type = sensor_type
         self._unit_of_measurement = SENSOR_TYPES[sensor_type][1]
         self._device_class = SENSOR_TYPES[sensor_type][2]
-        self._unique_id = '{} {}'.format(self._name, SENSOR_TYPES[self.sensor_type][0])
+        self._unique_id = '{}-{}'.format(self._name, self.sensor_type)
 
     @property
     def name(self):
@@ -111,24 +115,14 @@ class LuftdatenSensor(Entity):
         try:
             await self.rest_client.async_update()
         except LuftdatenError:
-            value = None
             return
-        value = self.rest_client.data
+        parsed_json = self.rest_client.data
 
-        try:
-            parsed_json = json.loads(value)
-            if not isinstance(parsed_json, dict):
-                _LOGGER.warning("JSON result was not a dictionary")
-                return
-        except ValueError:
-            _LOGGER.warning("REST result could not be parsed as JSON")
-            _LOGGER.debug("Erroneous JSON: %s", value)
-            return
-
-        sensordata_values = parsed_json['sensordatavalues']
-        for sensordata_value in sensordata_values:
-            if sensordata_value['value_type'] == self.sensor_type:
-                self._state = sensordata_value['value']
+        if parsed_json != None:
+            sensordata_values = parsed_json['sensordatavalues']
+            for sensordata_value in sensordata_values:
+                if sensordata_value['value_type'] == self.sensor_type:
+                    self._state = sensordata_value['value']
 
 
 class LuftdatenError(Exception):
@@ -138,26 +132,58 @@ class LuftdatenError(Exception):
 class LuftdatenClient(object):
     """Class for handling the data retrieval."""
 
-    def __init__(self, loop, session, resource):
+    def __init__(self, loop, session, resource, scan_interval):
         """Initialize the data object."""
         self._loop = loop
         self._session = session
         self._resource = resource
+        self.lastUpdate = datetime.datetime.now()
+        self.scan_interval = scan_interval
         self.data = None
+        self.lock = asyncio.Lock()
 
     async def async_update(self):
         """Get the latest data from Luftdaten service."""
-        _LOGGER.debug("Get data from %s", str(self._resource))
-        try:
-            with async_timeout.timeout(30, loop=self._loop):
-                response = await self._session.get(self._resource)
-            self.data = await response.text()
-            _LOGGER.debug("Received data: %s", str(self.data))
-        except aiohttp.ClientError as err:
-            _LOGGER.warning("REST request error: {0}".format(err))
-            self.data = None
-            raise LuftdatenError
-        except asyncio.TimeoutError:
-            _LOGGER.warning("REST request timeout")
-            self.data = None
-            raise LuftdatenError
+
+        async with self.lock:
+            # Time difference since last data update
+            callTimeDiff = datetime.datetime.now() - self.lastUpdate
+            # Fetch sensor values only once per scan_interval
+            if (callTimeDiff < self.scan_interval):
+                if self.data != None:
+                    return
+
+            # Handle calltime differences: substract 5 second from current time
+            self.lastUpdate = datetime.datetime.now() - timedelta(seconds=5)
+
+            # Query local device
+            responseData = None
+            try:
+                _LOGGER.debug("Get data from %s", str(self._resource))
+                with async_timeout.timeout(30, loop=self._loop):
+                    response = await self._session.get(self._resource)
+                responseData = await response.text()
+                _LOGGER.debug("Received data: %s", str(self.data))
+            except aiohttp.ClientError as err:
+                _LOGGER.warning("REST request error: {0}".format(err))
+                self.data = None
+                raise LuftdatenError
+            except asyncio.TimeoutError:
+                _LOGGER.warning("REST request timeout")
+                self.data = None
+                raise LuftdatenError
+
+            # Parse REST response
+            try:
+                parsed_json = json.loads(responseData)
+                if not isinstance(parsed_json, dict):
+                    _LOGGER.warning("JSON result was not a dictionary")
+                    self.data = None
+                    return
+                # Set parsed json as data
+                self.data = parsed_json
+            except ValueError:
+                _LOGGER.warning("REST result could not be parsed as JSON")
+                _LOGGER.debug("Erroneous JSON: %s", responseData)
+                self.data = None
+                return

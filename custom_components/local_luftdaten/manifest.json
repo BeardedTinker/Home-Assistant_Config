@@ -6,6 +6,6 @@
   "dependencies": [],
   "codeowners": ["@lichtteil"],
   "requirements": [],
-  "version": "1.10",
+  "version": "2.0.0",
   "iot_class": "local_polling"
 }
