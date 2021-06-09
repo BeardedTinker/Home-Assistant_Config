@@ -25,6 +25,7 @@ class EmbyClient:
             url = "http{0}://{1}:{2}/Users/{3}/Views".format(
                 self.ssl, self.host, self.port, self.user_id
             )
+            _LOGGER.info("Making API call on URL %s", url)
             api = requests.get(url, timeout=10)
         except OSError:
             _LOGGER.warning("Host %s is not available", self.host)
@@ -42,7 +43,7 @@ class EmbyClient:
 
     def get_data(self, categoryId):
         try:
-            url = "http{0}://{1}:{2}/Users/{3}/Items/Latest?Limit={4}&Fields=CommunityRating,Studios,PremiereDate,Genres&ParentId={5}&api_key={6}&GroupItems=false".format(
+            url = "http{0}://{1}:{2}/Users/{3}/Items/Latest?Limit={4}&Fields=CommunityRating,Studios,PremiereDate,Genres,DateCreated&ParentId={5}&api_key={6}&GroupItems=false".format(
                 self.ssl,
                 self.host,
                 self.port,

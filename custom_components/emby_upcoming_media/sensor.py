@@ -16,6 +16,7 @@ import dateutil.parser
 from datetime import date, datetime
 from datetime import timedelta
 import voluptuous as vol
+from itertools import groupby
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components import sensor
@@ -30,6 +31,8 @@ DOMAIN = "emby_upcoming_media"
 DOMAIN_DATA = f"{DOMAIN}_data"
 ATTRIBUTION = "Data is provided by Emby."
 
+DICT_LIBRARY_TYPES = {"tvshows": "TV Shows", "movies": "Movies"}
+
 # Configuration
 CONF_SENSOR = "sensor"
 CONF_ENABLED = "enabled"
@@ -38,9 +41,12 @@ CONF_INCLUDE = "include"
 CONF_MAX = "max"
 CONF_USER_ID = "user_id"
 CONF_USE_BACKDROP = "use_backdrop"
+CONF_GROUP_LIBRARIES = "group_libraries"
 
 CATEGORY_NAME = "CategoryName"
 CATEGORY_ID = "CategoryId"
+CATEGORY_TYPE = "CollectionType"
+
 
 SCAN_INTERVAL_SECONDS = 3600  # Scan once per hour
 
@@ -59,7 +65,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SSL, default=False): cv.boolean,
         vol.Optional(CONF_INCLUDE, default=[]): vol.All(cv.ensure_list),
         vol.Optional(CONF_MAX, default=5): cv.Number,
-        vol.Optional(CONF_USE_BACKDROP, default=False): cv.boolean
+        vol.Optional(CONF_USE_BACKDROP, default=False): cv.boolean,
+        vol.Optional(CONF_GROUP_LIBRARIES, default=False): cv.boolean
     }
 )
 
@@ -83,13 +90,19 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     hass.data[DOMAIN_DATA]["client"] = client
 
     categories = client.get_view_categories()
+    
+    categories = filter(lambda el: 'CollectionType' in el.keys() and el["CollectionType"] in DICT_LIBRARY_TYPES.keys(), categories) #just include supported library types (movie/tv)
 
     if include != []:
         categories = filter(lambda el: el["Name"] in include, categories)
+            
+    if config.get(CONF_GROUP_LIBRARIES) == True:
+        l=[list(y) for x,y in groupby(sorted(list(categories),key=lambda x: (x['CollectionType'])),lambda x: (x['CollectionType']))]
+        categories = [{k:(v if k!='Id' else list(set([x['Id'] for x in i]))) for k,v in i[0].items()} for i in l]
 
     mapped = map(
         lambda cat: EmbyUpcomingMediaSensor(
-            hass, {**config, CATEGORY_NAME: cat["Name"], CATEGORY_ID: cat["Id"]}
+            hass, {**config, CATEGORY_NAME: cat["Name"], CATEGORY_ID: cat["Id"], CATEGORY_TYPE: DICT_LIBRARY_TYPES[cat["CollectionType"]]}
         ),
         categories,
     )
@@ -106,7 +119,7 @@ class EmbyUpcomingMediaSensor(Entity):
         self._state = None
         self.data = []
         self.use_backdrop = conf.get(CONF_USE_BACKDROP)
-        self.category_name = conf.get(CATEGORY_NAME)
+        self.category_name = (conf.get(CATEGORY_TYPE) if conf.get(CONF_GROUP_LIBRARIES) == True else conf.get(CATEGORY_NAME))
         self.category_id = conf.get(CATEGORY_ID)
         self.friendly_name = "Emby Latest Media " + self.category_name
         self.entity_id = sensor.ENTITY_ID_FORMAT.format(
@@ -278,7 +291,14 @@ class EmbyUpcomingMediaSensor(Entity):
         return attributes
 
     def update(self):
-        data = self._client.get_data(self.category_id)
+        if isinstance(self.category_id, str): 
+            data = self._client.get_data(self.category_id)
+        else:
+            data = []
+            for element in self.category_id:
+                for res in self._client.get_data(element):
+                    data.append(res)
+            data.sort(key=lambda item:item['DateCreated'], reverse=True) #as we added all libraries we now resort to get the newest at top
 
         if data is not None:
             self._state = "Online"
