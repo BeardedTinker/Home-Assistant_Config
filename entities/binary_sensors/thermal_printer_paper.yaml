@@ -1,0 +1,11 @@
+#####
+# State of the paper in Thermal Printer
+#
+#####
+
+platform: mqtt
+name: Thermal printer paper
+state_topic: "printer/thermal_papercheck"
+payload_on: 'off'
+payload_off: 'om'
+availability_mode: latest
