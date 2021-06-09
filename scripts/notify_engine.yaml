@@ -50,7 +50,8 @@ notify_engine:
           importance: "{{ importance_id }}"
 #    - service: mqtt.publish
 #      data_template:
-#        topic: /printer/thermal
+#        topic: printer/thermal_text
+#        payload: "{{ title }}"
 #        payload_template: >-
 #          {
 #            "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
