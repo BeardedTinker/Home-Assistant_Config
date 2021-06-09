@@ -1,0 +1,21 @@
+#####
+# Control Dining room lights with dimmer
+# Because it no longer wants to use local binding
+#####
+
+alias: Dining room dimmer off
+id: '2b85a6c0-4f94-4773-8b33-c9d3ea161708'
+
+trigger:
+  platform: state
+  entity_id: sensor.dining_room_dimmer_action
+  to: 'off'
+  
+action:
+  service: light.turn_off
+  target:
+    entity_id:
+      - light.left
+      - light.right
+
+mode: single
