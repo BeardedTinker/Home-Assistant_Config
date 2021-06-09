@@ -26,7 +26,7 @@ action:
     data:
       target: !secret discord_github_id
       message: >-
-        {%- if trigger.json.pull_request -%}
+        {%- if trigger.json.pull_request | default(false) -%}
           Pull request
           {% if trigger.json.comment %}
             New comment on {{trigger.json.pull_request.title }} - Pull Request #{{
@@ -36,7 +36,7 @@ action:
             trigger.json.action}} by {{trigger.json.sender.login}}
           {% endif -%}
           {{trigger.json.pull_request.html_url}} 
-        {%- elif trigger.json.issue -%}
+        {%- elif trigger.json.issue | default(false) -%}
           {% if trigger.json.comment %}
             New comment on {{trigger.json.issue.title }} - Issue #{{
             trigger.json.issue.number}} from {{ trigger.json.comment.user.login }}
@@ -45,7 +45,7 @@ action:
             trigger.json.action }} by {{trigger.json.sender.login}}
           {% endif -%}
           {{trigger.json.issue.html_url}} 
-        {%- elif trigger.json.ref %}
+        {%- elif trigger.json.ref | default(false) %}
           {{ trigger.json.commits | count }} commits pushed to Home-Assistant_config:
             {% for commit in trigger.json.commits -%}
               {{commit.message}} 
