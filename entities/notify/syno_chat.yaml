@@ -1,0 +1,8 @@
+#####
+# Synology Chat notification
+# Used to receive notifications from Home Assistant in Synology chat
+#####
+
+platform: synology_chat
+name: syno_chat
+resource: !secret syno_chat_webhook
