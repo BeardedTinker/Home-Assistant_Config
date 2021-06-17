@@ -11,10 +11,10 @@ trigger:
   platform: state
   to: 'on'
 
-  condition:
-    - condition: numeric_state
-      entity_id: sensor.kitchen_motion_lux
-      above: 230  
+condition:
+  - condition: numeric_state
+    entity_id: sensor.kitchen_motion_lux
+    above: 230  
 
 action:
 - service: timer.cancel
