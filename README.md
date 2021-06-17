@@ -12,8 +12,8 @@ Each commit is verified automaticlly with <a href="https://github.com/BeardedTin
 
 # BeardedTinker's Home Assistant configuration
 
-Here is a shot on making my Home Assistant configuration available.
-All individual files should have comments inside and I'll try to add as much documentation as I can over time.
+You can find here all of my own configuration files from Home Assistant. Updates are pushed whenever there is any change.
+I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
 
 
 ## Want to get more info?
@@ -32,6 +32,7 @@ Heart of my smart home is Home Assistant running in Virtual Machine on Synology 
 Plugged in Synology is Zigbee USB CC2652RB stick from slae.sh with Zigbee2mqtt firmware from Koenkk.
 
 From other devices I use, here is a list:
+
 ##### IKEA DEVICES
   - IKEA TRADFRI Gateway - NOT used anymore
   - IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore
@@ -60,6 +61,7 @@ From other devices I use, here is a list:
   - Shelly 1L
   - Shelly 1
   - Shelly Uno
+  - Shelly Door & Window sensor
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
@@ -83,25 +85,23 @@ From other devices I use, here is a list:
   - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
+  - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge
 
 ### Containers and add-ons
 
 As I'm running this on Synology, I have mix of Docker containers and Home Assistant add-ons. Here is a list:
 
 Add-ons:
-  - ADB Android Debug Bridge - [link](https://github.com/hassio-addons/addon-adb) - REMOVED
   - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED
   - ESPHome - [link](https://esphome.io/) - migrated from Docker container
-  - Mosquitto Broker - [link](https://github.com/home-assistant/hassio-addons/tree/master/mosquitto) - REMOVED
   - Samba share - [link](https://github.com/home-assistant/hassio-addons/tree/master/samba)
+  - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
   - Terminal & SSH - [link](https://github.com/home-assistant/hassio-addons/tree/master/ssh)
   - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
-  - AdGuard Home - REMOVED
   - VaultWarden
-  - Emby - REMOVED - running native Synology package
   - Facebox
   - Grafana
   - InfluxDB
@@ -112,7 +112,6 @@ Containers:
   - Smokeping
   - Storagenode
   - Storj Exporter
-  - Zigbee2MQTT - REMOVED - running Home Assistant Add-On
 
 ### Integrations
 
@@ -173,26 +172,26 @@ Current count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     0 |
-| Automations          |   149 |
-| Binary sensors       |   210 |
+| Automations          |   152 |
+| Binary sensors       |   207 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    56 |
-| Entities             |  1719 |
+| Entities             |  1693 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
 | Input Number         |    11 |
 | Input Select         |     9 |
 | Input Text           |     4 |
-| Lights               |    40 |
-| Media players        |    39 |
-| Lines of code (YAML) | 18008 |
+| Lights               |    36 |
+| Media players        |    40 |
+| Lines of code (YAML) | 18238 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    12 |
 | Scripts              |    16 |
-| Sensors              |   990 |
+| Sensors              |   967 |
 | Switches             |    75 |
 | Timers               |     4 |
 | Weather              |     3 |
