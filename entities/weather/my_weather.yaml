@@ -7,7 +7,7 @@ platform: template
 name: "Super Weather station"
 unique_id: e17d521d-14f5-4cbf-a630-1a60a89faff9
 condition_template: "{{ states('weather.dark_sky') }}" 
-temperature_template: "{{ states('sensor.parthenocissus_temperature') | float}}"
+temperature_template: "{{ states('sensor.cherry_tomatoes_temperature') | float}}"
 humidity_template: "{{ states('sensor.indoor_aq_humidity') | float }}"
 forecast_template: "{{ state_attr('weather.accuweather', 'forecast') }}"
 pressure_template:  "{{ states('sensor.rose_1_pressure') | float }}"
