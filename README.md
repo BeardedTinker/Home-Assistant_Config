@@ -189,8 +189,8 @@ Current count of various things in Home Assistant
 | Lines of code (YAML) | 18238 |
 | Persons              |     6 |
 | Plants               |     7 |
-| Rest commands        |    12 |
-| Scripts              |    16 |
+| Rest commands        |    11 |
+| Scripts              |    17 |
 | Sensors              |   967 |
 | Switches             |    75 |
 | Timers               |     4 |
