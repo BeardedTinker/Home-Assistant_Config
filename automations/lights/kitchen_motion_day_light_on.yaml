@@ -14,7 +14,7 @@ trigger:
 condition:
   - condition: numeric_state
     entity_id: sensor.kitchen_motion_lux
-    above: 230  
+    below: 230  
 
 action:
 - service: timer.cancel
