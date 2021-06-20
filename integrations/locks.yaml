@@ -1,0 +1,18 @@
+#####
+# Lock tempate for Nuki
+# https://www.home-assistant.io/integrations/lock.template/
+#####
+
+lock:
+- platform: template
+  name: "Nuki Lock Action"
+  value_template: "{{ is_state_attr('binary_sensor.nuki_door_state', 'lock_state', 'locked') }}"
+  availability_template: "{{ state_attr('binary_sensor.nuki_door_state', 'lock_state') != None }}"
+  lock:
+    service: rest_command.nuki_lock_action
+    data:
+      action: 2
+  unlock:
+    service: rest_command.nuki_lock_action
+    data:
+      action: 1
