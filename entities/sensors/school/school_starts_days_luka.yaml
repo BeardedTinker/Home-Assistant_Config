@@ -1,10 +1,10 @@
 #####
-#
+# School - days until start for Luka
 #
 #####
 
 platform: template
 sensors:
   school_start_days_luka:
-    value_template: "{{ (((state_attr('input_datetime.school_first_day', 'timestamp'))-as_timestamp(now())) | int /60/1440) | round(0) }}"
+    value_template: "{{ (((state_attr('input_datetime.school_first_day_luka', 'timestamp'))-as_timestamp(now())) | int /60/1440) | round(0) }}"
     unit_of_measurement: 'Days'
