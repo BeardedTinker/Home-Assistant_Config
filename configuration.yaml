@@ -9,3 +9,6 @@ homeassistant:
   packages: !include_dir_named integrations     # package setup/config split
   allowlist_external_dirs:
     - !secret allow_dir
+
+    # Added because of custom Nuki integration
+template: !include templates.yaml

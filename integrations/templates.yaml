@@ -1,9 +1,0 @@
-#####
-# Sensors are gathering information about states and conditions.
-#
-# This loads up my sensor configurations
-#
-# https://www.home-assistant.io/integrations/sensor
-#####
-
-template: !include_dir_merge_named ../entities/templates
