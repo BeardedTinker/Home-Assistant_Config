@@ -226,7 +226,7 @@ class GarbageCollection(RestoreEntity):
                 kwargs["prov"] = self._holiday_prov
             if (
                 self._holiday_observed is not None
-                and type(self._holiday_observed) == bool
+                and type(self._holiday_observed) is bool
                 and not self._holiday_observed
             ):
                 kwargs["observed"] = self._holiday_observed
@@ -574,8 +574,14 @@ class GarbageCollection(RestoreEntity):
         else:
             try:
                 if self._next_date == today and (
-                    now.time() >= self.expire_after
-                    or self.last_collection.date() == today
+                    (
+                        type(self.expire_after) is time
+                        and now.time() >= self.expire_after
+                    )
+                    or (
+                        type(self.last_collection) is datetime
+                        and self.last_collection.date() == today
+                    )
                 ):
                     ready_for_update = True
             except (AttributeError, TypeError):
