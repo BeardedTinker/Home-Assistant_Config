@@ -24,6 +24,7 @@ class ImageHandler:
         COLOR_ZONES: (0xAD, 0xD8, 0xFF, 0x8F),
         COLOR_ZONES_OUTLINE: (0xAD, 0xD8, 0xFF),
         COLOR_VIRTUAL_WALLS: (255, 0, 0),
+        COLOR_NEW_DISCOVERED_AREA: (64, 64, 64),
         COLOR_NO_GO_ZONES: (255, 33, 55, 127),
         COLOR_NO_GO_ZONES_OUTLINE: (255, 0, 0),
         COLOR_NO_MOPPING_ZONES: (163, 130, 211, 127),
@@ -60,7 +61,7 @@ class ImageHandler:
     @staticmethod
     def create_empty_map_image(colors, text="NO MAP") -> ImageType:
         color = ImageHandler.__get_color__(COLOR_MAP_OUTSIDE, colors)
-        image = Image.new('RGBA', (200, 100), color=color)
+        image = Image.new('RGBA', (300, 200), color=color)
         if sum(color[0:3]) > 382:
             text_color = (0, 0, 0)
         else:
