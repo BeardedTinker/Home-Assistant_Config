@@ -6,13 +6,16 @@
 - trigger:
   - platform: webhook
     webhook_id: !secret nuki_bridge_webhook
+
   - platform: event
     event_type: event_template_reloaded
+
   - platform: state
     entity_id: sensor.nuki_door_sensor_state
     to:
       - "open"
       - "closed"
+
 - binary_sensor:
   - name: "Nuki Door State"
     device_class: door
