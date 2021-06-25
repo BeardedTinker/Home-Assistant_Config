@@ -1,0 +1,6 @@
+#####
+# Network integration, enaled by default (part of default_config)
+# https://www.home-assistant.io/integrations/network
+#####
+
+network:
