@@ -1,9 +1,0 @@
-#####
-# Zigbee2MQTT - as Docker container
-# working great!
-#####
-
-zigbe2mqtt:
-  title: 'Zigbee2MQTT'
-  url: !secret url_zigbee2mqtt
-  icon: mdi:zigbee
