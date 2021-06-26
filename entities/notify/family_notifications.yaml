@@ -11,4 +11,4 @@ services:
   - service: mobile_app_fig_lx1
   - service: mobile_app_iphone
   - service: ebroz_bot
-   
+  - service: syno_chat
