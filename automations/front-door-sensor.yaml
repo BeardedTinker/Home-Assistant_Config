@@ -28,11 +28,12 @@ action:
     title: '🚪*Front door*'
     value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
     tag_id: 'warning'
-- data:
+- service: media_player.volume_set
+  data:
     entity_id: media_player.display_me
     volume_level: 0.5
-  service: media_player.volume_set
-- data:
+
+- service: tts.google_translate_say
+  data:
     entity_id: media_player.display_me
-    message: Front door is open!
-  service: tts.google_translate_say
+    message: 'Front door is open!'
