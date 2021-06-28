@@ -1,0 +1,13 @@
+#####
+# Binary sensor turns on if there is Supervisor update
+# https://community.home-assistant.io/t/update-notifications-core-hacs-supervisor-and-addons/182295
+#####
+
+platform: template
+sensors:
+  # True if there's an update available for supervisor
+  updater_supervisor:
+    friendly_name: 'Updater Supervisor'
+    device_class: problem
+    value_template: "{{ state_attr('sensor.supervisor_updates', 'update_available') }}"
+    availability_template: "{{ states('sensor.supervisor_updates') | int(-1) > -1 }}"

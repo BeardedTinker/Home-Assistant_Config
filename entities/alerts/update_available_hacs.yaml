@@ -1,0 +1,20 @@
+#####
+# Alert if HACS update available
+#
+#####
+
+hacs_update_available:
+  name: HACS repos have updates
+  entity_id: binary_sensor.updater_hacs
+  state: 'on'
+  can_acknowledge: false
+  repeat: 360
+  title: "Updates available in {{ states('sensor.hacs') }} HACS repo{% if states('sensor.hacs') | int > 1 %}s{% endif %}"
+  message: ""
+  notifiers:
+    - 'syno_chat'
+    - 'mobile_app_ele_l29'
+  data:
+    tag: 'hacs-update-available'
+    url: 'http://hassio.local/hacs/installed'
+    ttl: 21600

@@ -1,0 +1,20 @@
+#####
+# Alert if Supervisor update available
+#
+#####
+
+supervisor_update_available:
+  name: Supervisor has an update
+  entity_id: binary_sensor.updater_supervisor
+  state: 'on'
+  can_acknowledge: false
+  repeat: 360
+  title: 'Update for HA Supervisor available'
+  message: "New version is {{ state_attr('sensor.supervisor_updates', 'newest_version') }}. Currently on {{ state_attr('sensor.supervisor_updates', 'current_version') }}"
+  notifiers:
+    - 'syno_chat'
+    - 'mobile_app_ele_l29'
+  data:
+    tag: 'supervisor-update-available'
+    url: 'http://hassio.local/hassio/dashboard'
+    ttl: 21600

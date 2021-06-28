@@ -1,0 +1,9 @@
+#####
+# Binary sensor turns on if there is HACS update
+# https://community.home-assistant.io/t/update-notifications-core-hacs-supervisor-and-addons/182295
+#####
+
+platform: threshold
+name: Updater HACS
+entity_id: sensor.hacs
+upper: 0.5

@@ -1,0 +1,20 @@
+#####
+# Alert if AddOns update available
+#
+#####
+
+addon_update_available:
+  name: Addons have updates
+  entity_id: binary_sensor.updater_addons
+  state: 'on'
+  can_acknowledge: false
+  repeat: 360
+  title: "Updates available for {{ states('sensor.supervisor_updates') }} HA addon{% if states('sensor.supervisor_updates') | int > 1 %}s{% endif %}"
+  message: ""
+  notifiers:
+  - 'syno_chat'
+  - 'mobile_app_ele_l29'
+  data:
+    tag: 'addon-update-available'
+    url: 'http://hassio.local/hassio/dashboard'
+    ttl: 21600
