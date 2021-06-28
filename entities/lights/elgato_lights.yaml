@@ -1,0 +1,9 @@
+#####
+# List of Elgato Key Light Air lights
+#####
+
+platform: group
+name: Elgato lights
+entities:
+  - light.elgato_key_light_air_left
+  - light.elgato_key_light_air_right
