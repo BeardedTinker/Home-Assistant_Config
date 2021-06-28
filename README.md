@@ -12,7 +12,7 @@ Each commit is verified automaticlly with <a href="https://github.com/BeardedTin
 
 # BeardedTinker's Home Assistant configuration
 
-You can find here all of my own configuration files from Home Assistant. Updates are pushed whenever there is any change.
+You can find here all of configuration files from my Home Assistant installation. Updates are pushed whenever there is any change and I do try to work on the system as much as time allows.
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
 
 
@@ -22,14 +22,14 @@ You can follow my [YouTube channel](https://YouTube.com/BeardedTinker) for more 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
 
-Also, you can try and get in touch while I'm streaming. There should be at least 1 stream each month!
+Also, if you have time you can try and join me while streaming and there shoul dbe at lest one stream each month!
 
 
 ### Hardware
 
-Heart of my smart home is Home Assistant running in Virtual Machine on Synology DSM920+.
+Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+).
 
-Plugged in Synology is Zigbee USB CC2652RB stick from slae.sh with Zigbee2mqtt firmware from Koenkk.
+Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk.
 
 From other devices I use, here is a list:
 
@@ -47,18 +47,18 @@ From other devices I use, here is a list:
   - Xiaomi Aqara human body movement and illuminance sensor [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
   - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
-  - Xiaomi Aqra Viration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+  - Xiaomi Aqara Vibration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Water sensor [SJCGQ11LM](https://www.zigbee2mqtt.io/devices/SJCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/4001249406915.html)
   - Xiaomi Mosquitto Repellent [ESPHome](https://youtu.be/XMFn8fKhUFA) - [AliExpress link](https://www.aliexpress.com/item/4000195100873.html)
 
 ##### SHELLY DEVICES
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
-  - [Shely Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
+  - [Shelly Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
   - [Shelly Gas CNG sensor](https://shelly.cloud/products/shelly-gas-smart-home-automation-sensor/) 
   - [Shelly Motion sensor](https://shelly.cloud/shelly-motion-smart-home-automation-sensor/)
   - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
   - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
-  - Shelly 1L
+  - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
   - Shelly 1
   - Shelly Uno
   - Shelly Door & Window sensor
@@ -85,7 +85,7 @@ From other devices I use, here is a list:
   - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
-  - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge
+  - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge & [Nuki Opener](https://nuki.io/en/opener/)
 
 ### Containers and add-ons
 
@@ -93,11 +93,11 @@ As I'm running this on Synology, I have mix of Docker containers and Home Assist
 
 Add-ons:
   - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED
-  - ESPHome - [link](https://esphome.io/) - migrated from Docker container
+  - ESPHome - [link](https://esphome.io/) 
   - Samba share - [link](https://github.com/home-assistant/hassio-addons/tree/master/samba)
   - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
   - Terminal & SSH - [link](https://github.com/home-assistant/hassio-addons/tree/master/ssh)
-  - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode) - migrated from Docker container
+  - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode)
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
@@ -127,8 +127,7 @@ etc...
 
 Following is a list of active Integrations that are visible at Configuration->Integration page:
   - AccuWeather
-  - AdGuard
-  - AirVisual
+   - AirVisual
   - Blitzortung (HACS)
   - Certificate Expiry
   - COVID-19
@@ -139,12 +138,14 @@ Following is a list of active Integrations that are visible at Configuration->In
   - HACS
   - Home Assistant Supervisor
   - Internet Printing Protocol
+  - Kraken
   - Luftdaten
   - Mikrotik
   - Minecraft Server
   - Mobile App
   - MQTT
   - Network UPS Tool
+  - Nuki
   - ONVIF
   - OpenUV
   - Reolink
@@ -177,7 +178,7 @@ Current count of various things in Home Assistant
 | Cameras              |    11 |
 | Climates             |     4 |
 | Device trackers      |    56 |
-| Entities             |  1718 |
+| Entities             |  1746 |
 | Groups               |    17 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
@@ -186,12 +187,12 @@ Current count of various things in Home Assistant
 | Input Text           |     4 |
 | Lights               |    36 |
 | Media players        |    40 |
-| Lines of code (YAML) | 18665 |
+| Lines of code (YAML) | 18702 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    17 |
-| Sensors              |   990 |
+| Sensors              |  1017 |
 | Switches             |    75 |
 | Timers               |     4 |
 | Weather              |     3 |
