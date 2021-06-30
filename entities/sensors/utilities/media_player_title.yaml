@@ -1,0 +1,10 @@
+#####
+# Creates sensor from TV attribute
+# for ex. name of the channel when watching Live TV
+#####
+
+platform: template
+sensors:
+  media_player_title:
+    value_template: '{{ state_attr("media_player.lg_tv", "media_title") }}'
+    friendly_name: Media Player Title

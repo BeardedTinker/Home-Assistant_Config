@@ -1,0 +1,14 @@
+#####
+# Calcluate week as A or B
+# This is used to track morning or afteroon week for school
+#####
+
+platform: template
+sensors:
+  current_week:
+    #    entity_id: sensor.date
+        friendly_name: "School week"
+        value_template: >-
+          {% set week_number = now().isocalendar()[1] %}
+          Week {{'A' if week_number % 2 == 0 else 'B'}}
+    #      Week {{'A' if week_number % 2 == 0 else 'B'}} (#{{week_number}})

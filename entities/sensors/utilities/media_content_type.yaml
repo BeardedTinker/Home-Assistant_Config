@@ -1,0 +1,10 @@
+#####
+# Creates sensor from TV attribute
+# for ex. channel when watching Live TV
+#####
+
+platform: template
+sensors:
+  media_content_type:
+    value_template: '{{ state_attr("media_player.lg_tv", "media_content_type") }}'
+    friendly_name: Media Content Type
