@@ -19,9 +19,11 @@ condition:
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'family'
     value1: "Living room motion and none at home!"
-    tag_id: 'emergency'
+    tag_id: 'warning'
+    group: home
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me

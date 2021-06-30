@@ -17,10 +17,12 @@ condition: []
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'family'
     title: '🚪*Front door*'
     value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
     tag_id: 'warning'
+    group: home
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - service: script.notify_engine
   data:

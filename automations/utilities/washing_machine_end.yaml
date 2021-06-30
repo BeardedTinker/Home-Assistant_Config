@@ -13,11 +13,13 @@ trigger:
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'family'
     title: '♨ *Washing done*'
     value1: 'Washing machine is done. Open the door.'
     tag_id: 'information'
     sticky: 'true'
+    group: home
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - service: input_boolean.turn_off
   data: {}
