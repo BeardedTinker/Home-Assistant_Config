@@ -4,7 +4,7 @@
 #####
 
 id: '8babba9f-1f78-4633-ba42-21fb04f72b50'
-alias: Restore backup state
+alias: Create snapshot backup
 
 trigger:
   platform: time
