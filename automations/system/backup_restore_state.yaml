@@ -15,5 +15,3 @@ action:
   data:
     addon: 15d21743_samba_backup
     input: restore-sensor
-
-mode: single
