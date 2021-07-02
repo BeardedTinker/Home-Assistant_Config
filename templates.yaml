@@ -33,7 +33,7 @@
       {% if trigger.platform == 'webhook' %}
         {% set my_state = {1: 'deactivated', 2: 'closed', 3: 'open', 4: 'unknown', 5: 'calibrating'} %}
         {% set trigdoor = my_state[trigger.json.doorsensorState] %}
-        {% set my_state = {0: 'uncalibrated', 1: 'locked', 2:'unlocking', 3: 'unlocked', 4: 'locking', 5: 'unlatched', 6: "unlocked (lock ‘n’ go)", 7: 'unlatching', 254: 'motor blocked', 255: 'undefined'} %}
+        {% set my_state = {0: 'uncalibrated', 1: 'locked', 2:'unlocking', 3: 'unlocked', 4: 'locking', 5: 'unlatched', 6: "unlocked (lock 'n' go)", 7: 'unlatching', 254: 'motor blocked', 255: 'undefined'} %}
         {% set triglock = my_state[trigger.json.state] %}
       {% else %}
         {% set trigdoor = states('sensor.nuki_door_sensor_state') %}
@@ -63,7 +63,7 @@
           {{ states('sensor.nuki_door_sensor_state') }}
         {% endif %}
       lock_state: >
-        {% set my_state = {0: 'uncalibrated', 1: 'locked', 2:'unlocking', 3: 'unlocked', 4: 'locking', 5: 'unlatched', 6: "unlocked (lock 'n' go)", 7: 'unlatching', 254: 'motor blocked', 255: 'undefined'} %}          
+        {% set my_state = {0: 'uncalibrated', 1: 'locked', 2:'unlocking', 3: 'unlocked', 4: 'locking', 5: 'unlatched', 6: "unlocked (lock ‘n’ go)", 7: 'unlatching', 254: 'motor blocked', 255: 'undefined'} %}          
         {% if trigger.platform == 'webhook' %}
           {{ my_state[trigger.json.state] }}
         {% else %}
@@ -71,7 +71,7 @@
         {% endif %}
       lock_battery: >
         {% if trigger.platform == 'webhook' %}
-          {{ trigger.json.batteryChargeState }}%
+          {{ trigger.json.batteryChargeState }}
         {% else %}
           {{ states('sensor.nuki_lock_battery_level') }}
         {% endif %}
@@ -83,9 +83,17 @@
         {% endif %}
       keypad_battery_critical: >
         {% if trigger.platform == 'webhook' %}
-          {{ trigger.json.keypadBatteryCritical }}
+          {% if trigger.json.keypadBatteryCritical != null %}
+            {{ trigger.json.keypadBatteryCritical }}
+          {% else %}
+            not installed    
+          {% endif %}
         {% else %}
-          {{ states('sensor.nuki_keypad_battery_critical_state') }}
+          {% if states('sensor.nuki_keypad_battery_critical_state') != 'unknown' %}
+            {{ states('sensor.nuki_keypad_battery_critical_state') }}
+          {% else %}
+            not installed 
+          {% endif %}
         {% endif %}
       last_update: "{{ strptime(as_timestamp(now()) | timestamp_local, '%Y%m%d %H:%M:%S') }}"
       trigger_platform: "{{ trigger.platform }}"
@@ -214,7 +222,7 @@
     state: >
       {% if states('sensor.nuki_endpoint_list') == "OK" %}
         {% set my_state = {0: 'uncalibrated', 1: 'locked', 2:'unlocking', 3: 'unlocked', 4: 'locking', 5: 'unlatched', 6: "unlocked (lock ‘n’ go)", 7: 'unlatching', 254: 'motor blocked', 255: 'undefined'} %}
-        {{ my_state[state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['state']] | default('loading...') }}
+        {{ my_state[state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['state']] }}
       {% endif %}
 
   - name: "Nuki Lock FW Version"
@@ -233,9 +241,14 @@
 
   - name: "Nuki Keypad Battery Critical State"
     icon: mdi:battery-alert-variant-outline
+    availability: "{{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] != null }}"
     state: >
       {% if states('sensor.nuki_endpoint_list') == "OK" %}
-        {{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] }}
+        {% if state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] != null %}
+          {{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] }}
+        {% else %}
+          not installed 
+        {% endif %}
       {% endif %}
 
   - name: "Nuki Lock Battery Level"
