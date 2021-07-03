@@ -1,0 +1,14 @@
+#####
+# LG TV - used to select sources 
+#####
+
+lg_tv_source:
+  name: 'Select TV Source:'
+  options:
+    - LiveTV
+    - Netflix
+    - PS4
+    - SmartShare
+    - YouTube
+  initial: 'LiveTV'
+  icon: mdi:television-classic
