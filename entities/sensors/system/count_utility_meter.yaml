@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of Utility meters
+#
+#####
+
+platform: template
+sensors:
+  count_media_player:
+    friendly_name: 'Number of Utility meters'
+    value_template: >-
+      {{ states.utility_meter | list | count }}

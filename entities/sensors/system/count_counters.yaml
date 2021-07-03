@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of Counters
+#
+#####
+
+platform: template
+sensors:
+  count_media_player:
+    friendly_name: 'Number of Counters'
+    value_template: >-
+      {{ states.counter | list | count }}

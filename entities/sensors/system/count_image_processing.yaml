@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of Image processing
+#
+#####
+
+platform: template
+sensors:
+  count_media_player:
+    friendly_name: 'Number of Image Processing'
+    value_template: >-
+      {{ states.image_processing | list | count }}

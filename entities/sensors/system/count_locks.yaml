@@ -1,0 +1,11 @@
+#####
+# Counter that tracks total number of lock
+#
+#####
+
+platform: template
+sensors:
+  count_media_player:
+    friendly_name: 'Number of Locks'
+    value_template: >-
+      {{ states.lock | list | count }}
