@@ -20,6 +20,7 @@ action:
 - service: timer.start
   entity_id: timer.living_room_motion
 - service: light.turn_on
-  data:
+  target:
     entity_id: light.stairs
+  data:
     brightness: 64

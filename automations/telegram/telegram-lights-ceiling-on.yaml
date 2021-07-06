@@ -17,5 +17,5 @@ action:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Ceiling Lights ON
 - service: light.turn_on
-  data:
+  target:
     entity_id: light.ceiling_lights

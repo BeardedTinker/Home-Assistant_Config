@@ -17,5 +17,5 @@ action:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Dining Room Lights OFF
 - service: light.turn_off
-  data:
+  target:
     entity_id: light.dining_room_lights

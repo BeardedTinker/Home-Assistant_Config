@@ -14,5 +14,7 @@ trigger:
 
 action:
 - service: light.turn_off
-  data:
+  target:
     entity_id: light.kitchen_lights
+  data:
+    transition: 5

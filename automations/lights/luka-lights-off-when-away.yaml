@@ -14,7 +14,7 @@ trigger:
 condition: []
 
 action:
-- data:
+- service: light.turn_off
+  target:
     entity_id:
       - light.luka_room_lights
-  service: light.turn_off

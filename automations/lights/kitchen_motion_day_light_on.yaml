@@ -20,6 +20,7 @@ action:
 - service: timer.cancel
   entity_id: timer.kitchen_motion
 - service: light.turn_on
-  data:
+  target:
     entity_id: light.kitchen_lights
+  data:
     brightness: 254

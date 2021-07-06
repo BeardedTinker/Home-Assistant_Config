@@ -17,5 +17,5 @@ action:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Lights ON
 - service: light.turn_on
-  data:
-    entity_id: group.all_lights
+  target:
+    entity_id: media_player.all_speakers

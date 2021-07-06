@@ -13,4 +13,5 @@ trigger:
 
 action:
 - service: light.turn_off
-  entity_id: light.stairs
+  target: 
+    entity_id: light.stairs

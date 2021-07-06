@@ -23,8 +23,9 @@ action:
     value1: 'Sun setting, turning lights on.'
     tag_id: 'information'
 - service: light.turn_on
-  data:
+  target:
     entity_id: light.living_room_lights
+  data:
     transition: 60
     brightness: 128
 - service: script.eveninglightsspeach

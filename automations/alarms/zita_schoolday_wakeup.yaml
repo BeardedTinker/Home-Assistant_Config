@@ -36,27 +36,28 @@ action:
     title: '⏲ *Good morning Zita*'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
     tag_id: 'information'
-- data:
+- service: media_player.volume_set
+  data:
     entity_id: media_player.mini_me
     volume_level: 0.3
-  service: media_player.volume_set
-- data:
+- service: tts.google_translate_say
+  data:
     entity_id: media_player.mini_me
     message: 'Good morning Zita. It is {{ states("sensor.time") }} and time for you to get up.'
-  service: tts.google_translate_say
-- data:
+- service: light.turn_on
+  target:
     entity_id:
       - light.goose
       - light.zita_ceiling
+  data:
     brightness: 64
-  service: light.turn_on
 - delay: '00:00:10'
-- data:
+- service: media_player.volume_set
+  data:
     entity_id: media_player.mini_me
     volume_level: 0.1
-  service: media_player.volume_set
-- data:
+- service: media_player.play_media
+  data:
     entity_id: media_player.mini_me
     media_content_id: 'http://live.antenazagreb.hr:8015/stream'
     media_content_type: audio/mp4
-  service: media_player.play_media

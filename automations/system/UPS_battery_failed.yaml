@@ -27,6 +27,7 @@ action:
   entity_id: input_boolean.ups_on_batteries
 - timeout: 00:04:00
   wait_template: ''
-- data:
+- service: light.turn_off
+  target:
     entity_id: all
-  service: light.turn_off
+  

@@ -17,5 +17,5 @@ action:
     callback_query_id: '{{ trigger.event.data.id }}'
     message: Lights OFF
 - service: light.turn_off
-  data:
-    entity_id: group.all_lights
+  target:
+    entity_id: all
