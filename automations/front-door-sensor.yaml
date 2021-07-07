@@ -19,7 +19,7 @@ action:
   data:
     who: 'family'
     title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
+    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
     tag_id: 'warning'
     group: home
     color: '#ff0000'
@@ -28,7 +28,7 @@ action:
   data:
     who: 'printer'
     title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{state_attr("weather.accuweather", "temperature")}}°C'
+    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
     tag_id: 'warning'
 - service: media_player.volume_set
   data:
