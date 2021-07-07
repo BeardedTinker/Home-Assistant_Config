@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  count_media_player:
+  count_vacuum:
     friendly_name: 'Number of Vacuums'
     value_template: >-
       {{ states.vacuum | list | count }}

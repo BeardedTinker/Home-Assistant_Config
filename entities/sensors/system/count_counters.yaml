@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  count_media_player:
+  count_counter:
     friendly_name: 'Number of Counters'
     value_template: >-
       {{ states.counter | list | count }}

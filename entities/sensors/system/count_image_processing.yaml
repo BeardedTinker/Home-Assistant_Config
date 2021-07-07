@@ -5,7 +5,7 @@
 
 platform: template
 sensors:
-  count_media_player:
+  count_image_processing:
     friendly_name: 'Number of Image Processing'
     value_template: >-
       {{ states.image_processing | list | count }}
