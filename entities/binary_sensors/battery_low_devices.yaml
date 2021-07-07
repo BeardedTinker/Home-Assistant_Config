@@ -1,0 +1,9 @@
+#####
+# Lists devices with low batter 
+# https://community.home-assistant.io/t/alert-when-devices-have-low-battery/258072
+#####
+
+platform: threshold
+entity_id: sensor.devices_with_low_battery
+name: Devices with low battery
+upper: 0.5

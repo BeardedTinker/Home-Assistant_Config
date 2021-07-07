@@ -1,0 +1,24 @@
+#####
+# Lists devices with low batter 
+# https://community.home-assistant.io/t/alert-when-devices-have-low-battery/258072
+#####
+
+platform: template
+sensors:
+  devices_with_low_battery:
+    friendly_name: 'Devices with low battery'
+    unit_of_measurement: devices
+    value_template: >-
+      {{ states.sensor
+          | selectattr('attributes.device_class', 'eq', 'battery')
+          | map(attribute='state')
+          | reject('in', ['unknown', 'unavailable', 'Ok'])
+          | map('int', -1) | select('le', 10)
+          | list | count
+      }}
+    icon_template: >-
+      {% if is_state('sensor.devices_with_low_battery', '0') %}
+        mdi:check-circle
+      {% else %}
+        mdi:battery-alert
+      {% endif %}
