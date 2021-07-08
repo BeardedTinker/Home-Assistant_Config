@@ -1,4 +1,5 @@
 """ Constants """
+from typing import Optional
 import voluptuous as vol
 from datetime import datetime
 import homeassistant.helpers.config_validation as cv
@@ -8,7 +9,7 @@ from homeassistant.const import CONF_NAME
 # Base component constants
 DOMAIN = "anniversaries"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "4.3.1"
+VERSION = "4.4.0"
 PLATFORM = "sensor"
 ISSUE_URL = "https://github.com/pinkywafer/Anniversaries/issues"
 ATTRIBUTION = "Sensor data calculated by Anniversaries Integration"
@@ -35,6 +36,7 @@ CONF_HALF_ANNIVERSARY = "show_half_anniversary"
 CONF_UNIT_OF_MEASUREMENT = "unit_of_measurement"
 CONF_ID_PREFIX = "id_prefix"
 CONF_ONE_TIME = "one_time"
+CONF_COUNT_UP = "count_up"
 CONF_DATE_EXCLUSION_ERROR = "Configuration cannot include both `date` and `date_template`. configure ONLY ONE"
 CONF_DATE_REQD_ERROR = "Either `date` or `date_template` is Required"
 
@@ -49,6 +51,7 @@ DEFAULT_HALF_ANNIVERSARY = False
 DEFAULT_UNIT_OF_MEASUREMENT = "Days"
 DEFAULT_ID_PREFIX = "anniversary_"
 DEFAULT_ONE_TIME = False
+DEFAULT_COUNT_UP = False
 
 ICON = DEFAULT_ICON_NORMAL
 
@@ -86,6 +89,7 @@ SENSOR_CONFIG_SCHEMA = vol.Schema(
         vol.Optional(CONF_UNIT_OF_MEASUREMENT, default=DEFAULT_UNIT_OF_MEASUREMENT): cv.string,
         vol.Optional(CONF_ID_PREFIX, default=DEFAULT_ID_PREFIX): cv.string,
         vol.Optional(CONF_ONE_TIME, default=DEFAULT_ONE_TIME): cv.boolean,
+        vol.Optional(CONF_COUNT_UP, default=DEFAULT_COUNT_UP): cv.boolean,
     }
 )
 
