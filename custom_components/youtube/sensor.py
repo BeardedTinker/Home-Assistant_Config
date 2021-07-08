@@ -5,7 +5,6 @@ For more details about this component, please refer to the documentation at
 https://github.com/custom-components/youtube
 """
 
-import html
 import logging
 import async_timeout
 import voluptuous as vol
@@ -40,10 +39,9 @@ async def async_setup_platform(
         async with async_timeout.timeout(10, loop=hass.loop):
             response = await session.get(url)
             info = await response.text()
-        name = html.parser.HTMLParser().unescape(
-            info.split('<title>')[1].split('</')[0])
-    except Exception:  # pylint: disable=broad-except
-
+        name = info.split('<title>')[1].split('</')[0]
+    except Exception as error:  # pylint: disable=broad-except
+        _LOGGER.debug('Unable to set up - %s', error)
         name = None
 
     if name is not None:
@@ -80,8 +78,7 @@ class YoutubeSensor(Entity):
             if exp < self.expiry:
                 return
             self.expiry = exp
-            title = html.parser.HTMLParser().unescape(
-                info.split('<title>')[2].split('</')[0])
+            title = info.split('<title>')[2].split('</')[0]
             url = info.split('<link rel="alternate" href="')[2].split('"/>')[0]
             if self.live or url != self.url:
                 self.stream, self.live, self.stream_start = await is_live(url, self._name, self.hass, self.session)
