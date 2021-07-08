@@ -12,7 +12,7 @@ Each commit is verified automaticlly with <a href="https://github.com/BeardedTin
 
 # BeardedTinker's Home Assistant configuration
 
-You can find here all of configuration files from my Home Assistant installation. Updates are pushed whenever there is any change and I do try to work on the system as much as time allows.
+You can find here all of the configuration files from my Home Assistant installation. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
 
 
@@ -22,12 +22,12 @@ You can follow my [YouTube channel](https://YouTube.com/BeardedTinker) for more 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
 
-Also, if you have time you can try and join me while streaming and there shoul dbe at lest one stream each month!
+Also, if you have time you can try and join me while streaming and there should be at lest one stream each month!
 
 
 ### Hardware
 
-Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+).
+Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) on DSM version 6.2.4.
 
 Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk.
 
@@ -174,28 +174,28 @@ Current count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     0 |
 | Automations          |   152 |
-| Binary sensors       |   211 |
+| Binary sensors       |   215 |
 | Cameras              |    11 |
 | Climates             |     4 |
-| Counters             |       |
+| Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  1655 |
+| Entities             |  1785 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
 | Input Number         |    11 |
-| Input Select         |     9 |
+| Input Select         |    10 |
 | Input Text           |     4 |
 | Lights               |    39 |
 | Locks                |     3 |
 | Media players        |    41 |
-| Lines of code (YAML) | 18960 |
+| Lines of code (YAML) | 19077 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    17 |
-| Sensors              |  1020 |
+| Sensors              |  1041 |
 | Switches             |    75 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
