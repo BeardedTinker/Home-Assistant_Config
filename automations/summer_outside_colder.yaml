@@ -22,7 +22,7 @@ action:
   data:
     who: 'family'
     title: '🚪*Temperature*'
-    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|float - states("sensor.dining_room_temperature")|float}}° hotter than outside.'
+    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|int - states("sensor.dining_room_temperature")|int}}° hotter than outside.'
     tag_id: 'warning'
     group: home
 #    sticky: ''
@@ -34,7 +34,7 @@ action:
 #  data:
 #    who: 'printer'
 #    title: '🚪*Temperature*'
-#    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|float - states("sensor.dining_room_temperature")|float}}° hotter than outside.'
+#    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|int - states("sensor.dining_room_temperature")|int}}° hotter than outside.'
 #    tag_id: 'warning'
 #    group: home
 #    sticky: ''
