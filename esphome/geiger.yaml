@@ -98,11 +98,11 @@ sensor:
       on_value:
         then:
           - lambda: |-
-              if (id(weight_miscale).state >= 75 && id(weight_miscale).state <= 85) {
+              if (id(weight_miscale).state >= 68 && id(weight_miscale).state <= 89) {
                 return id(weight_user1).publish_state(x);}
-              else if (id(weight_miscale).state >= 45 && id(weight_miscale).state <= 50) {
+              else if (id(weight_miscale).state >= 48 && id(weight_miscale).state <= 56) {
                 return id(weight_user2).publish_state(x);}
-              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 44.9) {
+              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 47.9) {
                 return id(weight_user3).publish_state(x);}
               else if (id(weight_miscale).state >= 20 && id(weight_miscale).state <= 39) {
                 return id(weight_user4).publish_state(x);}
@@ -113,11 +113,11 @@ sensor:
       on_value:
         then:
           - lambda: |-
-              if (id(weight_miscale).state >= 72 && id(weight_miscale).state <= 85) {
+              if (id(weight_miscale).state >= 68 && id(weight_miscale).state <= 89) {
                 return id(impedance_user1).publish_state(x);}
-              else if (id(weight_miscale).state >= 45 && id(weight_miscale).state <= 50) {
+              else if (id(weight_miscale).state >= 48 && id(weight_miscale).state <= 56) {
                 return id(impedance_user2).publish_state(x);}
-              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 44.9) {
+              else if (id(weight_miscale).state >= 40 && id(weight_miscale).state <= 47.9) {
                 return id(impedance_user3).publish_state(x);}
               else if (id(weight_miscale).state >= 20 && id(weight_miscale).state <= 39) {
                 return id(impedance_user4).publish_state(x);}
