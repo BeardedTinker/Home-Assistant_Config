@@ -1,5 +1,5 @@
 #####
-# Warn it outdoor air termperature is lower then inside
+# Warn when outdoor air termperature is lower then inside
 # And inside temperature is over 26
 #####
 
@@ -7,22 +7,21 @@ alias: 'Inside hotter than outside'
 id: d93eef00-aa6b-46f9-a28b-65324951c051
 
 trigger:
-  platform: template
-  value_template: >-
-    {{ sensor.dining_room_temperature >
-    sensor.balcony_temperature }}
+  - platform: numeric_state
+    entity_id: sensor.balcony_temperature
+    below: sensor.living_room_temperature
 
 condition:
   condition: numeric_state
-  entity_id: sensor.dining_room_temperature
-  above: 26
+  entity_id: sensor.living_room_temperature
+  above: 25
 
 action:
 - service: script.notify_engine
   data:
     who: 'family'
     title: '🚪*Temperature*'
-    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|int - states("sensor.dining_room_temperature")|int}}° hotter than outside.'
+    value1: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
     tag_id: 'warning'
     group: home
 #    sticky: ''
@@ -34,7 +33,7 @@ action:
 #  data:
 #    who: 'printer'
 #    title: '🚪*Temperature*'
-#    value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|int - states("sensor.dining_room_temperature")|int}}° hotter than outside.'
+#    value1: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
 #    tag_id: 'warning'
 #    group: home
 #    sticky: ''
@@ -50,4 +49,4 @@ action:
   target:
     entity_id: media_player.display_me
   data:
-    message: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.balcony_temperature")|int - states("sensor.dining_room_temperature")|int}}° hotter than outside.!'
+    message: 'Open windows - inside temperature is {{ states("living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.!'
