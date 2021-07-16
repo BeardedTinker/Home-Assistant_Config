@@ -1,0 +1,105 @@
+#####
+# Track inside and outside temperature and
+# inform when to open or close windows
+#####
+
+alias: 'Temperature difference inside vs outside'
+id: d93eef00-aa6b-46f9-a28b-65324951c051
+
+trigger:
+- platform: numeric_state
+  entity_id: sensor.balcony_temperature
+  below: sensor.living_room_temperature
+  for:
+    minutes: 15
+  id: lower_out
+- platform: numeric_state
+  entity_id: sensor.loggia_temperature
+  above: sensor.dining_room_temperature
+  for:
+    minutes: 10
+  id: higher_out
+
+condition:
+  condition: numeric_state
+  entity_id: sensor.living_room_temperature
+  above: 23
+
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: lower_out
+      sequence:
+      - service: script.notify_engine
+        data:
+          who: 'family'
+          title: '🚪*Temperature*'
+          value1: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
+          tag_id: 'warning'
+          group: home
+      #    sticky: ''
+          color: '#ff0000'
+      #    channel_id: ''
+      #    importance_id: ''
+          target_id: !secret telegram_bot_chat_id
+      #- service: script.notify_engine
+      #  data:
+      #    who: 'printer'
+      #    title: '🚪*Temperature*'
+      #    value1: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
+      #    tag_id: 'warning'
+      #    group: home
+      #    sticky: ''
+      #    color: '#ff0000'
+      #    channel_id: ''
+      #    importance_id: ''
+      - service: media_player.volume_set
+        target:
+          entity_id: media_player.display_me
+        data:
+          volume_level: 0.7
+      - service: tts.google_translate_say
+        target:
+          entity_id: media_player.display_me
+        data:
+          message: 'Open windows - inside temperature is {{ states("living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.!'
+
+    - conditions:
+      - condition: trigger
+        id: higher_out
+      sequence:
+      - service: script.notify_engine
+        data:
+          who: 'family'
+          title: '🚪*Temperature*'
+          value1: 'Close windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.'
+          tag_id: 'warning'
+          group: home
+      #    sticky: ''
+          color: '#ff0000'
+      #    channel_id: ''
+      #    importance_id: ''
+          target_id: !secret telegram_bot_chat_id
+      #- service: script.notify_engine
+      #  data:
+      #    who: 'printer'
+      #    title: '🚪*Temperature*'
+      #    value1: 'Close windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.diningroom_temperature")|int}}° cooler than outside.'
+      #    tag_id: 'warning'
+      #    group: home
+      #    sticky: ''
+      #    color: '#ff0000'
+      #    channel_id: ''
+      #    importance_id: ''
+      - service: media_player.volume_set
+        target:
+          entity_id: media_player.display_me
+        data:
+          volume_level: 0.4
+      - service: tts.google_translate_say
+        target:
+          entity_id: media_player.display_me
+        data:
+          message: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.!'
+      
