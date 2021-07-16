@@ -24,11 +24,14 @@ action:
     title: '🎮*Someone is playing minecraft*'
     value1: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) is/are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
     tag_id: 'information'
-- data:
+- service: media_player.volume_set
+  target:
     entity_id: media_player.whatever_me
+  data:
     volume_level: 0.3
-  service: media_player.volume_set
-- data:
+ 
+- service: tts.google_translate_say
+  target:
     entity_id: media_player.whatever_me
+  data:
     message: 'Currently, {{states("sensor.minecraft_server_players_online")}} players are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
-  service: tts.google_translate_say

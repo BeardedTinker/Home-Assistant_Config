@@ -36,8 +36,9 @@ action:
     title: '⏲ *Bedtime Luka*'
     value1: 'It is {{ states("sensor.time") }} - time to go to bed'
     tag_id: 'information'
-- data:
+- service: media_player.volume_set
+  target:
     entity_id: media_player.mini_me
+  data:
     volume_level: 0.3
-  service: media_player.volume_set
 - service: script.schoolnight_bedtime_luka

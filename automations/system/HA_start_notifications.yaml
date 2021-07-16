@@ -19,9 +19,14 @@ action:
     sticky: 'false'
     group: ha_status
     color: '#ff0000'
-- data:
-    entity_id: media_player.display_me
+#    target_id: 
+#    clickAction:
+#    channel_id:
+#    importance_id:
+- service: media_player.volume_set
+  target:
+    entity_id: media_player.display_mea
+  data:
     volume_level: 0.3
-  service: media_player.volume_set
 - delay: 00:00:01
 - service: script.googlescripthastart

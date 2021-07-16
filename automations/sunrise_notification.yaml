@@ -18,8 +18,9 @@ action:
     title: '🌅 *Sunrise*'
     value1: "It is {{ states('sensor.time') }} and the sun is up. Wake Up!"
     tag_id: 'information'
-- data:
+- service: media_player.volume_set
+  target:
     entity_id: media_player.display_me
+  data:
     volume_level: 0.2
-  service: media_player.volume_set
 - service: script.sunrisespeech
