@@ -1,6 +1,6 @@
 #####
 # Control Dining room lights with dimmer
-# Because it no longer wants to use local binding
+# Because it no longer wants to use local binding 
 #####
 
 alias: Dining room dimmer on
