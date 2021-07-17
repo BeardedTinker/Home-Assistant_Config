@@ -20,16 +20,14 @@ trigger:
     minutes: 10
   id: higher_out
 
-condition:
-  condition: numeric_state
-  entity_id: sensor.living_room_temperature
-  above: 23
-
 action:
   - choose:
     - conditions:
       - condition: trigger
         id: lower_out
+      - condition: numeric_state
+        entity_id: sensor.living_room_temperature
+        above: 25
       sequence:
       - service: script.notify_engine
         data:
