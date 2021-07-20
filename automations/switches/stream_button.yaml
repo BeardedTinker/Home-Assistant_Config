@@ -1,0 +1,64 @@
+#####
+# Automation for Shelly Button1
+# Controlles my Elgato Lights & desk LED strip 
+#####
+
+alias: Shelly Button
+id: 6e177c4e-4ef8-416d-8e55-c3a7595c8784
+description: ''
+trigger:
+- platform: state
+  entity_id: binary_sensor.shelly_button1_e09806a9844e_shortpush
+  to: 'on'
+  id: single
+- platform: state
+  entity_id: binary_sensor.shelly_button1_e09806a9844e_double_shortpush
+  id: double
+  to: 'on'
+- platform: state
+  entity_id: binary_sensor.shelly_button1_e09806a9844e_triple_shortpush
+  id: triple
+  to: 'on'
+- platform: state
+  entity_id: binary_sensor.shelly_button1_e09806a9844e_longpush
+  id: long
+  to: 'on'
+
+condition: []
+
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: single
+    sequence:
+    - service: light.toggle
+      target:
+        entity_id: light.elgato_key_light_air_left
+  - conditions:
+    - condition: trigger
+      id: double
+    sequence:
+    - service: light.toggle
+      target:
+        entity_id: light.elgato_key_light_air_right
+  - conditions:
+    - condition: trigger
+      id: triple
+    sequence:
+    - service: light.toggle
+      target:
+        entity_id: light.stream_desk
+  - conditions:
+    - condition: trigger
+      id: long
+    sequence:
+    - service: light.turn_off
+      target:
+        entity_id:
+        - light.elgato_key_light_air_right
+        - light.elgato_key_light_air_left
+        - light.stream_desk
+  default: []
+
+mode: single
