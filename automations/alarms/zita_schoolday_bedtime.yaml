@@ -19,6 +19,16 @@ trigger:
 #  at: '06:30:00'
 #  platform: time
 
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: sensor.zita_school_tomorrow
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.workday_tomorrow
+    state: 'on'
+
 action:
 - service: script.notify_engine
   data:
@@ -27,7 +37,8 @@ action:
     value1: 'It is {{ states("sensor.time") }} - time to go to bed'
     tag_id: 'information'
 - service: media_player.volume_set
-  data:
+  target:
     entity_id: media_player.mini_me
+  data:
     volume_level: 0.3
 - service: script.schoolnight_bedtime_zita
