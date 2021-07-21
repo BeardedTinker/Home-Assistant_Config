@@ -5,12 +5,14 @@ import logging
 
 import voluptuous as vol
 
+from haffmpeg.camera import CameraMjpeg
 from homeassistant.components.camera import SUPPORT_STREAM, Camera
 
 # from homeassistant.components.ffmpeg import DATA_FFMPEG
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.aiohttp_client import (
     async_aiohttp_proxy_web,
+    async_aiohttp_proxy_stream,
     async_get_clientsession,
 )
 
@@ -192,12 +194,20 @@ class ReolinkCamera(ReolinkEntity, Camera):
 
     async def handle_async_mjpeg_stream(self, request):
         """Generate an HTTP MJPEG stream from the camera."""
-        stream_source = await self.stream_source()
 
-        websession = async_get_clientsession(self._hass)
-        stream_coro = websession.get(stream_source, timeout=10)
+        stream = CameraMjpeg(self._manager.binary)
+        await stream.open_camera(self._input, extra_cmd=self._extra_arguments)
 
-        return await async_aiohttp_proxy_web(self._hass, request, stream_coro)
+        try:
+            stream_reader = await stream.get_reader()
+            return await async_aiohttp_proxy_stream(
+                self.hass,
+                request,
+                stream_reader,
+                self._manager.ffmpeg_stream_content_type,
+            )
+        finally:
+            await stream.close()
 
     async def async_camera_image(self):
         """Return a still image response from the camera."""

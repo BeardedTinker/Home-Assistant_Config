@@ -17,7 +17,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from homeassistant.components.automation import AutomationActionType
-from homeassistant.components.device_automation import TRIGGER_BASE_SCHEMA
+from homeassistant.components.device_automation import DEVICE_TRIGGER_BASE_SCHEMA
 from homeassistant.components.homeassistant.triggers import state as state_trigger
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 
@@ -28,7 +28,7 @@ NEW_VOD = "new_vod"
 
 TRIGGER_TYPES = {NEW_VOD}
 
-TRIGGER_SCHEMA = TRIGGER_BASE_SCHEMA.extend(
+TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
     {
         vol.Required(CONF_TYPE): vol.In(TRIGGER_TYPES),
         vol.Optional(CONF_ENTITY_ID): cv.entity_domain(SENSOR_DOMAIN),

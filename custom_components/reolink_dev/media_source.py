@@ -126,7 +126,7 @@ class ReolinkMediaSource(MediaSource):
 
         url = await base.api.get_vod_source(file)
         _LOGGER.debug("Load VOD %s", url)
-        stream = create_stream(self.hass, url)
+        stream = create_stream(self.hass, url, {})
         stream.add_provider("hls", timeout=3600)
         url: str = stream.endpoint_url("hls")
         # the media browser seems to have a problem with the master_playlist
