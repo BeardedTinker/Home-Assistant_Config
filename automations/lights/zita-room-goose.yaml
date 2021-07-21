@@ -21,4 +21,3 @@ action:
     entity_id: light.goose
   data:
     transition: 90
-  

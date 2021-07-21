@@ -15,4 +15,4 @@ condition: []
 action:
   data:
     entity_id: light.luka_floor_light
-  service: light.toggle
+  service: light.turn_on
