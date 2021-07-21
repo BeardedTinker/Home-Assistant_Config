@@ -3,7 +3,7 @@
 # Link to SmokePing where I can see network status
 #####
 
-grafana:
+smokeping:
   title: 'SmokePing'
   icon: 'mdi:lan'
   url: !secret url_smokeping

@@ -10,6 +10,11 @@ trigger:
   below: 2
   for: '00:01:30'
 
+condition:
+  condition: state
+  entity_id: input_boolean.dishwasher_on
+  state: 'on'
+
 action:
 - service: script.notify_engine
   data:

@@ -3,7 +3,7 @@
 # Link to Dashboard from node #1
 #####
 
-grafana:
+storj1:
   title: 'Storj #1'
   icon: 'mdi:server'
   url: !secret url_storj_1
