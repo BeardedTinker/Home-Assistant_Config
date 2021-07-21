@@ -24,6 +24,8 @@ action:
     value1: 'Dishwasher is starting.'
     tag_id: 'information'
     sticky: 'true'
+    group: home
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - service: input_boolean.turn_on
   data: {}

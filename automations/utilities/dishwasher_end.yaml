@@ -4,6 +4,7 @@
 
 alias: Dishwasher done
 id: 7cc7b31e-f474-4db1-8765-052a9cccaf93
+
 trigger:
   platform: numeric_state
   entity_id: sensor.dishwasher_current_consumption
@@ -23,6 +24,8 @@ action:
     value1: 'Dishwasher is done.'
     tag_id: 'information'
     sticky: 'true'
+    group: home
+    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
 - service: input_boolean.turn_off
   data: {}

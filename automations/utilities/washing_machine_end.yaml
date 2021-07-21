@@ -4,6 +4,7 @@
 
 alias: Washing machine done
 id: 71bee845-533b-4539-9e5b-4e829c420cb2
+
 trigger:
   platform: numeric_state
   entity_id: sensor.washing_machine_current_consumption
