@@ -1,8 +1,0 @@
-platform: template
-sensors:
-  rlc_410_motion:
-    friendly_name: RLC-410
-    device_class: motion
-    value_template: "{{ is_state('camera.reolink_rlc_410_5m', 'motion') }}"
-    delay_off: 
-        seconds: 30

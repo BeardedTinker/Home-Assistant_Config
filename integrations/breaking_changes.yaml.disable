@@ -1,6 +1,0 @@
-#####
-# HACS integration
-# Help track breaking changes and warn on them
-#####
-
-breaking_changes:

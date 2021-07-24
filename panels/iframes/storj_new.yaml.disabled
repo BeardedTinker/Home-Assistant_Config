@@ -1,9 +1,0 @@
-#####
-# Storj node #2
-# Link to Dashboard from node #2
-#####
-
-storj2:
-  title: 'Storj #2'
-  icon: 'mdi:server'
-  url: !secret url_storj_2
