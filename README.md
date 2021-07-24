@@ -168,18 +168,18 @@ It looks overwhelming at first, but when you get the hang of it, this structure 
 
 ## Counters
 
-Current count of various things in Home Assistant 
+Up-to-date count of various things in Home Assistant 
 
 | Type                 | Count |
 | -------------------- |:-----:|
-| Alerts               |     0 |
-| Automations          |   152 |
-| Binary sensors       |   215 |
+| Alerts               |     4 |
+| Automations          |   159 |
+| Binary sensors       |   214 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  1785 |
+| Entities             |  1770 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    13 |
@@ -188,15 +188,15 @@ Current count of various things in Home Assistant
 | Input Select         |    10 |
 | Input Text           |     4 |
 | Lights               |    39 |
+| Lines of code (YAML) | 19496 |
 | Locks                |     3 |
 | Media players        |    41 |
-| Lines of code (YAML) | 19077 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    17 |
-| Sensors              |  1041 |
-| Switches             |    75 |
+| Sensors              |  1024 |
+| Switches             |    66 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
