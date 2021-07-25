@@ -61,7 +61,7 @@ action:
         target:
           entity_id: media_player.display_me
         data:
-          message: 'Open windows - inside temperature is {{ states("living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.!'
+          message: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.!'
 
     - conditions:
       - condition: trigger
