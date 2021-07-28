@@ -7,8 +7,8 @@ import voluptuous as vol
 
 from haffmpeg.camera import CameraMjpeg
 from homeassistant.components.camera import SUPPORT_STREAM, Camera
+from homeassistant.components.ffmpeg import DATA_FFMPEG
 
-# from homeassistant.components.ffmpeg import DATA_FFMPEG
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.aiohttp_client import (
     async_aiohttp_proxy_web,
@@ -97,7 +97,7 @@ class ReolinkCamera(ReolinkEntity, Camera):
         Camera.__init__(self)
         self._entry_id = config.entry_id
 
-        # self._ffmpeg = self._hass.data[DATA_FFMPEG]
+        self._ffmpeg = self._hass.data[DATA_FFMPEG]
         # self._last_image = None
         self._ptz_commands = {
             "AUTO": "Auto",
@@ -195,7 +195,7 @@ class ReolinkCamera(ReolinkEntity, Camera):
     async def handle_async_mjpeg_stream(self, request):
         """Generate an HTTP MJPEG stream from the camera."""
 
-        stream = CameraMjpeg(self._manager.binary)
+        stream = CameraMjpeg(self._ffmpeg.binary)
         await stream.open_camera(self._input, extra_cmd=self._extra_arguments)
 
         try:
@@ -204,7 +204,7 @@ class ReolinkCamera(ReolinkEntity, Camera):
                 self.hass,
                 request,
                 stream_reader,
-                self._manager.ffmpeg_stream_content_type,
+                self._ffmpeg.ffmpeg_stream_content_type,
             )
         finally:
             await stream.close()
