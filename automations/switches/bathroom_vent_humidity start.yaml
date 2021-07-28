@@ -11,6 +11,8 @@ trigger:
   entity_id: sensor.bathroom_humidity
 
 condition: 
+  condition: and
+  conditions:
   - condition: numeric_state
     entity_id: sensor.bathroom_humidity
     above: 64
