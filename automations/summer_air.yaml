@@ -20,6 +20,15 @@ trigger:
     minutes: 10
   id: higher_out
 
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.people_home
+    state: 'on'
+  - condition: state
+    entity_id: sensor.season
+    state: 'summer'
 action:
   - choose:
     - conditions:
