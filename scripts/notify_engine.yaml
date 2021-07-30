@@ -1,6 +1,32 @@
 #####
-# Notifications engine - taken from CCOSTAN
+# Notifications engine - adapted from CCOSTAN
 # It allows more robust configuring on who to notify and type of notification
+#
+# What it does, variables
+#
+# Service template is used to select who will receive message.
+# It can be used for individual messages but groups too
+# for example - Discord sends message to both Discord and me etc.
+#
+# Options available for each notification. Not all platforms support everything
+# title:        used to send title to notify services that support it (HA app, Telegram,...)
+# message:      message that will be sent - up to 3 lines can be sent
+# attachment:   currently not used or tested but should send attachment in message where supported
+
+# Android specific
+# tag:          Android specific tag to replace notifications of same group/type (apns-collapse-id in iOS)
+# group:        Android specific (thread-id used in iOS) - used to group same messages
+# sticky:       Android specific - true will not dismiss it on select, false will
+# color:        Android specific - set color of notification
+# channel:      Android specific - again group in channels and can be used to customize notificaion sound - default is general
+# importance:   Android specific and relate to channel (high, low, max, min, default)
+# clickAction:  Android Specific - used to create clickable notificatins that have action
+# 
+# iOS Specific:
+# url:          iOS specific - for Android clickAction should be used
+# badge:        iOS specific
+# sound:        iOS specific
+# entity_id:    iOS specific - used in Dynamic attachments such as camera feed
 #
 # Original Repo : https://github.com/CCOSTAN/Home-AssistantConfig
 #####
@@ -33,21 +59,42 @@ notify_engine:
       data:
         title: "{{ title }}"
         message: "{{ value1 }} {{ value2 }} {{ value3 }}"
+# As secondary heading you can use subtitle in iOS and subject: in Android
+        subtitle: "{{ subtitle }}"
+        subject: "{{ subtitle }}"
         target: "{{ target_id }}"
         data:
           attachment:
             url: "{{ clickAction }}"
             content-type: "{{ content_type }}"
             hide-thumbnail: false
+# Using links - url: is used in iOS, and ClickAction: in Android
+          url: "{{ clickAction }}"  
           clickAction: "{{ clickAction }}"
           apns_headers:
             'apns-collapse-id': "{{ tag_id }}"
           tag: "{{ tag_id }}"
           group: "{{ group }}"
+# Android specific - default is false, true will make notification stick even if you click it          
           sticky: "{{ sticky }}"
+# Android specific - can use hex code and color name
           color: "{{ color }}"
+# Android specific  create or use channel, default is general
+# Importence sets notification importance for channel per message
+# Available values: high, low, max, min and default
           channel: "{{ channel_id }}"
           importance: "{{ importance_id }}"
+#          vibrationPattern: ""
+#          ledColor:
+# Android specific - timeout allows you out remove notificiation after nn seconds  
+          timeout: "{{ timeout_sec }}"
+          entity_id: "{{ camera_entity }}"
+          push:
+            category: "{{ ios_category }}"
+#            sound: "{{ ios_sound }}"
+#            badge: "{{ ios_badge }}"
+
+# DISABLED - used to send notifications to MQTT for printing on thermal printer
 #    - service: mqtt.publish
 #      data_template:
 #        topic: printer/thermal_text
@@ -56,29 +103,3 @@ notify_engine:
 #          {
 #            "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
 #          }
-
-#          push:
-#            sound: "{{ ios_sound }}"
-#            badge: "{{ ios_badge }}"
-#            category: "{{ ios_category }}"
-#          entity_id: "{{ camera_entity }}"
-
-# What it does, variables
-#
-# Service template is used to select who will receive message.
-# Individual messages are possible, but also group messgages too.
-# for example - Discord sends message to both Discord and me etc.
-#
-# title:      used to send title to notify services that support it (HA app, Telegram,...)
-# message:    test to sens message itself - up to 3 lines can be sent
-# attachment: currently not used or tested but should send attachment in message where supported
-# url:        iOS specific - for Android clickAction should be used
-# tag:        Android specific tag to replace notifications of same group/type (apns-collapse-id in iOS)
-# group:      Android specific (thread-id used in iOS) - used to group same messages
-# sticky:     Android specific - true will not dismiss it on select, false will
-# color:      Android specific - set color of notification
-# channel:    Android specific - again group in channels and can be used to customize notificaion sound - default is general
-# importance: Android specific and relate to channel (high, low, max, min, default)
-# badge:      iOS specific
-# sound:      iOS specific
-# entity_id:  iOS specific - used in Dynamic attachments such as camera feed

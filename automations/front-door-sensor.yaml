@@ -24,19 +24,17 @@ action:
     group: home
     color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
-- service: script.notify_engine
-  data:
-    who: 'printer'
-    title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
-    tag_id: 'warning'
+#- service: script.notify_engine
+#  data:
+#    who: 'printer'
+#    title: '🚪*Front door*'
+#    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
+#    tag_id: 'warning'
 - service: media_player.volume_set
-  target:
-    entity_id: media_player.display_me
   data:
+    entity_id: media_player.display_me
     volume_level: 0.6
 - service: tts.google_translate_say
-  target:
-    entity_id: media_player.display_me
-  data:
+  entity_id: media_player.display_me
+  data:  
     message: 'Front door is open!'
