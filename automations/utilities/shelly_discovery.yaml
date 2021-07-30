@@ -12,7 +12,7 @@ max: 999
 trigger:
   platform: mqtt
   topic: shellies/announce
-
+  
 action:
   service: python_script.shellies_discovery
   data:
@@ -20,3 +20,4 @@ action:
     mac: '{{ trigger.payload_json.mac }}'
     fw_ver: '{{ trigger.payload_json.fw_ver }}'
     model: '{{ trigger.payload_json.model }}'
+    mode: '{{ trigger.payload_json.mode | default }}'
