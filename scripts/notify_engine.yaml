@@ -9,13 +9,17 @@
 # When you call script from automation, you can specify variables provided below to tweak ho notification will behave.
 #
 # List of variables you can used when calling this script:
+#
 # who:            List of available platforms and variable that is used to select where to push notification
 # title:          Title of the message - not all notification platforms support this
 # value1:         value variables are used as messge body. Up to 3 lines can be used
 # value2: 
 # value3:
-# subtitle:       Subtitle can be used for text under the title (subtitle in iOS, subject in Android)
 # target_id:      Some platforms require you to specify target ID of the channel for message in ex. Discord, Telegram etc
+#
+# Additiona variables that can be used to further customize Companion App notifications
+#
+# subtitle:       Subtitle can be used for text under the title (subtitle in iOS, subject in Android)
 # clickAction:    Used toprovide URL that can be called after clisking notification (url in iOS, clickAction in Android)
 # tag_id:         Used to tag notifications, useful for mobile app notifications
 # group:          Used to group notificatrions, useful for mobile app notifications
@@ -61,10 +65,10 @@ notify_engine:
       data:
         title: "{{ title }}"
         message: "{{ value1 }} {{ value2 }} {{ value3 }}"
-        subtitle: "{{ subtitle }}"
-        subject: "{{ subtitle }}"
         target: "{{ target_id }}"
         data:
+          subtitle: "{{ subtitle }}"
+          subject: "{{ subtitle }}"
           attachment:
             url: "{{ clickAction }}"
             content-type: "{{ content_type }}"
