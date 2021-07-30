@@ -1,34 +1,36 @@
 #####
 # Notifications engine - adapted from CCOSTAN
-# It allows more robust configuring on who to notify and type of notification
-#
-# What it does, variables
+# Original Repo : https://github.com/CCOSTAN/Home-AssistantConfig
 #
 # Service template is used to select who will receive message.
 # It can be used for individual messages but groups too
 # for example - Discord sends message to both Discord and me etc.
 #
-# Options available for each notification. Not all platforms support everything
-# title:        used to send title to notify services that support it (HA app, Telegram,...)
-# message:      message that will be sent - up to 3 lines can be sent
-# attachment:   currently not used or tested but should send attachment in message where supported
-
-# Android specific
-# tag:          Android specific tag to replace notifications of same group/type (apns-collapse-id in iOS)
-# group:        Android specific (thread-id used in iOS) - used to group same messages
-# sticky:       Android specific - true will not dismiss it on select, false will
-# color:        Android specific - set color of notification
-# channel:      Android specific - again group in channels and can be used to customize notificaion sound - default is general
-# importance:   Android specific and relate to channel (high, low, max, min, default)
-# clickAction:  Android Specific - used to create clickable notificatins that have action
-# 
-# iOS Specific:
-# url:          iOS specific - for Android clickAction should be used
-# badge:        iOS specific
-# sound:        iOS specific
-# entity_id:    iOS specific - used in Dynamic attachments such as camera feed
+# When you call script from automation, you can specify variables provided below to tweak ho notification will behave.
 #
-# Original Repo : https://github.com/CCOSTAN/Home-AssistantConfig
+# List of variables you can used when calling this script:
+# who:            List of available platforms and variable that is used to select where to push notification
+# title:          Title of the message - not all notification platforms support this
+# value1:         value variables are used as messge body. Up to 3 lines can be used
+# value2: 
+# value3:
+# subtitle:       Subtitle can be used for text under the title (subtitle in iOS, subject in Android)
+# target_id:      Some platforms require you to specify target ID of the channel for message in ex. Discord, Telegram etc
+# clickAction:    Used toprovide URL that can be called after clisking notification (url in iOS, clickAction in Android)
+# tag_id:         Used to tag notifications, useful for mobile app notifications
+# group:          Used to group notificatrions, useful for mobile app notifications
+# sticky:         Android specific - true will make notification stick even when you press on it, default is false
+# color:          Android specific - change notification color. can use hex code or color name  (#ff0000 or 'orange')
+# channel_id:     Android specific - create or use channel for notification. Default is 'general'
+# importance_id:  Android specific - in combination with channel used to define importance: high, low, max, min and default
+# vibrationPattern: Android specific - NOT YET USED
+# ledColor:       Android specific - you can use hex code or color name (#ff0000 or 'orange')
+# timeout_sec:    Android specific - allows you to atumaticly expire notification after nnn secons - numeric value, in ex. 900
+# camera_entity:  Disply image
+# ios_category:   iOS specific - 
+# iso_sound:      iOS specific - DISABLED
+# ios_badge:      iOS specific - DISABLED
+# 
 #####
 
 notify_engine:
@@ -59,7 +61,6 @@ notify_engine:
       data:
         title: "{{ title }}"
         message: "{{ value1 }} {{ value2 }} {{ value3 }}"
-# As secondary heading you can use subtitle in iOS and subject: in Android
         subtitle: "{{ subtitle }}"
         subject: "{{ subtitle }}"
         target: "{{ target_id }}"
@@ -68,38 +69,21 @@ notify_engine:
             url: "{{ clickAction }}"
             content-type: "{{ content_type }}"
             hide-thumbnail: false
-# Using links - url: is used in iOS, and ClickAction: in Android
           url: "{{ clickAction }}"  
           clickAction: "{{ clickAction }}"
           apns_headers:
             'apns-collapse-id': "{{ tag_id }}"
           tag: "{{ tag_id }}"
           group: "{{ group }}"
-# Android specific - default is false, true will make notification stick even if you click it          
           sticky: "{{ sticky }}"
-# Android specific - can use hex code and color name
           color: "{{ color }}"
-# Android specific  create or use channel, default is general
-# Importence sets notification importance for channel per message
-# Available values: high, low, max, min and default
           channel: "{{ channel_id }}"
           importance: "{{ importance_id }}"
-#          vibrationPattern: ""
-#          ledColor:
-# Android specific - timeout allows you out remove notificiation after nn seconds  
+#          vibrationPattern: "100 1000 100 1000 100"
+#          ledColor: "{{ ledColor }}"
           timeout: "{{ timeout_sec }}"
           entity_id: "{{ camera_entity }}"
           push:
             category: "{{ ios_category }}"
 #            sound: "{{ ios_sound }}"
 #            badge: "{{ ios_badge }}"
-
-# DISABLED - used to send notifications to MQTT for printing on thermal printer
-#    - service: mqtt.publish
-#      data_template:
-#        topic: printer/thermal_text
-#        payload: "{{ title }}"
-#        payload_template: >-
-#          {
-#            "{{ states('sensor.date') }} {{ states('sensor.time') }} {{ value1 }}"
-#          }
