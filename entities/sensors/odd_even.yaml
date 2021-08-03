@@ -1,6 +1,8 @@
 #####
 # Odd or even day tracker
 # Will be used to track chorse around the house for kids
+# Kids asked for fair system, so had to discard day of the month and use day in the year
+# That way, there will be no issues with months that have 31 days
 #####
 
 platform: template
@@ -8,4 +10,4 @@ sensors:
   odd_even:
     friendly_name: "Date Odd or Even?"
     # entity_id: sensor.date
-    value_template: "{{ 'Odd' if now().day % 2 else 'Even' }}"
+    value_template: "{{ 'Odd' if now().strftime('%j')|int % 2 else 'Even' }}"
