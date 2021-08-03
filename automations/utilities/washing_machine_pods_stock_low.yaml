@@ -20,6 +20,10 @@ action:
     who: 'parents'
     title: 'Washing machine pods low'
     value1: 'Added washing machin pods to shopping list'
-    tag_id: 'information'
-    sticky: 'true'
     target_id: !secret telegram_bot_chat_id
+    group: duties
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300

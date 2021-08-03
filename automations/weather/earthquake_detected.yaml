@@ -17,11 +17,13 @@ action:
     who: 'family'
     title: '⚠ *Earthquake Alert!*'
     value1: 'Earthquake detected! Stay calm!'
-    tag_id: 'warning'
-    sticky: 'true'
-    group: weather
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: weather   
+    tag_id: 'warning'
+    importance_id: default
+    color: 'red'
+    sticky: 'true'
+
 - data:
     entity_id:
       - media_player.display_me

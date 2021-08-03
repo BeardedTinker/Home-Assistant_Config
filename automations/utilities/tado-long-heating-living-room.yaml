@@ -21,5 +21,10 @@ action:
     who: 'parents'
     title: '♨ *HEATING WARNING!*'
     value1: 'Living Room Heating ON for > 90 minutes'
-    tag_id: 'warning'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'true'
+#    timeout: 300

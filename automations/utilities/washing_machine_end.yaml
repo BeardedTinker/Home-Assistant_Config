@@ -22,11 +22,12 @@ action:
     who: 'family'
     title: '♨ *Washing done*'
     value1: 'Washing machine is done. Open the door.'
-    tag_id: 'information'
-    sticky: 'true'
-    group: home
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    sticky: 'false'
+    color: 'green'
 - service: input_boolean.turn_off
   data: {}
   entity_id: input_boolean.washing_on

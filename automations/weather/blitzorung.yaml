@@ -22,13 +22,15 @@ condition:
     below: 10
 
 action:
-  - service: script.notify_engine
-    data:
-      who: 'family'
-      title: '*Lightning Warning!*'
-      value1: 'Lightning has been detected within {{states("sensor.blitzortung_lightning_distance") | round (1, "floor")}} km from our place.'
-      tag_id: 'warning'
-      sticky: 'true'
-      group: weather
-      color: '#ff8c00'
-      target_id: !secret telegram_bot_chat_id
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '*Lightning Warning!*'
+    value1: 'Lightning has been detected within {{states("sensor.blitzortung_lightning_distance") | round (1, "floor")}} km from our place.'
+    target_id: !secret telegram_bot_chat_id
+    group: weather
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'true'
+    timeout: 300

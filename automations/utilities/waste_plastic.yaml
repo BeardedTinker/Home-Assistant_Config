@@ -22,6 +22,9 @@ action:
     who: 'parents'
     title: '♻ *Garbage day*'
     value1: 'Take out plastic for recycling.'
-    tag_id: 'information'
-    sticky: 'true'
     target_id: !secret telegram_bot_chat_id
+    group: duties
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'

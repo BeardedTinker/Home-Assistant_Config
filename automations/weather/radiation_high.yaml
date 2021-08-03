@@ -20,11 +20,13 @@ action:
     who: 'family'
     title: '☢ *Radiation Level Alert!*'
     value1: 'Radiation is currently {{ states("sensor.geiger_counter") }} CPM. Normal value is below 25'
-    tag_id: 'warning'
-    sticky: 'true'
-    group: weather
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: weather
+    tag_id: 'emergency'
+    importance_id: default
+    color: 'red'
+    sticky: 'true'
+
 - data:
     entity_id:
       - media_player.display_me
