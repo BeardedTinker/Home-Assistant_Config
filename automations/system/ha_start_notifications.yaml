@@ -23,7 +23,7 @@ action:
     timeout: 300
 - service: media_player.volume_set
   target:
-    entity_id: media_player.display_mea
+    entity_id: media_player.display_me
   data:
     volume_level: 0.3
 - delay: 00:00:01
