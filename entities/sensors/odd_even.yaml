@@ -7,5 +7,5 @@ platform: template
 sensors:
   odd_even:
     friendly_name: "Date Odd or Even?"
-    entity_id: sensor.date
+    # entity_id: sensor.date
     value_template: "{{ 'Odd' if now().day % 2 else 'Even' }}"
