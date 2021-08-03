@@ -22,6 +22,10 @@ action:
     title: '🌅 *Sunset*'
     value1: 'Sun setting, turning lights on.'
     tag_id: 'information'
+    sticky: 'false'
+    group: home
+    color: 'green'
+    timeout: 300
 - service: light.turn_on
   target:
     entity_id: light.living_room_lights

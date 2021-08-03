@@ -30,5 +30,9 @@ action:
     who: 'andrej'
     value1: "It's {{ states('sensor.date') }} {{ states('sensor.time') }} - all lights out"
     tag_id: 'information'
+    sticky: 'false'
+    group: home
+    color: 'green'
+    timeout: 300
 - service: input_boolean.turn_off
   entity_id: input_boolean.audio_notifications

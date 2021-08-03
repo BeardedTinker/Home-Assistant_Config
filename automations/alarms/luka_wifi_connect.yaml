@@ -18,6 +18,7 @@ action:
     title: '📶 *WiFi Connected*'
     value1: ' {{ states("sensor.iphone_ssid") }} WiFi is connected - well done!'
     tag_id: 'information'
-    sticky: 'true'
-    group: status
-    color: '#ff0000'
+    sticky: 'false'
+    group: home
+    color: 'green'
+    timeout: 300

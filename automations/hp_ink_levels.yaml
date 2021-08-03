@@ -28,10 +28,11 @@ action:
     notification_id: low-battery-alert
 - service: script.notify_engine
   data:
+    who: 'andrej'
     value1: "{{ trigger.to_state.attributes.friendly_name }} is at {{ trigger.to_state.state }}%"
-    who: 'telegram'
     tag_id: 'information'
-    sticky: 'true'
+    sticky: 'false'
     group: system
-    color: '#ff0000'
+    color: 'green'
+    timeout: 300
     target_id: !secret telegram_bot_chat_id

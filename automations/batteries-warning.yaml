@@ -16,11 +16,11 @@ condition:
 action:
 - service: script.notify_engine
   data:
-    who: 'telegram'
+    who: 'andrej'
     title: '*Information*'
     value1: 'There are low batteries: {{ states("sensor.low_batteries") }}'
     tag_id: 'information'
-    sticky: 'true'
+    sticky: 'false'
     group: system
-    color: '#ff0000'
+    color: 'orange'
     target_id: !secret telegram_bot_chat_id

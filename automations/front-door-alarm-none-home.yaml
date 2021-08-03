@@ -22,10 +22,15 @@ action:
     who: 'family'
     value1: "Motion in apartment! No family member is home"
     tag_id: 'emergency'
+    sticky: 'true'
+    group: security
+    color: 'red'
     target_id: !secret telegram_bot_chat_id
 - service: media_player.volume_set
   target:
-    entity_id: media_player.display_me
+    entity_id: 
+      - media_player.display_me
+      - media_player.clock:me
   data:
     volume_level: 0.7
   

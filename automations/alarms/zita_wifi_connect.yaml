@@ -19,5 +19,6 @@ action:
     value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
     tag_id: 'information'
     sticky: 'false'
-    group: status
-    color: '#ff0000'
+    group: home
+    color: 'green'
+    timeout: 300

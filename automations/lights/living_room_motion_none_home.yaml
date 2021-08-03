@@ -22,8 +22,10 @@ action:
     who: 'family'
     value1: "Living room motion and none at home!"
     tag_id: 'warning'
-    group: home
-    color: '#ff0000'
+    sticky: 'true'
+    group: security
+    color: 'orange'
+#    timeout: 300
     target_id: !secret telegram_bot_chat_id
 - data:
     entity_id: media_player.display_me

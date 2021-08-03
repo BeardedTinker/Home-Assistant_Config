@@ -36,6 +36,10 @@ action:
     title: '⏲ *Good morning Zita*'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
     tag_id: 'information'
+    sticky: 'false'
+    group: duties
+    color: 'green'
+#    timeout: 300
 - service: media_player.volume_set
   data:
     entity_id: media_player.mini_me

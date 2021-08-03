@@ -36,6 +36,11 @@ action:
     title: '⏲ *Bedtime Luka*'
     value1: 'It is {{ states("sensor.time") }} - time to go to bed'
     tag_id: 'information'
+    sticky: 'false'
+    group: duties
+    color: 'green'
+#    timeout: 300
+
 - service: media_player.volume_set
   target:
     entity_id: media_player.mini_me

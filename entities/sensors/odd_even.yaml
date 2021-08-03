@@ -1,0 +1,11 @@
+#####
+# Odd or even day tracker
+# Will be used to track chorse around the house for kids
+#####
+
+platform: template
+sensors:
+  odd_even:
+    friendly_name: "Date Odd or Even?"
+    entity_id: sensor.date
+    value_template: "{{ 'Odd' if now().day % 2 else 'Even' }}"
