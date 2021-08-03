@@ -17,8 +17,9 @@ action:
     who: 'zita'
     title: '📶 *WiFi Connected*'
     value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
-    tag_id: 'information'
-    sticky: 'false'
     group: home
+    tag_id: 'information'
+    importance_id: default
     color: 'green'
+    sticky: 'false'
     timeout: 300

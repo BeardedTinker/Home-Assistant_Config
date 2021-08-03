@@ -20,6 +20,10 @@ action:
     who: 'parents'
     title: 'Mosquito tablets low'
     value1: 'Added mosquito tablets to shopping list'
-    tag_id: 'information'
-    sticky: 'true'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+

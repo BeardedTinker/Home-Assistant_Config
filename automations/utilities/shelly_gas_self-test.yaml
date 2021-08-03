@@ -21,11 +21,12 @@ action:
     who: 'parents'
     title: '☠ *Gas needs Self-test*'
     value1: 'Gas sensor needs self-test. Press button to start it.'
-    tag_id: 'information'
-    sticky: 'true'
-    group: weather
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'false'
 - data:
     entity_id: media_player.display_me
     volume_level: 0.5

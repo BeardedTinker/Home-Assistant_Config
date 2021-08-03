@@ -29,10 +29,13 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
+    title: 'HP Printer Ink low'
     value1: "{{ trigger.to_state.attributes.friendly_name }} is at {{ trigger.to_state.state }}%"
-    tag_id: 'information'
-    sticky: 'false'
-    group: system
-    color: 'green'
-    timeout: 300
     target_id: !secret telegram_bot_chat_id
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300
+

@@ -24,10 +24,11 @@ action:
     value1: 'HACS Update(s) at {{ states("sensor.time") }}'
     value2: '{{state_attr("sensor.hacs","repositories")}}'
     value3: "There is {{ states('sensor.hacs') }} update."
-    tag_id: 'update_hacs'
+    group: hacs_update
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
     sticky: 'true'
-    group: ha_status
-    color: '#ff8c0'
     clickAction: '/hacs/entry'
 - service: rest_command.github_issue_state
   data:

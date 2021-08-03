@@ -19,8 +19,10 @@ action:
     who: 'andrej'
     title: '*Information*'
     value1: 'There are low batteries: {{ states("sensor.low_batteries") }}'
-    tag_id: 'information'
-    sticky: 'false'
-    group: system
-    color: 'orange'
     target_id: !secret telegram_bot_chat_id
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'orange'
+    sticky: 'false'
+#    timeout: ''

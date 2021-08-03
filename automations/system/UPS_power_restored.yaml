@@ -19,8 +19,12 @@ action:
   data:
     who: 'family'
     value1: "Power restored, battery charging, restoring boolean to off!"
-    tag_id: 'emergency'
     target_id: !secret telegram_bot_chat_id
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'  
 - service: input_boolean.turn_off
   data: {}
   entity_id: input_boolean.ups_on_batteries

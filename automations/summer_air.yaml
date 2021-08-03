@@ -43,13 +43,13 @@ action:
           who: 'family'
           title: '🚪*Temperature*'
           value1: 'Open windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
-          tag_id: 'information'
-          group: weather
-          sticky: 'true'
-          color: 'green'
-      #    channel_id: ''
-      #    importance_id: ''
           target_id: !secret telegram_bot_chat_id
+          group: weather
+          tag_id: 'information'
+          importance_id: default
+          color: 'green'
+          sticky: 'true'
+      #    channel_id: ''
       #- service: script.notify_engine
       #  data:
       #    who: 'printer'
@@ -81,13 +81,13 @@ action:
           who: 'family'
           title: '🚪*Temperature*'
           value1: 'Close windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.'
-          tag_id: 'information'
-          group: weather
-          sticky: 'true'
-          color: 'green'
-      #    channel_id: ''
-      #    importance_id: ''
           target_id: !secret telegram_bot_chat_id
+          group: weather
+          tag_id: 'information'
+          importance_id: default
+          color: 'green'
+          sticky: 'true'
+      #    channel_id: ''
       #- service: script.notify_engine
       #  data:
       #    who: 'printer'

@@ -16,14 +16,15 @@ condition: []
 action:
 - service: script.notify_engine
   data:
-    who: 'Andrej'
+    who: 'andrej'
     value1: "❌ Zigbee last seen ❌️:"
     value2: "{{state_attr('binary_sensor.z2m_health', 'data')}}"
-    tag_id: 'information'
-    sticky: 'false'
-    group: system
-    color: 'green'
-    timeout: 300
     target_id: !secret telegram_bot_chat_id
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300
 
 mode: single

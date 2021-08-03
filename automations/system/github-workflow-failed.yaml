@@ -20,9 +20,12 @@ action:
     who: 'discord'
     title: '*GitHub workflow failed!*'
     value1: 'At {{ states("sensor.beardedtinker_home_assistant_config_last_build_finished_at") }} after {{states("sensor.beardedtinker_home_assistant_config_last_build_duration")}} seconds, while building {{ states("sensor.beardedtinker_home_assistant_config_last_build_id") }} '
-    tag_id: 'warning'
-    sticky: 'true'
-    group: ha_status
-    color: '#ff8c0'
     target_id: !secret discord_github_id
+    group: system
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'false'
+    timeout: 300
+
 mode: single

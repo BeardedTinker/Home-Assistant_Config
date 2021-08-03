@@ -38,10 +38,11 @@ action:
     who: 'luka'
     title: '⏲ *Good morning Luka*'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
-    tag_id: 'information'
-    sticky: 'false'
     group: duties
+    tag_id: 'information'
+    importance_id: default
     color: 'green'
+    sticky: 'false'
     timeout: 300
 - service: media_player.volume_set
   data:

@@ -17,8 +17,9 @@ action:
     who: 'zita'
     title: '📶 *WiFi Disconnected*'
     value1: 'Check your WiFi'
-    tag_id: 'warning'
-    sticky: 'false'
     group: home
+    tag_id: 'warning'
+    importance_id: default
     color: 'orange'
+    sticky: 'false'
 #    timeout: 300

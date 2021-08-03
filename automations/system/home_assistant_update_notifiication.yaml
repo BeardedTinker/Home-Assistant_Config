@@ -36,12 +36,13 @@ action:
     value1: 'There is an update to Home Assistant Supervise'
     value2: '{{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}'
     value3: 'Triggering GitHub workflow build...'
-    tag_id: 'update_ha'
-    sticky: 'true'
-    group: ha_status
-    color: '#ff8c00'
-    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
+    group: ha_update
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'true'
+    clickAction: /hassio/dashboard
 
 - service: persistent_notification.create
   data:
@@ -76,12 +77,14 @@ action:
     who: 'discord'
     title: '*Update Home Assistant*'
     value1: 'GitHub workflow has started'
-    tag_id: 'update_ha'
-    sticky: 'true'
-    group: ha_status
-    color: '#ff8c00'
-    clickAction: /hassio/dashboard
     target_id: !secret discord_github_id
+    group: ha_update
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'true'
+    clickAction: /hassio/dashboard
+
 
 - service: persistent_notification.create
   data:
@@ -100,12 +103,13 @@ action:
     who: 'discord'
     title: '*Update Home Assistant*'
     value1: 'GitHub workflow has {{states("sensor.beardedtinker_home_assistant_config_state")}}'
-    tag_id: 'update_ha'
-    sticky: 'true'
-    group: ha_status
-    color: '#ff8c00'
-    clickAction: '/hassio/dashboard'
     target_id: !secret discord_github_id
+    group: ha_update
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'true'
+    clickAction: '/hassio/dashboard'
 
 - service: persistent_notification.create
   data:

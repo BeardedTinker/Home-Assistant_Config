@@ -20,8 +20,12 @@ action:
   data:
     who: 'family'
     value1: "HA restaring after power failure - please check the lights!"
-    tag_id: 'emergency'
     target_id: !secret telegram_bot_chat_id
+    group: system
+    tag_id: 'emergency'
+    importance_id: default
+    color: 'red'
+    sticky: 'true'
 - service: input_boolean.turn_off
   data: {}
   entity_id: input_boolean.ups_on_batteries

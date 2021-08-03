@@ -22,11 +22,14 @@ action:
     who: 'parents'
     title: '♨ *Dishwasher starting*'
     value1: 'Dishwasher is starting.'
-    tag_id: 'information'
-    sticky: 'true'
-    group: home
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300
+
 - service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.dishwasher_on

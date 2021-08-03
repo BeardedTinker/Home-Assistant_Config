@@ -21,10 +21,11 @@ action:
     who: 'andrej'
     title: '🌅 *Sunset*'
     value1: 'Sun setting, turning lights on.'
-    tag_id: 'information'
-    sticky: 'false'
     group: home
+    tag_id: 'information'
+    importance_id: default
     color: 'green'
+    sticky: 'false'
     timeout: 300
 - service: light.turn_on
   target:

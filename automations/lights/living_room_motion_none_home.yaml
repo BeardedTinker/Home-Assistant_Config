@@ -20,13 +20,16 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
+    title: 'Security Alert: Motion in living room'
     value1: "Living room motion and none at home!"
-    tag_id: 'warning'
-    sticky: 'true'
-    group: security
-    color: 'orange'
-#    timeout: 300
     target_id: !secret telegram_bot_chat_id
+    group: security
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'true'
+#    timeout: 300
+
 - data:
     entity_id: media_player.display_me
     volume_level: 0.7

@@ -20,11 +20,15 @@ action:
     who: 'family'
     title: '🚪*Front door*'
     value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
-    tag_id: 'warning'
-    sticky: 'false'
-    group: home
-    color: 'orange'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'false'
+#    timeout: ''
+
+
 #- service: script.notify_engine
 #  data:
 #    who: 'printer'

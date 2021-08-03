@@ -21,11 +21,11 @@ action:
     who: 'family'
     title: '💧 *Water Leak Alert!*'
     value1: 'Water leak detected - check under dishwasher now!'
-    tag_id: 'warning'
-    sticky: 'true'
-    group: utilities
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'emergency'
+    color: 'red'
+    sticky: 'true'
 - data:
     entity_id:
       - media_player.display_me

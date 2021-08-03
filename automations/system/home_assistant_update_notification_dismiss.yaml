@@ -23,8 +23,11 @@ action:
   data:
     who: 'andrej'
     value1: clear_notification
-    tag_id: 'update_ha'
-    group: ha_status
+    group: ha_update
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'true'
 - service: persistent_notification.dismiss
   data:
     notification_id: update_ha

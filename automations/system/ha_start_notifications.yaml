@@ -15,14 +15,12 @@ action:
     who: 'andrej'
     title: '*HA started*'
     value1: 'Home Assistant started at {{ states("sensor.time") }}'
-    tag_id: 'system'
+    group: ha
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
     sticky: 'false'
-    group: ha_status
-    color: '#ff0000'
-#    target_id: 
-#    clickAction:
-#    channel_id:
-#    importance_id:
+    timeout: 300
 - service: media_player.volume_set
   target:
     entity_id: media_player.display_mea

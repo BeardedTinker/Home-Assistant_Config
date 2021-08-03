@@ -20,6 +20,9 @@ action:
     who: 'parents'
     title: '🧹 *Vacuum status*'
     value1: '{{ trigger.to_state.name }} is {{ trigger.to_state.state }}'
-    tag_id: 'information'
-    sticky: 'true'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'

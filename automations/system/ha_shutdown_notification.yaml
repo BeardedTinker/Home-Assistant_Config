@@ -15,10 +15,12 @@ action:
     who: 'andrej'
     title: '*HA shutdown*'
     value1: 'Home Assistant shutting down at {{ states("sensor.time") }}'
-    tag_id: 'system'
+    group: ha
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
     sticky: 'false'
-    group: ha_status
-    color: '#ff0000'
+    timeout: 150
 - data:
     entity_id: media_player.display_me
     volume_level: 0.3

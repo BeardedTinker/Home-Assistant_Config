@@ -20,11 +20,12 @@ action:
     who: 'family'
     title: '☠ *Gas warning!*'
     value1: 'Gas is currently at {{ states("sensor.shelly_gas_10521cef4a01_concentration") }} PPM. Normal value is 0'
-    tag_id: 'warning'
-    sticky: 'true'
-    group: weather
-    color: '#ff0000'
     target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'warning'
+    importance_id: default
+    color: 'orange'
+    sticky: 'false'
 - data:
     entity_id:
       - media_player.display_me

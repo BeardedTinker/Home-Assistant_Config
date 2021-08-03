@@ -20,12 +20,16 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
+    title: '*Front door*'
     value1: "Motion in apartment! No family member is home"
-    tag_id: 'emergency'
-    sticky: 'true'
-    group: security
-    color: 'red'
     target_id: !secret telegram_bot_chat_id
+    group: security
+    tag_id: 'emergency'
+    importance_id: default
+    color: 'red'
+    sticky: 'true'
+#    timeout: 
+
 - service: media_player.volume_set
   target:
     entity_id: 

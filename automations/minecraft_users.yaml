@@ -23,10 +23,11 @@ action:
     who: 'luka'
     title: '🎮*Someone is playing minecraft*'
     value1: 'Currently, {{states("sensor.minecraft_server_players_online")}} player(s) is/are online: {{state_attr("sensor.minecraft_server_players_online", "players_list")}}'
-    tag_id: 'information'
-    sticky: 'false'
     group: system
+    tag_id: 'information'
+    importance_id: default
     color: 'green'
+    sticky: 'false'
     timeout: 300
 - service: media_player.volume_set
   target:
