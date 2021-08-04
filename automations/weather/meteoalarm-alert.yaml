@@ -27,7 +27,7 @@ action:
     group: weather
     tag_id: 'warning'
     importance_id: default
-    color: 'orange'
+    color: 'yellow'
     sticky: 'true'
 
 - service: media_player.volume_set

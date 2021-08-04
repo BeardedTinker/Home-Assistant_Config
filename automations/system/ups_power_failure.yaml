@@ -22,7 +22,7 @@ action:
     group: system
     tag_id: 'warning'
     importance_id: default
-    color: 'orange'
+    color: 'yellow'
     sticky: 'false'
 - service: input_boolean.turn_on
   data: {}

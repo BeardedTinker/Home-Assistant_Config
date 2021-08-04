@@ -26,7 +26,7 @@ action:
     group: security
     tag_id: 'warning'
     importance_id: default
-    color: 'orange'
+    color: 'yellow'
     sticky: 'true'
 #    timeout: 300
 

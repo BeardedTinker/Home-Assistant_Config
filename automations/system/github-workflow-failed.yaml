@@ -24,7 +24,7 @@ action:
     group: system
     tag_id: 'warning'
     importance_id: default
-    color: 'orange'
+    color: 'yellow'
     sticky: 'false'
     timeout: 300
 

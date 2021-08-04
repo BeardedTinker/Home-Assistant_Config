@@ -23,6 +23,6 @@ action:
     group: system
     tag_id: 'information'
     importance_id: default
-    color: 'orange'
+    color: 'yellow'
     sticky: 'false'
 #    timeout: ''
