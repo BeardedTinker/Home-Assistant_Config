@@ -1,0 +1,30 @@
+#####
+#
+#
+#####
+
+alias: github actions webhook
+id: 'b70b316f-bf5a-4618-95c3-8594cd290b3a'
+
+mode: queued
+
+trigger:
+  platform: webhook
+  webhook_id: !secret github_actions_webhook
+
+condition: '{{trigger.json.check_run.check_suite.head_branch == "master"}}'
+
+action:
+- service: mqtt.publish
+  data:
+    topic: 'github_checkrun/{{ trigger.json.check_run.name}}'
+    payload: >
+      {"status": {%- if trigger.json.check_run.status == 'completed' -%}
+        "{{trigger.json.check_run.conclusion}}"
+      {%- else -%}
+        "{{trigger.json.check_run.status}}"
+      {%- endif -%}, "id": "{{trigger.json.check_run.id
+      }}", "started_at": "{{trigger.json.check_run.started_at
+      }}", "completed_at": "{{trigger.json.check_run.completed_at
+      }}", "details_url": "{{trigger.json.check_run.details_url}}"}
+    retain: true

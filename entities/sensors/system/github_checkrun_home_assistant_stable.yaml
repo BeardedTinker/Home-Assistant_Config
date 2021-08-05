@@ -1,0 +1,11 @@
+#####
+# Populate data from Checkrun - Home Assistant Latest release
+# By PinkyWafer - https://github.com/pinkywafer/Home-Assistant_Config/
+#####
+
+platform: mqtt
+name: github_checkrun_home_assistant_stable
+state_topic: github_checkrun/home_assistant_stable
+value_template: "{{ value_json.status }}"
+json_attributes_topic: github_checkrun/home_assistant_stable
+icon: mdi:github

@@ -1,0 +1,11 @@
+#####
+# Populate data from Checkrun - yamlint
+# By PinkyWafer - https://github.com/pinkywafer/Home-Assistant_Config/
+#####
+
+platform: mqtt
+name: github_checkrun_yamllint
+state_topic: github_checkrun/yamllint
+value_template: "{{ value_json.status }}"
+json_attributes_topic: github_checkrun/yamllint
+icon: mdi:github

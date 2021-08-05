@@ -4,7 +4,7 @@
 #####
 
 github_actions:
-  url: https://api.github.com/BeardedTinker/Home-Assistant_Config/actions/workflows/main.yml/dispatches
+  url: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/actions/workflows/main.yml/dispatches
   method: POST
   headers:
     authorization: !secret github_token2
