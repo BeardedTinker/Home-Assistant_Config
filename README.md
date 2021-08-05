@@ -6,7 +6,7 @@
     <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a><br>
 
 
-Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Latest, Dev and Beta release
+Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version Latest, Dev and Beta release. YAML is also checked
   </h4>
 
 
@@ -27,9 +27,9 @@ Also, if you have time you can try and join me while streaming and there should 
 
 ### Hardware
 
-Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) on DSM version 6.2.4.
+Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) - DSM version 6.2.4.
 
-Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk.
+Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk (August 5th: Still haven't updated to latest firmware).
 
 From other devices I use, here is a list:
 
@@ -43,13 +43,13 @@ From other devices I use, here is a list:
 
 ##### XIAOMI DEVICES
   - Xiaomi MiJia wireless switch [WXKG01LM](https://www.zigbee2mqtt.io/devices/WXKG01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dW7ZKDA)
-  - Xiaomi MiJia temperature & humidity sensor [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
-  - Xiaomi Aqara human body movement and illuminance sensor [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
+  - Xiaomi MiJia temperature & humidity sensors [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
+  - Xiaomi Aqara human body movement and illuminance sensors [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
   - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Aqara Vibration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Water sensor [SJCGQ11LM](https://www.zigbee2mqtt.io/devices/SJCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/4001249406915.html)
-  - Xiaomi Mosquitto Repellent [ESPHome](https://youtu.be/XMFn8fKhUFA) - [AliExpress link](https://www.aliexpress.com/item/4000195100873.html)
+  - Xiaomi Mosquitto Repellents [ESPHome](https://youtu.be/XMFn8fKhUFA) - [AliExpress link](https://www.aliexpress.com/item/4000195100873.html)
 
 ##### SHELLY DEVICES
   - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
@@ -69,7 +69,7 @@ From other devices I use, here is a list:
   - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
   - Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
   - LG webOS TV
-  - Mi TV stick
+  - Xiaomi Mi TV stick
 
 ##### HEATING
   - tado° [Smart Thermostat](https://www.tado.com/hr/)
@@ -85,7 +85,8 @@ From other devices I use, here is a list:
   - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
-  - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge & [Nuki Opener](https://nuki.io/en/opener/)
+  - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
+  - [Nuki Opener](https://nuki.io/en/opener/) for intercom
 
 ### Containers and add-ons
 
@@ -101,17 +102,17 @@ Add-ons:
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
-  - VaultWarden
-  - Facebox
-  - Grafana
-  - InfluxDB
-  - MQTT
-  - Node-RED
-  - Portainer
-  - Prometheus
-  - Smokeping
-  - Storagenode
-  - Storj Exporter
+  - VaultWarden - opens source version of BitWarden as password manager
+  - Facebox - used for face recognition
+  - Grafana - only used currently for Storj node status
+  - InfluxDB - not active
+  - MQTT - used by all Zigbee devices, some Shelly devices, printing and more
+  - Node-RED - not used anymore
+  - Portainer - for Docker management and monitoring
+  - Prometheus - for Storj node data logging
+  - Smokeping - tracking network device activity
+  - Storagenode - Storj node for renting free space
+  - Storj Exporter - exports statistics from node to Prometheus
 
 ### Integrations
 
@@ -119,7 +120,7 @@ There are too many integrations to list them all, but some of the main ones are:
   - Telegram for notifications and control
   - Zigbee2MQTT for controlling (and now also updating) my Zigbee devices
   - Google for integration with Google Assistant and various Home devices
-  - Synology for Surveillence station and Synology system statistics and info
+  - Synology for Surveillence station and Synology system statistics & info
   - HACS - Home Assistant Community Store - for even more custom components and plugins
   - influxDB - storing data generated by Home Assistant
   - OctoPrint - to see what my Ender 3 Pro 3D printer is doing
@@ -127,9 +128,10 @@ etc...
 
 Following is a list of active Integrations that are visible at Configuration->Integration page:
   - AccuWeather
-   - AirVisual
+  - AirVisual
   - Blitzortung (HACS)
   - Certificate Expiry
+  - CO2Signal
   - COVID-19
   - Elgato Key Light
   - EPSHome
@@ -173,13 +175,13 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   159 |
+| Automations          |   150 |
 | Binary sensors       |   214 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  1770 |
+| Entities             |  1779 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    13 |
@@ -188,14 +190,14 @@ Up-to-date count of various things in Home Assistant
 | Input Select         |    10 |
 | Input Text           |     4 |
 | Lights               |    39 |
-| Lines of code (YAML) | 19496 |
+| Lines of code (YAML) | 20125 |
 | Locks                |     3 |
 | Media players        |    41 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    17 |
-| Sensors              |  1024 |
+| Sensors              |  1037 |
 | Switches             |    66 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
