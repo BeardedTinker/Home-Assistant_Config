@@ -69,7 +69,7 @@ action:
 - service: rest_command.github_actions
 
 # wait for travis build to start then update notification
-- wait_template: "{{ is_state('sensor.beardedtinker_home_assistant_config_state', 'started') }}"
+- wait_template: "{{ is_state('sensor.github_checkrun_home_assistant_latest', 'queued') }}"
 
 # Send notification that Travis started
 - service: script.notify_engine
@@ -85,7 +85,6 @@ action:
     sticky: 'true'
     clickAction: /hassio/dashboard
 
-
 - service: persistent_notification.create
   data:
     title: '*Update Home Assistant*'
@@ -96,13 +95,13 @@ action:
     notification_id: update_ha
 
 # wait for build to complete and update notification with status
-- wait_template: "{{ not is_state('sensor.beardedtinker_home_assistant_config_state', 'created') and not is_state('sensor.beardedtinker_home_assistant_config_state', 'started') }}"
+- wait_template: "{{ not is_state('sensor.github_checkrun_home_assistant_latest', 'queued') }}"
 
 - service: script.notify_engine
   data:
     who: 'discord'
     title: '*Update Home Assistant*'
-    value1: 'GitHub workflow has {{states("sensor.beardedtinker_home_assistant_config_state")}}'
+    value1: 'GitHub workflow has {{states("sensor.github_checkrun_home_assistant_latest")}}'
     target_id: !secret discord_github_id
     group: ha_update
     tag_id: 'information'
@@ -117,11 +116,11 @@ action:
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
-        GitHub workflow has {{states('sensor.beardedtinker_home_assistant_config_state')}}
+        GitHub workflow has {{states('sensor.github_checkrun_home_assistant_latest')}}
     notification_id: update_ha
 
 # post issue comment on Travis status
 - service: rest_command.github_issue_comment
   data:
-    message: "GitHub workflow has {{ states('sensor.beardedtinker_home_assistant_config_state') }}"
+    message: "GitHub workflow has {{ states('sensor.github_checkrun_home_assistant_latest') }}"
     issue_number: 14
