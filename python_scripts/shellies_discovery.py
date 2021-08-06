@@ -1954,8 +1954,8 @@ if model_id == MODEL_SHELLYEM_ID or dev_id_prefix == MODEL_SHELLYEM_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_MEASUREMENT,
-        None,
-        None,
+        STATE_CLASS_MEASUREMENT,
+        STATE_CLASS_MEASUREMENT,
     ]
     meters_sensors_units = [
         UNIT_WATT,
@@ -2028,8 +2028,8 @@ if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_MEASUREMENT,
-        None,
-        None,
+        STATE_CLASS_MEASUREMENT,
+        STATE_CLASS_MEASUREMENT,
     ]
     meters_sensors_units = [
         UNIT_AMPERE,
