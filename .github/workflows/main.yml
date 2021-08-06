@@ -44,7 +44,7 @@ jobs:
         run: |
           cp -R secrets_github.yaml secrets.yaml
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
+          cp -R service_account_ga_sample.json service_account_ga.json
           sudo mkdir -p /github/workspace/tmp
           #sudo touch fullchain.pem
           #sudo touch privkey.pem
@@ -67,7 +67,7 @@ jobs:
         run: |
           cp -R secrets_github.yaml secrets.yaml
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
+          cp -R service_account_ga_sample.json service_account_ga.json
           sudo mkdir -p /github/workspace/tmp
           sudo touch fullchain.pem
           sudo touch privkey.pem
@@ -90,7 +90,7 @@ jobs:
         run: |
           cp -R secrets_github.yaml secrets.yaml
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
+          cp -R service_account_ga_sample.json service_account_ga.json
           sudo mkdir -p /github/workspace/tmp
           sudo touch fullchain.pem
           sudo touch privkey.pem
@@ -113,7 +113,7 @@ jobs:
         run: |
           cp -R secrets_github.yaml secrets.yaml
           cp -R customize_sample.yaml customize.yaml
-          cp -R 0d25726f0c18_sample.json 0d25726f0c18.json
+          cp -R service_account_ga_sample.json service_account_ga.json
           sudo mkdir -p /github/workspace/tmp
           sudo touch fullchain.pem
           sudo touch privkey.pem

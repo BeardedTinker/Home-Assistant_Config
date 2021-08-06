@@ -1,0 +1,16 @@
+#####
+# Every Home Assistant start, devices will be synced with Google Assistant
+#
+#####
+
+alias: Sync Google assistant at start
+id: 5da0cfe0-8438-4ec8-9ad0-b35abc7dcfe1
+
+trigger:
+- platform: homeassistant
+  event: start
+
+action:
+- delay:
+    minutes: 5
+- service: google_assistant.request_sync
