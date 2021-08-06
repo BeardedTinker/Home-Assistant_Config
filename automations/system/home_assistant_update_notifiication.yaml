@@ -68,10 +68,10 @@ action:
 # Trigger GitHub Action workflow
 - service: rest_command.github_actions
 
-# wait for travis build to start then update notification
+# wait for GitHub workflow to start then update notification
 - wait_template: "{{ is_state('sensor.github_checkrun_home_assistant_stable', 'queued') }}"
 
-# Send notification that Travis started
+# Send notification that GitHub workflow started
 - service: script.notify_engine
   data:
     who: 'discord'
@@ -119,8 +119,8 @@ action:
         GitHub workflow has {{states('sensor.github_checkrun_home_assistant_stable')}}
     notification_id: update_ha
 
-# post issue comment on Travis status
+# post issue comment on GitHub workflow status
 - service: rest_command.github_issue_comment
   data:
-    message: "GitHub workflow has {{ states('sensor.github_checkrun_home_assistant_stable') }}"
+    message: "GitHub workflow status: {{ states('sensor.github_checkrun_home_assistant_stable') }}"
     issue_number: 14

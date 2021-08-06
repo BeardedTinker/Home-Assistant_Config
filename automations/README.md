@@ -16,7 +16,7 @@ Automations related to lights.
 Xiaomi CUBE and switches automations.
  
 ### /automation/system
-System related stuff, such as github, travis, update notifications etc
+System related stuff, such as github, update notifications etc
  
 ### /automation/telegram
 Bunch of automations that can be used to control telegram bot with /commands or menus.
