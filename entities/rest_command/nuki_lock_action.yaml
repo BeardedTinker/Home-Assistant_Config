@@ -1,8 +1,7 @@
-####
-# Nuki Lock Action
-# Thanks to Alessandro Del Prete
-# https://community.home-assistant.io/t/nuki-card-with-callbacks-official-integration-not-needed/311932
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
 #####
 
 nuki_lock_action:
-  url: "http://{{ states('sensor.nuki_bridge_host') }}:{{ states('sensor.nuki_bridge_port') }}/lockAction?nukiId={{ states('sensor.nuki_id') }}&token={{ states('sensor.nuki_bridge_token') }}&action={{ action }}"
+  url: "{{ states('input_text.nuki_bridge_url') }}/lockAction?action={{ action }}&nowait=1&nukiId={{ states('sensor.nuki_id') }}&token={{ states('input_text.nuki_bridge_token') | urlencode }}"

@@ -1,0 +1,30 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: rest
+scan_interval: 31536000
+resource_template: >
+  {% if states('input_text.nuki_bridge_url') != 'unknown' and states('input_text.nuki_bridge_token') != 'unknown' %}
+    {{ states('input_text.nuki_bridge_url') }}/info?&token={{ states('input_text.nuki_bridge_token') | urlencode }}
+  {% else %} 
+    none
+  {% endif %}
+name: "Nuki Bridge Endpoint Info"
+force_update: true
+value_template: >
+  {% if states('input_text.nuki_bridge_url') != 'unknown' and states('input_text.nuki_bridge_token') != 'unknown' %}
+    OK
+  {% else %} 
+    KO
+  {% endif %}
+json_attributes:
+  - bridgeType
+  - ids
+  - versions
+  - uptime
+  - currentTime
+  - wlanConnected
+  - serverConnected
+  - scanResults

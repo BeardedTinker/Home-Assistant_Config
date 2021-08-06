@@ -1,0 +1,99 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+nuki_bridge_polling_queue:
+  mode: queued
+  max: 2
+  max_exceeded: warning
+  sequence:
+    - delay: 1
+
+    - alias: "Refresh List REST sensor"
+      service: homeassistant.update_entity
+      target:
+        entity_id: sensor.nuki_bridge_endpoint_list
+    - delay: 1
+
+    - alias: "Refresh Info REST sensor"
+      service: homeassistant.update_entity
+      target:
+        entity_id: sensor.nuki_bridge_endpoint_info
+    - delay: 1
+
+    - alias: "Refresh Callback List REST sensor"
+      service: homeassistant.update_entity
+      target:
+        entity_id: sensor.nuki_bridge_callback_list
+    - alias: "Sync Callback List input text"
+      service: input_text.set_value
+      target:
+        entity_id: input_text.nuki_bridge_callback_list
+      data:
+        value: >
+          {{ (states('sensor.nuki_bridge_callback_list')|from_json) if states('sensor.nuki_bridge_callback_list') != 'unknown' }}
+    - alias: "Refresh Callback List state sensor"
+      service: homeassistant.update_entity
+      target:
+        entity_id: binary_sensor.nuki_bridge_callback
+    - delay: 1
+
+    - alias: "Add callback to bridge"
+      repeat:
+        while: "{{ states('binary_sensor.nuki_bridge_callback') == 'off' and states('input_text.nuki_bridge_callback_list')|from_json|count == 0 }}"
+        sequence:
+          - service: rest_command.nuki_bridge_add_callback
+          - delay: 1
+          - service: homeassistant.update_entity
+            target:
+              entity_id: sensor.nuki_bridge_callback_list
+          - delay: 1
+          - service: homeassistant.update_entity
+            target:
+              entity_id: binary_sensor.nuki_bridge_callback
+          - service: input_text.set_value
+            target:
+              entity_id: input_text.nuki_bridge_callback_list
+            data:
+              value: >
+                {{ states('sensor.nuki_bridge_callback_list')|from_json if states('sensor.nuki_bridge_callback_list') != 'unknown' }}
+          - wait_template: "{{ is_state('binary_sensor.nuki_bridge_callback', 'on') and states('input_text.nuki_bridge_callback_list')|from_json|count == 1 }}"
+            timeout: 10
+          - service: persistent_notification.create
+            data:
+              notification_id: "nuki_card_persistent"
+              title: Nuki Card (added callback to bridge)
+              message: >
+                * [**Script nuki_bridge_polling_queue**] ran at {{ as_timestamp(now()) | timestamp_custom("%H:%M:%S (%b %d)") }}
+                * [**Bridge Callback ID:**] "{{ states('input_text.nuki_bridge_callback_list') }}"
+                * [**Callback Raw List:**] {{ state_attr('sensor.nuki_bridge_callback_list','callbacks') }}
+    - alias: "Delete callbacks from bridge"
+      repeat:
+        while: "{{ (states('input_text.nuki_bridge_callback_list')|from_json|count > 1) }}"
+        sequence:
+          - service: rest_command.nuki_bridge_del_callback
+            data:
+              callback_id: "{{ (states('input_text.nuki_bridge_callback_list')|from_json)[-1] }}"
+          - delay: 1
+          - service: homeassistant.update_entity
+            target:
+              entity_id: sensor.nuki_bridge_callback_list
+          - delay: 1
+          - service: homeassistant.update_entity
+            target:
+              entity_id: binary_sensor.nuki_bridge_callback
+          - service: input_text.set_value
+            target:
+              entity_id: input_text.nuki_bridge_callback_list
+            data:
+              value: >
+                {{ states('sensor.nuki_bridge_callback_list')|from_json if states('sensor.nuki_bridge_callback_list') != 'unknown' }}
+          - service: persistent_notification.create
+            data:
+              notification_id: "nuki_card_persistent"
+              title: Nuki Card (deleted callback to bridge)
+              message: >
+                * [**Script nuki_bridge_polling_queue**] ran at {{ as_timestamp(now()) | timestamp_custom("%H:%M:%S (%b %d)") }}
+                * [**Bridge Callback ID:**] "{{ states('input_text.nuki_bridge_callback_list') }}"
+                * [**Callback Raw List:**] {{ state_attr('sensor.nuki_bridge_callback_list','callbacks') }}

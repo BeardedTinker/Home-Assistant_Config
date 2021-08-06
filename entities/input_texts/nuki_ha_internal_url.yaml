@@ -1,0 +1,8 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+nuki_ha_internal_url:
+  name: "Nuki Card (HA internal URL)"
+  initial: !secret nuki_ha_internal_url

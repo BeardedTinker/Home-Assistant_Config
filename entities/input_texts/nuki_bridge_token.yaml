@@ -1,0 +1,8 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+nuki_bridge_token:
+  name: "Nuki Card (bridge token)"
+  initial: !secret nuki_bridge_token

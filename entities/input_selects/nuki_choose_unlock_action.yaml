@@ -1,0 +1,14 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+nuki_choose_unlock_action:
+  name: "Nuki Card (unlock action)"
+  icon: mdi:lock-question
+  options:
+    - Unlock
+    - Lock
+    - Unlatch
+    - Lock ‘n’ Go
+    - Lock ‘n’ Go + Unlatch

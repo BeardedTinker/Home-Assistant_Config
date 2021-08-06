@@ -1,0 +1,9 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+nuki_door_sensor_states:
+  name: "Nuki Card (door sensor states)"
+  initial: '{"1": "deactivated", "2": "closed", "3": "open", "4": "unknown", "5": "calibrating"}'
+  max: 255

@@ -1,0 +1,38 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: template
+sensors:
+  nuki_lock_battery_level:
+    unique_id: nuki_lock_battery_level
+    device_class: battery
+    friendly_name: "Nuki Lock Battery Level"
+    unit_of_measurement: "%"
+    icon_template: >
+      {% if states('sensor.nuki_bridge_endpoint_list') != "unknown" %}
+        {% set battery_level = state_attr('sensor.nuki_bridge_endpoint_list', 'lastKnownState')['batteryChargeState'] | default(0) | int %}
+        {% set battery_charging = state_attr('sensor.nuki_bridge_endpoint_list', 'lastKnownState')['batteryCharging'] %}
+        {% set battery_round = (battery_level / 10) | int * 10 %}
+        {% if battery_round >= 100 and not battery_charging %}
+          mdi:battery
+        {% elif battery_round >= 100 and battery_charging %}
+          mdi:battery-charging
+        {% elif battery_round > 0 and not battery_charging %}
+          mdi:battery-{{ battery_round }}
+        {% elif battery_round > 0 and battery_charging %}
+          mdi:battery-charging-{{ battery_round }}
+        {% else %}
+          mdi:battery-alert-variant-outline
+        {% endif %}
+      {% endif %}
+    value_template: >
+      {% if states('sensor.nuki_bridge_endpoint_list') != "unknown" %}
+        {% set battery_level = state_attr('sensor.nuki_bridge_endpoint_list', 'lastKnownState')['batteryChargeState'] | default(0) | int %}
+        {% if state_attr('sensor.nuki_bridge_endpoint_list', 'lastKnownState')['batteryCharging'] %}
+          {{ battery_level }}
+        {% else %}
+          {{ battery_level }}
+        {% endif %}
+      {% endif %}

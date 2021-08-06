@@ -1,0 +1,114 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: template
+sensors:
+  nuki_bridge_callback:
+    unique_id: nuki_bridge_callback
+    device_class: connectivity
+    friendly_name: "Nuki Bridge Callback"
+    icon_template: mdi:arrow-vertical-lock
+    value_template: >
+      {% if states('sensor.nuki_bridge_callback_list') != 'unknown' and states('input_text.nuki_bridge_callback_list')|count > 0 %}
+        {{ 'on' if states('input_text.nuki_bridge_callback_list')|from_json|count == 1 else 'off' }}
+      {% else %}
+        off
+      {% endif %}
+    attribute_templates:
+      callback_id_list: >
+        {{ states('sensor.nuki_bridge_callback_list') if states('sensor.nuki_bridge_callback_list') != 'unknown' }}
+  nuki_door_sensor_state:
+    unique_id: nuki_door_sensor_state
+    device_class: door
+    friendly_name: "Nuki Door Sensor State"
+    icon_template: >
+      {% set door_icon = states('input_number.nuki_bridge_door_sensor_state') | int %}
+      {% set lock_icon = states('input_number.nuki_bridge_lock_sensor_state') | int %}
+      {% if door_icon == 2 and lock_icon == 3 %}
+        mdi:door-closed
+      {% elif door_icon == 2 and lock_icon == 1 %}
+        mdi:door-closed-lock
+      {% elif door_icon == 3 %}
+        mdi:door-open
+      {% endif %}
+    value_template: >
+      {{ states('input_number.nuki_bridge_door_sensor_state') | int == 3 }}
+    attribute_templates:
+      trigger_id: >
+        {{ states('input_text.nuki_bridge_trigger_id') if states('input_text.nuki_bridge_trigger_id') != 'unknown' }}
+      bridge_callback_id_list: >
+        {{ states('input_text.nuki_bridge_callback_list')|from_json if is_state('binary_sensor.nuki_bridge_callback', 'on') else states('input_text.nuki_bridge_callback_id_list_states') }}
+      nuki_id: >
+        {{ states('sensor.nuki_id') if states('sensor.nuki_id') != 'unknown' }}
+      door_state_numeric: >
+        {{ states('input_number.nuki_bridge_door_sensor_state') if states('input_number.nuki_bridge_door_sensor_state') != 'unknown' }}
+      door_state: >
+        {{ states('input_text.nuki_bridge_door_sensor') if states('input_text.nuki_bridge_door_sensor') != 'unknown' }}
+      lock_state_numeric: >
+        {{ states('input_number.nuki_bridge_lock_sensor_state') if states('input_number.nuki_bridge_lock_sensor_state') != 'unknown' }}
+      lock_state: >
+        {{ states('input_text.nuki_bridge_lock_sensor') if states('input_text.nuki_bridge_lock_sensor') != 'unknown' }}
+      lock_battery: >
+        {{ states('sensor.nuki_lock_battery_level') if states('sensor.nuki_lock_battery_level') != 'unknown' }}
+      lock_battery_critical: >
+        {{ states('binary_sensor.nuki_lock_battery_critical_state') if states('binary_sensor.nuki_lock_battery_critical_state') != 'unknown' }}
+      keypad_battery_critical: >
+        {{ states('binary_sensor.nuki_keypad_battery_critical_state') if states('binary_sensor.nuki_keypad_battery_critical_state') != 'unknown' else "n/a" }}
+      last_activity_callback: >
+        {{ states('input_text.nuki_bridge_last_activity') if states('input_text.nuki_bridge_last_activity') != 'unknown' }}
+      last_activity_polled: >
+        {{ states('sensor.nuki_last_activity') if states('sensor.nuki_last_activity') != 'unknown' }}
+  nuki_bridge_lock_bt_state:
+    unique_id: nuki_bridge_lock_bt_state
+    device_class: connectivity
+    friendly_name: "Nuki Bridge<->Lock BT State"
+    icon_template: >
+      {% if states('input_number.nuki_bt_state') | int == 1 %}
+        mdi:bluetooth-connect
+      {% elif states('input_number.nuki_bt_state') | int == 2 %}
+        mdi:bluetooth-off
+      {% else %}
+        mdi:bluetooth-audio
+      {% endif %}
+    value_template: >
+      {{ state_attr('sensor.nuki_bridge_endpoint_info','scanResults')[0]['paired'] if states('sensor.nuki_bridge_endpoint_info') != "unknown" }}
+  nuki_lock_battery_critical_state:
+    unique_id: nuki_lock_battery_critical_state
+    device_class: battery
+    friendly_name: "Nuki Lock Battery Critical State"
+    icon_template: mdi:battery-alert-variant-outline
+    value_template: >
+      {% if states('sensor.nuki_bridge_endpoint_list') != "unknown" %}
+        {% if state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['batteryCritical'] != null %}
+          {{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['batteryCritical'] }}
+        {% endif %}
+      {% endif %}
+  nuki_keypad_battery_critical_state:
+    unique_id: nuki_keypad_battery_critical_state
+    device_class: battery
+    friendly_name: "Nuki Keypad Battery Critical State"
+    icon_template: mdi:battery-alert-variant-outline
+    value_template: >
+      {% if states('sensor.nuki_bridge_endpoint_list') != "unknown" %}
+        {% if state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] != null %}
+          {{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] }}
+        {% else %}
+          not installed 
+        {% endif %}
+      {% endif %}
+  nuki_bridge_wifi_connected:
+    unique_id: nuki_bridge_wifi_connected
+    device_class: connectivity
+    friendly_name: "Nuki Bridge WiFi Connected"
+    icon_template: mdi:wifi-cog
+    value_template: >
+      {{ state_attr('sensor.nuki_bridge_endpoint_info','wlanConnected') if states('sensor.nuki_bridge_endpoint_info') != "unknown" }}
+  nuki_bridge_cloud_connected:
+    unique_id: nuki_bridge_cloud_connected
+    device_class: connectivity
+    friendly_name: "Nuki Bridge Cloud Connected"
+    icon_template: mdi:server-network
+    value_template: >
+      {{ state_attr('sensor.nuki_bridge_endpoint_info','serverConnected') if states('sensor.nuki_bridge_endpoint_info') != "unknown" }}
