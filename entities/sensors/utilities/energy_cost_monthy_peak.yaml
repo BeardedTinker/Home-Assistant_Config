@@ -1,0 +1,10 @@
+#####
+# Sensor Template - Energy use Monthly Peak Cost
+#####
+
+platform: template
+sensors:
+  monthly_peak_energy_cost:
+    friendly_name: 'Monthly Peak Energy Cost'
+    value_template: "{{ ((states('sensor.monthly_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
+    unit_of_measurement: "hrk"

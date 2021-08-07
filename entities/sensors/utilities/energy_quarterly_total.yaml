@@ -1,0 +1,10 @@
+#####
+# Sensor Template - Energy use Quaterly Peak and OffPeak total
+#####
+
+platform: template
+sensors:
+  quarterly_energy_total:
+    friendly_name: 'Quarterly Peak and Offpeak Total'
+    value_template: "{{ ((states('sensor.quarterly_energy_peak')|float + states('sensor.quarterly_energy_offpeak')|float) )|round(3) }}"
+    unit_of_measurement: "kWh"
