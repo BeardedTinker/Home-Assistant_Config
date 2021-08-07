@@ -1,0 +1,43 @@
+#####
+# Announce weekend chores
+#####
+
+alias: Chores Weekend Announcement
+id: ec1db421-14dc-4b33-a5ed-094923459df4
+
+trigger:
+  platform: time
+  at: '09:30:00'
+
+condition: 
+  - condition: time
+    weekday:
+      - sat
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '✅ *Saturday Chores*'
+    value1: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off dust...'
+    target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+#    timeout: ''
+
+- service: media_player.volume_set
+  data:
+    entity_id: 
+      - media_player.display_me
+      - media_player.whatever_me
+      - media_player.mini_me
+    volume_level: 0.6
+- service: tts.google_translate_say
+  entity_id: 
+    - media_player.display_me
+    - media_player.whatever_me
+    - media_player.mini_me
+  data:  
+    message: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off dust...'

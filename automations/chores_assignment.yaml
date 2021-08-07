@@ -1,0 +1,53 @@
+#####
+# Assigne chores depending on the odd/even date
+# Day is number of day in year as girls thought it's more fair
+#####
+
+alias: Chores assignment 
+id: '7f9f4d84-c966-4fc1-97b7-97d6bb3627f9'
+
+trigger:
+- platform: state
+  entity_id: sensor.odd_even
+  to: 'Odd'
+  id: odd
+- platform: state
+  entity_id: sensor.odd_even
+  to: 'Even'
+  id: even
+
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: odd
+      sequence:
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_dog
+            value: 'Luka'
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_washing_machine
+            value: 'Zita'
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_dishwasher
+            value: 'Zita'
+    - conditions:
+      - condition: trigger
+        id: even
+      sequence:
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_dog
+            value: 'Zita'
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_washing_machine
+            value: 'Luka'
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_dishwasher
+            value: 'Luka'
+mode: single

@@ -1,0 +1,42 @@
+#####
+# Announce daily chores
+# Uses Odd/even days of the year to devide tasks
+#####
+
+alias: Chores Daily Announcement
+id: 66efd0b7-9d2d-43d5-962c-5cfdd8c460a5
+
+trigger:
+  platform: time
+  at: '08:30:00'
+
+condition: []
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '✅ *Daily Chores*'
+    value1: 'Today, {{ states("input_text.chores_dog") }} will take the dog out, {{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.'
+    target_id: !secret telegram_bot_chat_id
+    group: home
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+#    timeout: ''
+
+- service: media_player.volume_set
+  data:
+    entity_id: 
+      - media_player.display_me
+      - media_player.whatever_me
+      - media_player.mini_me
+    volume_level: 0.6
+- service: tts.google_translate_say
+  entity_id: 
+    - media_player.display_me
+    - media_player.whatever_me
+    - media_player.mini_me
+  data:  
+    message: 'Today, {{ states("input_text.chores_dog") }} will take the dog out, {{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.!'
