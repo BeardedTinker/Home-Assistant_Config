@@ -1,0 +1,14 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: template
+sensors:
+  nuki_bridge_wifi_connected:
+    unique_id: nuki_bridge_wifi_connected
+    device_class: connectivity
+    friendly_name: "Nuki Bridge WiFi Connected"
+    icon_template: mdi:wifi-cog
+    value_template: >
+      {{ state_attr('sensor.nuki_bridge_endpoint_info','wlanConnected') if states('sensor.nuki_bridge_endpoint_info') != "unknown" }}

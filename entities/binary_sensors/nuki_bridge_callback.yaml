@@ -1,0 +1,21 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: template
+sensors:
+  nuki_bridge_callback:
+    unique_id: nuki_bridge_callback
+    device_class: connectivity
+    friendly_name: "Nuki Bridge Callback"
+    icon_template: mdi:arrow-vertical-lock
+    value_template: >
+      {% if states('sensor.nuki_bridge_callback_list') != 'unknown' and states('input_text.nuki_bridge_callback_list')|count > 0 %}
+        {{ 'on' if states('input_text.nuki_bridge_callback_list')|from_json|count == 1 else 'off' }}
+      {% else %}
+        off
+      {% endif %}
+    attribute_templates:
+      callback_id_list: >
+        {{ states('sensor.nuki_bridge_callback_list') if states('sensor.nuki_bridge_callback_list') != 'unknown' }}

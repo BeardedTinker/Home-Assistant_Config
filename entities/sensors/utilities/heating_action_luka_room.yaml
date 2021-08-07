@@ -1,0 +1,10 @@
+#####
+# Geting action attribute from climate component
+# Will be used to track heating statistics
+#####
+
+platform: template
+sensors:
+  heating_luka_room_action:
+    friendly_name: 'Luka room action'
+    value_template: "{{state_attr('climate.luka_room', 'hvac_action') }}"

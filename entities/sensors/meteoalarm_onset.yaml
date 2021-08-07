@@ -1,0 +1,10 @@
+#####
+# Meteoalarms Sensor Templates
+# https://www.home-assistant.io/integrations/meteoalarm/
+#####
+
+platform: template
+sensors:
+  meteoalarm_onset:
+    friendly_name: "Onset"
+    value_template: "{{ state_attr('binary_sensor.meteoalarm', 'onset') }}"

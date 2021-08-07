@@ -1,0 +1,10 @@
+#####
+# Check for heating if it's on
+# This is used to double-check if heating can heat the flat
+#####
+
+platform: template
+sensors:
+  luka_room_heating:
+    friendly_name: "Heating in Luka Room"
+    value_template: '{{ state_attr("climate.luka_room","hvac_action") == "heating" }}'

@@ -1,0 +1,10 @@
+#####
+# Geting action attribute from climate component
+# Will be used to track heating statistics
+#####
+
+platform: template
+sensors:
+  heating_dining_room_action:
+    friendly_name: 'Dining room action'
+    value_template: "{{state_attr('climate.dining_room', 'hvac_action') }}"

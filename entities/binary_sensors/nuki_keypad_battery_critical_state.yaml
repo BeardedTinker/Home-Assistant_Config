@@ -1,0 +1,20 @@
+#####
+# Nuki Alternative integration
+# https://gist.github.com/alexdelprete/296f50a4e5b35c0ea4bbed99a7420f5e
+#####
+
+platform: template
+sensors:
+  nuki_keypad_battery_critical_state:
+    unique_id: nuki_keypad_battery_critical_state
+    device_class: battery
+    friendly_name: "Nuki Keypad Battery Critical State"
+    icon_template: mdi:battery-alert-variant-outline
+    value_template: >
+      {% if states('sensor.nuki_bridge_endpoint_list') != "unknown" %}
+        {% if state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] != null %}
+          {{ state_attr('sensor.nuki_endpoint_list', 'lastKnownState')['keypadBatteryCritical'] }}
+        {% else %}
+          not installed 
+        {% endif %}
+      {% endif %}
