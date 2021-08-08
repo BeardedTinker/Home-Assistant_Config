@@ -4,7 +4,7 @@
 #####
 
 id: ea8867b5-c8e9-4860-8a1d-833ff2038c68
-alias: Turn On Audio Notifications
+alias: Turn On/Off Audio Notifications
 
 initial_state: true
 
