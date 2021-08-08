@@ -18,12 +18,12 @@ action:
   data:
     who: 'family'
     title: '✅ *Saturday Chores*'
-    value1: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off dust...'
+    value1: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks...'
     target_id: !secret telegram_bot_chat_id
-    group: home
+    group: duties
     tag_id: 'information'
     importance_id: default
-    color: 'green'
+    color: 'true'
     sticky: 'false'
 #    timeout: ''
 
@@ -40,4 +40,4 @@ action:
     - media_player.whatever_me
     - media_player.mini_me
   data:  
-    message: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off dust...'
+    message: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks...'

@@ -5,3 +5,4 @@
 
 chores_dishwasher:
   name: "Empty dishwasher"
+  icon: mdi:dishwasher

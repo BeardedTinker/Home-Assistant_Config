@@ -5,3 +5,4 @@
 
 chores_dog:
   name: "Take dog for a walk"
+  icon: mdi:dog-service

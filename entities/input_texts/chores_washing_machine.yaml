@@ -5,3 +5,4 @@
 
 chores_washing_machine:
   name: "Empty washing machine"
+  icon: mdi:washing-machine

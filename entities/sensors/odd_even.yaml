@@ -9,5 +9,6 @@ platform: template
 sensors:
   odd_even:
     friendly_name: "Date Odd or Even?"
+    icon_template: mdi:ab-testing
     # entity_id: sensor.date
     value_template: "{{ 'Odd' if now().strftime('%j')|int % 2 else 'Even' }}"

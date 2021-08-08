@@ -19,11 +19,11 @@ action:
     title: '✅ *Daily Chores*'
     value1: 'Today, {{ states("input_text.chores_dog") }} will take the dog out, {{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.'
     target_id: !secret telegram_bot_chat_id
-    group: home
+    group: duties
     tag_id: 'information'
     importance_id: default
     color: 'green'
-    sticky: 'false'
+    sticky: 'true'
 #    timeout: ''
 
 - service: media_player.volume_set
