@@ -8,21 +8,29 @@ Each automation YAML file also contains a description, but here is a brief overv
  
 ### /automation/alarms
 Wake-up alarms for kids during the school year. Still not finished.
+Nme could be notifications, but due to how it started it's still called alarms
  
 ### /automation/lights
 Automations related to lights.
- 
+
+### /automation/plants
+Used to track when plant sensors have been charged last time
+
 ### /automation/switches
 Xiaomi CUBE and switches automations.
  
 ### /automation/system
 System related stuff, such as github, update notifications etc
  
+### /automation/tags
+NFC tag automations. Far from finished, more of proof of concept.
+
 ### /automation/telegram
 Bunch of automations that can be used to control telegram bot with /commands or menus.
  
 ### /automation/utilities
 Heating, electricity and similar automations
+
 ### /automation/weather
 Weather and air quality related automations.
  
