@@ -1,0 +1,32 @@
+#####
+# Turn On/Off Text notifications at predifined time
+# Used to (un)mute messages at specific time
+#####
+
+id: a35f437d-ffea-4d59-9d85-19849ac68153
+alias: Turn On/Off Text Notifications
+
+initial_state: true
+
+trigger:
+  - platform: template
+    value_template: "{{ states('sensor.time') == (state_attr('input_datetime.text_notification_on', 'timestamp') | int | timestamp_custom('%H:%M', False)) }}"
+    id: turn_on
+  - platform: template
+    value_template: "{{ states('sensor.time') == (state_attr('input_datetime.text_notification_off', 'timestamp') | int | timestamp_custom('%H:%M', False)) }}"
+    id: turn_off
+
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: turn_on
+      sequence:
+        - service: input_boolean.turn_on
+          entity_id: input_boolean.text_notifications
+    - conditions:
+      - condition: trigger
+        id: turn_off
+      sequence:
+        - service: input_boolean.turn_off
+          entity_id: input_boolean.text_notifications
