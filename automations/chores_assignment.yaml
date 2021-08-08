@@ -28,6 +28,10 @@ action:
             value: 'Luka'
         - service: input_text.set_value
           data_template:
+            entity_id: input_text.chores_trash
+            value: 'Luka'
+        - service: input_text.set_value
+          data_template:
             entity_id: input_text.chores_washing_machine
             value: 'Zita'
         - service: input_text.set_value
@@ -41,6 +45,10 @@ action:
         - service: input_text.set_value
           data_template:
             entity_id: input_text.chores_dog
+            value: 'Zita'
+        - service: input_text.set_value
+          data_template:
+            entity_id: input_text.chores_trash
             value: 'Zita'
         - service: input_text.set_value
           data_template:
