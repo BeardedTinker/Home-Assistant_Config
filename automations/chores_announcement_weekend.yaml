@@ -10,9 +10,9 @@ trigger:
   at: '09:30:00'
 
 condition: 
-  - condition: time
-    weekday:
-      - sat
+  condition: time
+  weekday: sat 
+
 action:
 - service: script.notify_engine
   data:
