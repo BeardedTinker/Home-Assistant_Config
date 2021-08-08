@@ -1,0 +1,8 @@
+#####
+# Chores - Who will take trash and recycling out
+# Work in progress
+#####
+
+chores_trash:
+  name: "Take trash out"
+  icon: mdi:trash-can-outline
