@@ -1,0 +1,35 @@
+#####
+# Sensor Template - Energy use Daily Offpeak Cost
+#####
+
+  - sensor:
+      - name: Daily Offpeak Energy Cost
+        state: "{{ ((states('sensor.daily_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy
+      - name: Daily Peak Energy Cost
+        state: "{{ ((states('sensor.daily_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy
+      - name: Daily Total Energy Cost
+        state: "{{ (states('sensor.daily_peak_energy_cost')|float + states('sensor.daily_offpeak_energy_cost')|float + states('input_number.energy_daily_cost')|float)|round(2) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy
+      - name: Monthly Offpeak Energy Cost
+        state: "{{ ((states('sensor.monthly_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy
+      - name: Monthly Peak Energy Cost
+        state: "{{ ((states('sensor.monthly_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy
+      - name: Monthly Total Energy Cost
+        state: "{{ (states('sensor.monthly_peak_energy_cost')|float + states('sensor.monthly_offpeak_energy_cost')|float + states('input_number.energy_monthly_cost')|float)|round(2) }}"
+        unit_of_measurement: "hrk"
+        state_class: measurement
+        device_class: energy

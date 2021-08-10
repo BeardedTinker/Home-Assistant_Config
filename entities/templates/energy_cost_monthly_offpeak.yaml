@@ -1,0 +1,10 @@
+#####
+# Sensor Template - Energy use Monthly Offpeak Cost
+#####
+
+- sensor:
+    - name: Monthly Offpeak Energy Cost
+      state: "{{ ((states('sensor.monthly_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
+      unit_of_measurement: "hrk"
+      state_class: measurement
+      device_class: energy
