@@ -57,29 +57,11 @@ speech_processing:
           {% else %}
             0.3
           {% endif %}
-#    - service: notify.alexa_media
-#      data:
-#        data:
-#          type: tts
-#        target: >
-#          {% if states.group.bed.state == 'off' %}
-#          media_player.office
-#          {% else %}
-#          media_player.master_bathroom
-#          {% endif %}
-#        message: >-
-#            {{ speech_message }}
 
-    - service: tts.amazon_polly_say
+    - service: notify.test_group
       data:
-        entity_id: media_player.livingroomCC
         message: >-
-          <speak>
-          <amazon:auto-breaths>
             {{ speech_message }}
-          </amazon:auto-breaths>
-          </speak>
-        cache: true
 
     - service: input_boolean.turn_off
       data:
