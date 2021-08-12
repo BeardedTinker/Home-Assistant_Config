@@ -1,12 +1,12 @@
-#####################################################################################################
-###Script to actually send notifications to the ChromeCast Audios during normal hours and only when we are home! Call like this:
-  # action:
-    # service: script.speech_engine
-    # media_player:
-    # speech_message:
-# # @CCOSTAN
-# Original Repo : https://github.com/CCOSTAN/Home-AssistantConfig
-######################################################################################################
+#####
+# Script to actually send TTS to media player during normal hours and only when we are home!
+# Call like this:
+# action:
+#   service: script.speech_engine
+#     media_player:
+#     speech_message:
+# Original by @CCOSTAN Repo : https://github.com/CCOSTAN/Home-AssistantConfig
+#####
 
 speech_processing:
   mode: queued
@@ -57,18 +57,18 @@ speech_processing:
           {% else %}
             0.3
           {% endif %}
-    - service: notify.alexa_media
-      data:
-        data:
-          type: tts
-        target: >
-          {% if states.group.bed.state == 'off' %}
-          media_player.office
-          {% else %}
-          media_player.master_bathroom
-          {% endif %}
-        message: >-
-            {{ speech_message }}
+#    - service: notify.alexa_media
+#      data:
+#        data:
+#          type: tts
+#        target: >
+#          {% if states.group.bed.state == 'off' %}
+#          media_player.office
+#          {% else %}
+#          media_player.master_bathroom
+#          {% endif %}
+#        message: >-
+#            {{ speech_message }}
 
     - service: tts.amazon_polly_say
       data:

@@ -13,7 +13,7 @@
 #     call_outside_weather
 # 
 # Original by @CCOSTAN Repo : https://github.com/CCOSTAN/Home-AssistantConfig
-######################################################################################################
+#####
 
 speech_engine:
   mode: queued
