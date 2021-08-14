@@ -10,7 +10,7 @@ trigger:
   platform: state
   entity_id: switch.bathroom_vent_relay_0
   to: 'on'
-  for: 00:05:00
+  for: 00:15:00
 
 condition: []
 
