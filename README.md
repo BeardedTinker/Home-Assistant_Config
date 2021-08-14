@@ -2,11 +2,13 @@
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions"><img src="https://img.shields.io/github/workflow/status/BeardedTinker/Home-Assistant_Config/Home%20Assistant%20CI?label=GitHub%20CI&style=plastic"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/stargazers"><img src="https://img.shields.io/github/stars/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
     <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/last-commit/BeardedTinker/Home-Assistant_Config.svg?style=plasticr"/></a>
-        <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_config?style=plastic"/></a>
+    <a href="https://github.com/BeardedTinker/Home-Assistant_Config/commits/master"><img src="https://img.shields.io/github/commit-activity/y/BeardedTinker/Home-Assistant_config?style=plastic"/></a>
     <a href="https://discord.gg/HkxDRN6"><img src="https://img.shields.io/discord/675020779955683328?label=Discord%20BeardedHome&logo=discord"/></a><br>
+    <a href="https://www.youtube.com/beardedtinker"><img src="https://img.shields.io/youtube/channel/subscribers/UCuqokNoK8ZFNQdXxvlE129g?style=plastic"/></a>
+    <a href="https://twitter.com/BeardedTinker"><img src="https://img.shields.io/twitter/follow/BeardedTinker?style=plastic"/></a><br>
 
 
-Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version Latest, Dev and Beta release. YAML is also checked
+Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version, Latest, Dev and Beta release. RemarkLint and YAML is also checked.
   </h4>
 
 
@@ -175,35 +177,35 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   151 |
+| Automations          |   157 |
 | Binary sensors       |   220 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  1786 |
+| Entities             |  1808 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    13 |
 | Input Date/Time      |    23 |
-| Input Number         |    11 |
+| Input Number         |    13 |
 | Input Select         |    12 |
-| Input Text           |    16 |
+| Input Text           |    20 |
 | Lights               |    39 |
-| Lines of code (YAML) | 20534 |
+| Lines of code (YAML) | 21383 |
 | Locks                |     3 |
 | Media players        |    41 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
-| Scripts              |    18 |
-| Sensors              |  1020 |
+| Scripts              |    20 |
+| Sensors              |  1030 |
 | Switches             |    66 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 06.08.2021 8:20AM
+* Updated: 14.08.2021 9:20PM
 
 ### Missing files
 
