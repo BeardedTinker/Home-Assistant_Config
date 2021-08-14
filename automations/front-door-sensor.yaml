@@ -6,40 +6,73 @@ alias: Front Door sensor
 id: 35d7007f-da7e-4896-8eaf-1e1e1d99a9da
 
 trigger:
+- platform: state
   entity_id: binary_sensor.front_door_contact
-  for: 00:05
-  from: 'off'
-  platform: state
   to: 'on'
+  id: open
+- platform: state
+  entity_id: binary_sensor.front_door_contact
+  to: 'on'
+  for: 00:05
+  id: open_5
 
 condition: []
 
 action:
-- service: script.notify_engine
-  data:
-    who: 'family'
-    title: '🚪*Front door*'
-    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
-    target_id: !secret telegram_bot_chat_id
-    group: home
-    tag_id: 'warning'
-    importance_id: default
-    color: 'yellow'
-    sticky: 'false'
-#    timeout: ''
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: open
+      - condition: state
+        entity_id: binary_sensor.people_home
+        state: 'off'
+      sequence:
+        - service: script.notify_engine
+          data:
+            who: 'family'
+            title: '*Front door*'
+            value1: "Motion in apartment! No family member is home"
+            target_id: !secret telegram_bot_chat_id
+            group: security
+            tag_id: 'emergency'
+            importance_id: default
+            color: 'red'
+            sticky: 'true'
+            #timeout: 
 
-
-#- service: script.notify_engine
-#  data:
-#    who: 'printer'
-#    title: '🚪*Front door*'
-#    value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
-#    tag_id: 'warning'
-- service: media_player.volume_set
-  data:
-    entity_id: media_player.display_me
-    volume_level: 0.6
-- service: tts.google_translate_say
-  entity_id: media_player.display_me
-  data:  
-    message: 'Front door is open!'
+        - service: media_player.volume_set
+          target:
+            entity_id: 
+              - media_player.display_me
+              - media_player.clock:me
+          data:
+            volume_level: 0.7
+          
+        - service: tts.google_translate_say
+          target:
+            entity_id: media_player.display_me
+          data:
+            message: Intruder alert!
+    - conditions:
+      - condition: trigger
+        id: open_5
+      sequence:
+        - service: script.notify_engine
+          data:
+            who: 'family'
+            title: '🚪*Front door*'
+            value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
+            target_id: !secret telegram_bot_chat_id
+            group: home
+            tag_id: 'warning'
+            importance_id: default
+            color: 'yellow'
+            sticky: 'false'
+        - service: media_player.volume_set
+          data:
+            entity_id: media_player.display_me
+            volume_level: 0.6
+        - service: tts.google_translate_say
+          entity_id: media_player.display_me
+          data:  
+            message: 'Front door is open!'
