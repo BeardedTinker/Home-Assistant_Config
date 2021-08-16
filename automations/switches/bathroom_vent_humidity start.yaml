@@ -3,7 +3,7 @@
 #
 #####
 
-alias: Bathroom vent start
+alias: Bathroom vent humidity start
 id: 8e7778e0-eeaa-4040-86a3-a1cf34043359
 
 trigger:

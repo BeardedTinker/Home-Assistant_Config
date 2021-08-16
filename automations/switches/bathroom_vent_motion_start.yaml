@@ -1,0 +1,23 @@
+#####
+# Simple automation to start vent if bathroom motion is detected
+#
+#####
+
+alias: Bathroom vent motion start
+id: 5d1610d0-4d75-45c5-a344-26fe44e501f9
+
+trigger:
+  - entity_id: binary_sensor.bathroom_motion_occupancy
+    platform: state
+    to: 'on'
+
+condition:
+  - condition: time
+    after: '06:00:00'
+    before: '23:45:00'
+
+action:
+  - service: switch.turn_on
+    entity_id: switch.bathroom_vent_relay_0
+
+mode: single
