@@ -34,15 +34,9 @@ action:
 
 - service: media_player.volume_set
   data:
-    entity_id: 
-      - media_player.display_me
-      - media_player.whatever_me
-      - media_player.mini_me
+    entity_id: media_player.display_me
     volume_level: 0.6
 - service: tts.google_translate_say
-  entity_id: 
-    - media_player.display_me
-    - media_player.whatever_me
-    - media_player.mini_me
+  entity_id: media_player.display_me
   data:  
     message: 'Today, {{ states("input_text.chores_dog") }} will take the dog out, {{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.!'
