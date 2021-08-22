@@ -1,7 +1,7 @@
 """Base HACS class."""
 import logging
-from typing import List, Optional, TYPE_CHECKING
 import pathlib
+from typing import TYPE_CHECKING, List, Optional
 
 import attr
 from aiogithubapi.github import AIOGitHubAPI
@@ -9,11 +9,11 @@ from aiogithubapi.objects.repository import AIOGitHubAPIRepository
 from homeassistant.core import HomeAssistant
 
 from .enums import HacsDisabledReason, HacsStage
-from .helpers.functions.logger import getLogger
 from .hacsbase.configuration import Configuration
 from .models.core import HacsCore
 from .models.frontend import HacsFrontend
 from .models.system import HacsSystem
+from .utils.logger import getLogger
 
 if TYPE_CHECKING:
     from .helpers.classes.repository import HacsRepository
@@ -25,6 +25,8 @@ class HacsCommon:
     categories: List = []
     default: List = []
     installed: List = []
+    renamed_repositories = {}
+    archived_repositories = []
     skip: List = []
 
 
@@ -132,7 +134,8 @@ class HacsBase(HacsBaseAttributes):
         """Disable HACS."""
         self.system.disabled = True
         self.system.disabled_reason = reason
-        self.log.error("HACS is disabled - %s", reason)
+        if reason != HacsDisabledReason.REMOVED:
+            self.log.error("HACS is disabled - %s", reason)
 
     def enable(self) -> None:
         """Enable HACS."""
