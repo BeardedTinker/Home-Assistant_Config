@@ -23,5 +23,5 @@
         "hacs_frontend==20210822172723",
         "queueman==0.5"
     ],
-    "version": "1.14.0"
+    "version": "1.14.1"
 }
