@@ -1,0 +1,10 @@
+#####
+#
+#
+#####
+
+platform: integration
+source: sensor.energy_production_today
+name: solar_production
+unit: kWh
+round: 2

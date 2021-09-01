@@ -1,0 +1,13 @@
+#####
+# Simulated solar panel production sensor
+# Uses energy production estimate from Forcast Solar
+#####
+
+- sensor:
+  - name: Simulated Solar Production
+    state: "{{ (states('sensor.energy_production_today')) }}"
+    unit_of_measurement: kWh
+    attributes:
+      last_reset: "2021-08-28T12:00:00+00:00"
+      state_class: 'total_increasing'
+      device_class: 'energy'
