@@ -1,0 +1,12 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  ender_3_print_time:
+    friendly_name: Print Time
+    icon_template: mdi:clock-start
+    value_template: >-
+      {{ states.sensor.ender_3_sensor.attributes['print_stats']['print_duration'] | timestamp_custom("%H:%M:%S", 0) if states('sensor.ender_3_sensor') != 'unknown' else None }}

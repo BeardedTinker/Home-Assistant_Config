@@ -1,0 +1,12 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  ender_3_bed_temp:
+    friendly_name: Bed Temperature
+    icon_template: mdi:thermometer
+    value_template: >-
+      {{ [(states.sensor.ender_3_sensor.attributes['heater_bed']['temperature'] | float | round(1) | string), " / ", (states.sensor.ender_3_sensor.attributes['heater_bed']['target'] | float | round(1) | string)] | join if states('sensor.ender_3_sensor') != 'unknown' else None }}

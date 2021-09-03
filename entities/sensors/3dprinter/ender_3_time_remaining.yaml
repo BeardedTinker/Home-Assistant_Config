@@ -1,0 +1,12 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  ender_3_time_remaining:
+    friendly_name: Time Remaining
+    icon_template: mdi:clock-end
+    value_template: >-
+      {{ (((states.sensor.ender_3_sensor.attributes['print_stats']['print_duration'] / states.sensor.ender_3_sensor.attributes['display_status']['progress'] - states.sensor.ender_3_sensor.attributes['print_stats']['print_duration']) if states.sensor.ender_3_sensor.attributes['display_status']['progress'] > 0 else 0)) | timestamp_custom("%H:%M:%S", 0) if states('sensor.ender_3_sensor') != 'unknown' else None }}

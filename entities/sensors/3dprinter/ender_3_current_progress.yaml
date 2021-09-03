@@ -1,0 +1,13 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  ender_3_current_progress:
+    friendly_name: Current Progress
+    unit_of_measurement: '%'
+    icon_template: mdi:file-percent
+    value_template: >-
+      {{ (states.sensor.ender_3_sensor.attributes['display_status']['progress'] * 100) | round(1) if states('sensor.ender_3_sensor') != 'unknown' else None }}

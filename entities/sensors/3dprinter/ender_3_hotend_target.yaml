@@ -1,0 +1,13 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  ender_3_hotend_target:
+    friendly_name: Hotend Target
+    device_class: temperature
+    unit_of_measurement: '°C'
+    value_template: >-
+      {{ states.sensor.ender_3_sensor.attributes['extruder']['target'] | float | round(1) if states('sensor.ender_3_sensor') != 'unknown' else None }}
