@@ -1,7 +1,11 @@
+# This is used to set sensor name (device name) and friendly name for each sensor board 
 substitutions:
   devicename: schefflera-arboricola
   upper_devicename: Schefflera Arboricola
+  awake_for: 30s      # set how long to stay awake - NOT less then 10sec
+  sleep_for: 60min    # set how long to sleep in minutes
 
+# Setup of platform
 esphome:
   name: $devicename
   platform: ESP32
@@ -9,7 +13,28 @@ esphome:
   on_shutdown:
     then:
       - switch.turn_off: spower
-      
+  on_boot:
+    priority: -200
+    then:
+      - delay: 10s
+      - logger.log: "Checking sleep"
+      - lambda: |-
+          if (id(defeat).state) {
+            ESP_LOGD("main", "Prevent sleep");
+            id(deep_sleeping).prevent_deep_sleep();
+          } else {
+            ESP_LOGD("main", "Allow sleep");
+          }
+          if(id(remote_defeat).state) {
+            ESP_LOGD("main", "Remote prevent sleep");
+            id(deep_sleeping).prevent_deep_sleep();
+          } else {
+            ESP_LOGD("main", "Remote allow sleep");
+          }
+      - logger.log: "Sleep checked"
+
+# WiFi and IP addresss setup.
+# We use FIXED IP address to speed up this process and also Fast Connect
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_key
@@ -18,17 +43,18 @@ wifi:
     gateway: 192.168.1.1
     subnet: 255.255.252.0
   fast_connect: enable
-  
+
 # Enable logging
 logger:
 
-# Enable Home Assistant API
+# Enable Home Assistant API and OTA
 api:
   password: !secret api_password
 
 ota:
   password: !secret ota_password
-  
+
+# Power switch
 switch:
   - platform: gpio
     pin: GPIO4
@@ -38,6 +64,7 @@ switch:
     internal: true
     setup_priority: 1000
 
+# Wake button (GPIO35)
 binary_sensor:
   - platform: gpio
     pin: 
@@ -45,7 +72,21 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: True
     name: "${upper_devicename} Wake Button"
+  - platform: homeassistant
+    name: "Remote Prevent Sleep"
+    internal: True
+    id: "remote_defeat"
+    entity_id: input_boolean.schefflera_arboricola_prevent_deep_sleep
+    on_press:
+      then:
+        - logger.log: "remote press defeat"
+        - deep_sleep.prevent: deep_sleep_1
+    on_state:
+      then:
+        - delay: 4s
+        - logger.log: "Remote state state"
 
+# Setting up i2C to get sensor data
 i2c:
   sda: 25
   scl: 26
@@ -53,9 +94,11 @@ i2c:
   id: bus_a
   setup_priority: -200
 
+# Deep sleep
 deep_sleep:
-  run_duration: 30s
-  sleep_duration: 60min
+  run_duration: ${sleep_for}
+  sleep_duration: ${sleep_for}
+  id: deep_sleeping
 
 sensor:
   - platform: dht
