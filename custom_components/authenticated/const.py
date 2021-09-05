@@ -1,7 +1,7 @@
 """Constants for authenticated."""
 
 DOMAIN = "authenticated"
-INTEGRATION_VERSION = "21.3.0"
+INTEGRATION_VERSION = "21.9.0"
 ISSUE_URL = "https://github.com/custom-components/authenticated/issues"
 
 STARTUP = f"""

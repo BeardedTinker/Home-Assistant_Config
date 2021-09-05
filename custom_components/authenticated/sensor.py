@@ -201,13 +201,14 @@ class AuthenticatedSensor(Entity):
                 accessdata = AuthenticatedData(access, tokens[access])
                 ipaddress = IPData(accessdata, users, self.provider)
                 ipaddress.lookup()
-                if ipaddress.new_ip:
-                    if self.notify:
-                        ipaddress.notify(self.hass)
-                    ipaddress.new_ip = False
 
             if ipaddress.hostname is None:
                 ipaddress.hostname = get_hostname(ipaddress.ip_address)
+
+            if ipaddress.new_ip:
+                if self.notify:
+                    ipaddress.notify(self.hass)
+                ipaddress.new_ip = False
 
             self.hass.data[PLATFORM_NAME][access] = ipaddress
 
