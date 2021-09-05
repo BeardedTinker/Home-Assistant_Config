@@ -9,4 +9,4 @@ sensors:
     friendly_name: Hotend Temperature
     icon_template: mdi:thermometer
     value_template: >-
-      {{ [(states.sensor.ender_3_sensor.attributes['extruder']['temperature'] | float | round(1) | string), " / ", (states.sensor.ender_3_sensor.attributes['extruder']['target'] | float | round(1) | string)] | join if states('sensor.ender_3_sensor') != 'unknown' else None }}
+      {{ [(states.sensor.ender_3_sensor.attributes['extruder']['temperature'] | float | round(1) | string), " / ", (states.sensor.ender_3_sensor.attributes['extruder']['target'] | float | round(1) | string)] | join if is_state('sensor.ender_3_sensor', 'OK') else None }}

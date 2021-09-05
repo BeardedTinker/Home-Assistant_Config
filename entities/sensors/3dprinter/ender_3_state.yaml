@@ -9,4 +9,4 @@ sensors:
     friendly_name: State
     icon_template: mdi:printer-3d
     value_template: >-
-      {{ states.sensor.ender_3_sensor.attributes['print_stats']['state'] if states('sensor.ender_3_sensor') != 'unknown' else None }}
+      {{ states.sensor.ender_3_sensor.attributes['print_stats']['state'] if is_state('sensor.ender_3_sensor', 'OK') else None }}

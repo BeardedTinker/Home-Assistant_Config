@@ -8,4 +8,4 @@ sensors:
   ender_3_current_print:
     friendly_name: Current print
     value_template: >-
-      {{ states.sensor.ender_3_sensor.attributes['print_stats']['filename'] if states('sensor.ender_3_sensor') != 'unknown' else None }}
+      {{ states.sensor.ender_3_sensor.attributes['print_stats']['filename'] if is_state('sensor.ender_3_sensor', 'OK') else None }}
