@@ -1,5 +1,5 @@
 #####
-# Create camera from OctoPrint timelapse webcam
+# Create camera for Ender 3 Pro
 #####
 
 platform: mjpeg

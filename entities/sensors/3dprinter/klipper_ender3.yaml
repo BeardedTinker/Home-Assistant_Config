@@ -5,6 +5,7 @@
 
 platform: rest
 name: ender_3_sensor
+friendly_name: Ender 3 Por sensor
 resource: "http://192.168.1.100:7125/printer/objects/query?heater_bed&extruder&print_stats&toolhead&display_status&virtual_sdcard"
 json_attributes_path: "$.result.status"
 json_attributes:
