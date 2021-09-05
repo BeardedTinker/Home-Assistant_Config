@@ -1,0 +1,10 @@
+#####
+# School - start of day if school in morning for Zita
+#
+#####
+
+school_day_start_zita_b:
+  name: Zita School Day Start Week A
+  has_date: false
+  has_time: true
+  initial: '08:00:00'

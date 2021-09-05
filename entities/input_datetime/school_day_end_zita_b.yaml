@@ -1,0 +1,10 @@
+#####
+# School - end of day if school in morning for Zita
+#
+#####
+
+school_day_end_zita_b:
+  name: Zita School Day End Week B
+  has_date: false
+  has_time: true
+  initial: '11:45:00'

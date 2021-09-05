@@ -3,8 +3,8 @@
 #
 #####
 
-school_day_end_zita:
-  name: Zita School Day End
+school_day_end_zita_a:
+  name: Zita School Day End Week A
   has_date: false
   has_time: true
-  initial: '11:45:00'
+  initial: '11:30:00'
