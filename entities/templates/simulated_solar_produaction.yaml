@@ -5,7 +5,7 @@
 
 - sensor:
   - name: Simulated Solar Production
-    state: "{{ (states('sensor.energy_production_today')) }}"
+    state: "{{ (states('sensor.power_production_now')) }}"
     unit_of_measurement: kWh
     attributes:
       last_reset: "2021-08-28T12:00:00+00:00"
