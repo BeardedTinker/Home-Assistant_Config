@@ -1,7 +1,6 @@
 """Config flow for SpaceX Launches and Starman."""
 from spacexpypi import SpaceX
 
-from homeassistant import config_entries
 from homeassistant.helpers import config_entry_flow
 
 from .const import DOMAIN
@@ -19,5 +18,4 @@ config_entry_flow.register_discovery_flow(
     DOMAIN,
     "SpaceX Launches and Starman",
     _async_has_devices,
-    config_entries.CONN_CLASS_UNKNOWN,
 )

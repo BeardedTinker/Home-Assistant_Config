@@ -14,5 +14,6 @@
   "codeowners": [
     "@djtimca"
   ],
-  "version": "028"
+  "version": "029",
+  "iot_class": "cloud_polling"
 }
