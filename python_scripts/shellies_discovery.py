@@ -79,6 +79,7 @@ DEVICE_CLASS_WINDOW = "window"
 
 EXPIRE_AFTER_FOR_BATTERY_POWERED = int(1.2 * 12 * 60 * 60)  # 1.2 * 12 h
 EXPIRE_AFTER_FOR_AC_POWERED = int(2.2 * 10 * 60)  # 2.2 * 10 min
+EXPIRE_AFTER_FOR_SHELLY_MOTION = int(1.2 * 10 * 60)  # 2.2 * 10 min
 
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY_TOPIC = "avty_t"
@@ -1313,6 +1314,7 @@ if model_id == MODEL_SHELLYMOTION_ID or dev_id_prefix == MODEL_SHELLYMOTION_PREF
         TOPIC_INFO,
         TOPIC_INFO,
     ]
+    battery_powered = True
 
 if model_id == MODEL_SHELLYGAS_ID or dev_id_prefix == MODEL_SHELLYGAS_PREFIX:
     model = MODEL_SHELLYGAS
@@ -2659,9 +2661,15 @@ for sensor_id in range(len(sensors)):
         battery_powered = False
         no_battery_sensor = True
     if battery_powered:
-        expire_after = device_config.get(
-            CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_BATTERY_POWERED
-        )
+        if model == MODEL_SHELLYMOTION:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_MOTION
+            )
+        else:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_BATTERY_POWERED
+            )
+
         if device_config.get(CONF_POWERED) == ATTR_POWER_AC:
             no_battery_sensor = True
             expire_after = device_config.get(
@@ -2881,9 +2889,14 @@ for bin_sensor_id in range(len(bin_sensors)):
     ):
         battery_powered = False
     if battery_powered:
-        expire_after = device_config.get(
-            CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_BATTERY_POWERED
-        )
+        if model == MODEL_SHELLYMOTION:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_MOTION
+            )
+        else:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_BATTERY_POWERED
+            )
         if device_config.get(CONF_POWERED) == ATTR_POWER_AC:
             no_battery_sensor = True
             expire_after = device_config.get(
