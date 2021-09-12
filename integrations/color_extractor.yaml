@@ -1,0 +1,7 @@
+#####
+# Color extractor
+# Used to match LED lights with dominant colour from image (Chrome Cast)
+# https://www.home-assistant.io/integrations/color_extractor/
+#####
+
+color_extractor:

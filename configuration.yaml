@@ -9,3 +9,5 @@ homeassistant:
   packages: !include_dir_named integrations     # package setup/config split
   allowlist_external_dirs:
     - !secret allow_dir
+  allowlist_external_urls:
+    - https://i.ytimg.com

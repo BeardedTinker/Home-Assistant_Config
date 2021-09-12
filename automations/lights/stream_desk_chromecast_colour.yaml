@@ -1,0 +1,18 @@
+#####
+# Set stream desk colour to dominant colour from Loft TV Chromecast
+#
+#####
+
+alias: "Stream Desk to Chromecast colour"
+
+trigger:
+  - platform: state
+    entity_id: media_player.loft_tv
+
+action:
+  - service: color_extractor.turn_on
+    data_template:
+      color_extract_url: "{{ states.media_player.loft_tv.attributes.entity_picture }}"
+      entity_id: light.stream_desk
+      brightness_pct: 100
+      transition: 5
