@@ -19,13 +19,13 @@ esphome:
       - delay: 10s
       - logger.log: "Checking sleep"
       - lambda: |-
-          if (id(defeat).state) {
+          if (id(defer).state) {
             ESP_LOGD("main", "Prevent sleep");
             id(deep_sleeping).prevent_deep_sleep();
           } else {
             ESP_LOGD("main", "Allow sleep");
           }
-          if(id(remote_defeat).state) {
+          if (id(remote_defer).state) {
             ESP_LOGD("main", "Remote prevent sleep");
             id(deep_sleeping).prevent_deep_sleep();
           } else {
@@ -72,15 +72,16 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: True
     name: "${upper_devicename} Wake Button"
+    id: defer
   - platform: homeassistant
     name: "Remote Prevent Sleep"
     internal: True
-    id: "remote_defeat"
+    id: "remote_defer"
     entity_id: input_boolean.schefflera_arboricola_prevent_deep_sleep
     on_press:
       then:
-        - logger.log: "remote press defeat"
-        - deep_sleep.prevent: deep_sleep_1
+        - logger.log: "remote press defer"
+        - deep_sleep.prevent: deep_sleeping
     on_state:
       then:
         - delay: 4s
