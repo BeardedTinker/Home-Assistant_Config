@@ -10,4 +10,3 @@ sensors:
     icon_template: mdi:clock-outline
     value_template: >-
       {{ (as_timestamp(now()) + 2 * 60 * 60 + ((states.sensor.ender_3_sensor.attributes['print_stats']['print_duration'] / states.sensor.ender_3_sensor.attributes['display_status']['progress'] - states.sensor.ender_3_sensor.attributes['print_stats']['print_duration']) if states.sensor.ender_3_sensor.attributes['display_status']['progress'] > 0 else 0)) | timestamp_custom("%H:%M:%S", 0) if is_state('sensor.ender_3_sensor', 'OK') else None }}
-

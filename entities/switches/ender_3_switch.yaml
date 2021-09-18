@@ -3,7 +3,6 @@
 #
 #####
 
-
 platform: rest
 name: ender_3_power
 #friendly_name: Ender 3 Pro power
