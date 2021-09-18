@@ -137,6 +137,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - COVID-19
   - Elgato Key Light
   - EPSHome
+  - Forcast Solar
   - GDACS
   - Google Cast
   - HACS
@@ -149,7 +150,6 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Mobile App
   - MQTT
   - Network UPS Tool
-  - Nuki
   - ONVIF
   - OpenUV
   - Reolink
@@ -160,6 +160,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Synology DSM
   - Tado
   - Tile
+  - Ubiquity UniFi
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
   - Xiaomi Miio
 
@@ -177,35 +178,35 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   157 |
-| Binary sensors       |   220 |
+| Automations          |   159 |
+| Binary sensors       |   219 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  1808 |
+| Entities             |  2033 |
 | Groups               |    17 |
 | Image Processing     |     1 |
-| Input Boolean        |    13 |
-| Input Date/Time      |    23 |
+| Input Boolean        |    14 |
+| Input Date/Time      |    25 |
 | Input Number         |    13 |
 | Input Select         |    12 |
 | Input Text           |    20 |
 | Lights               |    39 |
-| Lines of code (YAML) | 21383 |
-| Locks                |     3 |
+| Lines of code (YAML) | 22301 |
+| Locks                |     1 |
 | Media players        |    41 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
-| Sensors              |  1030 |
-| Switches             |    66 |
+| Sensors              |  1249 |
+| Switches             |    67 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 14.08.2021 9:20PM
+* Updated: 18.09.2021 11:24PM
 
 ### Missing files
 
