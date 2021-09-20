@@ -14,8 +14,10 @@ LONG_TOKENS = "long_tokens"
 LAST_EVENT = "last_event"
 
 CONF_STREAM = "stream"
+CONF_STREAM_FORMAT = "stream_format"
 CONF_PROTOCOL = "protocol"
 CONF_CHANNEL = "channel"
+CONF_STREAM_FORMAT = "stream_format"
 CONF_MOTION_OFF_DELAY = "motion_off_delay"
 CONF_PLAYBACK_MONTHS = "playback_months"
 CONF_THUMBNAIL_PATH = "playback_thumbnail_path"
@@ -24,6 +26,8 @@ DEFAULT_CHANNEL = 1
 DEFAULT_MOTION_OFF_DELAY = 60
 DEFAULT_PROTOCOL = "rtmp"
 DEFAULT_STREAM = "main"
+DEFAULT_STREAM_FORMAT = "h264"
+
 DEFAULT_TIMEOUT = 30
 DEFAULT_PLAYBACK_MONTHS = 2
 DEFAULT_THUMBNAIL_OFFSET = 6

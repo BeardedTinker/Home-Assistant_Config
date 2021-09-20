@@ -36,10 +36,12 @@ from .const import (
     CONF_MOTION_OFF_DELAY,
     CONF_PROTOCOL,
     CONF_STREAM,
+    CONF_STREAM_FORMAT,
     DEFAULT_CHANNEL,
     DEFAULT_MOTION_OFF_DELAY,
     DEFAULT_PROTOCOL,
     DEFAULT_STREAM,
+    DEFAULT_STREAM_FORMAT,
     DEFAULT_TIMEOUT,
     DOMAIN,
     PUSH_MANAGER,
@@ -80,6 +82,11 @@ class ReolinkBase:
         else:
             self._stream = options[CONF_STREAM]
 
+        if CONF_STREAM_FORMAT not in options:
+            self._stream_format = DEFAULT_STREAM_FORMAT
+        else:
+            self._stream_format = options[CONF_STREAM_FORMAT]
+
         if CONF_PROTOCOL not in options:
             self._protocol = DEFAULT_PROTOCOL
         else:
@@ -92,6 +99,7 @@ class ReolinkBase:
             self._password,
             channel=self._channel - 1,
             stream=self._stream,
+            stream_format=self._stream_format,
             protocol=self._protocol,
             timeout=self._timeout,
         )
@@ -192,6 +200,11 @@ class ReolinkBase:
         """Set the stream."""
         self._stream = stream
         await self._api.set_stream(stream)
+
+    async def set_stream_format(self, stream_format):
+        """Set the stream format."""
+        self._stream_format = stream_format
+        await self._api.set_stream_format(stream_format)
 
     async def set_timeout(self, timeout):
         """Set the API timeout."""

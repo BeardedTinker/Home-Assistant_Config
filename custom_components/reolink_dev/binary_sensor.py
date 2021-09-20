@@ -121,11 +121,36 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             for key, value in self._base.api.ai_state.items():
                 if key == "channel":
                     continue
-                
+
                 if self._state:
-                    attrs[key] = value == 1
+                    if isinstance(value, int):  # compatibility with firmware < 3.0.0-494
+                        attrs[key] = value == 1
+                    else:
+                        # from firmware 3.0.0.0-494 there is a new json structure:
+                        # [
+                        #     {
+                        #         "cmd" : "GetAiState",
+                        #         "code" : 0,
+                        #         "value" : {
+                        #             "channel" : 0,
+                        #             "face" : {
+                        #                 "alarm_state" : 0,
+                        #                 "support" : 0
+                        #             },
+                        #             "people" : {
+                        #                 "alarm_state" : 0,
+                        #                 "support" : 1
+                        #             },
+                        #             "vehicle" : {
+                        #                 "alarm_state" : 0,
+                        #                 "support" : 1
+                        #             }
+                        #         }
+                        #     }
+                        # ]
+                        attrs[key] = value.get("alarm_state", 0) == 1
                 else:
                     # Reset the AI values.
                     attrs[key] = False
-		
+
         return attrs

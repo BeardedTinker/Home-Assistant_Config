@@ -28,6 +28,7 @@ from .const import (
     CONF_PROTOCOL,
     CONF_STREAM,
     CONF_THUMBNAIL_PATH,
+    CONF_STREAM_FORMAT,
     COORDINATOR,
     DOMAIN,
     EVENT_DATA_RECEIVED,
@@ -127,6 +128,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     await base.set_timeout(entry.options[CONF_TIMEOUT])
     await base.set_protocol(entry.options[CONF_PROTOCOL])
     await base.set_stream(entry.options[CONF_STREAM])
+    await base.set_stream_format(entry.options[CONF_STREAM_FORMAT])
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):

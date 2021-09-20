@@ -2,6 +2,7 @@
 import asyncio
 from datetime import datetime
 import logging
+from typing import Union
 
 import voluptuous as vol
 
@@ -209,7 +210,9 @@ class ReolinkCamera(ReolinkEntity, Camera):
         finally:
             await stream.close()
 
-    async def async_camera_image(self):
+    async def async_camera_image(
+        self, width: Union[int, None] = None, height: Union[int, None] = None
+    ) -> Union[bytes, None]:
         """Return a still image response from the camera."""
         return await self._base.api.get_snapshot()
 
