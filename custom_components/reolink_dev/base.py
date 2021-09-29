@@ -107,7 +107,10 @@ class ReolinkBase:
         self._hass = hass
         self.async_functions = list()
         self.sync_functions = list()
+
         self.motion_detection_state = True
+        self.object_person_detection_state = True
+        self.object_vehicle_detection_state = True
 
         if CONF_MOTION_OFF_DELAY not in options:
             self.motion_off_delay = DEFAULT_MOTION_OFF_DELAY
@@ -399,7 +402,6 @@ class ReolinkPush:
 
 async def handle_webhook(hass, webhook_id, request):
     """Handle incoming webhook from Reolink for inbound messages and calls."""
-    _LOGGER.debug("Reolink webhook triggered")
 
     if not request.body_exists:
         _LOGGER.debug("Webhook triggered without payload")

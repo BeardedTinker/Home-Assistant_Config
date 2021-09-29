@@ -29,6 +29,7 @@ from .const import (
     DEFAULT_PROTOCOL,
     DEFAULT_STREAM,
     DEFAULT_STREAM_FORMAT,
+    DEFAULT_THUMBNAIL_PATH,
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
@@ -192,7 +193,7 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_THUMBNAIL_PATH,
                         default=self.config_entry.options.get(
-                            CONF_THUMBNAIL_PATH, None
+                            CONF_THUMBNAIL_PATH, DEFAULT_THUMBNAIL_PATH
                         ),
                     ): cv.string,
                     vol.Optional(
