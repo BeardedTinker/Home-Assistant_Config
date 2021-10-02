@@ -52,6 +52,7 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER_DATA = logging.getLogger(__name__ + ".data")
 
 STORAGE_VERSION = 1
 
@@ -328,6 +329,10 @@ class ReolinkPush:
             )
             await self.set_available(True)
         else:
+            _LOGGER.error(
+                "Host %s subscription failed to its webhook, base object state will to NotAvailable",
+                self._host,
+            )
             await self.set_available(False)
         return True
 
@@ -359,6 +364,10 @@ class ReolinkPush:
                 await self.set_available(False)
                 await self._sman.subscribe(self._webhook_url)
             else:
+                _LOGGER.info(
+                    "Host %s SUCCESSFULLY renewed Reolink subscription",
+                    self._host,
+                )
                 await self.set_available(True)
         else:
             await self.set_available(True)
@@ -411,7 +420,8 @@ async def handle_webhook(hass, webhook_id, request):
         _LOGGER.debug("Webhook triggered with unknown payload")
         return
 
-    _LOGGER.debug(data)
+    _LOGGER_DATA.debug(data)
+
     matches = re.findall(r'Name="IsMotion" Value="(.+?)"', data)
     if matches:
         is_motion = matches[0] == "true"
