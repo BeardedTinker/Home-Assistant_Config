@@ -2,7 +2,7 @@
 substitutions:
   devicename: schefflera-arboricola
   upper_devicename: Schefflera Arboricola
-  awake_for: 30s      # set how long to stay awake - NOT less then 10sec
+  awake_for: 5s      # set how long to stay awake - NOT less then 10sec
   sleep_for: 60min    # set how long to sleep in minutes
 
 # Setup of platform
@@ -97,7 +97,7 @@ i2c:
 
 # Deep sleep
 deep_sleep:
-  run_duration: ${sleep_for}
+  run_duration: ${awake_for}
   sleep_duration: ${sleep_for}
   id: deep_sleeping
 
@@ -105,7 +105,7 @@ sensor:
   - platform: dht
     pin: 16
     model: dht11
-    update_interval: 5sec
+    update_interval: 4sec
     temperature:
       name: "${upper_devicename} Temperature"
     humidity:
@@ -115,7 +115,7 @@ sensor:
     name: "${upper_devicename} Soil Moisture"
     attenuation: 11db
     unit_of_measurement: '%'
-    update_interval: 5sec
+    update_interval: 4sec
     filters:
       # 1.48v = in water
       # 3.34v = dry
@@ -136,30 +136,30 @@ sensor:
     name: "${upper_devicename} Battery"
     attenuation: 6db
     unit_of_measurement: 'V'
-    update_interval: 5sec
+    update_interval: 4sec
     filters:
       - calibrate_linear:
           # Map 0.0 (from sensor) to 0.0 (true value)
           - 0.0 -> 0.0
           - 2.06 -> 1.89
       - lambda: return x * 2.0;
-  - platform: adc
-    pin: 33
-    name: "${upper_devicename} Battery %"
-    attenuation: 6db
-    unit_of_measurement: '%'
-    update_interval: 5sec
-    filters:
-#      - calibrate_linear:
-#          # Map 0.0 (from sensor) to 0.0 (true value)
-#          - 0.0 -> 0.0
-#          - 2.06 -> 1.89       
-      - lambda: |-
-          return ((id(${devicename}_voltage).state -3.3) /0.8 * 100.00);  
+#  - platform: adc
+#    pin: 33
+#    name: "${upper_devicename} Battery %"
+#    attenuation: 6db
+#    unit_of_measurement: '%'
+##    update_interval: 4sec
+#    filters:
+##      - calibrate_linear:
+##          # Map 0.0 (from sensor) to 0.0 (true value)
+##          - 0.0 -> 0.0
+##          - 2.06 -> 1.89       
+#      - lambda: |-
+#          return ((id(${devicename}_voltage).state -3.3) /0.8 * 100.00);  
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"
-    update_interval: 5sec
+    update_interval: 4sec
     unit_of_measurement: '%'
     accuracy_decimals: 4
     filters:
@@ -172,5 +172,5 @@ sensor:
     i2c_id: bus_a
     name: "${upper_devicename} Illuminance"
     address: 0x23
-    update_interval: 5sec
+    update_interval: 4sec
     setup_priority: -300
