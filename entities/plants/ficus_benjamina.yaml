@@ -5,11 +5,11 @@
 
 ficus_benjamina:
   sensors:
-    moisture: sensor.ficus_benjamina_soil
+    moisture: sensor.ficus_benjamina_soil_moisture
     battery: sensor.ficus_benjamina_battery
     temperature: sensor.ficus_benjamina_temperature
-    conductivity: sensor.ficus_benjamina_fertilizer
-    brightness: sensor.ficus_benjamina_lux
+    conductivity: sensor.ficus_benjamina_salt
+    brightness: sensor.ficus_benjamina_illuminance
   min_moisture: 30
   max_moisture: 75
   min_battery: 10
