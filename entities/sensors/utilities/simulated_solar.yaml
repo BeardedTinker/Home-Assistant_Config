@@ -6,5 +6,5 @@
 platform: integration
 source: sensor.power_production_now
 name: solar_production
-unit: kWh
+# unit: kWh
 round: 2
