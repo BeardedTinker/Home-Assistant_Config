@@ -5,11 +5,11 @@
 
 cherry_tomatoes:
   sensors:
-    moisture: sensor.cherry_tomatoes_soil
+    moisture: sensor.cherry_tomatoes_soil_moisture
     battery: sensor.cherry_tomatoes_battery
     temperature: sensor.cherry_tomatoes_temperature
-    conductivity: sensor.cherry_tomatoes_fertilizer
-    brightness: sensor.cherry_tomatoes_lux
+    conductivity: sensor.cherry_tomatoes_salt
+    brightness: sensor.cherry_tomatoes_illuminance
   min_moisture: 60
   max_moisture: 85
   min_battery: 10

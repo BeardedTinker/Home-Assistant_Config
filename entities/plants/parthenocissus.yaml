@@ -5,11 +5,11 @@
 
 parthenocissus:
   sensors:
-    moisture: sensor.parthenocissus_soil
+    moisture: sensor.parthenocissus_soil_moisture
     battery: sensor.parthenocissus_battery
     temperature: sensor.parthenocissus_temperature
-    conductivity: sensor.parthenocissus_fertilizer
-    brightness: sensor.parthenocissus_lux
+    conductivity: sensor.parthenocissus_salt
+    brightness: sensor.parthenocissus_illuminance
   min_moisture: 30
   max_moisture: 75
   min_battery: 10
