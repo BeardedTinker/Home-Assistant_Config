@@ -6,10 +6,10 @@
 parthenocissus_small:
   sensors:
     moisture: sensor.parthenocissus_small_soil_moisture
-    battery: sensor.parthenocissus_small_tomatoes_battery
-    temperature: sensor.parthenocissus_small_tomatoes_temperature
-    conductivity: sensor.parthenocissus_small_tomatoes_salt
-    brightness: sensor.parthenocissus_small_tomatoes_illuminance
+    battery: sensor.parthenocissus_small_battery
+    temperature: sensor.parthenocissus_small_temperature
+    conductivity: sensor.parthenocissus_small_salt
+    brightness: sensor.parthenocissus_small_illuminance
   min_moisture: 60
   max_moisture: 85
   min_battery: 10
