@@ -414,26 +414,37 @@ class SpaceXSensor(CoordinatorEntity):
         elif self._kind == "spacex_latest_launch_rocket":
             core_counter = 1
             for this_core in latest_launch_data["cores_detail"]:
-                self.attrs["core_" + str(core_counter) + "_serial"] = this_core["details"][
-                    "serial"
-                ]
-                self.attrs["core_" + str(core_counter) + "_flight"] = this_core[
+                if this_core.get("details"):
+                    self.attrs["core_" + str(core_counter) + "_serial"] = this_core.get("details",{}).get(
+                        "serial"
+                    )
+                    self.attrs["core_" + str(core_counter) + "_block"] = this_core.get("details",{}).get(
+                        "block"
+                    )
+                else:
+                    self.attrs["core_" + str(core_counter) + "_serial"] = None
+                    self.attrs["core_" + str(core_counter) + "_block"] = None
+
+                self.attrs["core_" + str(core_counter) + "_flight"] = this_core.get(
                     "flight"
-                ]
-                self.attrs["core_" + str(core_counter) + "_block"] = this_core["details"][
-                    "block"
-                ]
+                )
+                
                 self.attrs[
                     "core_" + str(core_counter) + "_landing_intent"
-                ] = this_core["landing_attempt"]
+                ] = this_core.get("landing_attempt")
 
-                self.attrs["core_" + str(core_counter) + "_lz"] = this_core["landpad"][
-                    "name"
-                ]
+                if this_core.get("landpad"):
+                    self.attrs["core_" + str(core_counter) + "_lz"] = this_core.get("landpad",{}).get(
+                        "name"
+                    )
 
-                self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core["landpad"][
-                    "full_name"
-                ]
+                    self.attrs["core_" + str(core_counter) + "_lz_long"] = this_core.get("landpad",{}).get(
+                        "full_name"
+                    )
+                else:
+                    self.attrs["core_" + str(core_counter) + "_lz"] = None
+                    self.attrs["core_" + str(core_counter) + "_lz_long"] = None
+
                 core_counter = core_counter + 1
             
             if latest_launch_data.get("fairings"):
