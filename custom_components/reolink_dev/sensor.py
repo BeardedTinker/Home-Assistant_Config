@@ -127,7 +127,7 @@ class LastEventSensor(ReolinkEntity, SensorEntity):
 
         filename = file.get("name", "")
         if len(filename) == 0:
-            _LOGGER.warning("Search command provided a file record without a name: %s", str(file))
+            _LOGGER.info("Search command provided a file record without a name: %s", str(file))
 
         end = searchtime_to_datetime(file["EndTime"], start.tzinfo)
         start = searchtime_to_datetime(file["StartTime"], end.tzinfo)

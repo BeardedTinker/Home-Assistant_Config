@@ -23,6 +23,7 @@ from .base import ReolinkBase, ReolinkPush
 from .const import (
     BASE,
     CONF_CHANNEL,
+    CONF_USE_HTTPS,
     CONF_MOTION_OFF_DELAY,
     CONF_PLAYBACK_MONTHS,
     CONF_PROTOCOL,
@@ -120,6 +121,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     """Update the configuration at the base entity and API."""
     base: ReolinkBase = hass.data[DOMAIN][entry.entry_id][BASE]
+
+    base.enable_https(entry.options[CONF_USE_HTTPS])
 
     base.motion_off_delay = entry.options[CONF_MOTION_OFF_DELAY]
     base.playback_months = entry.options[CONF_PLAYBACK_MONTHS]
