@@ -17,7 +17,7 @@ condition:
     entity_id: sensor.bathroom_humidity
     above: 64
   - condition: numeric_state
-    entity_id: sensor.bedroom_humidity
+    entity_id: sensor.shelly_h_t_d50641_humidity
     below: 63.5
 
 action:
