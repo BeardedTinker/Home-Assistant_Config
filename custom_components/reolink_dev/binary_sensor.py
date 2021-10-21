@@ -2,6 +2,7 @@
 import asyncio
 import datetime
 import logging
+import traceback
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
@@ -102,16 +103,24 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
         if self._base.api.channels > 1:
             # Pull the motion state for the NVR channel, it has only 1 event
-            self._event_state = await self._base.api.get_motion_state()
+            try:
+                self._event_state = await self._base.api.get_motion_state()
+            except:
+                _LOGGER.error("Motion state could not be queried from API")
+                _LOGGER.error(traceback.format_exc(()))
 
         if self._event_state:
             self._last_motion = datetime.datetime.now()
 
             if self._base.api.ai_state:
                 # Pull the AI state only at motion detection
-                await self._base.api.get_ai_state()
-                # send an event to AI based motion sensor entities
-                self._hass.bus.async_fire(self._base.event_id, {"ai_refreshed": True})
+                try:
+                    await self._base.api.get_ai_state()
+                    # send an event to AI based motion sensor entities
+                    self._hass.bus.async_fire(self._base.event_id, {"ai_refreshed": True})
+                except:
+                    _LOGGER.error("AI state could not be queried from API")
+                    _LOGGER.error(traceback.format_exc(()))
         else:
             if self._base.motion_off_delay > 0:
                 await asyncio.sleep(self._base.motion_off_delay)
