@@ -5,6 +5,6 @@
   - sensor:
       - name: Daily Offpeak Energy Cost
         state: "{{ ((states('sensor.daily_energy_offpeak')|float ) * states('input_number.offpeak_energy_cost')|float) }}"
-        unit_of_measurement: "hrk"
+        unit_of_measurement: "HRK"
         state_class: measurement
         device_class: energy
