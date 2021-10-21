@@ -179,12 +179,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   159 |
-| Binary sensors       |   224 |
+| Binary sensors       |   226 |
 | Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  2121 |
+| Entities             |  2048 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    14 |
@@ -192,21 +192,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |    13 |
 | Input Select         |    12 |
 | Input Text           |    20 |
-| Lights               |    39 |
-| Lines of code (YAML) | 22609 |
+| Lights               |    38 |
+| Lines of code (YAML) | 23112 |
 | Locks                |     1 |
 | Media players        |    41 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
-| Sensors              |  1301 |
-| Switches             |    88 |
+| Sensors              |  1238 |
+| Switches             |    78 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 08.10.2021 08:00PM
+* Updated: 21.10.2021 23:00PM
 
 ### Missing files
 
