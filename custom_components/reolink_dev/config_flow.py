@@ -18,6 +18,7 @@ from .base import ReolinkBase
 from .const import (
     BASE,
     CONF_CHANNEL,
+    CONF_USE_HTTPS,
     CONF_MOTION_OFF_DELAY,
     CONF_PLAYBACK_MONTHS,
     CONF_PROTOCOL,
@@ -25,6 +26,7 @@ from .const import (
     CONF_STREAM_FORMAT,
     CONF_THUMBNAIL_PATH,
     DEFAULT_MOTION_OFF_DELAY,
+    DEFAULT_USE_HTTPS,
     DEFAULT_PLAYBACK_MONTHS,
     DEFAULT_PROTOCOL,
     DEFAULT_STREAM,
@@ -86,7 +88,8 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_HOST): str,
-                    vol.Optional(CONF_PORT, default=80): cv.positive_int,
+                    vol.Optional(CONF_PORT, default=443): cv.positive_int,
+                    vol.Optional(CONF_USE_HTTPS, default=DEFAULT_USE_HTTPS): bool,
                     vol.Required(CONF_USERNAME): str,
                     vol.Required(CONF_PASSWORD): str,
                 }

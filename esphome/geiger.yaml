@@ -90,7 +90,7 @@ sensor:
 #    filters:
 #    - lambda: return x / 123.147092360319;
 
-  - platform: xiaomi_miscale2
+  - platform: xiaomi_miscale
     mac_address: 'DF:F2:FF:EE:0C:33'
     weight:
       name: "Xiaomi Mi Body Composition Scale Weight"

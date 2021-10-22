@@ -80,6 +80,10 @@ class ReolinkBase:
         else:
             self._use_https = config[CONF_USE_HTTPS]
 
+        if config[CONF_PORT] == 80 and self._use_https:
+            _LOGGER.warning("Port 80 is used, USE_HTTPS set back to False")
+            self._use_https = False
+
         if CONF_TIMEOUT not in options:
             self._timeout = DEFAULT_TIMEOUT
         else:
