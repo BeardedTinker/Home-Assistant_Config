@@ -1,4 +1,5 @@
 # This is used to set sensor name (device name) and friendly name for each sensor board 
+# Using _ in device name will result in warning!
 substitutions:
   devicename: dracena_marginata
   upper_devicename: Dracena Marginata
@@ -48,11 +49,12 @@ wifi:
 logger:
 
 # Enable Home Assistant API and OTA
+# Password is disabled for OTA and API for faster data transfer and easier setup
 api:
-  password: !secret api_password
+#  password: !secret api_password
 
 ota:
-  password: !secret ota_password
+#  password: !secret ota_password
 
 # Power switch
 switch:
