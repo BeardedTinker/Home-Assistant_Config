@@ -69,13 +69,12 @@ binary_sensor:
   - platform: gpio
     pin: 
       number: GPIO35
-      mode: INPUT_PULLUP
-      inverted: True
+      inverted: true
     name: "${upper_devicename} Wake Button"
     id: defer
   - platform: homeassistant
     name: "${upper_devicename} Remote Prevent Sleep"
-    internal: True
+    internal: true
     id: "remote_defer"
     entity_id: input_boolean.${devicename}_prevent_deep_sleep
     on_press:
@@ -91,7 +90,7 @@ binary_sensor:
 i2c:
   sda: 25
   scl: 26
-  scan: True
+  scan: true
   id: bus_a
   setup_priority: -200
 
@@ -143,19 +142,20 @@ sensor:
           - 0.0 -> 0.0
           - 2.06 -> 1.89
       - lambda: return x * 2.0;
-#  - platform: adc
-#    pin: 33
-#    name: "${upper_devicename} Battery %"
-#    attenuation: 6db
-#    unit_of_measurement: '%'
-##    update_interval: 4sec
-#    filters:
-##      - calibrate_linear:
-##          # Map 0.0 (from sensor) to 0.0 (true value)
-##          - 0.0 -> 0.0
-##          - 2.06 -> 1.89       
-#      - lambda: |-
-#          return ((id(${devicename}_voltage).state -3.3) /0.8 * 100.00);  
+    id: ${devicename}_voltage
+  - platform: adc
+    pin: 33
+    name: "${upper_devicename} Battery %"
+    attenuation: 6db
+    unit_of_measurement: '%'
+#    update_interval: 4sec
+    filters:
+#      - calibrate_linear:
+#          # Map 0.0 (from sensor) to 0.0 (true value)
+#          - 0.0 -> 0.0
+#          - 2.06 -> 1.89       
+      - lambda: |-
+          return ((id(${devicename}_voltage).state -3.3) /0.8 * 100.00);  
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"

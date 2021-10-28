@@ -1,7 +1,7 @@
 # This is used to set sensor name (device name) and friendly name for each sensor board 
 substitutions:
-  devicename: ficus_benjamina
-  upper_devicename: Ficus Benjamina
+  devicename: dracena_marginata
+  upper_devicename: Dracena Marginata
   awake_for: 5s      # set how long to stay awake - NOT less then 10sec
   sleep_for: 60min    # set how long to sleep in minutes
 
@@ -39,7 +39,7 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_key
   manual_ip:
-    static_ip: 192.168.2.51
+    static_ip: 192.168.2.55
     gateway: 192.168.1.1
     subnet: 255.255.252.0
   fast_connect: enable
@@ -79,7 +79,7 @@ binary_sensor:
     entity_id: input_boolean.${devicename}_prevent_deep_sleep
     on_press:
       then:
-        - logger.log: "remote press defer"
+        - logger.log: "Remote Press defer"
         - deep_sleep.prevent: deep_sleeping
     on_state:
       then:
@@ -90,7 +90,7 @@ binary_sensor:
 i2c:
   sda: 25
   scl: 26
-  scan: True
+  scan: true
   id: bus_a
   setup_priority: -200
 
@@ -120,16 +120,6 @@ sensor:
       # 3.34v = dry
       lambda: |-
         return (3.3 - x) * 100.0 / (3.3 - 1.48);
-#  - platform: adc
-#    pin: 32
-#    name: "${upper_devicename} Soil Moisture raw"
-#    attenuation: 11db
-#    unit_of_measurement: '%'
-#    filters:
-#      # 1.1v = in water
-#      # 2.94v = dry
-#      lambda: |-
-#        return (2.95 - x) * 100.0 / (2.95 - 1.1);
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery"
@@ -148,7 +138,7 @@ sensor:
     name: "${upper_devicename} Battery %"
     attenuation: 6db
     unit_of_measurement: '%'
-#    update_interval: 4sec
+    update_interval: 4sec
     filters:
 #      - calibrate_linear:
 #          # Map 0.0 (from sensor) to 0.0 (true value)
