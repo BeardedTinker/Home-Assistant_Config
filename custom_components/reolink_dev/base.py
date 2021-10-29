@@ -428,6 +428,8 @@ class ReolinkPush:
 async def handle_webhook(hass, webhook_id, request):
     """Handle incoming webhook from Reolink for inbound messages and calls."""
 
+    _LOGGER.debug("Webhook called")
+
     if not request.body_exists:
         _LOGGER.debug("Webhook triggered without payload")
 
