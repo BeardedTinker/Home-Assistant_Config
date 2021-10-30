@@ -1,0 +1,19 @@
+#####
+# Plant monitor integration. Using LilyGO HiGrow board with pesor firmware
+# https://www.home-assistant.io/integrations/plant
+#####
+
+dypsis_lutescenes:
+  sensors:
+    moisture: sensor.dypsis_lutescenes_soil_moisture
+    battery: sensor.dypsis_lutescenes_battery_2
+    temperature: sensor.dypsis_lutescenes_temperature
+    conductivity: sensor.dypsis_lutescenes_salt
+    brightness: sensor.dypsis_lutescenes_illuminance
+  min_moisture: 30
+  max_moisture: 75
+  min_battery: 10
+  min_conductivity: 1
+  min_temperature: 7
+  min_brightness: 500
+  check_days: 3
