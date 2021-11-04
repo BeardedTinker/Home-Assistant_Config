@@ -89,6 +89,7 @@ From other devices I use, here is a list:
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
   - [Nuki Opener](https://nuki.io/en/opener/) for intercom
+  - SwitchBot
 
 ### Containers and add-ons
 
@@ -179,12 +180,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   159 |
-| Binary sensors       |   226 |
-| Cameras              |    12 |
+| Binary sensors       |   227 |
+| Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  2048 |
+| Entities             |  2085 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    14 |
@@ -192,21 +193,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |    13 |
 | Input Select         |    12 |
 | Input Text           |    20 |
-| Lights               |    38 |
-| Lines of code (YAML) | 23112 |
+| Lights               |    40 |
+| Lines of code (YAML) | 23663 |
 | Locks                |     1 |
-| Media players        |    41 |
+| Media players        |    42 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
 | Sensors              |  1238 |
-| Switches             |    78 |
+| Switches             |    93 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 21.10.2021 23:00PM
+* Updated: 04.11.2021 10:10PM
 
 ### Missing files
 
