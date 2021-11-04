@@ -7,3 +7,4 @@ morning_report:
   name: Morning Report
   has_date: false
   has_time: true
+  icon: mdi:weather-sunset-up

@@ -7,3 +7,4 @@ text_notification_off:
   name: Text Notifications Off
   has_date: false
   has_time: true
+  icon: mdi:message-text-lock-outline

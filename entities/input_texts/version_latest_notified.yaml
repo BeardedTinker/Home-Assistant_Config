@@ -4,3 +4,4 @@
 #####
 version_latest_notified:
   name: Home assistant update version notified
+  icon: mdi:sort-numeric-ascending

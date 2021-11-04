@@ -7,3 +7,4 @@ audio_notification_off:
   name: Audio Notifications Off
   has_date: false
   has_time: true
+  icon: mdi:text-to-speech-off
