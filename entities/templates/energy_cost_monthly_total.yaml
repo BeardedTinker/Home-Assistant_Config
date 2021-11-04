@@ -4,7 +4,7 @@
 
 - sensor:
     - name: Monthly Total Energy Cost
-      state: "{{ (states('sensor.monthly_peak_energy_cost')|float + states('sensor.monthly_offpeak_energy_cost')|float + states('input_number.energy_monthly_cost')|float)|round(2) }}"
+      state: "{{ (states('sensor.monthly_peak_energy_cost')|float(0) + states('sensor.monthly_offpeak_energy_cost')|float(0) + states('input_number.energy_monthly_cost')|float)|round(2) }}"
       unit_of_measurement: "HRK"
       state_class: measurement
       device_class: energy
