@@ -7,3 +7,4 @@ platform: trend
 sensors:
   pm25_increase:
     entity_id: sensor.luftdaten_43996_p25
+    icon: mdi:smog
