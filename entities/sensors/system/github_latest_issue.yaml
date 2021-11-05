@@ -16,4 +16,4 @@ json_attributes:
   - state
   - created_at
   - url
-value_template: '{{ value_json[0].number }}'
+value_template: '{{ value_json[0].number | default("") }}'

@@ -7,6 +7,6 @@ name: Cube state
 state_topic: "zigbee2mqtt/Cube"
 availability_topic: "zigbee2mqtt/bridge/state"
 icon: "mdi:gesture-double-tap"
-value_template: "{{ value_json.action }}"
+value_template: "{{ value_json.action | default }}"
 json_attributes_topic: "zigbee2mqtt/Cube"
 force_update: true
