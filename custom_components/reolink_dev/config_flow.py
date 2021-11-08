@@ -176,7 +176,7 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             CONF_STREAM, DEFAULT_STREAM
                         ),): vol.In(
-                        ["main", "sub"]
+                        ["main", "sub", "ext"]
                     ),
                     vol.Required(CONF_STREAM_FORMAT, 
                     default=self.config_entry.options.get(
