@@ -6,7 +6,7 @@
 schefflera_arboricola:
   sensors:
     moisture: sensor.schefflera_arboricola_soil_moisture
-    battery: sensor.schefflera_arboricola_battery
+    battery: sensor.schefflera_arboricola_battery_2
     temperature: sensor.schefflera_arboricola_temperature
     conductivity: sensor.schefflera_arboricola_salt
     brightness: sensor.schefflera_arboricola_illuminance

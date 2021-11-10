@@ -3,8 +3,32 @@
 substitutions:
   devicename: schefflera_arboricola
   upper_devicename: Schefflera Arboricola
-  awake_for: 5s      # set how long to stay awake - NOT less then 10sec
+  awake_for: 6s      # set how long to stay awake - NOT less then 10sec
   sleep_for: 60min    # set how long to sleep in minutes
+
+# WiFi and IP addresss setup.
+# We use FIXED IP address to speed up this process and also Fast Connect
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+  manual_ip:
+    static_ip: 192.168.2.50
+    gateway: 192.168.1.1
+    subnet: 255.255.252.0
+  fast_connect: enable
+
+##### NOTHING SHOULD BE CHANGED AFTER THIS LINE
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API and OTA
+# Password is disabled for OTA and API for faster data transfer and easier setup
+api:
+#  password: !secret api_password
+
+ota:
+#  password: !secret ota_password
 
 # Setup of platform
 esphome:
@@ -34,28 +58,6 @@ esphome:
           }
       - logger.log: "Sleep checked"
 
-# WiFi and IP addresss setup.
-# We use FIXED IP address to speed up this process and also Fast Connect
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_key
-  manual_ip:
-    static_ip: 192.168.2.50
-    gateway: 192.168.1.1
-    subnet: 255.255.252.0
-  fast_connect: enable
-
-# Enable logging
-logger:
-
-# Enable Home Assistant API and OTA
-# Password is disabled for OTA and API for faster data transfer and easier setup
-api:
-#  password: !secret api_password
-
-ota:
-#  password: !secret ota_password
-
 # Power switch
 switch:
   - platform: gpio
@@ -75,13 +77,13 @@ binary_sensor:
     name: "${upper_devicename} Wake Button"
     id: defer
   - platform: homeassistant
-    name: "Remote Prevent Sleep"
+    name: "${upper_devicename} Remote Prevent Sleep"
     internal: true
     id: "remote_defer"
     entity_id: input_boolean.${devicename}_prevent_deep_sleep
     on_press:
       then:
-        - logger.log: "remote press defer"
+        - logger.log: "Remote press defer"
         - deep_sleep.prevent: deep_sleeping
     on_state:
       then:
@@ -103,6 +105,8 @@ deep_sleep:
   id: deep_sleeping
 
 sensor:
+
+# Temperature & Humidity
   - platform: dht
     pin: 16
     model: dht11
@@ -111,6 +115,8 @@ sensor:
       name: "${upper_devicename} Temperature"
     humidity:
       name: "${upper_devicename} Humidity"
+
+# Soil moisture %
   - platform: adc
     pin: 32
     name: "${upper_devicename} Soil Moisture"
@@ -122,6 +128,7 @@ sensor:
       # 3.34v = dry
       lambda: |-
         return (3.3 - x) * 100.0 / (3.3 - 1.48);
+# Soil moisture raw data - not needed
 #  - platform: adc
 #    pin: 32
 #    name: "${upper_devicename} Soil Moisture raw"
@@ -132,6 +139,8 @@ sensor:
 #      # 2.94v = dry
 #      lambda: |-
 #        return (2.95 - x) * 100.0 / (2.95 - 1.1);
+
+# Battery V
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery"
@@ -139,25 +148,25 @@ sensor:
     unit_of_measurement: 'V'
     update_interval: 4sec
     filters:
+      # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
-          # Map 0.0 (from sensor) to 0.0 (true value)
           - 0.0 -> 0.0
           - 2.06 -> 1.89
       - lambda: return x * 2.0;
     id: ${devicename}_voltage
+
+# Battery %
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery %"
     attenuation: 6db
     unit_of_measurement: '%'
-#    update_interval: 4sec
+    update_interval: 4sec
     filters:
-#      - calibrate_linear:
-#          # Map 0.0 (from sensor) to 0.0 (true value)
-#          - 0.0 -> 0.0
-#          - 2.06 -> 1.89       
       - lambda: |-
-          return ((id(${devicename}_voltage).state -3.3) /0.8 * 100.00);  
+          return ((id(${devicename}_voltage).state -3.24) /0.8 * 100.00);  
+
+# Fertilizer / Salt %
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"
@@ -165,11 +174,12 @@ sensor:
     unit_of_measurement: '%'
     accuracy_decimals: 4
     filters:
+      # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
-          # Map 0.0 (from sensor) to 0.0 (true value)
           - 0.0 -> 0.0
           - 1.1 -> 100.0
-    
+
+# Lux / Illuminance
   - platform: bh1750
     i2c_id: bus_a
     name: "${upper_devicename} Illuminance"

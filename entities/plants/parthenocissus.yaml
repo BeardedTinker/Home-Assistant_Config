@@ -6,7 +6,7 @@
 parthenocissus:
   sensors:
     moisture: sensor.parthenocissus_soil_moisture
-    battery: sensor.parthenocissus_battery
+    battery: sensor.parthenocissus_battery_2
     temperature: sensor.parthenocissus_temperature
     conductivity: sensor.parthenocissus_salt
     brightness: sensor.parthenocissus_illuminance

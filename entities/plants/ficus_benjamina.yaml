@@ -6,7 +6,7 @@
 ficus_benjamina:
   sensors:
     moisture: sensor.ficus_benjamina_soil_moisture
-    battery: sensor.ficus_benjamina_battery
+    battery: sensor.ficus_benjamina_battery_2
     temperature: sensor.ficus_benjamina_temperature
     conductivity: sensor.ficus_benjamina_salt
     brightness: sensor.ficus_benjamina_illuminance

@@ -6,7 +6,7 @@
 parthenocissus_small:
   sensors:
     moisture: sensor.parthenocissus_small_soil_moisture
-    battery: sensor.parthenocissus_small_battery
+    battery: sensor.parthenocissus_small_battery_2
     temperature: sensor.parthenocissus_small_temperature
     conductivity: sensor.parthenocissus_small_salt
     brightness: sensor.parthenocissus_small_illuminance
