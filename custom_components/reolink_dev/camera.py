@@ -1,21 +1,14 @@
 """This component provides support for Reolink IP cameras."""
-import asyncio
 from datetime import datetime
 import logging
 from typing import Union
 
 import voluptuous as vol
 
-from haffmpeg.camera import CameraMjpeg
 from homeassistant.components.camera import SUPPORT_STREAM, Camera
 from homeassistant.components.ffmpeg import DATA_FFMPEG
 
 from homeassistant.helpers import config_validation as cv, entity_platform
-from homeassistant.helpers.aiohttp_client import (
-    async_aiohttp_proxy_web,
-    async_aiohttp_proxy_stream,
-    async_get_clientsession,
-)
 
 from .const import (
     DOMAIN_DATA,
@@ -192,23 +185,6 @@ class ReolinkCamera(ReolinkEntity, Camera):
     async def stream_source(self):
         """Return the source of the stream."""
         return await self._base.api.get_stream_source()
-
-    async def handle_async_mjpeg_stream(self, request):
-        """Generate an HTTP MJPEG stream from the camera."""
-
-        stream = CameraMjpeg(self._ffmpeg.binary)
-        await stream.open_camera(self._input, extra_cmd=self._extra_arguments)
-
-        try:
-            stream_reader = await stream.get_reader()
-            return await async_aiohttp_proxy_stream(
-                self.hass,
-                request,
-                stream_reader,
-                self._ffmpeg.ffmpeg_stream_content_type,
-            )
-        finally:
-            await stream.close()
 
     async def async_camera_image(
         self, width: Union[int, None] = None, height: Union[int, None] = None
