@@ -10,10 +10,10 @@ trigger:
     entity_id: binary_sensor.leak_sensor_water_leak
     from: 'off'
 
-condition:
-  - condition: template
-    value_template: >
-      "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
+condition: "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
+#  - condition: template
+#    value_template: >
+#      "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
 
 action:
 - service: script.notify_engine

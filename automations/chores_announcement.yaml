@@ -8,7 +8,7 @@ id: 66efd0b7-9d2d-43d5-962c-5cfdd8c460a5
 
 trigger:
   platform: time
-  at: '08:30:00'
+  at: '09:00:00'
 
 condition: []
 
@@ -35,7 +35,7 @@ action:
 - service: media_player.volume_set
   data:
     entity_id: media_player.display_me
-    volume_level: 0.6
+    volume_level: 0.5
 - service: tts.google_translate_say
   entity_id: media_player.display_me
   data:  

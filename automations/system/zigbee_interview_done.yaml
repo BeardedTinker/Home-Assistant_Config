@@ -10,9 +10,9 @@ trigger:
   platform: mqtt
   topic: 'zigbee2mqtt/bridge/log'
 
-condition:
-  condition: template
-  value_template: '{{trigger.payload_json.type == "pairing" and trigger.payload_json.message == "interview_successful"}}'
+condition: '{{trigger.payload_json.type == "pairing" and trigger.payload_json.message == "interview_successful"}}'
+#  condition: template
+#  value_template: '{{trigger.payload_json.type == "pairing" and trigger.payload_json.message == "interview_successful"}}'
 
 action:
   - service: persistent_notification.create

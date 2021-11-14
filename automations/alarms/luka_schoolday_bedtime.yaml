@@ -9,12 +9,18 @@ id: 49354363-ff87-4670-82b2-5886a2c86a73
 trigger:
   platform: template
   value_template: >
-    {% if states('sensor.time') == "22:30" and is_state('input_boolean.luka_school_online','on') %}
-      True
-    {% elif states('sensor.time') == "22:00" and is_state('input_boolean.luka_school_online','off')  %}
-      True
+    {% 
+      if states('sensor.time') == "22:30" 
+      and is_state('input_boolean.luka_school_online','on') 
+    %}
+      true
+    {% 
+      elif states('sensor.time') == "22:00" 
+      and is_state('input_boolean.luka_school_online','off')  
+    %}
+      true
     {% else %}
-      False
+      false
     {% endif %}	
 #  at: '06:30:00'
 #  platform: time

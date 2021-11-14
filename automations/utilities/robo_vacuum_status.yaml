@@ -12,9 +12,9 @@ trigger:
   for:
     seconds: 30
 
-condition:
-  condition: template
-  value_template: "{{ not (trigger.to_state.state == trigger.from_state.state) }}"
+condition: "{{ not (trigger.to_state.state == trigger.from_state.state) }}"
+#  condition: template
+#  value_template: "{{ not (trigger.to_state.state == trigger.from_state.state) }}"
 
 action:
 - service: script.notify_engine

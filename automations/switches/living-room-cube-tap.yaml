@@ -9,9 +9,9 @@ trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube
 
-condition:
-  condition: template
-  value_template: '{{ ''tap'' == trigger.payload_json.action }}'
+condition: '{{ ''tap'' == trigger.payload_json.action }}'
+#  condition: template
+#  value_template: '{{ ''tap'' == trigger.payload_json.action }}'
 
 action:
   data:

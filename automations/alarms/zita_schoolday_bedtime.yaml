@@ -9,12 +9,18 @@ id: 1f422df6-8148-4612-b58e-fe20893d4e99
 trigger:
   platform: template
   value_template: >
-    {% if states('sensor.time') == "21:30" and is_state('input_boolean.zita_school_online','on') %}
-      True
-    {% elif states('sensor.time') == "21:00" and is_state('input_boolean.zita_school_online','off')  %}
-      True
+    {% 
+      if states('sensor.time') == "21:30" 
+      and is_state('input_boolean.zita_school_online','on') 
+    %}
+      true
+    {% 
+      elif states('sensor.time') == "21:00" 
+      and is_state('input_boolean.zita_school_online','off') 
+    %}
+      true
     {% else %}
-      False
+      false
     {% endif %}	
 #  at: '06:30:00'
 #  platform: time

@@ -9,9 +9,9 @@ trigger:
   platform: mqtt
   topic: zigbee2mqtt/Cube
 
-condition:
-  condition: template
-  value_template: '{{ ''flip180'' == trigger.payload_json.action }}'
+condition: '{{ ''flip180'' == trigger.payload_json.action }}'
+#  condition: template
+#  value_template: '{{ ''flip180'' == trigger.payload_json.action }}'
 
 action:
   data:

@@ -7,7 +7,7 @@ id: ec1db421-14dc-4b33-a5ed-094923459df4
 
 trigger:
   platform: time
-  at: '09:30:00'
+  at: '10:30:00'
 
 condition: 
   condition: time
@@ -33,7 +33,7 @@ action:
       - media_player.display_me
       - media_player.whatever_me
       - media_player.mini_me
-    volume_level: 0.6
+    volume_level: 0.5
 - service: tts.google_translate_say
   entity_id: 
     - media_player.display_me

@@ -33,6 +33,7 @@ action:
           target:
             entity_id:
               - light.zita_tabletop
+              - light.zita_table_light
     - conditions:
       - condition: trigger
         id: double

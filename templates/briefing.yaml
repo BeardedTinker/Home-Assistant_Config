@@ -300,7 +300,10 @@
     {{ inside_weather() }}
     {% endif %}
 
-    {% if call_outside_weather == 1 and is_state('sun.sun', 'above_horizon') %}
+    {% 
+      if call_outside_weather == 1 
+      and is_state('sun.sun', 'above_horizon') 
+    %}
     {{ outside_weather() }}
     {% endif %}
 

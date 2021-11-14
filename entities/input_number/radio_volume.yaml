@@ -9,4 +9,4 @@ radio_volume:
   min: 0
   max: 1
   step: 0.05
-  mode: box
+  mode: slider
