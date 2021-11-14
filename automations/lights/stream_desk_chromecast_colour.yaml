@@ -12,7 +12,8 @@ trigger:
 action:
   - service: color_extractor.turn_on
     data_template:
-      color_extract_url: "{{ states.media_player.loft_tv.attributes.entity_picture }}"
+#      color_extract_url: "{{ states.media_player.loft_tv.attributes.entity_picture }}"
+      color_extract_url: "{{ state_attr('media_player.loft_tv', 'entity_picture') }}"
       entity_id: light.stream_desk
       brightness_pct: 100
       transition: 5

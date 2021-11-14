@@ -4,7 +4,7 @@
 #####
 
 new_github_issue_replace_battery:
-  url: https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues
+  url: 'https://api.github.com/repos/BeardedTinker/Home-Assistant_Config/issues/76/comments'
   method: POST
   headers:
     Authorization: !secret github_token2
