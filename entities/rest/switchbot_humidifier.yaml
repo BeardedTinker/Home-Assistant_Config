@@ -1,0 +1,26 @@
+######
+# SwitchBot Humidifier JSON
+# Almost all attributes are pulled from JSON (except Device ID)
+#####
+
+resource: !secret sbot_humidifier
+method: GET
+scan_interval: 900
+headers:
+  Authorization: !secret sbot_api
+  Content-Type: 'application/json'
+sensor:
+  name: Switchbot Humidifier json
+  value_template: '{{ value_json.body }}'
+  json_attributes_path: "$.body"
+  json_attributes:
+  - deviceId
+  - deviceType
+  - nebulizationEfficiency
+  - humidity
+  - auto
+  - childLock
+  - sound
+  - power
+  - temperature
+  - lackWater

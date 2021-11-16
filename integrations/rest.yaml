@@ -1,0 +1,7 @@
+#####
+# This integration can expose regular REST 
+#
+# https://www.home-assistant.io/integrations/rest/
+#####
+
+rest: !include_dir_list ../entities/rest

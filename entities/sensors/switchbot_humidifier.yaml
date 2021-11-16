@@ -1,0 +1,21 @@
+#####
+# SwitchBot Humidifier - Sensors
+# Creates sensors out of JSON attributes
+#####
+
+platform: template
+sensors:
+  switchbot_humidifier_temp:
+    friendly_name: "Humidifier Temperature"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["temperature"] }}'
+    unit_of_measurement: "°C"
+    device_class: "temperature"
+  switchbot_humidifier_humidity:
+    friendly_name: "Humidifier humidity"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["humidity"] }}'
+    unit_of_measurement: "%"
+    device_class: "humidity"
+  switchbot_humidifier_nebulization:
+    friendly_name: "Humidifier nebulization"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["nebulizationEfficiency"] }}'
+    unit_of_measurement: "%"

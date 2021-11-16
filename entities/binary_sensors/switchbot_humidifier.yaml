@@ -1,0 +1,21 @@
+#####
+# SwitchBot Humidifier - Binary Sensors
+# Created Binary Sensors out of JSON attributes
+#####
+
+platform: template
+sensors:
+  switchbot_humidifier_childlock:
+    friendly_name: "Humidifier Child Lock"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["childLock"] }}'
+  switchbot_humidifier_sound:
+    friendly_name: "Humidifier Sound"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["sound"] }}'
+  switchbot_humidifier_power:
+    friendly_name: "Humidifier Power"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["power"] }}'
+    device_class: "power"
+  switchbot_humidifier_water:
+    friendly_name: "Humidifier Water"
+    value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["lackWater"] }}'
+    device_class: "problem"

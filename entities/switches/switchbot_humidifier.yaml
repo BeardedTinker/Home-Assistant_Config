@@ -1,0 +1,14 @@
+#####
+# SwitchBot Humidifier - Switch
+# Creates switch for ON/OFF functionality
+#
+# There is option to use this to pull state 
+# but haven't implemented thatyet
+#####
+
+platform: command_line
+switches: 
+  switchbot_humidifier:
+    command_on: !secret sbot_hum_on
+    command_off: !secret sbot_hum_off
+    friendly_name: Humidifier
