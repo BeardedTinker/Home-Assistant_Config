@@ -8,21 +8,21 @@
     <a href="https://twitter.com/BeardedTinker"><img src="https://img.shields.io/twitter/follow/BeardedTinker?style=plastic"/></a><br>
 
 
-Each commit is verified automaticlly with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version, Latest, Dev and Beta release. RemarkLint and YAML is also checked.
+Each commit is automaticlly verified with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version, Latest, Dev and Beta release. RemarkLint and YAML is also checked.
   </h4>
 
 
 # BeardedTinker's Home Assistant configuration
 
-You can find here all of the configuration files from my Home Assistant installation. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
+Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
 
 
 ## Want to get more info?
 
-You can follow my [YouTube channel](https://YouTube.com/BeardedTinker) for more information and video guides for various stuff that's included here. 
+A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more then 200 videos as of Today, with at least 100 of them being Home Assistant How To's. 
 
-If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6) 
+If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6). 
 
 Also, if you have time you can try and join me while streaming and there should be at lest one stream each month!
 
@@ -61,9 +61,15 @@ From other devices I use, here is a list:
   - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
   - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
   - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
-  - Shelly 1
-  - Shelly Uno
-  - Shelly Door & Window sensor
+  - [Shelly Door & Window 2](https://shelly.cloud/products/shelly-door-window-2-smart-home-automation-sensor/) sensor
+
+  Plus some Shelly devices that are waiting instalaltion and/or testing:
+  - Shelly 1 
+  - Shelly Uno 
+  - Shelly UV light
+  - Shelly Plus 1 
+  - Shelly Plus 1PM 
+
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
@@ -81,7 +87,7 @@ From other devices I use, here is a list:
   - Reolink RLC-410-5MP PoE camera
   - various DLink PoE IP cameras 
   
-##### OTHER DEVICES
+##### OTHER INTEGRATED DEVICES
   - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
   - Elgato [Key Light Air](https://www.elgato.com/en/gaming/key-light-air)
   - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
@@ -89,7 +95,13 @@ From other devices I use, here is a list:
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
   - [Nuki Opener](https://nuki.io/en/opener/) for intercom
-  - SwitchBot
+  - [SwitchBot Humidifier](https://www.switch-bot.com/collections/accessories/products/switchbot-smart-humidifier)
+  - [SwitchBot Meter](https://www.switch-bot.com/collections/accessories/products/switchbot-meter)
+  - [SwitchBot Mini Hub](https://www.switch-bot.com/products/switchbot-hub-mini)
+  - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper) -TBD
+  - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
+  - HP DeskJest All-in-on printer
+  - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer 
 
 ### Containers and add-ons
 
@@ -144,7 +156,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - HACS
   - Home Assistant Supervisor
   - Internet Printing Protocol
-  - Kraken
+  - Kraken - REMOVED
   - Luftdaten
   - Mikrotik
   - Minecraft Server
@@ -162,6 +174,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Tado
   - Tile
   - Ubiquity UniFi
+  - Withings
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
   - Xiaomi Miio
 
@@ -180,12 +193,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   159 |
-| Binary sensors       |   227 |
+| Binary sensors       |   230 |
 | Cameras              |    11 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  2085 |
+| Entities             |  2105 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    14 |
@@ -193,21 +206,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |    13 |
 | Input Select         |    12 |
 | Input Text           |    20 |
-| Lights               |    40 |
-| Lines of code (YAML) | 23663 |
+| Lights               |    42 |
+| Lines of code (YAML) | 24372 |
 | Locks                |     1 |
 | Media players        |    42 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
-| Sensors              |  1238 |
-| Switches             |    93 |
+| Sensors              |  1254 |
+| Switches             |    94 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 04.11.2021 10:10PM
+* Updated: 17.11.2021 10:36AM
 
 ### Missing files
 
