@@ -2,6 +2,7 @@
 import asyncio
 import logging
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.switch import DEVICE_CLASS_SWITCH
 from homeassistant.helpers.entity import ToggleEntity
 
@@ -11,7 +12,7 @@ from .entity import ReolinkEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices):
     """Set up the Reolink IP Camera switches."""
     devices = []
     base = hass.data[DOMAIN][config_entry.entry_id][BASE]

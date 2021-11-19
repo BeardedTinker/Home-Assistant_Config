@@ -4,6 +4,7 @@ import datetime
 import logging
 import traceback
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
 from .entity import ReolinkEntity
@@ -15,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_DEVICE_CLASS = "motion"
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices):
     """Set up the Reolink IP Camera switches."""
     new_sensors = [MotionSensor(hass, config_entry)]
 

@@ -5,6 +5,7 @@ from typing import Union
 
 import voluptuous as vol
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.camera import SUPPORT_STREAM, Camera
 from homeassistant.components.ffmpeg import DATA_FFMPEG
 
@@ -27,7 +28,7 @@ from .typings import VoDEvent
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices):
     """Set up a Reolink IP Camera."""
 
     platform = entity_platform.current_platform.get()

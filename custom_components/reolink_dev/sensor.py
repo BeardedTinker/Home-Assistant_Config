@@ -30,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @asyncio.coroutine
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices):
     """Set up the Reolink IP Camera switches."""
     devices = []
     base: ReolinkBase = hass.data[DOMAIN][config_entry.entry_id][BASE]
