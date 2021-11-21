@@ -1,0 +1,18 @@
+#####
+# Rest sensor for Klipper Voron 2.4
+#
+#####
+
+platform: rest
+name: voron_24_sensor
+resource: "http://192.168.1.152:7125/printer/objects/query?heater_bed&extruder&print_stats&toolhead&display_status&virtual_sdcard"
+json_attributes_path: "$.result.status"
+json_attributes:
+  - heater_bed
+  - extruder
+  - print_stats
+  - toolhead
+  - display_status
+  - virtual_sdcard
+value_template: >-
+  {{ 'OK' if ('result' in value_json) else None }}

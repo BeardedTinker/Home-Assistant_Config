@@ -1,0 +1,12 @@
+#####
+#
+#
+#####
+
+platform: template
+sensors:
+  v24_bed_actual:
+    device_class: temperature
+    unit_of_measurement: '°C'
+    value_template: >-
+      {{ states.sensor.voron_24_sensor.attributes['heater_bed']['temperature'] | float | round(1) if is_state('sensor.voron_24_sensor', 'OK') else None }}

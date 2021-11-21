@@ -1,0 +1,8 @@
+#####
+# Create camera for Ender 3 Pro
+#####
+
+platform: mjpeg
+name: Voron 2.4
+still_image_url: !secret voron_image_url
+mjpeg_url: !secret voron_mjpeg_url
