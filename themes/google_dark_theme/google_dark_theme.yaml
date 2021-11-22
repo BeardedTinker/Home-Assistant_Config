@@ -77,3 +77,10 @@ Google Dark Theme:
   mdc-theme-surface: var(--primary-background-color)
   # Pre/Code
   markdown-code-background-color: rgb(23, 23, 23)
+  # Checkboxes
+  mdc-select-fill-color: rgb(32, 33, 36)
+  mdc-select-ink-color: var(--primary-text-color)
+  mdc-select-label-ink-color: var(--secondary-text-color)
+  mdc-select-idle-line-color: var(--primary-text-color)
+  mdc-select-dropdown-icon-color: var(--secondary-text-color)
+  mdc-select-hover-line-color: var(--accent-color)

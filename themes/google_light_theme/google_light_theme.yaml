@@ -73,6 +73,13 @@ Google Light Theme:
   # Dropdowns
   material-background-color: var(--card-background-color)
   material-secondary-background-color: var(--primary-background-color)
-  mdc-theme-surface: var(--paper-card-background-color)
+  mdc-theme-surface: var(--primary-background-color)
   # Pre/Code
   markdown-code-background-color: rgb(242, 242, 242)
+  # Checkboxes
+  mdc-select-fill-color: rgb(255, 255, 255)
+  mdc-select-ink-color: var(--primary-text-color)
+  mdc-select-label-ink-color: var(--secondary-text-color)
+  mdc-select-idle-line-color: var(--primary-text-color)
+  mdc-select-dropdown-icon-color: var(--secondary-text-color)
+  mdc-select-hover-line-color: var(--accent-color)
