@@ -3,7 +3,7 @@
 substitutions:
   devicename: dypsis_lutescenes
   upper_devicename: Dypsis Lutescenes
-  awake_for: 6s      # set how long to stay awake - NOT less then 10sec
+  awake_for: 8s      # set how long to stay awake - NOT less then 10sec
   sleep_for: 60min    # set how long to sleep in minutes
 
 # WiFi and IP addresss setup.
@@ -15,7 +15,7 @@ wifi:
     static_ip: 192.168.2.54
     gateway: 192.168.1.1
     subnet: 255.255.252.0
-  fast_connect: enable
+#  fast_connect: enable
 
 ##### NOTHING SHOULD BE CHANGED AFTER THIS LINE
 
@@ -41,7 +41,7 @@ esphome:
   on_boot:
     priority: -200
     then:
-      - delay: 10s
+      - delay: 4s
       - logger.log: "Checking sleep"
       - lambda: |-
           if (id(defer).state) {
@@ -110,7 +110,7 @@ sensor:
   - platform: dht
     pin: 16
     model: dht11
-    update_interval: 4sec
+    update_interval: 3sec
     temperature:
       name: "${upper_devicename} Temperature"
     humidity:
@@ -122,7 +122,7 @@ sensor:
     name: "${upper_devicename} Soil Moisture"
     attenuation: 11db
     unit_of_measurement: '%'
-    update_interval: 4sec
+    update_interval: 3sec
     filters:
       # 1.48v = in water
       # 3.34v = dry
@@ -146,7 +146,7 @@ sensor:
     name: "${upper_devicename} Battery"
     attenuation: 6db
     unit_of_measurement: 'V'
-    update_interval: 4sec
+    update_interval: 3sec
     filters:
       # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
@@ -161,7 +161,7 @@ sensor:
     name: "${upper_devicename} Battery %"
     attenuation: 6db
     unit_of_measurement: '%'
-    update_interval: 4sec
+    update_interval: 3sec
     filters:
       - lambda: |-
           return ((id(${devicename}_voltage).state -3.24) /0.8 * 100.00);  
@@ -170,7 +170,7 @@ sensor:
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"
-    update_interval: 4sec
+    update_interval: 3sec
     unit_of_measurement: '%'
     accuracy_decimals: 4
     filters:
@@ -184,5 +184,5 @@ sensor:
     i2c_id: bus_a
     name: "${upper_devicename} Illuminance"
     address: 0x23
-    update_interval: 4sec
+    update_interval: 3sec
     setup_priority: -300

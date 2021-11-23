@@ -15,7 +15,7 @@ wifi:
     static_ip: 192.168.2.50
     gateway: 192.168.1.1
     subnet: 255.255.252.0
-  fast_connect: enable
+#  fast_connect: enable
 
 ##### NOTHING SHOULD BE CHANGED AFTER THIS LINE
 
@@ -110,7 +110,7 @@ sensor:
   - platform: dht
     pin: 16
     model: dht11
-    update_interval: 4sec
+    update_interval: 3sec
     temperature:
       name: "${upper_devicename} Temperature"
     humidity:
@@ -170,7 +170,7 @@ sensor:
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"
-    update_interval: 4sec
+    update_interval: 3sec
     unit_of_measurement: '%'
     accuracy_decimals: 4
     filters:
@@ -184,5 +184,5 @@ sensor:
     i2c_id: bus_a
     name: "${upper_devicename} Illuminance"
     address: 0x23
-    update_interval: 4sec
+    update_interval: 3sec
     setup_priority: -300
