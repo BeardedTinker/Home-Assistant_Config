@@ -10,8 +10,13 @@ trigger:
   at: '10:30:00'
 
 condition: 
-  condition: time
-  weekday: sat 
+  condition: and
+  conditions:
+  - condition: time
+    weekday: sat 
+  - condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'  
 
 action:
 - service: script.notify_engine

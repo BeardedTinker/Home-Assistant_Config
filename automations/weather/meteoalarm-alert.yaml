@@ -16,6 +16,9 @@ condition:
     - condition: state
       entity_id: binary_sensor.meteoalarm
       state: 'off'
+    - condition: state
+      entity_id: input_boolean.audio_notifications
+      state: 'on'
 
 action:
 - service: script.notify_engine

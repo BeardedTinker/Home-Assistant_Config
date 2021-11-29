@@ -10,10 +10,10 @@ trigger:
     entity_id: sensor.shelly_gas_10521cef4a01_self_test
     to: 'not_completed'
 
-#condition:
-#  condition: state
-#  entity_id: input_boolean.audio_notifications
-#  state: 'on'
+condition:
+  condition: state
+  entity_id: input_boolean.audio_notifications
+  state: 'on'
 
 action:
 - service: script.notify_engine

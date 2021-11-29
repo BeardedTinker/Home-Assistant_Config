@@ -11,7 +11,12 @@ trigger:
   platform: state
   to: Nickelodeon
 
-condition: []
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'
 
 action:
 - data:

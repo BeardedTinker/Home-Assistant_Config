@@ -16,6 +16,9 @@ condition:
     - condition: state
       entity_id: sensor.minecraft_server_players_online
       state: '0'
+    - condition: state
+      entity_id: input_boolean.audio_notifications
+      state: 'on'  
 
 action:
 - service: script.notify_engine

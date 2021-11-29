@@ -29,6 +29,10 @@ condition:
   - condition: state
     entity_id: sensor.season
     state: 'summer'
+  - condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'  
+
 action:
   - choose:
     - conditions:
