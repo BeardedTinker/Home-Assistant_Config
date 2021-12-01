@@ -17,23 +17,28 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices
     devices = []
     base = hass.data[DOMAIN][config_entry.entry_id][BASE]
 
-    for capability in await base.api.get_switch_capabilities():
-        if capability == "ftp":
-            devices.append(FTPSwitch(hass, config_entry))
-        elif capability == "email":
-            devices.append(EmailSwitch(hass, config_entry))
-        elif capability == "audio":
-            devices.append(AudioSwitch(hass, config_entry))
-        elif capability == "irLights":
-            devices.append(IRLightsSwitch(hass, config_entry))
-        elif capability == "push":
-            devices.append(PushSwitch(hass, config_entry))
-        elif capability == "recording":
-            devices.append(RecordingSwitch(hass, config_entry))
-        else:
-            continue
+    if (base.unique_id[13:] == "1") and not base.api.is_nvr(): # prevent controls from being created several times with multi channel devices
+        for capability in await base.api.get_switch_capabilities():
+            if capability == "ftp":
+                devices.append(FTPSwitch(hass, config_entry))
+            elif capability == "email":
+                devices.append(EmailSwitch(hass, config_entry))
+            elif capability == "audio":
+                devices.append(AudioSwitch(hass, config_entry))
+            elif capability == "irLights":
+                devices.append(IRLightsSwitch(hass, config_entry))
+            elif capability == "spotlight":
+                devices.append(SpotLightSwitch(hass, config_entry))
+            elif capability == "siren":
+                devices.append(SirenSwitch(hass, config_entry))
+            elif capability == "push":
+                devices.append(PushSwitch(hass, config_entry))
+            elif capability == "recording":
+                devices.append(RecordingSwitch(hass, config_entry))
+            else:
+                continue
 
-    async_add_devices(devices, update_before_add=False)
+        async_add_devices(devices, update_before_add=False)
 
 
 class FTPSwitch(ReolinkEntity, ToggleEntity):
@@ -175,6 +180,143 @@ class IRLightsSwitch(ReolinkEntity, ToggleEntity):
         """Disable motion ir lights."""
         await self._base.api.set_ir_lights(False)
         await self.request_refresh()
+
+
+class SpotLightSwitch(ReolinkEntity, ToggleEntity):
+    """An implementation of a Reolink IP camera spotlight (WhiteLed) switch"""
+
+    
+
+    def __init__(self, hass, config):
+        """Initialize a Reolink camera."""
+        ReolinkEntity.__init__(self, hass, config)
+        ToggleEntity.__init__(self)
+        self._slstatus = False
+
+    @property
+    def unique_id(self):
+        """Return Unique ID string."""
+        return f"reolink_SpotlightSwitch_{self._base.unique_id}"
+
+    @property
+    def name(self):
+        """Return the name of this camera."""
+        return f"{self._base.name} Spotlight"
+
+    @property
+    def is_on(self):
+        """Camera Motion Spotlight Status."""
+        # return self._base.api.whiteled_state
+        return self._slstatus
+
+    @property
+    def device_class(self):
+        """Device class of the switch."""
+        return DEVICE_CLASS_SWITCH
+
+    @property
+    def icon(self):
+        """Icon of the switch."""
+        if self.is_on:
+            return "mdi:lightbulb-spot"
+        else: 
+            return "mdi:lightbulb-spot-off"
+
+    async def async_turn_on(self, **kwargs):
+        """Enable spotlight."""
+        # uses call to simple turn on routine
+        # which sets night mode on, auto, 100% bright
+        
+        await self._base.api.set_spotlight(True)
+        self._slstatus = True
+        await self.request_refresh()
+
+    async def async_turn_off(self, **kwargs):
+        """Disable spotlight."""
+        await self._base.api.set_spotlight(False)
+        self._slstatus = False
+        await self.request_refresh()    
+
+    async def set_schedule(self,**kwargs):
+        # to set the schedule for when night mode on and auto off
+        # requires a start and end time in hours and minutes
+        # if not provided will default to start 18:00, end 06:00
+        #
+        # if being set will cause night mode and non-auto to be set
+        #
+        _starthour = 18
+        _startmin = 0
+        _endhour = 6
+        _endmin = 0
+
+        for key, value in kwargs.items():
+            if key == "starthour":
+                _starthour = value
+            elif key == "startmin":
+                _startmin = value
+            elif key == "endhour":
+                _endhour = value
+            elif key == "endmin":
+                _endmin = value
+
+        await self._base.api.set_spotlight_lighting_schedule(_endhour, _endmin, _starthour, _startmin )
+        await self.request_refresh()
+
+
+class SirenSwitch(ReolinkEntity, ToggleEntity):
+    """An implementation of a Reolink IP camera spotlight (WhiteLed) switch"""
+
+    def __init__(self, hass, config):
+        """Initialize a Reolink camera."""
+        ReolinkEntity.__init__(self, hass, config)
+        ToggleEntity.__init__(self)
+        self._sistatus = False
+
+    @property
+    def unique_id(self):
+        """Return Unique ID string."""
+        return f"reolink_SirenSwitch_{self._base.unique_id}"
+
+    @property
+    def name(self):
+        """Return the name of this camera."""
+        return f"{self._base.name} Siren"
+
+    @property
+    def is_on(self):
+        """Camera Motion Siren Status."""
+        # return self._base.api.audio_alarm_state
+        return self._sistatus
+
+    @property
+    def device_class(self):
+        """Device class of the switch."""
+        return DEVICE_CLASS_SWITCH
+
+    @property
+    def icon(self):
+        """Icon of the switch."""
+        if self.is_on:
+            return "mdi:alarm"
+        else: 
+            return "mdi:alarm-off"
+
+    async def async_turn_on(self, **kwargs):
+        """Turn On Siren."""
+        # uses call to simple turn on routine
+        # which sets night mode on, auto, 100% bright
+        
+        await self._base.api.set_siren(True)
+        self._sistatus = True
+        await self.request_refresh()
+
+    async def async_turn_off(self, **kwargs):
+        """Turn Off Siren."""
+        await self._base.api.set_siren(False)
+        self._sistatus = False
+        await self.request_refresh()
+
+
 
 
 class PushSwitch(ReolinkEntity, ToggleEntity):
