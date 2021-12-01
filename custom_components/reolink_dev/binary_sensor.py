@@ -191,6 +191,24 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
         self._last_motion = datetime.datetime.min
         self._object_type = object_type
 
+    @property
+    def icon(self):
+        """Icon of the sensor."""
+
+        if self._object_type == "pet":
+            if self._state:
+                return "mdi:dog-side"
+            else:
+                return "mdi:dog-side-off"
+        if self._object_type == "vehicle":
+            if self._state:
+                return "mdi:car"
+            else:
+                return "mdi:car-off"
+
+        if self._state:
+            return "mdi:motion-sensor"
+        return "mdi:motion-sensor-off"
 
     @property
     def unique_id(self):
