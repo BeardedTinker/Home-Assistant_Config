@@ -1,0 +1,22 @@
+#####
+# Count lights ON on 2nd floor
+# https://community.home-assistant.io/t/counts-the-lights-on/105361/63?u=beardedconti
+#####
+
+platform: template
+sensors:
+  lights_1st_floor:
+    friendly_name: 'Lights on 2nd floor'
+    unique_id: lights_2nd_floor
+    value_template: > 
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+      {%- set ns = namespace(lights=[]) %}
+      {%- for light in states.light | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(light.entity_id) == area and "2nd Floor" not in state_attr(light.entity_id, "friendly_name") %}
+            {%- set ns.lights = ns.lights + [ light.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.lights| list | length }}

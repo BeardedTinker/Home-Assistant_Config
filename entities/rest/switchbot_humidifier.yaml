@@ -5,7 +5,7 @@
 
 resource: !secret sbot_humidifier
 method: GET
-scan_interval: 900
+scan_interval: 600
 headers:
   Authorization: !secret sbot_api
   Content-Type: 'application/json'

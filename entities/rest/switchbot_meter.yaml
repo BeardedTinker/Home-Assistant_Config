@@ -5,7 +5,7 @@
 
 resource: !secret sbot_meter
 method: GET
-scan_interval: 900
+scan_interval: 600
 headers:
   Authorization: !secret sbot_api
   Content-Type: 'application/json'
@@ -15,7 +15,7 @@ sensor:
   json_attributes_path: "$.body"
   json_attributes:
   - deviceId
-  - deviceType    
+  - deviceType
   - humidity
   - temperature
 
