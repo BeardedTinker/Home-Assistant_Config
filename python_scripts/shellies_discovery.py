@@ -834,8 +834,8 @@ if model_id == MODEL_SHELLY1PM_ID or dev_id_prefix == MODEL_SHELLY1PM_PREFIX:
     relays_bin_sensors_pl = [PL_1_0, None, None, None]
     relays_bin_sensors_topics = [
         None,
-        TOPIC_INPUT_EVENT_0,
-        TOPIC_INPUT_EVENT_0,
+        TOPIC_INPUT_EVENT,
+        TOPIC_INPUT_EVENT,
         TOPIC_RELAY,
     ]
     relays_bin_sensors_tpls = [None, TPL_LONGPUSH, TPL_SHORTPUSH, TPL_OVERPOWER_RELAY]
