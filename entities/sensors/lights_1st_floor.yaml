@@ -8,7 +8,7 @@ sensors:
   lights_1st_floor:
     friendly_name: 'Lights on 1st floor'
     unique_id: lights_1st_floor
-    value_template: > 
+    value_template: >
       {%- set search_state = 'on' %}
       {%- set search_areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall'] %}
       {%- set ns = namespace(lights=[]) %}

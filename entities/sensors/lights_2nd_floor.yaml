@@ -5,10 +5,10 @@
 
 platform: template
 sensors:
-  lights_1st_floor:
+  lights_2nd_floor:
     friendly_name: 'Lights on 2nd floor'
     unique_id: lights_2nd_floor
-    value_template: > 
+    value_template: >
       {%- set search_state = 'on' %}
       {%- set search_areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
       {%- set ns = namespace(lights=[]) %}

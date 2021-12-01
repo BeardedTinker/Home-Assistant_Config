@@ -1,0 +1,22 @@
+#####
+# Count switches ON on 1st floor
+# https://community.home-assistant.io/t/counts-the-lights-on/105361/63?u=beardedconti
+#####
+
+platform: template
+sensors:
+  switches_1st_floor:
+    friendly_name: 'Switches on 1st floor'
+    unique_id: switches_1st_floor
+    value_template: >
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall'] %}
+      {%- set ns = namespace(switch=[]) %}
+      {%- for switch in states.switch | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(switch.entity_id) == area and "1st Floor" not in state_attr(switch.entity_id, "friendly_name") %}
+            {%- set ns.switch = ns.switch + [ switch.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.switch| list | length }}
