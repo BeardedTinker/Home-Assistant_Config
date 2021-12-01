@@ -48,6 +48,7 @@ From other devices I use, here is a list:
   - Xiaomi MiJia temperature & humidity sensors [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
   - Xiaomi Aqara human body movement and illuminance sensors [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
   - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
+  - NEW Aqara Door and Window contact sensor
   - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Aqara Vibration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
   - Xiaomi Water sensor [SJCGQ11LM](https://www.zigbee2mqtt.io/devices/SJCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/4001249406915.html)
@@ -101,7 +102,8 @@ From other devices I use, here is a list:
   - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper) -TBD
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
-  - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer 
+  - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer
+  - Gledopto GL-SD-002 Zigbee Smart switch
 
 ### Containers and add-ons
 
@@ -193,12 +195,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   159 |
-| Binary sensors       |   230 |
-| Cameras              |    11 |
+| Binary sensors       |   232 |
+| Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  2105 |
+| Entities             |  2172 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    14 |
@@ -207,20 +209,20 @@ Up-to-date count of various things in Home Assistant
 | Input Select         |    12 |
 | Input Text           |    20 |
 | Lights               |    42 |
-| Lines of code (YAML) | 24372 |
+| Lines of code (YAML) | 24836 |
 | Locks                |     1 |
 | Media players        |    42 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
-| Sensors              |  1254 |
-| Switches             |    94 |
+| Sensors              |  1333 |
+| Switches             |    79 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 17.11.2021 10:36AM
+* Updated: 1.12.2021 11:17PM
 
 ### Missing files
 
