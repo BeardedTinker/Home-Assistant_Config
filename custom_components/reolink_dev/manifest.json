@@ -3,10 +3,10 @@
   "name": "Reolink IP camera",
   "documentation": "https://github.com/fwestenberg/reolink_dev",
   "issue_tracker": "https://github.com/fwestenberg/reolink_dev/issues",
-  "version": "0.41",
+  "version": "0.42",
   "iot_class": "local_polling",
   "requirements": [
-    "reolink==0.0.52"
+    "reolink==0.0.53"
   ],
   "dependencies": [
     "ffmpeg",
