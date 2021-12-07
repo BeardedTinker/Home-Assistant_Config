@@ -1,0 +1,8 @@
+#####
+# Automatically update NameChead DDNS record
+#
+#####
+
+namecheapdns:
+  domain: !secret cert_host
+  password: !secret ddns_key
