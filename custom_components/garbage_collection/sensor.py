@@ -229,7 +229,7 @@ class GarbageCollection(RestoreEntity):
                 and type(self._holiday_observed) is bool
                 and not self._holiday_observed
             ):
-                kwargs["observed"] = self._holiday_observed
+                kwargs["observed"] = self._holiday_observed  # type: ignore
             hol = holidays.CountryHoliday(self._country_holidays, **kwargs)
             if self._holiday_pop_named is not None:
                 for pop in self._holiday_pop_named:
@@ -324,7 +324,7 @@ class GarbageCollection(RestoreEntity):
         return self._icon
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         res = {}
         if self._next_date is None:

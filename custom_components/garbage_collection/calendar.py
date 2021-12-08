@@ -53,7 +53,7 @@ class GarbageCollectionCalendar(CalendarEventDevice):
         )
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the device state attributes."""
         if self.hass.data[DOMAIN][CALENDAR_PLATFORM].event is None:
             # No tasks, we don't need to show anything.
