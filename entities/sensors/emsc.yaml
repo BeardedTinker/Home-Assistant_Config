@@ -1,0 +1,9 @@
+#####
+# EMSC RSS feed from HACS 
+#
+#####
+
+platform: emscrss
+name: Earthquakes
+radius: 200
+magnitude: 2.0
