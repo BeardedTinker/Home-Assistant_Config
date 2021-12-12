@@ -1,11 +1,23 @@
 """
 This script adds MQTT discovery support for Shellies devices.
 """
+ATTR_DEVICE_CLASS = "device_class"
+ATTR_ENABLED = "enabled"
+ATTR_ENTITY_CATEGORY = "entity_category"
+ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
+ATTR_PAYLOAD = "payload"
 ATTR_POWER_AC = "ac"
 ATTR_RELAY = "relay"
 ATTR_ROLLER = "roller"
 ATTR_SHELLY = "Shelly"
+ATTR_TOPIC = "topic"
+
+BUTTON_MUTE = "mute"
+BUTTON_RESTART = "restart"
+BUTTON_SELF_TEST = "self_test"
+BUTTON_UNMUTE = "unmute"
+BUTTON_UPDATE_FIRMWARE = "update_firmware"
 
 COMP_FAN = "fan"
 COMP_LIGHT = "light"
@@ -65,6 +77,7 @@ DEVICE_CLASS_POWER_FACTOR = "power_factor"
 DEVICE_CLASS_PRESENCE = "presence"
 DEVICE_CLASS_PRESSURE = "pressure"
 DEVICE_CLASS_PROBLEM = "problem"
+DEVICE_CLASS_RESTART = "restart"
 DEVICE_CLASS_SAFETY = "safety"
 DEVICE_CLASS_SHADE = "shade"
 DEVICE_CLASS_SHUTTER = "shutter"
@@ -84,12 +97,15 @@ ENTITY_CATEGORY_DIAGNOSTIC = "diagnostic"
 EXPIRE_AFTER_FOR_BATTERY_POWERED = int(1.2 * 12 * 60 * 60)  # 1.2 * 12 h
 EXPIRE_AFTER_FOR_AC_POWERED = int(2.2 * 10 * 60)  # 2.2 * 10 min
 EXPIRE_AFTER_FOR_SHELLY_MOTION = int(1.2 * 60 * 60)  # 1.2 * 60 min
+EXPIRE_AFTER_FOR_SHELLY_VALVE = int(1.2 * 60 * 60)  # 1.2 * 60 min
 
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY_TOPIC = "avty_t"
 KEY_COMMAND_TOPIC = "cmd_t"
 KEY_CONFIGURATION_URL = "cu"
 KEY_CONNECTIONS = "cns"
+KEY_CURRENT_TEMPERATURE_TEMPLATE = "curr_temp_tpl"
+KEY_CURRENT_TEMPERATURE_TOPIC = "curr_temp_t"
 KEY_DEVICE = "dev"
 KEY_DEVICE_CLASS = "dev_cla"
 KEY_ENABLED_BY_DEFAULT = "en"
@@ -97,12 +113,16 @@ KEY_ENTITY_CATEGORY = "entity_category"
 KEY_EXPIRE_AFTER = "exp_aft"
 KEY_FORCE_UPDATE = "frc_upd"
 KEY_ICON = "icon"
-KEY_IDENTIFIERS = "ids"
 KEY_JSON_ATTRIBUTES_TEMPLATE = "json_attr_tpl"
 KEY_JSON_ATTRIBUTES_TOPIC = "json_attr_t"
 KEY_MAC = "mac"
 KEY_MANUFACTURER = "mf"
+KEY_MAX_TEMP = "max_temp"
+KEY_MIN_TEMP = "min_temp"
+KEY_MODE_STATE_TEMPLATE = "mode_stat_tpl"
+KEY_MODE_STATE_TOPIC = "mode_stat_t"
 KEY_MODEL = "mdl"
+KEY_MODES = "modes"
 KEY_NAME = "name"
 KEY_OFF_DELAY = "off_dly"
 KEY_OPTIMISTIC = "opt"
@@ -113,9 +133,11 @@ KEY_PAYLOAD_NOT_AVAILABLE = "pl_not_avail"
 KEY_PAYLOAD_OFF = "pl_off"
 KEY_PAYLOAD_ON = "pl_on"
 KEY_PAYLOAD_OPEN = "pl_open"
+KEY_PAYLOAD_PRESS = "payload_press"
 KEY_PAYLOAD_STOP = "pl_stop"
 KEY_POSITION_TEMPLATE = "pos_tpl"
 KEY_POSITION_TOPIC = "pos_t"
+KEY_PRECISION = "precision"
 KEY_QOS = "qos"
 KEY_RETAIN = "ret"
 KEY_SET_POSITION_TEMPLATE = "set_pos_tpl"
@@ -128,6 +150,10 @@ KEY_STATE_TEMPLATE = "stat_tpl"
 KEY_STATE_TOPIC = "stat_t"
 KEY_SUBTYPE = "stype"
 KEY_SW_VERSION = "sw"
+KEY_TEMPERATURE_COMMAND_TEMPLATE = "temp_cmd_tpl"
+KEY_TEMPERATURE_COMMAND_TOPIC = "temp_cmd_t"
+KEY_TEMPERATURE_STATE_TEMPLATE = "temp_stat_tpl"
+KEY_TEMPERATURE_STATE_TOPIC = "temp_stat_t"
 KEY_TOPIC = "t"
 KEY_TYPE = "type"
 KEY_UNIQUE_ID = "uniq_id"
@@ -145,6 +171,8 @@ MIN_4PRO_FIRMWARE_DATE = 20200408
 
 # Firmware 1.1.0 release date
 MIN_MOTION_FIRMWARE_DATE = 20210226
+
+MIN_VALVE_FIRMWARE_DATE = 20211210
 
 # Firmware 1.11.0 release date
 MIN_FIRMWARE_DATE = 20210720
@@ -178,6 +206,7 @@ MODEL_SHELLYRGBW2 = f"{ATTR_SHELLY} RGBW2"
 MODEL_SHELLYSENSE = f"{ATTR_SHELLY} Sense"
 MODEL_SHELLYSMOKE = f"{ATTR_SHELLY} Smoke"
 MODEL_SHELLYUNI = f"{ATTR_SHELLY} UNI"
+MODEL_SHELLYVALVE = f"{ATTR_SHELLY} Valve"
 MODEL_SHELLYVINTAGE = f"{ATTR_SHELLY} Vintage"
 
 MODEL_SHELLY1_ID = "SHSW-1"  # Shelly 1
@@ -266,6 +295,9 @@ MODEL_SHELLYSENSE_PREFIX = "shellysense"
 MODEL_SHELLYSMOKE_ID = "SHSM-01"  # Shelly Smoke
 MODEL_SHELLYSMOKE_PREFIX = "shellysmoke"
 
+MODEL_SHELLYVALVE_ID = "SHTRV-01"  # Shelly Valve
+MODEL_SHELLYVALVE_PREFIX = "shellytrv"
+
 MODEL_SHELLYVINTAGE_ID = "SHVIN-1"  # Shelly Vintage
 MODEL_SHELLYVINTAGE_PREFIX = "shellyvintage"
 
@@ -273,6 +305,12 @@ MODEL_SHELLYUNI_ID = "SHUNI-1"  # Shelly UNI
 MODEL_SHELLYUNI_PREFIX = "shellyuni"
 
 OFF_DELAY = 2
+
+PL_MUTE = "mute"
+PL_RESTART = "reboot"
+PL_SELF_TEST = "self_test"
+PL_UNMUTE = "unmute"
+PL_UPDATE_FIRMWARE = "update_fw"
 
 SENSOR_ADC = "adc"
 SENSOR_BATTERY = "battery"
@@ -341,6 +379,7 @@ SENSOR_TRIPLE_SHORTPUSH_0 = "triple shortpush 0"
 SENSOR_TRIPLE_SHORTPUSH_1 = "triple shortpush 1"
 SENSOR_TRIPLE_SHORTPUSH_2 = "triple shortpush 2"
 SENSOR_UPTIME = "uptime"
+SENSOR_LAST_RESTART = "last_restart"
 SENSOR_VIBRATION = "vibration"
 SENSOR_VOLTAGE = "voltage"
 
@@ -350,6 +389,7 @@ STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 TOPIC_ADC = "adc/0"
 TOPIC_ANNOUNCE = "announce"
 TOPIC_COLOR_0_STATUS = "color/0/status"
+TOPIC_COMMAND = "command"
 TOPIC_EXT_SWITCH = "ext_switch/0"
 TOPIC_INFO = "info"
 TOPIC_INPUT_0 = "input/0"
@@ -363,20 +403,24 @@ TOPIC_LONGPUSH = "longpush"
 TOPIC_LONGPUSH_0 = "longpush/0"
 TOPIC_LONGPUSH_1 = "longpush/1"
 TOPIC_LONGPUSH_2 = "longpush/2"
+TOPIC_MUTE = "sensor/mute"
 TOPIC_OVERPOWER_VALUE = "overpower_value"
 TOPIC_RELAY = "relay"
+TOPIC_SELF_TEST = "sensor/start_self_test"
 TOPIC_STATUS = "status"
 TOPIC_TEMPERATURE = "sensor/temperature"
 TOPIC_TEMPERATURE_STATUS = "temperature_status"
+TOPIC_UNMUTE = "sensor/unmute"
 TOPIC_VOLTAGE = "voltage"
 
 TPL_ADC = "{{value|float|round(2)}}"
 TPL_BATTERY = "{{value|float|round}}"
 TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
-TPL_CLOUD = "{%if value_json[^cloud^].connected==true%}ON{%else%}OFF{%endif%}"
-TPL_CONCENTRATION = "{%if 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CHARGER = "{%if value_json.charger==true%}ON{%else%}OFF{%endif%}"
+TPL_CLOUD = "{%if value_json.cloud.connected==true%}ON{%else%}OFF{%endif%}"
+TPL_CONCENTRATION = "{%if 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CURRENT = "{{value|float|round(2)}}"
+TPL_CURRENT_TEMPERATURE = "{{ value_json.tmp.value }}"
 TPL_DOUBLE_SHORTPUSH = "{%if value_json.event==^SS^%}ON{%else%}OFF{%endif%}"
 TPL_ENERGY_WH = "{{(value|float/1000)|round(2)}}"
 TPL_ENERGY_WMIN = "{{(value|float/60/1000)|round(2)}}"
@@ -386,6 +430,8 @@ TPL_HUMIDITY = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_HUMIDITY_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_ILLUMINATION = "{{value_json.lux}}"
 TPL_ILLUMINATION_TO_JSON = "{{{^illumination^:value}|tojson}}"
+TPL_IP = "{{value_json.ip}}"
+TPL_IP_FROM_INFO = "{{value_json.wifi_sta.ip}}"
 TPL_LONGPUSH = "{%if value_json.event==^L^%}ON{%else%}OFF{%endif%}"
 TPL_LONGPUSH_SHORTPUSH = "{%if value_json.event==^LS^%}ON{%else%}OFF{%endif%}"
 TPL_LUX = "{{value|float|round}}"
@@ -400,11 +446,12 @@ TPL_OVERPOWER_VALUE_TO_JSON = "{{{^overpower_value^:value}|tojson}}"
 TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
 TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
-TPL_RSSI = "{{value_json[^wifi_sta^].rssi}}"
-TPL_IP = "{{value_json.ip}}"
+TPL_RSSI = "{{value_json.wifi_sta.rssi}}"
+TPL_SET_TARGET_TEMPERATURE = "target_t={{value|int}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
 TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
-TPL_SSID = "{{value_json[^wifi_sta^].ssid}}"
+TPL_SSID = "{{value_json.wifi_sta.ssid}}"
+TPL_TARGET_TEMPERATURE = "{{ value_json.target_t.value }}"
 TPL_TEMPERATURE = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
@@ -584,8 +631,21 @@ if (
     )
 
 if (
-    dev_id_prefix not in (MODEL_SHELLY4PRO_PREFIX, MODEL_SHELLYMOTION_PREFIX)
-    and model_id not in (MODEL_SHELLY4PRO_ID, MODEL_SHELLYMOTION_ID)
+    dev_id_prefix == MODEL_SHELLYVALVE_PREFIX or MODEL_SHELLYVALVE_ID == model_id
+) and cur_ver_date < MIN_VALVE_FIRMWARE_DATE:
+    raise ValueError(
+        f"Firmware dated {MIN_VALVE_FIRMWARE_DATE} is required, please update your device {dev_id}"
+    )
+
+if (
+    dev_id_prefix
+    not in (
+        MODEL_SHELLY4PRO_PREFIX,
+        MODEL_SHELLYMOTION_PREFIX,
+        MODEL_SHELLYVALVE_PREFIX,
+    )
+    and model_id
+    not in (MODEL_SHELLY4PRO_ID, MODEL_SHELLYMOTION_ID, MODEL_SHELLYVALVE_ID)
 ) and cur_ver_date < MIN_FIRMWARE_DATE:
     raise ValueError(
         f"Firmware dated {MIN_FIRMWARE_DATE} is required, please update your device {dev_id}"
@@ -669,6 +729,8 @@ sensors_topics = []
 sensors_tpls = []
 sensors_units = []
 white_lights = 0
+climate_entity_option = {}
+buttons = []
 
 if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
     model = MODEL_SHELLY1
@@ -714,7 +776,15 @@ if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_units = [UNIT_DBM, None, None, None]
-
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY1L_ID or dev_id_prefix == MODEL_SHELLY1L_PREFIX:
     model = MODEL_SHELLY1L
@@ -805,6 +875,15 @@ if model_id == MODEL_SHELLY1L_ID or dev_id_prefix == MODEL_SHELLY1L_PREFIX:
     sensors_topics = [None, TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
     sensors_tpls = [TPL_TEMPERATURE, TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_units = [UNIT_CELSIUS, UNIT_DBM, None, None, None]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY1PM_ID or dev_id_prefix == MODEL_SHELLY1PM_PREFIX:
     model = MODEL_SHELLY1PM
@@ -902,6 +981,15 @@ if model_id == MODEL_SHELLY1PM_ID or dev_id_prefix == MODEL_SHELLY1PM_PREFIX:
     bin_sensors_topics = [None, TOPIC_INFO]
     ext_humi_sensors = 1
     ext_temp_sensors = 3
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYAIR_ID or dev_id_prefix == MODEL_SHELLYAIR_PREFIX:
     model = MODEL_SHELLYAIR
@@ -959,6 +1047,15 @@ if model_id == MODEL_SHELLYAIR_ID or dev_id_prefix == MODEL_SHELLYAIR_PREFIX:
     bin_sensors_tpls = [None, TPL_NEW_FIRMWARE_FROM_INFO]
     bin_sensors_topics = [None, TOPIC_INFO]
     ext_temp_sensors = 1
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY2_ID or dev_id_prefix == MODEL_SHELLY2_PREFIX:
     model = MODEL_SHELLY2
@@ -1015,6 +1112,15 @@ if model_id == MODEL_SHELLY2_ID or dev_id_prefix == MODEL_SHELLY2_PREFIX:
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP, TPL_VOLTAGE]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE, TOPIC_VOLTAGE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY25_ID or dev_id_prefix == MODEL_SHELLY25_PREFIX:
     model = MODEL_SHELLY25
@@ -1113,6 +1219,15 @@ if model_id == MODEL_SHELLY25_ID or dev_id_prefix == MODEL_SHELLY25_PREFIX:
     bin_sensors_pl = [PL_1_0, None, PL_1_0, PL_1_0]
     bin_sensors_tpls = [None, TPL_NEW_FIRMWARE_FROM_INFO, None, None]
     bin_sensors_topics = [None, TOPIC_INFO, TOPIC_INPUT_0, TOPIC_INPUT_1]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYUNI_ID or dev_id_prefix == MODEL_SHELLYUNI_PREFIX:
     model = MODEL_SHELLYUNI
@@ -1169,6 +1284,15 @@ if model_id == MODEL_SHELLYUNI_ID or dev_id_prefix == MODEL_SHELLYUNI_PREFIX:
     bin_sensors_tpls = [TPL_NEW_FIRMWARE_FROM_INFO]
     bin_sensors_pl = [None]
     bin_sensors_topics = [TOPIC_INFO]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if (
     model_id in (MODEL_SHELLYPLUG_ID, MODEL_SHELLYPLUG_E_ID)
@@ -1214,6 +1338,15 @@ if (
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYPLUG_US_ID or dev_id_prefix == MODEL_SHELLYPLUG_US_PREFIX:
     model = MODEL_SHELLYPLUG_US
@@ -1256,6 +1389,15 @@ if model_id == MODEL_SHELLYPLUG_US_ID or dev_id_prefix == MODEL_SHELLYPLUG_US_PR
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYPLUG_S_ID or dev_id_prefix == MODEL_SHELLYPLUG_S_PREFIX:
     model = MODEL_SHELLYPLUG_S
@@ -1304,6 +1446,15 @@ if model_id == MODEL_SHELLYPLUG_S_ID or dev_id_prefix == MODEL_SHELLYPLUG_S_PREF
     bin_sensors_pl = [PL_1_0, None]
     bin_sensors_tpls = [None, TPL_NEW_FIRMWARE_FROM_INFO]
     bin_sensors_topics = [None, TOPIC_INFO]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY4PRO_ID or dev_id_prefix == MODEL_SHELLY4PRO_PREFIX:
     model = MODEL_SHELLY4PRO
@@ -1336,6 +1487,15 @@ if model_id == MODEL_SHELLY4PRO_ID or dev_id_prefix == MODEL_SHELLY4PRO_PREFIX:
     sensors_units = [None]
     sensors_tpls = [TPL_IP]
     sensors_topics = [TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYHT_ID or dev_id_prefix == MODEL_SHELLYHT_PREFIX:
     model = MODEL_SHELLYHT
@@ -1577,6 +1737,35 @@ if model_id == MODEL_SHELLYGAS_ID or dev_id_prefix == MODEL_SHELLYGAS_PREFIX:
     bin_sensors_device_classes = [DEVICE_CLASS_UPDATE, DEVICE_CLASS_GAS]
     bin_sensors_tpls = [TPL_NEW_FIRMWARE_FROM_INFO, TPL_GAS]
     bin_sensors_topics = [TOPIC_INFO, None]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        },
+        BUTTON_SELF_TEST: {
+            ATTR_TOPIC: TOPIC_SELF_TEST,
+            ATTR_PAYLOAD: PL_SELF_TEST,
+            ATTR_ENABLED: True,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        },
+        BUTTON_MUTE: {
+            ATTR_TOPIC: TOPIC_MUTE,
+            ATTR_PAYLOAD: PL_MUTE,
+            ATTR_ENABLED: True,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+            ATTR_ICON: "mdi:volume-variant-off",
+        },
+        BUTTON_UNMUTE: {
+            ATTR_TOPIC: TOPIC_UNMUTE,
+            ATTR_PAYLOAD: PL_UNMUTE,
+            ATTR_ENABLED: True,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+            ATTR_ICON: "mdi:volume-high",
+        },
+    }
 
 if (
     model_id in (MODEL_SHELLYBUTTON1_ID, MODEL_SHELLYBUTTON1V2_ID)
@@ -1947,6 +2136,15 @@ if model_id == MODEL_SHELLYRGBW2_ID or dev_id_prefix == MODEL_SHELLYRGBW2_PREFIX
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_units = [UNIT_DBM, None, None, None]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREFIX:
     model = MODEL_SHELLYDIMMER
@@ -2071,6 +2269,15 @@ if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREF
         DEVICE_CLASS_POWER,
     ]
     lights_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN, TPL_POWER]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PREFIX:
     model = MODEL_SHELLYDIMMER2
@@ -2195,6 +2402,15 @@ if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PR
         DEVICE_CLASS_POWER,
     ]
     lights_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN, TPL_POWER]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYBULB_ID or dev_id_prefix == MODEL_SHELLYBULB_PREFIX:
     model = MODEL_SHELLYBULB
@@ -2223,6 +2439,15 @@ if model_id == MODEL_SHELLYBULB_ID or dev_id_prefix == MODEL_SHELLYBULB_PREFIX:
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYBULBRGBW_ID or dev_id_prefix == MODEL_SHELLYBULBRGBW_PREFIX:
     model = MODEL_SHELLYBULBRGBW
@@ -2260,6 +2485,15 @@ if model_id == MODEL_SHELLYBULBRGBW_ID or dev_id_prefix == MODEL_SHELLYBULBRGBW_
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYDUO_ID or dev_id_prefix == MODEL_SHELLYDUO_PREFIX:
     model = MODEL_SHELLYDUO
@@ -2297,6 +2531,15 @@ if model_id == MODEL_SHELLYDUO_ID or dev_id_prefix == MODEL_SHELLYDUO_PREFIX:
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYVINTAGE_ID or dev_id_prefix == MODEL_SHELLYVINTAGE_PREFIX:
     model = MODEL_SHELLYVINTAGE
@@ -2334,6 +2577,15 @@ if model_id == MODEL_SHELLYVINTAGE_ID or dev_id_prefix == MODEL_SHELLYVINTAGE_PR
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYEM_ID or dev_id_prefix == MODEL_SHELLYEM_PREFIX:
     model = MODEL_SHELLYEM
@@ -2414,6 +2666,15 @@ if model_id == MODEL_SHELLYEM_ID or dev_id_prefix == MODEL_SHELLYEM_PREFIX:
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
     model = MODEL_SHELLY3EM
@@ -2499,6 +2760,15 @@ if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
     ]
     sensors_tpls = [TPL_RSSI, TPL_SSID, TPL_UPTIME, TPL_IP]
     sensors_topics = [TOPIC_INFO, TOPIC_INFO, TOPIC_INFO, TOPIC_ANNOUNCE]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
 
 if model_id == MODEL_SHELLYFLOOD_ID or dev_id_prefix == MODEL_SHELLYFLOOD_PREFIX:
     model = MODEL_SHELLYFLOOD
@@ -2751,6 +3021,204 @@ if model_id == MODEL_SHELLYI3_ID or dev_id_prefix == MODEL_SHELLYI3_PREFIX:
         TOPIC_ANNOUNCE,
         TOPIC_TEMPERATURE_STATUS,
     ]
+    buttons = {
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        }
+    }
+
+if model_id == MODEL_SHELLYVALVE_ID:
+    model = MODEL_SHELLYVALVE
+    battery_powered = True
+
+    climate_entity_option = {
+        KEY_MIN_TEMP: 4,
+        KEY_MAX_TEMP: 31,
+        KEY_MODES: ["auto"],
+        KEY_PRECISION: 1.0,
+    }
+    sensors = [
+        SENSOR_BATTERY,
+        SENSOR_RSSI,
+        SENSOR_IP,
+        SENSOR_SSID,
+        SENSOR_LAST_RESTART,
+    ]
+    sensors_entity_categories = [
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+    ]
+    sensors_state_classes = [
+        STATE_CLASS_MEASUREMENT,
+        None,
+        None,
+        None,
+        None,
+    ]
+    sensors_enabled = [True, False, False, False, False]
+    sensors_device_classes = [
+        DEVICE_CLASS_BATTERY,
+        DEVICE_CLASS_SIGNAL_STRENGTH,
+        None,
+        None,
+        DEVICE_CLASS_TIMESTAMP,
+    ]
+    sensors_units = [UNIT_PERCENT, UNIT_DBM, None, None, None]
+    sensors_tpls = [
+        TPL_BATTERY_FROM_JSON,
+        TPL_RSSI,
+        TPL_IP_FROM_INFO,
+        TPL_SSID,
+        TPL_UPTIME,
+    ]
+    sensors_topics = [
+        TOPIC_STATUS,
+        TOPIC_INFO,
+        TOPIC_INFO,
+        TOPIC_INFO,
+        TOPIC_INFO,
+    ]
+    bin_sensors = [
+        SENSOR_FIRMWARE_UPDATE,
+        SENSOR_CHARGER,
+        SENSOR_CLOUD,
+    ]
+    bin_sensors_entity_categories = [
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+    ]
+    bin_sensors_enabled = [True, True, False]
+    bin_sensors_device_classes = [
+        DEVICE_CLASS_UPDATE,
+        DEVICE_CLASS_BATTERY_CHARGING,
+        DEVICE_CLASS_CONNECTIVITY,
+    ]
+    bin_sensors_pl = [None, None, None]
+    bin_sensors_tpls = [
+        TPL_NEW_FIRMWARE_FROM_INFO,
+        TPL_CHARGER,
+        TPL_CLOUD,
+    ]
+    bin_sensors_topics = [
+        TOPIC_INFO,
+        TOPIC_INFO,
+        TOPIC_INFO,
+    ]
+    buttons = {
+        BUTTON_RESTART: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_RESTART,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_RESTART,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        },
+        BUTTON_UPDATE_FIRMWARE: {
+            ATTR_TOPIC: TOPIC_COMMAND,
+            ATTR_PAYLOAD: PL_UPDATE_FIRMWARE,
+            ATTR_ENABLED: True,
+            ATTR_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
+            ATTR_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+        },
+    }
+
+# buttons
+for button, button_options in buttons.items():
+    device_config = get_device_config(dev_id)
+    if ignore_device_model:
+        device_name = clean_name(dev_id)
+    else:
+        device_name = f"{model} {dev_id.split('-')[-1]}"
+    unique_id = f"{dev_id}-{button}".lower()
+    config_topic = f"{disc_prefix}/button/{dev_id}-{button}/config".encode(
+        "ascii", "ignore"
+    ).decode("utf-8")
+    default_topic = f"shellies/{dev_id}/"
+    availability_topic = "~online"
+    command_topic = f"~{button_options[ATTR_TOPIC]}"
+    button_name = f"{device_name} {clean_name(button)}"
+    expire_after = device_config.get(CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_VALVE)
+
+    payload = {
+        KEY_NAME: button_name,
+        KEY_COMMAND_TOPIC: command_topic,
+        KEY_PAYLOAD_PRESS: button_options[ATTR_PAYLOAD],
+        KEY_ENABLED_BY_DEFAULT: str(button_options[ATTR_ENABLED]),
+        KEY_ENTITY_CATEGORY: button_options[ATTR_ENTITY_CATEGORY],
+        KEY_AVAILABILITY_TOPIC: availability_topic,
+        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
+        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_UNIQUE_ID: unique_id,
+        KEY_QOS: qos,
+        KEY_DEVICE: {
+            KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
+            KEY_NAME: device_name,
+            KEY_MODEL: model,
+            KEY_SW_VERSION: fw_ver,
+            KEY_MANUFACTURER: ATTR_MANUFACTURER,
+            KEY_CONFIGURATION_URL: f"http://{host}/",
+        },
+        "~": default_topic,
+    }
+    if button_options.get(ATTR_DEVICE_CLASS):
+        payload[KEY_DEVICE_CLASS] = button_options[ATTR_DEVICE_CLASS]
+    if button_options.get(ATTR_ICON):
+        payload[KEY_ICON] = button_options[ATTR_ICON]
+    if dev_id.lower() in ignored:
+        payload = ""
+    mqtt_publish(config_topic, payload, retain)
+
+# clmate entities
+if climate_entity_option:
+    device_config = get_device_config(dev_id)
+    if ignore_device_model:
+        device_name = clean_name(dev_id)
+    else:
+        device_name = f"{model} {dev_id.split('-')[-1]}"
+    default_topic = f"shellies/{dev_id}/"
+    status_topic = "~status"
+    command_topic = "~command"
+    availability_topic = "~online"
+    unique_id = f"{dev_id}".lower()
+    config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
+        "ascii", "ignore"
+    ).decode("utf-8")
+    expire_after = device_config.get(CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_VALVE)
+    payload = {
+        KEY_NAME: device_name,
+        KEY_CURRENT_TEMPERATURE_TOPIC: status_topic,
+        KEY_CURRENT_TEMPERATURE_TEMPLATE: TPL_CURRENT_TEMPERATURE,
+        KEY_TEMPERATURE_STATE_TOPIC: status_topic,
+        KEY_TEMPERATURE_STATE_TEMPLATE: TPL_TARGET_TEMPERATURE,
+        KEY_TEMPERATURE_COMMAND_TOPIC: command_topic,
+        KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
+        KEY_MODE_STATE_TOPIC: status_topic,
+        KEY_MODE_STATE_TEMPLATE: "auto",
+        KEY_EXPIRE_AFTER: expire_after,
+        KEY_UNIQUE_ID: unique_id,
+        KEY_OPTIMISTIC: VALUE_FALSE,
+        KEY_QOS: qos,
+        KEY_DEVICE: {
+            KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
+            KEY_NAME: device_name,
+            KEY_MODEL: model,
+            KEY_SW_VERSION: fw_ver,
+            KEY_MANUFACTURER: ATTR_MANUFACTURER,
+            KEY_CONFIGURATION_URL: f"http://{host}/",
+        },
+        "~": default_topic,
+    }
+    payload.update(climate_entity_option)
+    if dev_id.lower() in ignored:
+        payload = ""
+    mqtt_publish(config_topic, payload, retain)
 
 # rollers
 for roller_id in range(rollers):
@@ -2808,7 +3276,6 @@ for roller_id in range(rollers):
             KEY_OPTIMISTIC: VALUE_FALSE,
             KEY_QOS: qos,
             KEY_DEVICE: {
-                KEY_IDENTIFIERS: [mac],
                 KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                 KEY_NAME: device_name,
                 KEY_MODEL: model,
@@ -2866,7 +3333,6 @@ for relay_id in range(relays):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -2914,7 +3380,6 @@ for relay_id in range(relays):
                     KEY_UNIQUE_ID: unique_id,
                     KEY_QOS: qos,
                     KEY_DEVICE: {
-                        KEY_IDENTIFIERS: [mac],
                         KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                         KEY_NAME: device_name,
                         KEY_MODEL: model,
@@ -2966,7 +3431,6 @@ for relay_id in range(relays):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -3014,7 +3478,6 @@ for relay_id in range(relays):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -3104,6 +3567,8 @@ for sensor_id in range(len(sensors)):
     availability_topic = "~online"
     if sensors[sensor_id] in (SENSOR_RSSI, SENSOR_SSID, SENSOR_ADC, SENSOR_IP):
         sensor_name = f"{device_name} {sensors[sensor_id].upper()}"
+    elif sensors[sensor_id] == SENSOR_UPTIME:
+        sensor_name = f"{device_name} Last Restart"
     else:
         sensor_name = f"{device_name} {clean_name(sensors[sensor_id])}"
     if sensors[sensor_id] == SENSOR_TEMPERATURE_F:
@@ -3117,7 +3582,13 @@ for sensor_id in range(len(sensors)):
 
     config_component = COMP_SWITCH
     if (
-        model in (MODEL_SHELLYBUTTON1, MODEL_SHELLYMOTION, MODEL_SHELLYSENSE)
+        model
+        in (
+            MODEL_SHELLYBUTTON1,
+            MODEL_SHELLYMOTION,
+            MODEL_SHELLYSENSE,
+            MODEL_SHELLYVALVE,
+        )
         and device_config.get(CONF_POWERED) == ATTR_POWER_AC
     ):
         battery_powered = False
@@ -3126,6 +3597,10 @@ for sensor_id in range(len(sensors)):
         if model == MODEL_SHELLYMOTION:
             expire_after = device_config.get(
                 CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_MOTION
+            )
+        elif model == MODEL_SHELLYVALVE:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_VALVE
             )
         else:
             expire_after = device_config.get(
@@ -3149,7 +3624,6 @@ for sensor_id in range(len(sensors)):
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: {
-            KEY_IDENTIFIERS: [mac],
             KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
             KEY_NAME: device_name,
             KEY_MODEL: model,
@@ -3221,7 +3695,6 @@ for input_id in range(inputs):
         KEY_PAYLOAD: "0",
         KEY_QOS: qos,
         KEY_DEVICE: {
-            KEY_IDENTIFIERS: [mac],
             KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
             KEY_NAME: device_name,
             KEY_MODEL: model,
@@ -3250,7 +3723,6 @@ for input_id in range(inputs):
             KEY_VALUE_TEMPLATE: "{{value_json.event}}",
             KEY_QOS: qos,
             KEY_DEVICE: {
-                KEY_IDENTIFIERS: [mac],
                 KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                 KEY_NAME: device_name,
                 KEY_MODEL: model,
@@ -3300,7 +3772,6 @@ for sensor_id in range(ext_temp_sensors):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: {
-                KEY_IDENTIFIERS: [mac],
                 KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                 KEY_NAME: device_name,
                 KEY_MODEL: model,
@@ -3351,7 +3822,6 @@ for sensor_id in range(ext_humi_sensors):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: {
-                KEY_IDENTIFIERS: [mac],
                 KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                 KEY_NAME: device_name,
                 KEY_MODEL: model,
@@ -3374,7 +3844,13 @@ for bin_sensor_id in range(len(bin_sensors)):
     if isinstance(device_config.get(CONF_PUSH_OFF_DELAY), bool):
         push_off_delay = device_config.get(CONF_PUSH_OFF_DELAY)
     if (
-        model in (MODEL_SHELLYBUTTON1, MODEL_SHELLYMOTION, MODEL_SHELLYSENSE)
+        model
+        in (
+            MODEL_SHELLYBUTTON1,
+            MODEL_SHELLYMOTION,
+            MODEL_SHELLYSENSE,
+            MODEL_SHELLYVALVE,
+        )
         and device_config.get(CONF_POWERED) == ATTR_POWER_AC
     ):
         battery_powered = False
@@ -3382,6 +3858,10 @@ for bin_sensor_id in range(len(bin_sensors)):
         if model == MODEL_SHELLYMOTION:
             expire_after = device_config.get(
                 CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_MOTION
+            )
+        elif model == MODEL_SHELLYVALVE:
+            expire_after = device_config.get(
+                CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_VALVE
             )
         else:
             expire_after = device_config.get(
@@ -3429,7 +3909,6 @@ for bin_sensor_id in range(len(bin_sensors)):
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: {
-            KEY_IDENTIFIERS: [mac],
             KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
             KEY_NAME: device_name,
             KEY_MODEL: model,
@@ -3633,7 +4112,6 @@ for light_id in range(rgbw_lights):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -3698,7 +4176,6 @@ for light_id in range(rgbw_lights):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -3893,7 +4370,6 @@ for light_id in range(white_lights):
                     KEY_UNIQUE_ID: unique_id,
                     KEY_QOS: qos,
                     KEY_DEVICE: {
-                        KEY_IDENTIFIERS: [mac],
                         KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                         KEY_NAME: device_name,
                         KEY_MODEL: model,
@@ -3975,7 +4451,6 @@ for light_id in range(white_lights):
                 KEY_UNIQUE_ID: unique_id,
                 KEY_QOS: qos,
                 KEY_DEVICE: {
-                    KEY_IDENTIFIERS: [mac],
                     KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                     KEY_NAME: device_name,
                     KEY_MODEL: model,
@@ -4032,7 +4507,6 @@ for meter_id in range(meters):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: {
-                KEY_IDENTIFIERS: [mac],
                 KEY_CONNECTIONS: [[KEY_MAC, format_mac(mac)]],
                 KEY_NAME: device_name,
                 KEY_MODEL: model,
