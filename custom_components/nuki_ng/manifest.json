@@ -1,0 +1,12 @@
+{
+  "domain": "nuki_ng",
+  "name": "Nuki Lock",
+  "documentation": "https://github.com/kvj/hass_nuki_ng",
+  "issue_tracker": "https://github.com/kvj/hass_nuki_ng/issues",
+  "dependencies": [],
+  "codeowners": ["@kvj"],
+  "requirements": [],
+  "iot_class": "local_polling",
+  "config_flow": true,
+  "version": "0.0.1"
+}

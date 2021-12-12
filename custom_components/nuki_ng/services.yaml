@@ -1,0 +1,26 @@
+bridge_reboot:
+  name: Reboot Bridge
+  target:
+    device:
+      integration: nuki_ng
+
+bridge_fwupdate:
+  name: Perform Bridge software update
+  target:
+    device:
+      integration: nuki_ng
+
+bridge_delete_callback:
+  name: Delete callback URL from Bridge callbacks list
+  description: The callbacks currently set are exposed as attributes of the 'Bridge Callback Set' entity
+  target:
+    device:
+      integration: nuki_ng
+  fields:
+    command:
+      name: Callback URL
+      description: URL to delete
+      required: true
+      example: "http://192.168.0.0/callback"
+      selector:
+        text: {}
