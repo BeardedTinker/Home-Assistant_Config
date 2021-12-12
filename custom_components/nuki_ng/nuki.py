@@ -163,7 +163,7 @@ class NukiInterface:
         return result
 
     async def web_list(self):
-        door_state_map = {0: "unavailable", 1: "deactivated", 2: "door closed",
+        door_state_map = {1: "deactivated", 2: "door closed",
                           3: "door opened", 4: "door state unknown", 5: "calibrating"}
         device_state_map = {
             0: {0: "uncalibrated", 1: "locked", 2: "unlocking", 3: "unlocked", 4: "locking", 5: "unlatched", 6: "unlocked (lock 'n' go)", 7: "unlatching", 254: "motor blocked", 255: "undefined"},

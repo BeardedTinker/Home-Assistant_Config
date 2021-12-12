@@ -23,7 +23,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             entities.append(KeypadBatteryLow(coordinator, dev_id))
         if coordinator.is_opener(dev_id):
             entities.append(RingAction(coordinator, dev_id))
-        if coordinator.device_supports(dev_id, "doorsensorState"):
+        if coordinator.device_supports(dev_id, "doorsensorStateName"):
             entities.append(DoorState(coordinator, dev_id))
     if coordinator.api.can_bridge():
         entities.append(BridgeServerConnection(coordinator))
@@ -138,7 +138,7 @@ class DoorState(NukiEntity, BinarySensorEntity):
     def is_on(self) -> bool:
         current = DoorSensorStates(self.last_state.get(
             "doorsensorState", DoorSensorStates.UNKNOWN.value))
-        return current == DoorSensorStates.DOOR_OPENED
+        return current != DoorSensorStates.DOOR_CLOSED
 
 
 class BridgeServerConnection(NukiBridge, BinarySensorEntity):

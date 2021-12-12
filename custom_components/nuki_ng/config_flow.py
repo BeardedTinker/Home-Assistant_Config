@@ -18,12 +18,12 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def find_nuki_devices(self, config: dict):
         nuki = NukiInterface(
             self.hass,
-            bridge=config["address"],
-            token=config["token"],
-            web_token=config["web_token"]
+            bridge=config.get("address"),
+            token=config.get("token"),
+            web_token=config.get("web_token")
         )
         title = None
-        if config["token"]:
+        if nuki.token:
             try:
                 response = await nuki.bridge_list()
                 _LOGGER.debug(f"bridge devices: {response}")
@@ -32,7 +32,7 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception(
                     f"Failed to get list of devices from bridge: {err}")
                 return title, "invalid_bridge_token"
-        if config["web_token"]:
+        if nuki.web_token:
             try:
                 response = await nuki.web_list()
                 _LOGGER.debug(f"web devices: {response}")

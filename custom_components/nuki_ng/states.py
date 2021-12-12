@@ -23,6 +23,7 @@ class LockStates(BaseStates):
 
 
 class DoorSensorStates(BaseStates):
+    UNAVAILABLE = 0
     DEACTIVATED = 1
     DOOR_CLOSED = 2
     DOOR_OPENED = 3
