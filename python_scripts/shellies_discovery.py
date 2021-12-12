@@ -730,7 +730,7 @@ sensors_tpls = []
 sensors_units = []
 white_lights = 0
 climate_entity_option = {}
-buttons = []
+buttons = {}
 
 if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
     model = MODEL_SHELLY1
@@ -3038,7 +3038,7 @@ if model_id == MODEL_SHELLYVALVE_ID:
     climate_entity_option = {
         KEY_MIN_TEMP: 4,
         KEY_MAX_TEMP: 31,
-        KEY_MODES: ["auto"],
+        KEY_MODES: ["heat"],
         KEY_PRECISION: 1.0,
     }
     sensors = [
@@ -3200,7 +3200,7 @@ if climate_entity_option:
         KEY_TEMPERATURE_COMMAND_TOPIC: command_topic,
         KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
         KEY_MODE_STATE_TOPIC: status_topic,
-        KEY_MODE_STATE_TEMPLATE: "auto",
+        KEY_MODE_STATE_TEMPLATE: "heat",
         KEY_EXPIRE_AFTER: expire_after,
         KEY_UNIQUE_ID: unique_id,
         KEY_OPTIMISTIC: VALUE_FALSE,
@@ -3650,14 +3650,9 @@ for sensor_id in range(len(sensors)):
         payload[KEY_ICON] = "mdi:wifi"
     elif sensors[sensor_id] == SENSOR_TEMPERATURE_STATUS:
         payload[KEY_ICON] = "mdi:thermometer"
-    if battery_powered and sensors[sensor_id] not in (
-        SENSOR_SSID,
-        SENSOR_RSSI,
-        SENSOR_UPTIME,
-        SENSOR_IP,
-    ):
+    if battery_powered:
         payload[KEY_EXPIRE_AFTER] = expire_after
-    if not battery_powered:
+    else:
         payload[KEY_AVAILABILITY_TOPIC] = availability_topic
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
@@ -3925,13 +3920,9 @@ for bin_sensor_id in range(len(bin_sensors)):
     else:
         payload[KEY_PAYLOAD_ON] = bin_sensors_pl[bin_sensor_id][VALUE_ON]
         payload[KEY_PAYLOAD_OFF] = bin_sensors_pl[bin_sensor_id][VALUE_OFF]
-    if battery_powered and bin_sensors[bin_sensor_id] not in (
-        SENSOR_FIRMWARE_UPDATE,
-        SENSOR_OPENING,
-        SENSOR_CLOUD,
-    ):
+    if battery_powered:
         payload[KEY_EXPIRE_AFTER] = expire_after
-    if not battery_powered:
+    else:
         payload[KEY_AVAILABILITY_TOPIC] = availability_topic
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
