@@ -2,6 +2,7 @@ import logging
 
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, LENGTH_KILOMETERS
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.device_registry import DeviceEntryType
 
 from .const import (
     ATTR_LAT,
@@ -99,7 +100,7 @@ class BlitzortungSensor(Entity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         return self._attrs
 
@@ -123,7 +124,7 @@ class BlitzortungSensor(Entity):
             "identifiers": {(DOMAIN, self._integration_name)},
             "model": "Lightning Detector",
             "sw_version": "0.0.1",
-            "entry_type": "service",
+            "entry_type": DeviceEntryType.SERVICE,
         }
 
     def update_lightning(self, lightning):

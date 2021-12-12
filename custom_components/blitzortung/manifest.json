@@ -1,8 +1,9 @@
 {
   "domain": "blitzortung",
+  "iot_class": "cloud_push",
   "name": "Blitzortung",
   "config_flow": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/mrk-its/homeassistant-blitzortung",
   "issue_tracker": "https://github.com/mrk-its/homeassistant-blitzortung/issues",
   "requirements": ["paho-mqtt>=1.5.0"],
