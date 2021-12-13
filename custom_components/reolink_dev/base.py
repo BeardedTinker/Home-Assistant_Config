@@ -140,6 +140,13 @@ class ReolinkBase:
         else:
             self._thumbnail_path: str = options[CONF_THUMBNAIL_PATH]
 
+        from .binary_sensor import MotionSensor, ObjectDetectedSensor
+
+        self.sensor_motion_detection: Optional[MotionSensor] = None
+        self.sensor_person_detection: Optional[ObjectDetectedSensor] = None
+        self.sensor_vehicle_detection: Optional[ObjectDetectedSensor] = None
+        self.sensor_pet_detection: Optional[ObjectDetectedSensor] = None
+
     @property
     def name(self):
         """Create the device name."""

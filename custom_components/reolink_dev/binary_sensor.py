@@ -18,16 +18,23 @@ DEFAULT_DEVICE_CLASS = "motion"
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_devices):
     """Set up the Reolink IP Camera switches."""
-    new_sensors = [MotionSensor(hass, config_entry)]
 
     base: ReolinkBase = hass.data[DOMAIN][config_entry.entry_id][BASE]
+
+    base.sensor_motion_detection = MotionSensor(hass, config_entry)
+
+    new_sensors = [base.sensor_motion_detection]
 
     if base.api.is_ia_enabled:
         _LOGGER.debug("Camera '{}' model '{}' is AI enabled so object detection sensors will be created".
                       format(base.name, base.api.model))
-        new_sensors.append(ObjectDetectedSensor(hass, config_entry, 'person'))
-        new_sensors.append(ObjectDetectedSensor(hass, config_entry, 'vehicle'))
-        new_sensors.append(ObjectDetectedSensor(hass, config_entry, 'pet'))
+        base.sensor_person_detection = ObjectDetectedSensor(hass, config_entry, "person")
+        base.sensor_vehicle_detection = ObjectDetectedSensor(hass, config_entry, "vehicle")
+        base.sensor_pet_detection = ObjectDetectedSensor(hass, config_entry, "pet")
+
+        new_sensors.append(base.sensor_person_detection)
+        new_sensors.append(base.sensor_vehicle_detection)
+        new_sensors.append(base.sensor_pet_detection)
 
     async_add_devices(new_sensors, update_before_add=False)
 
@@ -113,7 +120,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             self._event_state = self._base.api.motion_state
         except:
             _LOGGER.error("Motion states could not be queried from API")
-            _LOGGER.error(traceback.format_exc(()))
+            _LOGGER.error(traceback.format_exc())
             return
 
         if self._event_state:
@@ -126,7 +133,8 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
             if self._base.motion_off_delay > 0:
                 await asyncio.sleep(self._base.motion_off_delay)
 
-        self.async_schedule_update_ha_state()
+        if self.enabled:
+            self.async_schedule_update_ha_state()
 
     @property
     def extra_state_attributes(self):
@@ -270,7 +278,8 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
                         self._event_state = value.get('alarm_state', 0) == 1
                         self._available = value.get('support', 0) == 1
 
-                    self.async_schedule_update_ha_state()
+                    if self.enabled:
+                        self.async_schedule_update_ha_state()
                     object_found = True
                     break
 

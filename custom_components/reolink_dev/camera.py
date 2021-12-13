@@ -145,9 +145,12 @@ class ReolinkCamera(ReolinkEntity, Camera):
         return bool(self._base.api.hdd_info)
 
     @property
-    def device_state_attributes(self):
-        """Return the camera state attributes."""
-        attrs = {}
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        attrs = super().extra_state_attributes
+        if attrs is None:
+            attrs = {}
+
         if self._base.api.ptz_support:
             attrs["ptz_presets"] = self._base.api.ptz_presets
 
