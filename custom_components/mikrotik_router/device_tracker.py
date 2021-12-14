@@ -225,7 +225,7 @@ class MikrotikControllerDeviceTracker(ScannerEntity):
         return info
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
         return attributes
@@ -301,7 +301,7 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
         return "mdi:lan-disconnect"
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
         for variable in DEVICE_ATTRIBUTES_HOST:

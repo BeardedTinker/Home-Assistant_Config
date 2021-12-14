@@ -3,12 +3,15 @@
 import logging
 from typing import Any, Dict, Optional
 
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
-    DEVICE_CLASS_CONNECTIVITY,
+    BinarySensorDeviceClass,
 )
 from homeassistant.const import (
     CONF_NAME,
+    CONF_HOST,
+    ATTR_DEVICE_CLASS,
     ATTR_ATTRIBUTION,
 )
 from homeassistant.core import callback
@@ -31,13 +34,16 @@ ATTR_LABEL = "label"
 ATTR_GROUP = "group"
 ATTR_PATH = "data_path"
 ATTR_ATTR = "data_attr"
+ATTR_CTGR = "entity_category"
 
 SENSOR_TYPES = {
     "system_fwupdate": {
+        ATTR_DEVICE_CLASS: BinarySensorDeviceClass.UPDATE,
         ATTR_LABEL: "Firmware update",
         ATTR_GROUP: "System",
         ATTR_PATH: "fw-update",
         ATTR_ATTR: "available",
+        ATTR_CTGR: EntityCategory.DIAGNOSTIC,
     },
 }
 
@@ -234,6 +240,11 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
             self._type = {}
             self._attr = None
 
+        if ATTR_CTGR in self._type:
+            self._entity_category = self._type[ATTR_CTGR]
+        else:
+            self._entity_category = None
+
         self._device_class = None
         self._state = None
         self._icon = None
@@ -246,7 +257,7 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
         return f"{self._inst} {self._type[ATTR_LABEL]}"
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         return self._attrs
 
@@ -261,12 +272,26 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
         return self._ctrl.connected()
 
     @property
+    def entity_category(self) -> str:
+        """Return entity category"""
+        if self._entity_category:
+            return self._entity_category
+
+        return None
+
+    @property
     def device_info(self) -> Dict[str, Any]:
         """Return a description for device registry."""
+        if self._type[ATTR_GROUP] == "System":
+            self._type[ATTR_GROUP] = self._ctrl.data["resource"]["board-name"]
+
         info = {
+            "connections": {(DOMAIN, self._ctrl.data["routerboard"]["serial-number"])},
             "manufacturer": self._ctrl.data["resource"]["platform"],
             "model": self._ctrl.data["resource"]["board-name"],
             "name": f"{self._inst} {self._type[ATTR_GROUP]}",
+            "sw_version": self._ctrl.data["resource"]["version"],
+            "configuration_url": f"http://{self._ctrl.config_entry.data[CONF_HOST]}",
         }
         if ATTR_GROUP in self._type:
             info["identifiers"] = {
@@ -275,7 +300,7 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
                     "serial-number",
                     self._ctrl.data["routerboard"]["serial-number"],
                     "sensor",
-                    self._type[ATTR_GROUP],
+                    f"{self._inst} {self._type[ATTR_GROUP]}",
                 )
             }
 
@@ -332,7 +357,7 @@ class MikrotikControllerPPPSecretBinarySensor(MikrotikControllerBinarySensor):
     @property
     def device_class(self) -> Optional[str]:
         """Return the device class."""
-        return DEVICE_CLASS_CONNECTIVITY
+        return BinarySensorDeviceClass.CONNECTIVITY
 
     @property
     def available(self) -> bool:
@@ -356,7 +381,7 @@ class MikrotikControllerPPPSecretBinarySensor(MikrotikControllerBinarySensor):
             return "mdi:account-off-outline"
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
         for variable in DEVICE_ATTRIBUTES_PPP_SECRET:
@@ -426,7 +451,7 @@ class MikrotikControllerPortBinarySensor(MikrotikControllerBinarySensor):
     @property
     def device_class(self) -> Optional[str]:
         """Return the device class."""
-        return DEVICE_CLASS_CONNECTIVITY
+        return BinarySensorDeviceClass.CONNECTIVITY
 
     @property
     def available(self) -> bool:
@@ -450,7 +475,7 @@ class MikrotikControllerPortBinarySensor(MikrotikControllerBinarySensor):
         return icon
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
         for variable in DEVICE_ATTRIBUTES_IFACE:

@@ -1,11 +1,12 @@
 """Mikrotik Controller for Mikrotik Router."""
 
-import re
 import asyncio
-import logging
 import ipaddress
+import logging
+import re
+import pytz
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from ipaddress import ip_address, IPv4Network
 from mac_vendor_lookup import AsyncMacLookup
 
@@ -61,6 +62,8 @@ from .mikrotikapi import MikrotikAPI
 
 _LOGGER = logging.getLogger(__name__)
 
+DEFAULT_TIME_ZONE = None
+
 
 def is_valid_ip(address):
     try:
@@ -68,6 +71,21 @@ def is_valid_ip(address):
         return True
     except ValueError:
         return False
+
+
+def utc_from_timestamp(timestamp: float) -> datetime:
+    """Return a UTC time from a timestamp."""
+    return pytz.utc.localize(datetime.utcfromtimestamp(timestamp))
+
+
+def as_local(dattim: datetime) -> datetime:
+    """Convert a UTC datetime object to local time zone."""
+    if dattim.tzinfo == DEFAULT_TIME_ZONE:
+        return dattim
+    if dattim.tzinfo is None:
+        dattim = pytz.utc.localize(dattim)
+
+    return dattim.astimezone(DEFAULT_TIME_ZONE)
 
 
 # ---------------------------
@@ -1215,17 +1233,38 @@ class MikrotikControllerData:
         )
 
         tmp_uptime = 0
-        tmp = re.split(r"(\d+)[h]", self.data["resource"]["uptime_str"])
+        tmp = re.split(r"(\d+)[s]", self.data["resource"]["uptime_str"])
         if len(tmp) > 1:
             tmp_uptime += int(tmp[1])
+        tmp = re.split(r"(\d+)[m]", self.data["resource"]["uptime_str"])
+        if len(tmp) > 1:
+            tmp_uptime += int(tmp[1]) * 60
+        tmp = re.split(r"(\d+)[h]", self.data["resource"]["uptime_str"])
+        if len(tmp) > 1:
+            tmp_uptime += int(tmp[1]) * 3600
         tmp = re.split(r"(\d+)[d]", self.data["resource"]["uptime_str"])
         if len(tmp) > 1:
-            tmp_uptime += int(tmp[1]) * 24
+            tmp_uptime += int(tmp[1]) * 86400
         tmp = re.split(r"(\d+)[w]", self.data["resource"]["uptime_str"])
         if len(tmp) > 1:
-            tmp_uptime += int(tmp[1]) * 24 * 7
+            tmp_uptime += int(tmp[1]) * 604800
 
-        self.data["resource"]["uptime"] = tmp_uptime
+        now = datetime.now().replace(microsecond=0)
+        uptime_tm = datetime.timestamp(now - timedelta(seconds=tmp_uptime))
+        update_uptime = False
+        if not self.data["resource"]["uptime"]:
+            update_uptime = True
+        else:
+            uptime_old = datetime.timestamp(
+                datetime.fromisoformat(self.data["resource"]["uptime"])
+            )
+            if uptime_tm > uptime_old + 10:
+                update_uptime = True
+
+        if update_uptime:
+            self.data["resource"]["uptime"] = str(
+                as_local(utc_from_timestamp(uptime_tm)).isoformat()
+            )
 
         if self.data["resource"]["total-memory"] > 0:
             self.data["resource"]["memory-usage"] = round(
@@ -1725,13 +1764,14 @@ class MikrotikControllerData:
                 if vals["address"] != "unknown":
                     for dns_uid, dns_vals in self.data["dns"].items():
                         if dns_vals["address"] == vals["address"]:
-                            if dns_vals["comment"] != "":
+                            if dns_vals["comment"].split("#", 1)[0] != "":
                                 self.data["host"][uid]["host-name"] = dns_vals[
                                     "comment"
                                 ].split("#", 1)[0]
                             elif (
                                 uid in self.data["dhcp"]
-                                and self.data["dhcp"][uid]["comment"] != ""
+                                and self.data["dhcp"][uid]["comment"].split("#", 1)[0]
+                                != ""
                             ):
                                 # Override name if DHCP comment exists
                                 self.data["host"][uid]["host-name"] = self.data["dhcp"][
@@ -1747,7 +1787,7 @@ class MikrotikControllerData:
                 if (
                     self.data["host"][uid]["host-name"] == "unknown"
                     and uid in self.data["dhcp"]
-                    and self.data["dhcp"][uid]["comment"] != ""
+                    and self.data["dhcp"][uid]["comment"].split("#", 1)[0] != ""
                 ):
                     self.data["host"][uid]["host-name"] = self.data["dhcp"][uid][
                         "comment"
@@ -1766,13 +1806,16 @@ class MikrotikControllerData:
                     self.data["host"][uid]["host-name"] = uid
 
             # Resolve manufacturer
-            if vals["manufacturer"] == "detect" and vals["address"] != "unknown":
+            if vals["manufacturer"] == "detect" and vals["mac-address"] != "unknown":
                 try:
                     self.data["host"][uid][
                         "manufacturer"
                     ] = await self.async_mac_lookup.lookup(vals["mac-address"])
                 except:
                     self.data["host"][uid]["manufacturer"] = ""
+
+            if vals["manufacturer"] == "detect":
+                self.data["host"][uid]["manufacturer"] = ""
 
     # ---------------------------
     #   process_accounting

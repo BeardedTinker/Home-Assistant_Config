@@ -2,6 +2,7 @@
     "domain": "mikrotik_router",
     "name": "Mikrotik Router",
     "config_flow": true,
+    "iot_class": "local_polling",
     "documentation": "https://github.com/tomaae/homeassistant-mikrotik_router",
     "issue_tracker": "https://github.com/tomaae/homeassistant-mikrotik_router/issues",
     "dependencies": [],

@@ -5,6 +5,12 @@ import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.exceptions import ConfigEntryNotReady
+
+from homeassistant.const import (
+    CONF_NAME,
+    CONF_HOST,
+)
+
 from .const import (
     DOMAIN,
     DATA_CLIENT,
@@ -71,8 +77,16 @@ async def async_setup_entry(hass, config_entry):
         connections={(DOMAIN, controller.data["routerboard"]["serial-number"])},
         manufacturer=controller.data["resource"]["platform"],
         model=controller.data["routerboard"]["model"],
-        name=controller.data["routerboard"]["model"],
+        name=f"{config_entry.data[CONF_NAME]} {controller.data['routerboard']['model']}",
         sw_version=controller.data["resource"]["version"],
+        configuration_url=f"http://{config_entry.data[CONF_HOST]}",
+        identifiers={
+            DOMAIN,
+            "serial-number",
+            controller.data["routerboard"]["serial-number"],
+            "sensor",
+            f"{config_entry.data[CONF_NAME]} {controller.data['routerboard']['model']}",
+        },
     )
 
     return True

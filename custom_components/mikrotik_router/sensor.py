@@ -5,10 +5,14 @@ from typing import Any, Dict, Optional
 
 from homeassistant.const import (
     CONF_NAME,
+    CONF_HOST,
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
     TEMP_CELSIUS,
 )
+
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.components.sensor import SensorDeviceClass
 
 from .const import (
     CONF_SENSOR_PORT_TRAFFIC,
@@ -48,10 +52,11 @@ ATTR_UNIT_ATTR = "unit_attr"
 ATTR_GROUP = "group"
 ATTR_PATH = "data_path"
 ATTR_ATTR = "data_attr"
+ATTR_CTGR = "entity_category"
 
 SENSOR_TYPES = {
     "system_temperature": {
-        ATTR_DEVICE_CLASS: None,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
         ATTR_ICON: "mdi:thermometer",
         ATTR_LABEL: "Temperature",
         ATTR_UNIT: TEMP_CELSIUS,
@@ -60,7 +65,7 @@ SENSOR_TYPES = {
         ATTR_ATTR: "temperature",
     },
     "system_cpu-temperature": {
-        ATTR_DEVICE_CLASS: None,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
         ATTR_ICON: "mdi:thermometer",
         ATTR_LABEL: "CPU temperature",
         ATTR_UNIT: TEMP_CELSIUS,
@@ -69,7 +74,7 @@ SENSOR_TYPES = {
         ATTR_ATTR: "cpu-temperature",
     },
     "system_board-temperature1": {
-        ATTR_DEVICE_CLASS: None,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
         ATTR_ICON: "mdi:thermometer",
         ATTR_LABEL: "Board temperature",
         ATTR_UNIT: TEMP_CELSIUS,
@@ -78,7 +83,7 @@ SENSOR_TYPES = {
         ATTR_ATTR: "board-temperature1",
     },
     "system_power-consumption": {
-        ATTR_DEVICE_CLASS: None,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.POWER,
         ATTR_ICON: "mdi:transmission-tower",
         ATTR_LABEL: "Power consumption",
         ATTR_UNIT: "W",
@@ -105,13 +110,14 @@ SENSOR_TYPES = {
         ATTR_ATTR: "fan2-speed",
     },
     "system_uptime": {
-        ATTR_DEVICE_CLASS: None,
-        ATTR_ICON: "mdi:clock-outline",
+        ATTR_DEVICE_CLASS: SensorDeviceClass.TIMESTAMP,
+        ATTR_ICON: None,
         ATTR_LABEL: "Uptime",
-        ATTR_UNIT: "h",
+        ATTR_UNIT: None,
         ATTR_GROUP: "System",
         ATTR_PATH: "resource",
         ATTR_ATTR: "uptime",
+        ATTR_CTGR: EntityCategory.DIAGNOSTIC,
     },
     "system_cpu-load": {
         ATTR_DEVICE_CLASS: None,
@@ -363,6 +369,11 @@ class MikrotikControllerSensor(SensorEntity):
         self._device_class = None
         self._state = None
 
+        if ATTR_CTGR in self._type:
+            self._entity_category = self._type[ATTR_CTGR]
+        else:
+            self._entity_category = None
+
         if ATTR_ICON in self._type:
             self._icon = self._type[ATTR_ICON]
         else:
@@ -386,7 +397,7 @@ class MikrotikControllerSensor(SensorEntity):
         return val
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         return self._attrs
 
@@ -396,15 +407,23 @@ class MikrotikControllerSensor(SensorEntity):
         if self._icon:
             return self._icon
 
-        return ""
+        return None
+
+    @property
+    def entity_category(self) -> str:
+        """Return entity category"""
+        if self._entity_category:
+            return self._entity_category
+
+        return None
 
     @property
     def device_class(self) -> Optional[str]:
         """Return the device class."""
-        if ATTR_UNIT_ATTR in self._type:
+        if ATTR_DEVICE_CLASS in self._type:
             return self._type[ATTR_DEVICE_CLASS]
-        else:
-            return None
+
+        return None
 
     @property
     def unique_id(self) -> str:
@@ -428,10 +447,16 @@ class MikrotikControllerSensor(SensorEntity):
     @property
     def device_info(self) -> Dict[str, Any]:
         """Return a description for device registry."""
+        if self._type[ATTR_GROUP] == "System":
+            self._type[ATTR_GROUP] = self._ctrl.data["resource"]["board-name"]
+
         info = {
+            "connections": {(DOMAIN, self._ctrl.data["routerboard"]["serial-number"])},
             "manufacturer": self._ctrl.data["resource"]["platform"],
             "model": self._ctrl.data["resource"]["board-name"],
             "name": f"{self._inst} {self._type[ATTR_GROUP]}",
+            "sw_version": self._ctrl.data["resource"]["version"],
+            "configuration_url": f"http://{self._ctrl.config_entry.data[CONF_HOST]}",
         }
         if ATTR_GROUP in self._type:
             info["identifiers"] = {
@@ -440,7 +465,7 @@ class MikrotikControllerSensor(SensorEntity):
                     "serial-number",
                     self._ctrl.data["routerboard"]["serial-number"],
                     "sensor",
-                    self._type[ATTR_GROUP],
+                    f"{self._inst} {self._type[ATTR_GROUP]}",
                 )
             }
 
@@ -475,6 +500,11 @@ class MikrotikControllerTrafficSensor(MikrotikControllerSensor):
     def unique_id(self) -> str:
         """Return a unique id for this entity."""
         return f"{self._inst.lower()}-{self._sensor.lower()}-{self._data['default-name'].lower()}"
+
+    @property
+    def state_class(self) -> str:
+        """Return the state_class"""
+        return f"measurement"
 
     @property
     def device_info(self) -> Dict[str, Any]:
@@ -538,7 +568,7 @@ class MikrotikAccountingSensor(MikrotikControllerSensor):
         return info
 
     @property
-    def device_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
         for variable in DEVICE_ATTRIBUTES_ACCOUNTING:
