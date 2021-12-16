@@ -174,7 +174,7 @@ MIN_4PRO_FIRMWARE_DATE = 20200408
 # Firmware 1.1.0 release date
 MIN_MOTION_FIRMWARE_DATE = 20210226
 
-MIN_VALVE_FIRMWARE_DATE = 20211210
+MIN_VALVE_FIRMWARE_DATE = 20211215
 
 # Firmware 1.11.0 release date
 MIN_FIRMWARE_DATE = 20210720
@@ -415,7 +415,7 @@ TOPIC_TEMPERATURE_STATUS = "temperature_status"
 TOPIC_UNMUTE = "sensor/unmute"
 TOPIC_VOLTAGE = "voltage"
 
-TPL_ACTION_TEMPLATE = "{{%if value_json.target_t.value<={min_temp}%}}off{{%elif value_json.target_t.value<value_json.tmp.value%}}idle{{%else%}}heating{{%endif%}}"
+TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats[0].target_t.value<={min_temp}%}}off{{%elif value_json.thermostats[0].pos==0%}}idle{{%else%}}heating{{%endif%}}"
 TPL_ADC = "{{value|float|round(2)}}"
 TPL_BATTERY = "{{value|float|round}}"
 TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
@@ -423,7 +423,7 @@ TPL_CHARGER = "{%if value_json.charger==true%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD = "{%if value_json.cloud.connected==true%}ON{%else%}OFF{%endif%}"
 TPL_CONCENTRATION = "{%if 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CURRENT = "{{value|float|round(2)}}"
-TPL_CURRENT_TEMPERATURE = "{{ value_json.tmp.value }}"
+TPL_CURRENT_TEMPERATURE = "{{value_json.thermostats[0].tmp.value}}"
 TPL_DOUBLE_SHORTPUSH = "{%if value_json.event==^SS^%}ON{%else%}OFF{%endif%}"
 TPL_ENERGY_WH = "{{(value|float/1000)|round(2)}}"
 TPL_ENERGY_WMIN = "{{(value|float/60/1000)|round(2)}}"
@@ -450,11 +450,11 @@ TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
 TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
 TPL_RSSI = "{{value_json.wifi_sta.rssi}}"
-TPL_SET_TARGET_TEMPERATURE = "target_t={{value|int}}"
+TPL_SET_TARGET_TEMPERATURE = "{{value|int}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
 TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
-TPL_TARGET_TEMPERATURE = "{{ value_json.target_t.value }}"
+TPL_TARGET_TEMPERATURE = "{{ value_json.thermostats[0].target_t.value }}"
 TPL_TEMPERATURE = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
@@ -3227,7 +3227,7 @@ for button, button_options in buttons.items():
         payload = ""
     mqtt_publish(config_topic, payload, retain)
 
-# clmate entities
+# climate entities
 if climate_entity_option:
     device_config = get_device_config(dev_id)
     if ignore_device_model:
@@ -3235,8 +3235,8 @@ if climate_entity_option:
     else:
         device_name = f"{model} {dev_id.split('-')[-1]}"
     default_topic = f"shellies/{dev_id}/"
-    status_topic = "~status"
-    command_topic = "~command"
+    info_topic = "~info"
+    temperature_command_topic = "~thermostat/0/command/target_t"
     availability_topic = "~online"
     unique_id = f"{dev_id}".lower()
     config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
@@ -3245,17 +3245,17 @@ if climate_entity_option:
     expire_after = device_config.get(CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_SHELLY_VALVE)
     payload = {
         KEY_NAME: device_name,
-        KEY_ACTION_TOPIC: status_topic,
+        KEY_ACTION_TOPIC: info_topic,
         KEY_ACTION_TEMPLATE: TPL_ACTION_TEMPLATE.format(
             min_temp=climate_entity_option[KEY_MIN_TEMP]
         ),
-        KEY_CURRENT_TEMPERATURE_TOPIC: status_topic,
+        KEY_CURRENT_TEMPERATURE_TOPIC: info_topic,
         KEY_CURRENT_TEMPERATURE_TEMPLATE: TPL_CURRENT_TEMPERATURE,
-        KEY_TEMPERATURE_STATE_TOPIC: status_topic,
+        KEY_TEMPERATURE_STATE_TOPIC: info_topic,
         KEY_TEMPERATURE_STATE_TEMPLATE: TPL_TARGET_TEMPERATURE,
-        KEY_TEMPERATURE_COMMAND_TOPIC: command_topic,
+        KEY_TEMPERATURE_COMMAND_TOPIC: temperature_command_topic,
         KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
-        KEY_MODE_STATE_TOPIC: status_topic,
+        KEY_MODE_STATE_TOPIC: info_topic,
         KEY_MODE_STATE_TEMPLATE: "heat",
         KEY_EXPIRE_AFTER: expire_after,
         KEY_UNIQUE_ID: unique_id,
