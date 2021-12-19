@@ -1,5 +1,6 @@
 #####
 # Get latest video from BeardedTinker channel
+# HACS integration
 #####
 
 platform: youtube
