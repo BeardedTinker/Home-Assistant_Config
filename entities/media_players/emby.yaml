@@ -1,7 +1,10 @@
 ###
 # Emby integration
+# https://www.home-assistant.io/integrations/emby/
 ###
 
 platform: emby
 host: !secret emby_ip
 api_key: !secret emby_key
+port: 8096
+ssl: false
