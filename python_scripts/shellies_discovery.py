@@ -316,6 +316,7 @@ PL_UPDATE_FIRMWARE = "update_fw"
 
 SENSOR_ADC = "adc"
 SENSOR_BATTERY = "battery"
+SENSOR_CALIBRATED = "calibrated"
 SENSOR_CHARGER = "charger"
 SENSOR_CLOUD = "cloud"
 SENSOR_CONCENTRATION = "concentration"
@@ -415,15 +416,17 @@ TOPIC_TEMPERATURE_STATUS = "temperature_status"
 TOPIC_UNMUTE = "sensor/unmute"
 TOPIC_VOLTAGE = "voltage"
 
-TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats[0].target_t.value<={min_temp}%}}off{{%elif value_json.thermostats[0].pos==0%}}idle{{%else%}}heating{{%endif%}}"
+TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
 TPL_ADC = "{{value|float|round(2)}}"
 TPL_BATTERY = "{{value|float|round}}"
 TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
+TPL_BATTERY_FROM_INFO = "{{value_json.bat.value}}"
+TPL_CALIBRATED = "{%if value_json.calibrated==true%}ON{%else%}OFF{%endif%}"
 TPL_CHARGER = "{%if value_json.charger==true%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD = "{%if value_json.cloud.connected==true%}ON{%else%}OFF{%endif%}"
 TPL_CONCENTRATION = "{%if 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CURRENT = "{{value|float|round(2)}}"
-TPL_CURRENT_TEMPERATURE = "{{value_json.thermostats[0].tmp.value}}"
+TPL_CURRENT_TEMPERATURE = "{{value_json.thermostats.0.tmp.value}}"
 TPL_DOUBLE_SHORTPUSH = "{%if value_json.event==^SS^%}ON{%else%}OFF{%endif%}"
 TPL_ENERGY_WH = "{{(value|float/1000)|round(2)}}"
 TPL_ENERGY_WMIN = "{{(value|float/60/1000)|round(2)}}"
@@ -454,7 +457,7 @@ TPL_SET_TARGET_TEMPERATURE = "{{value|int}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
 TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
-TPL_TARGET_TEMPERATURE = "{{ value_json.thermostats[0].target_t.value }}"
+TPL_TARGET_TEMPERATURE = "{{value_json.thermostats.0.target_t.value}}"
 TPL_TEMPERATURE = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
@@ -3124,14 +3127,14 @@ if model_id == MODEL_SHELLYVALVE_ID:
     ]
     sensors_units = [UNIT_PERCENT, UNIT_DBM, None, None, None]
     sensors_tpls = [
-        TPL_BATTERY_FROM_JSON,
+        TPL_BATTERY_FROM_INFO,
         TPL_RSSI,
         TPL_IP_FROM_INFO,
         TPL_SSID,
         TPL_UPTIME,
     ]
     sensors_topics = [
-        TOPIC_STATUS,
+        TOPIC_INFO,
         TOPIC_INFO,
         TOPIC_INFO,
         TOPIC_INFO,
@@ -3141,25 +3144,30 @@ if model_id == MODEL_SHELLYVALVE_ID:
         SENSOR_FIRMWARE_UPDATE,
         SENSOR_CHARGER,
         SENSOR_CLOUD,
+        SENSOR_CALIBRATED,
     ]
     bin_sensors_entity_categories = [
         ENTITY_CATEGORY_DIAGNOSTIC,
         ENTITY_CATEGORY_DIAGNOSTIC,
         ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
     ]
-    bin_sensors_enabled = [True, True, False]
+    bin_sensors_enabled = [True, True, False, False]
     bin_sensors_device_classes = [
         DEVICE_CLASS_UPDATE,
         DEVICE_CLASS_BATTERY_CHARGING,
         DEVICE_CLASS_CONNECTIVITY,
+        None,
     ]
-    bin_sensors_pl = [None, None, None]
+    bin_sensors_pl = [None, None, None, None]
     bin_sensors_tpls = [
         TPL_NEW_FIRMWARE_FROM_INFO,
         TPL_CHARGER,
         TPL_CLOUD,
+        TPL_CALIBRATED,
     ]
     bin_sensors_topics = [
+        TOPIC_INFO,
         TOPIC_INFO,
         TOPIC_INFO,
         TOPIC_INFO,
