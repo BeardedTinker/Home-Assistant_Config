@@ -306,7 +306,7 @@ MODEL_SHELLYVINTAGE_PREFIX = "shellyvintage"
 MODEL_SHELLYUNI_ID = "SHUNI-1"  # Shelly UNI
 MODEL_SHELLYUNI_PREFIX = "shellyuni"
 
-OFF_DELAY = 2
+OFF_DELAY = 1
 
 PL_MUTE = "mute"
 PL_RESTART = "reboot"
@@ -4095,8 +4095,7 @@ for light_id in range(rgbw_lights):
             '"fx_tpl":"{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Flash{%else%}Off{%endif%}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
@@ -4128,8 +4127,7 @@ for light_id in range(rgbw_lights):
             '"fx_tpl":"{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Breath{%elif value_json.effect==4%}Flash{%elif value_json.effect==5%}On/Off Gradual{%elif value_json.effect==6%}Red/Green Change{%else%}Off{%endif%}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
@@ -4305,8 +4303,7 @@ for light_id in range(white_lights):
             '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
@@ -4332,8 +4329,7 @@ for light_id in range(white_lights):
             '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
@@ -4362,8 +4358,7 @@ for light_id in range(white_lights):
             '"min_mireds":153,'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
@@ -4389,8 +4384,7 @@ for light_id in range(white_lights):
             '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
-            '"dev": {"ids":["' + mac + '"],'
-            '"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
+            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
             '"name":"' + device_name + '",'
             '"mdl":"' + model + '",'
             '"sw":"' + fw_ver + '",'
