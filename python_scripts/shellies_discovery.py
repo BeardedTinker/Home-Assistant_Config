@@ -1,6 +1,5 @@
-"""
-This script adds MQTT discovery support for Shellies devices.
-"""
+"""This script adds MQTT discovery support for Shellies devices."""
+
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
 ATTR_POWER_AC = "ac"
@@ -13,6 +12,8 @@ BUTTON_RESTART = "restart"
 BUTTON_SELF_TEST = "self_test"
 BUTTON_UNMUTE = "unmute"
 BUTTON_UPDATE_FIRMWARE = "update_firmware"
+BUTTON_VALVE_CLOSE = "valve_close"
+BUTTON_VALVE_OPEN = "valve_open"
 
 COMP_FAN = "fan"
 COMP_LIGHT = "light"
@@ -314,7 +315,9 @@ NUMBER_VALVE_POSITION = "valve_position"
 
 OFF_DELAY = 1
 
+PL_CLOSE = "close"
 PL_MUTE = "mute"
+PL_OPEN = "open"
 PL_RESTART = "reboot"
 PL_SELF_TEST = "self_test"
 PL_UNMUTE = "unmute"
@@ -391,6 +394,7 @@ SENSOR_TRIPLE_SHORTPUSH_0 = "triple shortpush 0"
 SENSOR_TRIPLE_SHORTPUSH_1 = "triple shortpush 1"
 SENSOR_TRIPLE_SHORTPUSH_2 = "triple shortpush 2"
 SENSOR_UPTIME = "uptime"
+SENSOR_VALVE = "valve"
 SENSOR_VIBRATION = "vibration"
 SENSOR_VOLTAGE = "voltage"
 
@@ -436,6 +440,8 @@ TOPIC_STATUS = "status"
 TOPIC_TEMPERATURE = "temperature"
 TOPIC_TEMPERATURE_STATUS = "temperature_status"
 TOPIC_TOTAL_WORK_TIME = "totalworktime"
+TOPIC_VALVE = "valve/0/state"
+TOPIC_VALVE_COMMAND = "valve/0/command"
 TOPIC_VOLTAGE = "voltage"
 
 TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
@@ -455,7 +461,7 @@ TPL_ENERGY_WH = "{{(value|float/1000)|round(2)}}"
 TPL_ENERGY_WMIN = "{{(value|float/60/1000)|round(2)}}"
 TPL_GAS = "{%if value in [^mild^,^heavy^]%}ON{%else%}OFF{%endif%}"
 TPL_GAS_TO_JSON = "{{{^status^:value}|tojson}}"
-TPL_HUMIDITY = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
+TPL_HUMIDITY = "{%if value!=999 and value!=0%}{{value|round(1)}}{%endif%}"
 TPL_HUMIDITY_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_ILLUMINATION = "{{value_json.lux}}"
 TPL_ILLUMINATION_TO_JSON = "{{{^illumination^:value}|tojson}}"
@@ -468,6 +474,7 @@ TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
+TPL_VALVE = "{{value.replace(^_^,^ ^)}}"
 TPL_VALVE_POSITION = "{{value_json.thermostats.0.pos}}"
 TPL_NEW_FIRMWARE_FROM_INFO = (
     "{%if value_json[^update^].has_update==true%}ON{%else%}OFF{%endif%}"
@@ -479,12 +486,13 @@ TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
 TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
 TPL_RSSI = "{{value_json.wifi_sta.rssi}}"
+TPL_SELF_TEST = "{{value.replace(^_^,^ ^)}}"
 TPL_SET_TARGET_TEMPERATURE = "{{value|int}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
 TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
 TPL_TARGET_TEMPERATURE = "{{value_json.thermostats.0.target_t.value}}"
-TPL_TEMPERATURE = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
+TPL_TEMPERATURE = "{%if value!=999 and value!=-100%}{{value|round(1)}}{%endif%}"
 TPL_TEMPERATURE_EXT = "{%if value!=999%}{{value|float|round(1)}}{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
 TPL_TILT = "{{value|float}}"
@@ -542,7 +550,7 @@ OPTIONS_BUTTON_SELF_TEST = {
     KEY_PAYLOAD_PRESS: PL_SELF_TEST,
 }
 OPTIONS_BUTTON_MUTE = {
-    ATTR_ICON: "mdi:volume-variant-off",
+    ATTR_ICON: "mdi:volume-mute",
     KEY_COMMAND_TOPIC: TOPIC_MUTE,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
@@ -561,6 +569,18 @@ OPTIONS_BUTTON_RESTART = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_DEVICE_CLASS: DEVICE_CLASS_RESTART,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+}
+OPTIONS_BUTTON_VALVE_CLOSE = {
+    KEY_COMMAND_TOPIC: TOPIC_VALVE_COMMAND,
+    KEY_PAYLOAD_PRESS: PL_CLOSE,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ICON: "mdi:progress-close",
+}
+OPTIONS_BUTTON_VALVE_OPEN = {
+    KEY_COMMAND_TOPIC: TOPIC_VALVE_COMMAND,
+    KEY_PAYLOAD_PRESS: PL_OPEN,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ICON: "mdi:progress-check",
 }
 OPTIONS_NUMBER_VALVE_POSITION = {
     KEY_COMMAND_TOPIC: TOPIC_COMMAND_VALVE_POSITION,
@@ -612,6 +632,13 @@ OPTIONS_SENSOR_UPTIME = {
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_VALUE_TEMPLATE: TPL_UPTIME,
+}
+OPTIONS_SENSOR_VALVE = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
+    KEY_ICON: "mdi:pipe-valve",
+    KEY_STATE_TOPIC: TOPIC_VALVE,
+    KEY_VALUE_TEMPLATE: TPL_VALVE,
 }
 OPTIONS_SENSOR_IP = {
     KEY_ENABLED_BY_DEFAULT: False,
@@ -737,14 +764,15 @@ OPTIONS_SENSOR_LUX = {
 OPTIONS_SENSOR_OPERATION = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
-    KEY_ICON: "mdi:format-list-bulleted",
+    KEY_ICON: "mdi:cog-transfer",
     KEY_STATE_TOPIC: TOPIC_SENSOR_OPERATION,
 }
 OPTIONS_SENSOR_SELF_TEST = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
-    KEY_ICON: "md:progress-wrench",
+    KEY_ICON: "md:wrench",
     KEY_STATE_TOPIC: TOPIC_SENSOR_SELF_TEST,
+    KEY_VALUE_TEMPLATE: TPL_SELF_TEST,
 }
 OPTIONS_SENSOR_CONCENTRATION = {
     KEY_ENABLED_BY_DEFAULT: True,
@@ -845,7 +873,7 @@ def mqtt_publish(topic, payload, retain):
         "retain": retain,
         "qos": 0,
     }
-    logger.debug(service_data)
+    logger.debug(service_data)  # noqa: F821
     logger.debug("Sending to MQTT broker: %s %s", topic, payload)  # noqa: F821
     hass.services.call("mqtt", "publish", service_data, False)  # noqa: F821
 
@@ -859,9 +887,14 @@ no_battery_sensor = False
 
 fw_ver = data.get(CONF_FW_VER)  # noqa: F821
 dev_id = data.get(CONF_ID)  # noqa: F821
-model_id = data.get(CONF_MODEL_ID)
-mode = data.get(CONF_MODE)
-host = data.get(CONF_HOST)
+model_id = data.get(CONF_MODEL_ID)  # noqa: F821
+mode = data.get(CONF_MODE)  # noqa: F821
+host = data.get(CONF_HOST)  # noqa: F821
+
+if not host:
+    raise ValueError(
+        "host value None is not valid, update shallies_discovery automation"
+    )
 
 use_fahrenheit = False
 
@@ -870,7 +903,7 @@ if mode == "roller":
     roller_mode = True
 
 ignored = [
-    element.lower() for element in data.get(CONF_IGNORED_DEVICES, [])
+    element.lower() for element in data.get(CONF_IGNORED_DEVICES, [])  # noqa: F821
 ]  # noqa: F821
 mac = data.get(CONF_MAC)  # noqa: F821
 
@@ -885,13 +918,13 @@ if not mac:
 if not fw_ver:
     raise ValueError("fw_ver value None is not valid, check script configuration")
 
-mac = str(mac).lower()  # noqa: F821
+mac = str(mac).lower()
 
 try:
     cur_ver_date = parse_version(fw_ver)
 except (IndexError, ValueError):
     raise ValueError(
-        f"Firmware version {fw_ver} is not supported, please update your device {dev_id}"
+        f"Firmware version {fw_ver} is not supported, update your device {dev_id}"
     )
 
 dev_id_prefix = dev_id.rsplit("-", 1)[0].lower()
@@ -900,21 +933,21 @@ if (
     dev_id_prefix == MODEL_SHELLY4PRO_PREFIX or MODEL_SHELLY4PRO_ID == model_id
 ) and cur_ver_date < MIN_4PRO_FIRMWARE_DATE:
     raise ValueError(
-        f"Firmware dated {MIN_4PRO_FIRMWARE_DATE} is required, please update your device {dev_id}"
+        f"Firmware dated {MIN_4PRO_FIRMWARE_DATE} is required, update your device {dev_id}"
     )
 
 if (
     dev_id_prefix == MODEL_SHELLYMOTION_PREFIX or MODEL_SHELLYMOTION_ID == model_id
 ) and cur_ver_date < MIN_MOTION_FIRMWARE_DATE:
     raise ValueError(
-        f"Firmware dated {MIN_MOTION_FIRMWARE_DATE} is required, please update your device {dev_id}"
+        f"Firmware dated {MIN_MOTION_FIRMWARE_DATE} is required, update your device {dev_id}"
     )
 
 if (
     dev_id_prefix == MODEL_SHELLYVALVE_PREFIX or MODEL_SHELLYVALVE_ID == model_id
 ) and cur_ver_date < MIN_VALVE_FIRMWARE_DATE:
     raise ValueError(
-        f"Firmware dated {MIN_VALVE_FIRMWARE_DATE} is required, please update your device {dev_id}"
+        f"Firmware dated {MIN_VALVE_FIRMWARE_DATE} is required, update your device {dev_id}"
     )
 
 if (
@@ -928,12 +961,12 @@ if (
     not in (MODEL_SHELLY4PRO_ID, MODEL_SHELLYMOTION_ID, MODEL_SHELLYVALVE_ID)
 ) and cur_ver_date < MIN_FIRMWARE_DATE:
     raise ValueError(
-        f"Firmware dated {MIN_FIRMWARE_DATE} is required, please update your device {dev_id}"
+        f"Firmware dated {MIN_FIRMWARE_DATE} is required, update your device {dev_id}"
     )
 
-logger.debug(
+logger.debug(  # noqa: F821
     "id: %s, mac: %s, fw_ver: %s, model: %s", dev_id, mac, fw_ver, model_id
-)  # noqa: F821
+)
 
 try:
     if int(data.get(CONF_QOS, 0)) in (0, 1, 2):  # noqa: F821
@@ -1563,6 +1596,7 @@ if model_id == MODEL_SHELLYGAS_ID or dev_id_prefix == MODEL_SHELLYGAS_PREFIX:
         SENSOR_SELF_TEST: OPTIONS_SENSOR_SELF_TEST,
         SENSOR_SSID: OPTIONS_SENSOR_SSID,
         SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
+        SENSOR_VALVE: OPTIONS_SENSOR_VALVE,
     }
     bin_sensors = [SENSOR_FIRMWARE_UPDATE, SENSOR_GAS]
     bin_sensors_entity_categories = [ENTITY_CATEGORY_DIAGNOSTIC, None]
@@ -1571,10 +1605,12 @@ if model_id == MODEL_SHELLYGAS_ID or dev_id_prefix == MODEL_SHELLYGAS_PREFIX:
     bin_sensors_tpls = [TPL_NEW_FIRMWARE_FROM_INFO, TPL_GAS]
     bin_sensors_topics = [TOPIC_INFO, None]
     buttons = {
-        BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE,
-        BUTTON_SELF_TEST: OPTIONS_BUTTON_SELF_TEST,
         BUTTON_MUTE: OPTIONS_BUTTON_MUTE,
+        BUTTON_SELF_TEST: OPTIONS_BUTTON_SELF_TEST,
         BUTTON_UNMUTE: OPTIONS_BUTTON_UNMUTE,
+        BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE,
+        BUTTON_VALVE_CLOSE: OPTIONS_BUTTON_VALVE_CLOSE,
+        BUTTON_VALVE_OPEN: OPTIONS_BUTTON_VALVE_OPEN,
     }
 
 if (
@@ -2744,9 +2780,9 @@ for roller_id in range(rollers):
             device_class = device_config[f"roller-{roller_id}-class"]
         else:
             wrong_class = device_config[f"roller-{roller_id}-class"]
-            logger.error(
+            logger.error(  # noqa: F821
                 f"{wrong_class} is the wrong roller class, the default value None was used"
-            )  # noqa: F821
+            )
     default_topic = f"shellies/{dev_id}/"
     state_topic = f"~roller/{roller_id}"
     command_topic = f"{state_topic}/command"
@@ -3023,6 +3059,8 @@ for sensor, sensor_options in sensors.items():
         sensor_name = f"{device_name} {sensor.upper()}"
     elif sensor == SENSOR_UPTIME:
         sensor_name = f"{device_name} Last Restart"
+    elif sensor == SENSOR_RSSI:
+        sensor_name = f"{device_name} WiFi Signal"
     elif sensor == SENSOR_TEMPERATURE_F:
         sensor_name = f"{device_name} Temperature"
     else:
