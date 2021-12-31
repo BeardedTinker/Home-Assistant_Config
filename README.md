@@ -76,6 +76,7 @@ From other devices I use, here is a list:
   - Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
   - Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   - Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
+  - Amazon Echo 3rd Gen
   - Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
   - LG webOS TV
   - Xiaomi Mi TV stick
@@ -195,12 +196,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   159 |
-| Binary sensors       |   246 |
+| Binary sensors       |   250 |
 | Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     2 |
 | Device trackers      |    56 |
-| Entities             |  2253 |
+| Entities             |  2280 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    14 |
@@ -209,20 +210,20 @@ Up-to-date count of various things in Home Assistant
 | Input Select         |    12 |
 | Input Text           |    20 |
 | Lights               |    43 |
-| Lines of code (YAML) | 24244 |
+| Lines of code (YAML) | 24586 |
 | Locks                |     3 |
-| Media players        |    42 |
+| Media players        |    43 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    20 |
-| Sensors              |  1349 |
-| Switches             |    87 |
+| Sensors              |  1362 |
+| Switches             |    89 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 13.12.2021 10:00AM
+* Updated: 31.12.2021 7:00PM
 
 ### Missing files
 
