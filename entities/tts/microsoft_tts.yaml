@@ -1,0 +1,15 @@
+#####
+# Microsoft TTS
+# https://www.home-assistant.io/integrations/microsoft/
+#####
+
+platform: microsoft
+api_key: !secret ms_key
+language: hr-hr
+gender: Female
+type: GabrijelaNeural
+#rate: 20
+#volume: -50
+#pitch: high
+#contour: (0, 0) (100, 100)
+region: northeurope
