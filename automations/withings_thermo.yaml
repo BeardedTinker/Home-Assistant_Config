@@ -1,0 +1,53 @@
+#####
+# Withings Thermo - warning on high fever
+# https://youtu.be/Dq0j8a-M224 - video on integration
+#####
+
+alias: Withing Thermo fever
+id: c016eed5-c78a-4f30-9786-94c924063ca1
+
+trigger:
+  platform: numeric_state
+  entity_id: 
+    - sensor.withings_body_temperature_c_andrej
+    - sensor.withings_body_temperature_c_mirta
+    - sensor.withings_body_temperature_c_luka
+    - sensor.withings_body_temperature_c_zita
+  above: 37.4
+
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '🌡 *Someone has fever*'
+    value1: 'It looks like {{ trigger.to_state.name }} is higher and is currently {{ trigger.to_state.state }}°C'
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'true'
+    sticky: 'false'
+#    timeout: ''
+
+- service: media_player.volume_set
+  data:
+    entity_id: 
+      - media_player.display_me
+      - media_player.whatever_me
+      - media_player.mini_me
+    volume_level: 0.5
+
+- service: tts.google_translate_say
+  entity_id: 
+    - media_player.display_me
+    - media_player.whatever_me
+    - media_player.mini_me
+  data:  
+    message: 'It looks like {{ trigger.to_state.name }} is higher then normal. It is currently {{ trigger.to_state.state }}'
