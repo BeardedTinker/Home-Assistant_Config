@@ -97,9 +97,9 @@ From other devices I use, here is a list:
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
   - [Nuki Opener](https://nuki.io/en/opener/) for intercom
-  - [SwitchBot Humidifier](https://www.switch-bot.com/collections/accessories/products/switchbot-smart-humidifier)
-  - [SwitchBot Meter](https://www.switch-bot.com/collections/accessories/products/switchbot-meter)
-  - [SwitchBot Mini Hub](https://www.switch-bot.com/products/switchbot-hub-mini)
+  - [SwitchBot Humidifier](https://switchbot.vip/3FtfULt)
+  - [SwitchBot Meter](https://switchbot.vip/3HEb284)
+  - [SwitchBot Mini Hub](https://switchbot.vip/3oIgL49)
   - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper) -TBD
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
