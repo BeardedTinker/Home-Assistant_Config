@@ -100,6 +100,10 @@ KEY_ACTION_TEMPLATE = "act_tpl"
 KEY_ACTION_TOPIC = "act_t"
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY_TOPIC = "avty_t"
+KEY_BRIGHTNESS_TEMPLATE = "bri_tpl"
+KEY_COLOR_TEMP_TEMPLATE = "clr_temp_tpl"
+KEY_COMMAND_OFF_TEMPLATE = "cmd_off_tpl"
+KEY_COMMAND_ON_TEMPLATE = "cmd_on_tpl"
 KEY_COMMAND_TEMPLATE = "cmd_tpl"
 KEY_COMMAND_TOPIC = "cmd_t"
 KEY_CONFIGURATION_URL = "cu"
@@ -118,8 +122,10 @@ KEY_JSON_ATTRIBUTES_TOPIC = "json_attr_t"
 KEY_MAC = "mac"
 KEY_MANUFACTURER = "mf"
 KEY_MAX = "max"
+KEY_MAX_MIREDS = "max_mirs"
 KEY_MAX_TEMP = "max_temp"
 KEY_MIN = "min"
+KEY_MIN_MIREDS = "min_mirs"
 KEY_MIN_TEMP = "min_temp"
 KEY_MODE_STATE_TEMPLATE = "mode_stat_tpl"
 KEY_MODE_STATE_TOPIC = "mode_stat_t"
@@ -143,6 +149,7 @@ KEY_POSITION_TOPIC = "pos_t"
 KEY_PRECISION = "precision"
 KEY_QOS = "qos"
 KEY_RETAIN = "ret"
+KEY_SCHEMA = "schema"
 KEY_SET_POSITION_TEMPLATE = "set_pos_tpl"
 KEY_SET_POSITION_TOPIC = "set_pos_t"
 KEY_STATE_CLASS = "stat_cla"
@@ -403,46 +410,46 @@ STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 
 SWITCH_SCHEDULE = "schedule"
 
-TOPIC_ADC = "adc/0"
-TOPIC_ANNOUNCE = "announce"
-TOPIC_COLOR_0_STATUS = "color/0/status"
-TOPIC_COMMAND = "command"
-TOPIC_COMMAND_PROFILES = "thermostat/0/command/schedule_profile"
-TOPIC_COMMAND_SCHEDULE = "thermostat/0/command/schedule"
-TOPIC_COMMAND_VALVE_POSITION = "thermostat/0/command/valve_pos"
-TOPIC_EXT_SWITCH = "ext_switch/0"
-TOPIC_INFO = "info"
-TOPIC_INPUT_0 = "input/0"
-TOPIC_INPUT_1 = "input/1"
-TOPIC_INPUT_2 = "input/2"
-TOPIC_INPUT_EVENT = "input_event"
-TOPIC_INPUT_EVENT_0 = "input_event/0"
-TOPIC_INPUT_EVENT_1 = "input_event/1"
-TOPIC_INPUT_EVENT_2 = "input_event/2"
-TOPIC_LONGPUSH = "longpush"
-TOPIC_LONGPUSH_0 = "longpush/0"
-TOPIC_LONGPUSH_1 = "longpush/1"
-TOPIC_LONGPUSH_2 = "longpush/2"
-TOPIC_MUTE = "sensor/mute"
-TOPIC_ONLINE = "online"
+TOPIC_ADC = "~adc/0"
+TOPIC_ANNOUNCE = "~announce"
+TOPIC_COLOR_0_STATUS = "~color/0/status"
+TOPIC_COMMAND = "~command"
+TOPIC_COMMAND_PROFILES = "~thermostat/0/command/schedule_profile"
+TOPIC_COMMAND_SCHEDULE = "~thermostat/0/command/schedule"
+TOPIC_COMMAND_VALVE_POSITION = "~thermostat/0/command/valve_pos"
+TOPIC_EXT_SWITCH = "~ext_switch/0"
+TOPIC_INFO = "~info"
+TOPIC_INPUT_0 = "~input/0"
+TOPIC_INPUT_1 = "~input/1"
+TOPIC_INPUT_2 = "~input/2"
+TOPIC_INPUT_EVENT = "~input_event"
+TOPIC_INPUT_EVENT_0 = "~input_event/0"
+TOPIC_INPUT_EVENT_1 = "~input_event/1"
+TOPIC_INPUT_EVENT_2 = "~input_event/2"
+TOPIC_LIGHT_SET = "~light/{light_id}/set"
+TOPIC_LIGHT_STATUS = "~light/{light_id}/status"
+TOPIC_MUTE = "~sensor/mute"
+TOPIC_ONLINE = "~online"
 TOPIC_OVERPOWER_VALUE = "overpower_value"
-TOPIC_RELAY = "relay"
-TOPIC_SELF_TEST = "sensor/start_self_test"
-TOPIC_SENSOR_BATTERY = "sensor/battery"
-TOPIC_SENSOR_CONCENTRATION = "sensor/concentration"
-TOPIC_SENSOR_HUMIDITY = "sensor/humidity"
-TOPIC_SENSOR_OPERATION = "sensor/operation"
-TOPIC_SENSOR_SELF_TEST = "sensor/self_test"
-TOPIC_SENSOR_TEMPERATURE = "sensor/temperature"
-TOPIC_SENSOR_TILT = "sensor/tilt"
-TOPIC_SENSOR_UNMUTE = "sensor/unmute"
-TOPIC_STATUS = "status"
-TOPIC_TEMPERATURE = "temperature"
-TOPIC_TEMPERATURE_STATUS = "temperature_status"
-TOPIC_TOTAL_WORK_TIME = "totalworktime"
-TOPIC_VALVE = "valve/0/state"
-TOPIC_VALVE_COMMAND = "valve/0/command"
-TOPIC_VOLTAGE = "voltage"
+TOPIC_RELAY = "~relay"
+TOPIC_SELF_TEST = "~sensor/start_self_test"
+TOPIC_SENSOR_BATTERY = "~sensor/battery"
+TOPIC_SENSOR_CONCENTRATION = "~sensor/concentration"
+TOPIC_SENSOR_HUMIDITY = "~sensor/humidity"
+TOPIC_SENSOR_OPERATION = "~sensor/operation"
+TOPIC_SENSOR_SELF_TEST = "~sensor/self_test"
+TOPIC_SENSOR_TEMPERATURE = "~sensor/temperature"
+TOPIC_SENSOR_TILT = "~sensor/tilt"
+TOPIC_SENSOR_UNMUTE = "~sensor/unmute"
+TOPIC_STATUS = "~status"
+TOPIC_TEMPERATURE = "~temperature"
+TOPIC_TEMPERATURE_STATUS = "~temperature_status"
+TOPIC_TOTAL_WORK_TIME = "~totalworktime"
+TOPIC_VALVE = "~valve/0/state"
+TOPIC_VALVE_COMMAND = "~valve/0/command"
+TOPIC_VOLTAGE = "~voltage"
+TOPIC_WHITE_SET = "~white/{light_id}/set"
+TOPIC_WHITE_STATUS = "~white/{light_id}/status"
 
 TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
 TPL_ADC = "{{value|float|round(2)}}"
@@ -452,13 +459,18 @@ TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
 TPL_CALIBRATED = "{%if value_json.calibrated==true%}ON{%else%}OFF{%endif%}"
 TPL_CHARGER = "{%if value_json.charger==true%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD = "{%if value_json.cloud.connected==true%}ON{%else%}OFF{%endif%}"
+TPL_COLOR_TEMP_WHITE_LIGHT = (
+    "{{((1000000/(value_json.temp|int,2700)|max)|round(0,^floor^))}}"
+)
+TPL_COMMAND_ON_WHITE_LIGHT = "{{^turn^:^on^{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}{{%if transition is defined%}},^transition^:{{{{min(transition|multiply(1000), {max_transition})}}}}{{%endif%}}}}"
+TPL_COMMAND_ON_WHITE_LIGHT_DUO = "{{^turn^:^on^{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}{{%if color_temp is defined%}},^temp^:{{{{(1000000/(color_temp|int))|round(0,^floor^)}}}}{{%endif%}}{{%if transition is defined%}},^transition^:{{{{min(transition|multiply(1000), {max_transition})}}}}{{%endif%}}}}"
 TPL_COMMAND_PROFILES = "{{value.split(^ ^)[-1]}}"
 TPL_CONCENTRATION = "{%if 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CURRENT = "{{value|float|round(2)}}"
 TPL_CURRENT_TEMPERATURE = "{{value_json.thermostats.0.tmp.value}}"
 TPL_DOUBLE_SHORTPUSH = "{%if value_json.event==^SS^%}ON{%else%}OFF{%endif%}"
-TPL_ENERGY_WH = "{{(value|float/1000)|round(2)}}"
-TPL_ENERGY_WMIN = "{{(value|float/60/1000)|round(2)}}"
+TPL_ENERGY_WH = "{{value|float|round(2)}}"
+TPL_ENERGY_WMIN = "{{(value|float/60)|round(2)}}"
 TPL_GAS = "{%if value in [^mild^,^heavy^]%}ON{%else%}OFF{%endif%}"
 TPL_GAS_TO_JSON = "{{{^status^:value}|tojson}}"
 TPL_HUMIDITY = "{%if value!=999 and value!=0%}{{value|round(1)}}{%endif%}"
@@ -507,7 +519,6 @@ UNIT_CELSIUS = "°C"
 UNIT_DBM = "dBm"
 UNIT_DEGREE = "°"
 UNIT_FAHRENHEIT = "°F"
-UNIT_KWH = "kWh"
 UNIT_LUX = "lx"
 UNIT_PERCENT = "%"
 UNIT_PPM = "ppm"
@@ -515,14 +526,15 @@ UNIT_SECOND = "s"
 UNIT_VAR = "VAR"
 UNIT_VOLT = "V"
 UNIT_WATT = "W"
+UNIT_WH = "Wh"
 
 VALUE_BUTTON_DOUBLE_PRESS = "button_double_press"
 VALUE_BUTTON_LONG_PRESS = "button_long_press"
 VALUE_BUTTON_LONG_SHORT_PRESS = "button_long_short_press"
 VALUE_BUTTON_SHORT_LONG_PRESS = "button_short_long_press"
 VALUE_BUTTON_SHORT_PRESS = "button_short_press"
-VALUE_BUTTON_TRIPLE_PRESS = "button_triple_press"
 VALUE_BUTTON_SHORT_RELEASE = "button_short_release"
+VALUE_BUTTON_TRIPLE_PRESS = "button_triple_press"
 VALUE_CLOSE = "close"
 VALUE_CLOSE = "close"
 VALUE_FALSE = "false"
@@ -532,6 +544,7 @@ VALUE_OPEN = "open"
 VALUE_OPEN = "open"
 VALUE_STOP = "stop"
 VALUE_STOP = "stop"
+VALUE_TEMPLATE = "template"
 VALUE_TRIGGER = "trigger"
 VALUE_TRUE = "true"
 
@@ -865,16 +878,20 @@ def get_device_config(dev_id):
         return result
 
 
-def mqtt_publish(topic, payload, retain):
+def mqtt_publish(topic, payload, retain, json=False):
     """Publish data to MQTT broker."""
+    if json:
+        payload_str = str(payload).replace("'", '"').replace("^", '\\"')
+    else:
+        payload_str = str(payload).replace("'", '"').replace("^", "'")
     service_data = {
         "topic": topic,
-        "payload": str(payload).replace("'", '"').replace("^", "'"),
+        "payload": payload_str,
         "retain": retain,
         "qos": 0,
     }
     logger.debug(service_data)  # noqa: F821
-    logger.debug("Sending to MQTT broker: %s %s", topic, payload)  # noqa: F821
+    logger.debug("Sending to MQTT broker: %s %s", topic, payload_str)  # noqa: F821
     hass.services.call("mqtt", "publish", service_data, False)  # noqa: F821
 
 
@@ -909,6 +926,8 @@ mac = data.get(CONF_MAC)  # noqa: F821
 
 if not dev_id:
     raise ValueError("id value None is not valid, check script configuration")
+if "^" in dev_id:
+    raise ValueError("Wrong char ^ in id, change device configuration")
 if len(dev_id) > 32:
     raise ValueError(
         f"id value {dev_id} is longer than 32 characters, use shorter custom MQTT prefix"
@@ -1039,7 +1058,7 @@ selectors = {}
 sensors = {}
 switches = {}
 numbers = {}
-white_lights = 0
+white_lights = {}
 
 if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
     model = MODEL_SHELLY1
@@ -1143,7 +1162,7 @@ if model_id == MODEL_SHELLY1L_ID or dev_id_prefix == MODEL_SHELLY1L_PREFIX:
     ]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     sensors = {
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
         SENSOR_SSID: OPTIONS_SENSOR_SSID,
@@ -1163,7 +1182,7 @@ if model_id == MODEL_SHELLY1PM_ID or dev_id_prefix == MODEL_SHELLY1PM_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [
@@ -1217,7 +1236,7 @@ if model_id == MODEL_SHELLYAIR_ID or dev_id_prefix == MODEL_SHELLYAIR_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [SENSOR_INPUT]
@@ -1257,7 +1276,7 @@ if model_id == MODEL_SHELLY2_ID or dev_id_prefix == MODEL_SHELLY2_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [
@@ -1301,7 +1320,7 @@ if model_id == MODEL_SHELLY25_ID or dev_id_prefix == MODEL_SHELLY25_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [
@@ -1397,7 +1416,7 @@ if (
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [SENSOR_OVERPOWER]
@@ -1428,7 +1447,7 @@ if model_id == MODEL_SHELLYPLUG_US_ID or dev_id_prefix == MODEL_SHELLYPLUG_US_PR
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [SENSOR_OVERPOWER]
@@ -1459,7 +1478,7 @@ if model_id == MODEL_SHELLYPLUG_S_ID or dev_id_prefix == MODEL_SHELLYPLUG_S_PREF
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [SENSOR_OVERPOWER]
@@ -1495,7 +1514,7 @@ if model_id == MODEL_SHELLY4PRO_ID or dev_id_prefix == MODEL_SHELLY4PRO_PREFIX:
         STATE_CLASS_MEASUREMENT,
         STATE_CLASS_TOTAL_INCREASING,
     ]
-    relays_sensors_units = [UNIT_WATT, UNIT_KWH]
+    relays_sensors_units = [UNIT_WATT, UNIT_WH]
     relays_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     relays_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
     relays_bin_sensors = [SENSOR_OVERPOWER, SENSOR_INPUT]
@@ -1778,6 +1797,28 @@ if model_id == MODEL_SHELLYRGBW2_ID or dev_id_prefix == MODEL_SHELLYRGBW2_PREFIX
     inputs = 1
     rgbw_lights = 1
     white_lights = 4
+    white_lights = {
+        0: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_WHITE_SET,
+            KEY_STATE_TOPIC: TOPIC_WHITE_STATUS,
+        },
+        1: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_WHITE_SET,
+            KEY_STATE_TOPIC: TOPIC_WHITE_STATUS,
+        },
+        2: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_WHITE_SET,
+            KEY_STATE_TOPIC: TOPIC_WHITE_STATUS,
+        },
+        3: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_WHITE_SET,
+            KEY_STATE_TOPIC: TOPIC_WHITE_STATUS,
+        },
+    }
 
     bin_sensors = [
         SENSOR_INPUT_0,
@@ -1810,7 +1851,7 @@ if model_id == MODEL_SHELLYRGBW2_ID or dev_id_prefix == MODEL_SHELLYRGBW2_PREFIX
     ]
     lights_sensors_device_classes = [DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY]
     lights_sensors_tpls = [TPL_POWER, TPL_ENERGY_WMIN]
-    lights_sensors_units = [UNIT_WATT, UNIT_KWH]
+    lights_sensors_units = [UNIT_WATT, UNIT_WH]
     sensors = {
         SENSOR_IP: OPTIONS_SENSOR_IP,
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
@@ -1821,7 +1862,13 @@ if model_id == MODEL_SHELLYRGBW2_ID or dev_id_prefix == MODEL_SHELLYRGBW2_PREFIX
 
 if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREFIX:
     model = MODEL_SHELLYDIMMER
-    white_lights = 1
+    white_lights = {
+        0: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_LIGHT_SET,
+            KEY_STATE_TOPIC: TOPIC_LIGHT_STATUS,
+        }
+    }
     inputs = 2
     inputs_types = [VALUE_BUTTON_LONG_PRESS, VALUE_BUTTON_SHORT_PRESS]
     sensors = {
@@ -1922,7 +1969,7 @@ if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREF
         STATE_CLASS_TOTAL_INCREASING,
         None,
     ]
-    lights_sensors_units = [UNIT_WATT, UNIT_KWH, UNIT_WATT]
+    lights_sensors_units = [UNIT_WATT, UNIT_WH, UNIT_WATT]
     lights_sensors_device_classes = [
         DEVICE_CLASS_POWER,
         DEVICE_CLASS_ENERGY,
@@ -1935,7 +1982,13 @@ if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PR
     model = MODEL_SHELLYDIMMER2
     inputs = 2
     inputs_types = [VALUE_BUTTON_LONG_PRESS, VALUE_BUTTON_SHORT_PRESS]
-    white_lights = 1
+    white_lights = {
+        0: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_LIGHT_SET,
+            KEY_STATE_TOPIC: TOPIC_LIGHT_STATUS,
+        }
+    }
     sensors = {
         SENSOR_IP: OPTIONS_SENSOR_IP,
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
@@ -2034,7 +2087,7 @@ if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PR
         STATE_CLASS_TOTAL_INCREASING,
         None,
     ]
-    lights_sensors_units = [UNIT_WATT, UNIT_KWH, UNIT_WATT]
+    lights_sensors_units = [UNIT_WATT, UNIT_WH, UNIT_WATT]
     lights_sensors_device_classes = [
         DEVICE_CLASS_POWER,
         DEVICE_CLASS_ENERGY,
@@ -2069,7 +2122,7 @@ if model_id == MODEL_SHELLYBULBRGBW_ID or dev_id_prefix == MODEL_SHELLYBULBRGBW_
         STATE_CLASS_TOTAL_INCREASING,
         STATE_CLASS_MEASUREMENT,
     ]
-    lights_sensors_units = [UNIT_KWH, UNIT_WATT]
+    lights_sensors_units = [UNIT_WH, UNIT_WATT]
     lights_sensors_device_classes = [DEVICE_CLASS_ENERGY, DEVICE_CLASS_POWER]
     lights_sensors_tpls = [TPL_ENERGY_WMIN, TPL_POWER]
     bin_sensors = [SENSOR_FIRMWARE_UPDATE]
@@ -2088,14 +2141,23 @@ if model_id == MODEL_SHELLYBULBRGBW_ID or dev_id_prefix == MODEL_SHELLYBULBRGBW_
 
 if model_id == MODEL_SHELLYDUO_ID or dev_id_prefix == MODEL_SHELLYDUO_PREFIX:
     model = MODEL_SHELLYDUO
-    white_lights = 1
+    white_lights = {
+        0: {
+            KEY_COLOR_TEMP_TEMPLATE: TPL_COLOR_TEMP_WHITE_LIGHT,
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT_DUO,
+            KEY_COMMAND_TOPIC: TOPIC_LIGHT_SET,
+            KEY_MAX_MIREDS: 370,
+            KEY_MIN_MIREDS: 153,
+            KEY_STATE_TOPIC: TOPIC_LIGHT_STATUS,
+        }
+    }
     lights_sensors = [SENSOR_ENERGY, SENSOR_POWER]
     lights_sensors_entity_categories = [None, None]
     lights_sensors_state_classes = [
         STATE_CLASS_TOTAL_INCREASING,
         STATE_CLASS_MEASUREMENT,
     ]
-    lights_sensors_units = [UNIT_KWH, UNIT_WATT]
+    lights_sensors_units = [UNIT_WH, UNIT_WATT]
     lights_sensors_device_classes = [DEVICE_CLASS_ENERGY, DEVICE_CLASS_POWER]
     lights_sensors_tpls = [TPL_ENERGY_WMIN, TPL_POWER]
     bin_sensors = [SENSOR_FIRMWARE_UPDATE]
@@ -2114,14 +2176,22 @@ if model_id == MODEL_SHELLYDUO_ID or dev_id_prefix == MODEL_SHELLYDUO_PREFIX:
 
 if model_id == MODEL_SHELLYVINTAGE_ID or dev_id_prefix == MODEL_SHELLYVINTAGE_PREFIX:
     model = MODEL_SHELLYVINTAGE
-    white_lights = 1
+
+    white_lights = {
+        0: {
+            KEY_COMMAND_ON_TEMPLATE: TPL_COMMAND_ON_WHITE_LIGHT,
+            KEY_COMMAND_TOPIC: TOPIC_LIGHT_SET,
+            KEY_STATE_TOPIC: TOPIC_LIGHT_STATUS,
+        }
+    }
+
     lights_sensors = [SENSOR_ENERGY, SENSOR_POWER]
     lights_sensors_entity_categories = [None, None]
     lights_sensors_state_classes = [
         STATE_CLASS_TOTAL_INCREASING,
         STATE_CLASS_MEASUREMENT,
     ]
-    lights_sensors_units = [UNIT_KWH, UNIT_WATT]
+    lights_sensors_units = [UNIT_WH, UNIT_WATT]
     lights_sensors_device_classes = [DEVICE_CLASS_ENERGY, DEVICE_CLASS_POWER]
     lights_sensors_tpls = [TPL_ENERGY_WMIN, TPL_POWER]
     bin_sensors = [SENSOR_FIRMWARE_UPDATE]
@@ -2170,10 +2240,10 @@ if model_id == MODEL_SHELLYEM_ID or dev_id_prefix == MODEL_SHELLYEM_PREFIX:
         UNIT_WATT,
         UNIT_VAR,
         UNIT_VOLT,
-        UNIT_KWH,
-        UNIT_KWH,
-        UNIT_KWH,
-        UNIT_KWH,
+        UNIT_WH,
+        UNIT_WH,
+        UNIT_WH,
+        UNIT_WH,
     ]
     meters_sensors_device_classes = [
         DEVICE_CLASS_POWER,
@@ -2242,10 +2312,10 @@ if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
         UNIT_WATT,
         UNIT_PERCENT,
         UNIT_VOLT,
-        UNIT_KWH,
-        UNIT_KWH,
-        UNIT_KWH,
-        UNIT_KWH,
+        UNIT_WH,
+        UNIT_WH,
+        UNIT_WH,
+        UNIT_WH,
     ]
     meters_sensors_device_classes = [
         DEVICE_CLASS_CURRENT,
@@ -2597,17 +2667,17 @@ for number, number_options in numbers.items():
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(number)}",
-        KEY_COMMAND_TOPIC: f"~{number_options[KEY_COMMAND_TOPIC]}",
+        KEY_COMMAND_TOPIC: number_options[KEY_COMMAND_TOPIC],
         KEY_MAX: number_options[KEY_MAX],
         KEY_MIN: number_options[KEY_MIN],
         KEY_STEP: number_options[KEY_STEP],
-        KEY_STATE_TOPIC: f"~{number_options[KEY_STATE_TOPIC]}",
+        KEY_STATE_TOPIC: number_options[KEY_STATE_TOPIC],
         KEY_VALUE_TEMPLATE: number_options[KEY_VALUE_TEMPLATE],
         KEY_UNIT: number_options[KEY_UNIT],
         KEY_ENABLED_BY_DEFAULT: str(number_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{number}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
         KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
         KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
         KEY_DEVICE: device_info,
@@ -2633,17 +2703,17 @@ for switch, switch_options in switches.items():
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(switch)}",
-        KEY_COMMAND_TOPIC: f"~{switch_options[KEY_COMMAND_TOPIC]}",
+        KEY_COMMAND_TOPIC: switch_options[KEY_COMMAND_TOPIC],
         KEY_PAYLOAD_OFF: switch_options[KEY_PAYLOAD_OFF],
         KEY_PAYLOAD_ON: switch_options[KEY_PAYLOAD_ON],
-        KEY_STATE_TOPIC: f"~{switch_options[KEY_STATE_TOPIC]}",
+        KEY_STATE_TOPIC: switch_options[KEY_STATE_TOPIC],
         KEY_STATE_OFF: switch_options[KEY_STATE_OFF],
         KEY_STATE_ON: switch_options[KEY_STATE_ON],
         KEY_VALUE_TEMPLATE: switch_options[KEY_VALUE_TEMPLATE],
         KEY_ENABLED_BY_DEFAULT: str(switch_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{switch}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
         KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
         KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
         KEY_DEVICE: device_info,
@@ -2669,15 +2739,15 @@ for select, select_options in selectors.items():
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(select)}",
-        KEY_COMMAND_TOPIC: f"~{select_options[KEY_COMMAND_TOPIC]}",
+        KEY_COMMAND_TOPIC: select_options[KEY_COMMAND_TOPIC],
         KEY_COMMAND_TEMPLATE: TPL_COMMAND_PROFILES,
         KEY_OPTIONS: select_options[KEY_OPTIONS],
-        KEY_STATE_TOPIC: f"~{select_options[KEY_STATE_TOPIC]}",
+        KEY_STATE_TOPIC: select_options[KEY_STATE_TOPIC],
         KEY_VALUE_TEMPLATE: select_options[KEY_VALUE_TEMPLATE],
         KEY_ENABLED_BY_DEFAULT: str(select_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{select}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
         KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
         KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
         KEY_DEVICE: device_info,
@@ -2703,12 +2773,12 @@ for button, button_options in buttons.items():
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(button)}",
-        KEY_COMMAND_TOPIC: f"~{button_options[KEY_COMMAND_TOPIC]}",
+        KEY_COMMAND_TOPIC: button_options[KEY_COMMAND_TOPIC],
         KEY_PAYLOAD_PRESS: button_options[KEY_PAYLOAD_PRESS],
         KEY_ENABLED_BY_DEFAULT: str(button_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{button}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
         KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
         KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
         KEY_DEVICE: device_info,
@@ -2728,7 +2798,6 @@ for button, button_options in buttons.items():
 # climate entities
 if climate_entity_option:
     default_topic = f"shellies/{dev_id}/"
-    info_topic = f"~{TOPIC_INFO}"
     temperature_command_topic = "~thermostat/0/command/target_t"
     config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
         "ascii", "ignore"
@@ -2736,22 +2805,22 @@ if climate_entity_option:
 
     payload = {
         KEY_NAME: device_name,
-        KEY_ACTION_TOPIC: info_topic,
+        KEY_ACTION_TOPIC: TOPIC_INFO,
         KEY_ACTION_TEMPLATE: TPL_ACTION_TEMPLATE.format(
             min_temp=climate_entity_option[KEY_MIN_TEMP]
         ),
-        KEY_CURRENT_TEMPERATURE_TOPIC: info_topic,
+        KEY_CURRENT_TEMPERATURE_TOPIC: TOPIC_INFO,
         KEY_CURRENT_TEMPERATURE_TEMPLATE: TPL_CURRENT_TEMPERATURE,
-        KEY_TEMPERATURE_STATE_TOPIC: info_topic,
+        KEY_TEMPERATURE_STATE_TOPIC: TOPIC_INFO,
         KEY_TEMPERATURE_STATE_TEMPLATE: TPL_TARGET_TEMPERATURE,
         KEY_TEMPERATURE_COMMAND_TOPIC: temperature_command_topic,
         KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
-        KEY_MODE_STATE_TOPIC: info_topic,
+        KEY_MODE_STATE_TOPIC: TOPIC_INFO,
         KEY_MODE_STATE_TEMPLATE: "heat",
         KEY_UNIQUE_ID: f"{dev_id}".lower(),
         KEY_OPTIMISTIC: VALUE_FALSE,
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
         KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
         KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
         KEY_DEVICE: device_info,
@@ -2806,7 +2875,7 @@ for roller_id in range(rollers):
             KEY_PAYLOAD_OPEN: VALUE_OPEN,
             KEY_PAYLOAD_CLOSE: VALUE_CLOSE,
             KEY_PAYLOAD_STOP: VALUE_STOP,
-            KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_UNIQUE_ID: unique_id,
@@ -2852,7 +2921,7 @@ for relay_id in range(relays):
                 KEY_STATE_TOPIC: state_topic,
                 KEY_PAYLOAD_OFF: VALUE_OFF,
                 KEY_PAYLOAD_ON: VALUE_ON,
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_UNIQUE_ID: unique_id,
@@ -2891,7 +2960,7 @@ for relay_id in range(relays):
                     KEY_UNIT: relays_sensors_units[sensor_id],
                     KEY_VALUE_TEMPLATE: relays_sensors_tpls[sensor_id],
                     KEY_DEVICE_CLASS: relays_sensors_device_classes[sensor_id],
-                    KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                    KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                     KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                     KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                     KEY_FORCE_UPDATE: str(force_update).lower(),
@@ -2934,7 +3003,7 @@ for relay_id in range(relays):
                 KEY_UNIT: relays_sensors_units[sensor_id],
                 KEY_VALUE_TEMPLATE: relays_sensors_tpls[sensor_id],
                 KEY_DEVICE_CLASS: relays_sensors_device_classes[sensor_id],
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_FORCE_UPDATE: str(force_update).lower(),
@@ -2968,14 +3037,14 @@ for relay_id in range(relays):
         else:
             sensor_name = f"{device_name} {clean_name(relays_bin_sensors[bin_sensor_id])} {relay_id}"
         if relays_bin_sensors_topics and relays_bin_sensors_topics[bin_sensor_id]:
-            state_topic = f"~{relays_bin_sensors_topics[bin_sensor_id]}/{relay_id}"
+            state_topic = f"{relays_bin_sensors_topics[bin_sensor_id]}/{relay_id}"
         else:
-            state_topic = f"~{relays_bin_sensors[bin_sensor_id]}/{relay_id}"
+            state_topic = f"{relays_bin_sensors[bin_sensor_id]}/{relay_id}"
         if not roller_mode:
             payload = {
                 KEY_NAME: sensor_name,
                 KEY_STATE_TOPIC: state_topic,
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_UNIQUE_ID: unique_id,
@@ -3036,7 +3105,7 @@ for relay_id in range(relays):
             ):
                 payload[
                     KEY_JSON_ATTRIBUTES_TOPIC
-                ] = f"~{relays_bin_sensors_topics[bin_sensor_id]}/{relay_id}/{TOPIC_OVERPOWER_VALUE}"
+                ] = f"{relays_bin_sensors_topics[bin_sensor_id]}/{relay_id}/{TOPIC_OVERPOWER_VALUE}"
                 payload[KEY_JSON_ATTRIBUTES_TEMPLATE] = TPL_OVERPOWER_VALUE_TO_JSON
         else:
             payload = ""
@@ -3055,7 +3124,7 @@ for sensor, sensor_options in sensors.items():
         "ascii", "ignore"
     ).decode("utf-8")
     default_topic = f"shellies/{dev_id}/"
-    if sensor in (SENSOR_RSSI, SENSOR_SSID, SENSOR_ADC, SENSOR_IP):
+    if sensor in (SENSOR_SSID, SENSOR_ADC, SENSOR_IP):
         sensor_name = f"{device_name} {sensor.upper()}"
     elif sensor == SENSOR_UPTIME:
         sensor_name = f"{device_name} Last Restart"
@@ -3068,7 +3137,7 @@ for sensor, sensor_options in sensors.items():
 
     payload = {
         KEY_NAME: sensor_name,
-        KEY_STATE_TOPIC: f"~{sensor_options[KEY_STATE_TOPIC]}",
+        KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC],
         KEY_FORCE_UPDATE: str(force_update).lower(),
         KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{sensor}".lower(),
@@ -3094,7 +3163,7 @@ for sensor, sensor_options in sensors.items():
     if battery_powered:
         payload[KEY_EXPIRE_AFTER] = expire_after
     else:
-        payload[KEY_AVAILABILITY_TOPIC] = f"~{TOPIC_ONLINE}"
+        payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
     if (
@@ -3181,7 +3250,7 @@ for sensor_id in range(ext_temp_sensors):
             KEY_UNIT: UNIT_CELSIUS,
             KEY_DEVICE_CLASS: SENSOR_TEMPERATURE,
             KEY_FORCE_UPDATE: str(force_update).lower(),
-            KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_UNIQUE_ID: unique_id,
@@ -3219,7 +3288,7 @@ for sensor_id in range(ext_humi_sensors):
             KEY_UNIT: UNIT_PERCENT,
             KEY_DEVICE_CLASS: SENSOR_HUMIDITY,
             KEY_FORCE_UPDATE: str(force_update).lower(),
-            KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_UNIQUE_ID: unique_id,
@@ -3254,9 +3323,9 @@ for bin_sensor_id in range(len(bin_sensors)):
             f"{device_name} {clean_name(bin_sensors[bin_sensor_id].replace('/', ' '))}"
         )
     if bin_sensors_topics[bin_sensor_id]:
-        state_topic = f"~{bin_sensors_topics[bin_sensor_id]}"
-    elif relays > 0 or white_lights > 0:
-        state_topic = f"~{bin_sensors[bin_sensor_id]}"
+        state_topic = f"{bin_sensors_topics[bin_sensor_id]}"
+    elif relays > 0 or len(white_lights) > 0:
+        state_topic = f"{bin_sensors[bin_sensor_id]}"
     elif bin_sensors[bin_sensor_id] == SENSOR_OPENING:
         state_topic = "~sensor/state"
     else:
@@ -3280,7 +3349,7 @@ for bin_sensor_id in range(len(bin_sensors)):
     if battery_powered:
         payload[KEY_EXPIRE_AFTER] = expire_after
     else:
-        payload[KEY_AVAILABILITY_TOPIC] = f"~{TOPIC_ONLINE}"
+        payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
     if bin_sensors_device_classes[bin_sensor_id]:
@@ -3326,7 +3395,7 @@ for bin_sensor_id in range(len(bin_sensors)):
         bin_sensors[bin_sensor_id] == SENSOR_FIRMWARE_UPDATE
         and bin_sensors_tpls[bin_sensor_id] == TPL_NEW_FIRMWARE_FROM_INFO
     ):
-        payload[KEY_JSON_ATTRIBUTES_TOPIC] = f"~{TOPIC_INFO}"
+        payload[KEY_JSON_ATTRIBUTES_TOPIC] = TOPIC_INFO
         payload[KEY_JSON_ATTRIBUTES_TEMPLATE] = TPL_UPDATE_TO_JSON
     if (
         model == MODEL_SHELLY1
@@ -3354,7 +3423,7 @@ for light_id in range(rgbw_lights):
     default_topic = f"shellies/{dev_id}/"
     state_topic = f"~color/{light_id}/status"
     command_topic = f"~color/{light_id}/set"
-    availability_topic = f"~{TOPIC_ONLINE}"
+    availability_topic = TOPIC_ONLINE
     unique_id = f"{dev_id}-light-{light_id}".lower()
     config_topic = f"{disc_prefix}/light/{dev_id}-{light_id}/config".encode(
         "ascii", "ignore"
@@ -3451,7 +3520,7 @@ for light_id in range(rgbw_lights):
             payload = {
                 KEY_NAME: sensor_name,
                 KEY_STATE_TOPIC: state_topic,
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_UNIQUE_ID: unique_id,
@@ -3507,7 +3576,7 @@ for light_id in range(rgbw_lights):
                 KEY_UNIT: lights_sensors_units[sensor_id],
                 KEY_VALUE_TEMPLATE: lights_sensors_tpls[sensor_id],
                 KEY_DEVICE_CLASS: lights_sensors_device_classes[sensor_id],
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_FORCE_UPDATE: str(force_update).lower(),
@@ -3530,145 +3599,56 @@ for light_id in range(rgbw_lights):
         mqtt_publish(config_topic, payload, retain)
 
 # white lights
-for light_id in range(white_lights):
+for light_id, light_options in white_lights.items():
     if device_config.get(f"light-{light_id}-name"):
         light_name = device_config[f"light-{light_id}-name"]
     else:
         light_name = f"{device_name} Light {light_id}"
-    default_topic = f"shellies/{dev_id}/"
-    if model in (
-        MODEL_SHELLYDIMMER,
-        MODEL_SHELLYDIMMER2,
-        MODEL_SHELLYDUO,
-        MODEL_SHELLYVINTAGE,
-    ):
-        state_topic = f"~light/{light_id}/status"
-        command_topic = f"~light/{light_id}/set"
-        unique_id = f"{dev_id}-light-{light_id}".lower()
-        config_topic = f"{disc_prefix}/light/{dev_id}-{light_id}/config".encode(
-            "ascii", "ignore"
-        ).decode("utf-8")
-    else:
-        state_topic = f"~white/{light_id}/status"
-        command_topic = f"~white/{light_id}/set"
+
+    if model == MODEL_SHELLYRGBW2:
         unique_id = f"{dev_id}-light-white-{light_id}".lower()
         config_topic = f"{disc_prefix}/light/{dev_id}-white-{light_id}/config".encode(
             "ascii", "ignore"
         ).decode("utf-8")
-    availability_topic = f"~{TOPIC_ONLINE}"
-    if mode == LIGHT_WHITE and model == MODEL_SHELLYRGBW2:
-        payload = (
-            '{"schema":"template",'
-            '"name":"' + light_name + '",'
-            '"cmd_t":"' + command_topic + '",'
-            '"stat_t":"' + state_topic + '",'
-            '"avty_t":"' + availability_topic + '",'
-            '"pl_avail":"true",'
-            '"pl_not_avail":"false",'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"brightness\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if white_value is defined%},\\"white\\":{{white_value}}{%endif%}{%if effect is defined%},\\"effect\\":{{effect}}{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"stat_tpl":"{%if value_json.ison%}on{%else%}off{%endif%}",'
-            '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
-            '"uniq_id":"' + unique_id + '",'
-            '"qos":"' + str(qos) + '",'
-            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
-            '"name":"' + device_name + '",'
-            '"mdl":"' + model + '",'
-            '"sw":"' + fw_ver + '",'
-            '"mf":"' + ATTR_MANUFACTURER + '"},'
-            '"~":"' + default_topic + '"}'
-        )
-    elif model in (MODEL_SHELLYDIMMER, MODEL_SHELLYDIMMER2):
-        payload = (
-            '{"schema":"template",'
-            '"name":"' + light_name + '",'
-            '"cmd_t":"' + command_topic + '",'
-            '"stat_t":"' + state_topic + '",'
-            '"avty_t":"' + availability_topic + '",'
-            '"pl_avail":"true",'
-            '"pl_not_avail":"false",'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"brightness\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"stat_tpl":"{%if value_json.ison%}on{%else%}off{%endif%}",'
-            '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
-            '"uniq_id":"' + unique_id + '",'
-            '"qos":"' + str(qos) + '",'
-            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
-            '"name":"' + device_name + '",'
-            '"mdl":"' + model + '",'
-            '"sw":"' + fw_ver + '",'
-            '"mf":"' + ATTR_MANUFACTURER + '"},'
-            '"~":"' + default_topic + '"}'
-        )
-    elif model == MODEL_SHELLYDUO:
-        payload = (
-            '{"schema":"template",'
-            '"name":"' + light_name + '",'
-            '"cmd_t":"' + command_topic + '",'
-            '"stat_t":"' + state_topic + '",'
-            '"avty_t":"' + availability_topic + '",'
-            '"pl_avail":"true",'
-            '"pl_not_avail":"false",'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"brightness\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if color_temp is defined%},\\"temp\\":{{(1000000/(color_temp|int))|round(0,\\"floor\\")}}{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"stat_tpl":"{%if value_json.ison%}on{%else%}off{%endif%}",'
-            '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
-            '"clr_temp_tpl":"{{((1000000/(value_json.temp|int,2700)|max)|round(0,\\"floor\\"))}}",'
-            '"max_mireds":370,'
-            '"min_mireds":153,'
-            '"uniq_id":"' + unique_id + '",'
-            '"qos":"' + str(qos) + '",'
-            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
-            '"name":"' + device_name + '",'
-            '"mdl":"' + model + '",'
-            '"sw":"' + fw_ver + '",'
-            '"mf":"' + ATTR_MANUFACTURER + '"},'
-            '"~":"' + default_topic + '"}'
-        )
-    elif model == MODEL_SHELLYVINTAGE:
-        payload = (
-            '{"schema":"template",'
-            '"name":"' + light_name + '",'
-            '"cmd_t":"' + command_topic + '",'
-            '"stat_t":"' + state_topic + '",'
-            '"avty_t":"' + availability_topic + '",'
-            '"pl_avail":"true",'
-            '"pl_not_avail":"false",'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"brightness\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition,'
-            + str(MAX_TRANSITION)
-            + ')|multiply(1000)}}{%endif%}}",'
-            '"stat_tpl":"{%if value_json.ison%}on{%else%}off{%endif%}",'
-            '"bri_tpl":"{{value_json.brightness|float|multiply(2.55)|round}}",'
-            '"uniq_id":"' + unique_id + '",'
-            '"qos":"' + str(qos) + '",'
-            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
-            '"name":"' + device_name + '",'
-            '"mdl":"' + model + '",'
-            '"sw":"' + fw_ver + '",'
-            '"mf":"' + ATTR_MANUFACTURER + '"},'
-            '"~":"' + default_topic + '"}'
-        )
     else:
+        unique_id = f"{dev_id}-light-{light_id}".lower()
+        config_topic = f"{disc_prefix}/light/{dev_id}-{light_id}/config".encode(
+            "ascii", "ignore"
+        ).decode("utf-8")
+
+    payload = {
+        KEY_SCHEMA: VALUE_TEMPLATE,
+        KEY_NAME: light_name,
+        KEY_COMMAND_TOPIC: light_options[KEY_COMMAND_TOPIC].format(light_id=light_id),
+        KEY_STATE_TOPIC: light_options[KEY_STATE_TOPIC].format(light_id=light_id),
+        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
+        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
+        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_COMMAND_ON_TEMPLATE: light_options[KEY_COMMAND_ON_TEMPLATE].format(
+            max_transition=MAX_TRANSITION
+        ),
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^turn^:^off^{{%if transition is defined%}},^transition^:{{{{min(transition|multiply(1000),{MAX_TRANSITION})}}}}{{%endif%}}}}",
+        KEY_STATE_TEMPLATE: "{%if value_json.ison%}on{%else%}off{%endif%}",
+        KEY_BRIGHTNESS_TEMPLATE: "{{value_json.brightness|float|multiply(2.55)|round}}",
+        KEY_UNIQUE_ID: unique_id,
+        KEY_QOS: str(qos),
+        KEY_DEVICE: device_info,
+        "~": f"shellies/{dev_id}/",
+    }
+
+    if light_options.get(KEY_COLOR_TEMP_TEMPLATE):
+        payload[KEY_COLOR_TEMP_TEMPLATE] = TPL_COLOR_TEMP_WHITE_LIGHT
+    if light_options.get(KEY_MAX_MIREDS):
+        payload[KEY_MAX_MIREDS] = light_options[KEY_MAX_MIREDS]
+    if light_options.get(KEY_MIN_MIREDS):
+        payload[KEY_MIN_MIREDS] = light_options[KEY_MIN_MIREDS]
+
+    if model == MODEL_SHELLYRGBW2 and mode == LIGHT_COLOR:
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
 
-    mqtt_publish(config_topic, payload, retain)
+    mqtt_publish(config_topic, payload, retain, json=True)
 
     # white light's binary sensors
     for bin_sensor_id in range(len(lights_bin_sensors)):
@@ -3692,7 +3672,7 @@ for light_id in range(white_lights):
                 payload = {
                     KEY_NAME: sensor_name,
                     KEY_STATE_TOPIC: state_topic,
-                    KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                    KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                     KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                     KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                     KEY_UNIQUE_ID: unique_id,
@@ -3765,7 +3745,7 @@ for light_id in range(white_lights):
                 KEY_UNIT: lights_sensors_units[sensor_id],
                 KEY_VALUE_TEMPLATE: lights_sensors_tpls[sensor_id],
                 KEY_DEVICE_CLASS: lights_sensors_device_classes[sensor_id],
-                KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
                 KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
                 KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
                 KEY_FORCE_UPDATE: str(force_update).lower(),
@@ -3810,7 +3790,7 @@ for meter_id in range(meters):
             KEY_STATE_TOPIC: state_topic,
             KEY_UNIT: meters_sensors_units[sensor_id],
             KEY_VALUE_TEMPLATE: meters_sensors_tpls[sensor_id],
-            KEY_AVAILABILITY_TOPIC: f"~{TOPIC_ONLINE}",
+            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_FORCE_UPDATE: str(force_update).lower(),
