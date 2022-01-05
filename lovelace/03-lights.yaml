@@ -18,7 +18,7 @@
             type: entity-button
         type: horizontal-stack
       - cards:
-          - entity: light.bedroom_lights
+          - entity: light.bedroom
             name: Bedroom
             tap_action:
               action: toggle
@@ -37,11 +37,11 @@
       - entity: light.dining_room_lights
         name: Dining Room Lights
         toggle: true
-        type: 'custom:slider-entity-row'
+        type: custom:slider-entity-row
       - entity: light.living_room_lights
         name: Living Room Lights
         toggle: true
-        type: 'custom:slider-entity-row'
+        type: custom:slider-entity-row
       - entities:
           - entity: light.bar_light
           - entity: light.ceiling_lights
@@ -51,26 +51,77 @@
       - entity: light.kitchen_lights
         name: Kitchen Lights
         toggle: true
-        type: 'custom:slider-entity-row'
+        type: custom:slider-entity-row
       - entity: light.ceiling_lights
         name: Ceiling Lights
         toggle: true
-        type: 'custom:slider-entity-row'
+        type: custom:slider-entity-row
       - entities:
           - entity: light.sink
           - entity: light.oven
           - entity: light.fridge
+          - entity: light.kitchen_countertop
         show_header_toggle: false
         title: Kitchen
         type: entities
+      - type: horizontal-stack
+        cards:
+          - type: light
+            entity: light.elgato_key_light_air_left
+            name: Elgato left
+          - type: light
+            entity: light.elgato_key_light_air_right
+            name: Elgato right
+      - entities:
+          - entity: light.bedroom
+        type: entities
+      - shorten_cards: false
+        consolidate_entities: false
+        child_card: false
+        hide_header: false
+        header: Voron 2.4
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list: true
+        entity: light.voron
+        group: true
+        type: custom:light-entity-card
+      - shorten_cards: false
+        consolidate_entities: false
+        child_card: false
+        hide_header: false
+        header: Stream desk
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list: true
+        entity: light.stream_desk
+        group: true
+        type: custom:light-entity-card
       - entities:
           - entity: light.left
           - entity: light.right
         show_header_toggle: false
         title: Dining room
-        type: entities
-      - entities:
-          - entity: light.bedroom_light
         type: entities
       - entities:
           - entity: light.corner
@@ -83,15 +134,9 @@
       - entities:
           - entity: switch.piano
           - entity: switch.tree
-          - entity: switch.ender_3
+          - entity: switch.3d_printer
         title: Plugs
         type: glance
-      - entities:
-          - entity: sensor.cube_battery
-          - entity: sensor.cube_action
-          - entity: sensor.cube_linkquality
-          - entity: sensor.cube_state
-        type: entities
       - cards:
           - cards:
               - entity: light.ceiling_four
@@ -138,424 +183,73 @@
                 type: entity-button
             type: horizontal-stack
         type: vertical-stack
-      - entities:
-          - entity: sensor.living_room_motion_illuminance
-        show_header_toggle: false
-        type: entities
-      - entities:
-          - entity: sensor.living_room_motion_illuminance
-        hours_to_show: 24
-        refresh_interval: 0
-        type: history-graph
-      - shorten_cards: true
-        consolidate_entities: false
-        color_wheel: true
-        persist_features: true
-        brightness: true
-        color_temp: true
-        white_value: true
-        color_picker: true
-        smooth_color_wheel: true
-        hide_header: false
-        child_card: false
-        show_slider_percent: true
-        full_width_sliders: false
-        brightness_icon: weather-sunny
-        white_icon: file-word-box
-        temperature_icon: thermometer
-        effects_list:
-          - Android
-          - Blink
-          - Blink Rainbow
-          - Bouncing Balls
-          - Bpm
-          - Breathe
-          - Candle
-          - Candle Multi
-          - Chase
-          - Chase Flash
-          - Chase Flash Rnd
-          - Chase Rainbow
-          - Chase Random
-          - ChunChun
-          - Circus
-          - Colorful
-          - Colorloop
-          - Colortwinkles
-          - Colorwaves
-          - Dancing Shadows
-          - Dissolve
-          - Dissolve Rnd
-          - Drip
-          - Dynamic
-          - Fade
-          - Fill Noise
-          - Fire 2012
-          - Fire Flicker
-          - Fireworks
-          - Fireworks 1D
-          - Fireworks Starburst
-          - Flow
-          - Glitter
-          - Gradient
-          - Halloween
-          - Halloween Eyes
-          - Heartbeat
-          - ICU
-          - Juggle
-          - Lake
-          - Lighthouse
-          - Lightning
-          - Loading
-          - Merry Christmas
-          - Meteor
-          - Meteor Smooth
-          - Multi Comet
-          - Noise 1
-          - Noise 2
-          - Noise 3
-          - Noise 4
-          - Oscillate
-          - Pacifica
-          - Palette
-          - Percent
-          - Phased
-          - Phased Noise
-          - Plasma
-          - Police
-          - Police All
-          - Popcorn
-          - Pride 2015
-          - Railway
-          - Rain
-          - Rainbow
-          - Rainbow Runner
-          - Random Colors
-          - Red & Blue
-          - Ripple
-          - Ripple Rainbow
-          - Running
-          - Running 2
-          - Saw
-          - Scan
-          - Scan Dual
-          - Scanner
-          - Scanner Dual
-          - Sine
-          - Sinelon
-          - Sinelon Dual
-          - Sinelon Rainbow
-          - Solid
-          - Solid Pattern
-          - Solid Pattern Tri
-          - Sparkle
-          - Sparkle Dark
-          - Sparkle+
-          - Spots
-          - Spots Fade
-          - Stream
-          - Stream 2
-          - Strobe
-          - Strobe Mega
-          - Strobe Rainbow
-          - Sunrise
-          - Sweep
-          - Sweep Random
-          - Theater
-          - Theater Rainbow
-          - Traffic Light
-          - Tri Chase
-          - Tri Fade
-          - Tri Wipe
-          - Twinkle
-          - Twinklecat
-          - Twinklefox
-          - Twinkleup
-          - Two Areas
-          - Two Dots
-          - Washingup
-          - Wipe
-          - Wipe Random
-        entity: light.stairs
-        group: true
-        header: Stairs
-        type: 'custom:light-entity-card'
-      - shorten_cards: true
-        consolidate_entities: false
-        color_wheel: true
-        persist_features: true
-        brightness: true
-        color_temp: true
-        white_value: true
-        color_picker: true
-        smooth_color_wheel: true
-        hide_header: false
-        child_card: false
-        show_slider_percent: true
-        full_width_sliders: false
-        brightness_icon: weather-sunny
-        white_icon: file-word-box
-        temperature_icon: thermometer
-        effects_list:
-          - Android
-          - Blink
-          - Blink Rainbow
-          - Bouncing Balls
-          - Bpm
-          - Breathe
-          - Candle
-          - Candle Multi
-          - Chase
-          - Chase Flash
-          - Chase Flash Rnd
-          - Chase Rainbow
-          - Chase Random
-          - ChunChun
-          - Circus
-          - Colorful
-          - Colorloop
-          - Colortwinkles
-          - Colorwaves
-          - Dancing Shadows
-          - Dissolve
-          - Dissolve Rnd
-          - Drip
-          - Dynamic
-          - Fade
-          - Fill Noise
-          - Fire 2012
-          - Fire Flicker
-          - Fireworks
-          - Fireworks 1D
-          - Fireworks Starburst
-          - Flow
-          - Glitter
-          - Gradient
-          - Halloween
-          - Halloween Eyes
-          - Heartbeat
-          - ICU
-          - Juggle
-          - Lake
-          - Lighthouse
-          - Lightning
-          - Loading
-          - Merry Christmas
-          - Meteor
-          - Meteor Smooth
-          - Multi Comet
-          - Noise 1
-          - Noise 2
-          - Noise 3
-          - Noise 4
-          - Oscillate
-          - Pacifica
-          - Palette
-          - Percent
-          - Phased
-          - Phased Noise
-          - Plasma
-          - Police
-          - Police All
-          - Popcorn
-          - Pride 2015
-          - Railway
-          - Rain
-          - Rainbow
-          - Rainbow Runner
-          - Random Colors
-          - Red & Blue
-          - Ripple
-          - Ripple Rainbow
-          - Running
-          - Running 2
-          - Saw
-          - Scan
-          - Scan Dual
-          - Scanner
-          - Scanner Dual
-          - Sine
-          - Sinelon
-          - Sinelon Dual
-          - Sinelon Rainbow
-          - Solid
-          - Solid Pattern
-          - Solid Pattern Tri
-          - Sparkle
-          - Sparkle Dark
-          - Sparkle+
-          - Spots
-          - Spots Fade
-          - Stream
-          - Stream 2
-          - Strobe
-          - Strobe Mega
-          - Strobe Rainbow
-          - Sunrise
-          - Sweep
-          - Sweep Random
-          - Theater
-          - Theater Rainbow
-          - Traffic Light
-          - Tri Chase
-          - Tri Fade
-          - Tri Wipe
-          - Twinkle
-          - Twinklecat
-          - Twinklefox
-          - Twinkleup
-          - Two Areas
-          - Two Dots
-          - Washingup
-          - Wipe
-          - Wipe Random
-        entity: light.rice_lights
-        group: true
-        header: Rice lights
-        type: 'custom:light-entity-card'
-      - shorten_cards: true
-        consolidate_entities: false
-        color_wheel: true
-        persist_features: true
-        brightness: true
-        color_temp: true
-        white_value: true
-        color_picker: true
-        smooth_color_wheel: true
-        hide_header: false
-        child_card: false
-        show_slider_percent: true
-        full_width_sliders: false
-        brightness_icon: weather-sunny
-        white_icon: file-word-box
-        temperature_icon: thermometer
-        effects_list:
-          - Android
-          - Blink
-          - Blink Rainbow
-          - Bouncing Balls
-          - Bpm
-          - Breathe
-          - Candle
-          - Candle Multi
-          - Chase
-          - Chase Flash
-          - Chase Flash Rnd
-          - Chase Rainbow
-          - Chase Random
-          - ChunChun
-          - Circus
-          - Colorful
-          - Colorloop
-          - Colortwinkles
-          - Colorwaves
-          - Dancing Shadows
-          - Dissolve
-          - Dissolve Rnd
-          - Drip
-          - Dynamic
-          - Fade
-          - Fill Noise
-          - Fire 2012
-          - Fire Flicker
-          - Fireworks
-          - Fireworks 1D
-          - Fireworks Starburst
-          - Flow
-          - Glitter
-          - Gradient
-          - Halloween
-          - Halloween Eyes
-          - Heartbeat
-          - ICU
-          - Juggle
-          - Lake
-          - Lighthouse
-          - Lightning
-          - Loading
-          - Merry Christmas
-          - Meteor
-          - Meteor Smooth
-          - Multi Comet
-          - Noise 1
-          - Noise 2
-          - Noise 3
-          - Noise 4
-          - Oscillate
-          - Pacifica
-          - Palette
-          - Percent
-          - Phased
-          - Phased Noise
-          - Plasma
-          - Police
-          - Police All
-          - Popcorn
-          - Pride 2015
-          - Railway
-          - Rain
-          - Rainbow
-          - Rainbow Runner
-          - Random Colors
-          - Red & Blue
-          - Ripple
-          - Ripple Rainbow
-          - Running
-          - Running 2
-          - Saw
-          - Scan
-          - Scan Dual
-          - Scanner
-          - Scanner Dual
-          - Sine
-          - Sinelon
-          - Sinelon Dual
-          - Sinelon Rainbow
-          - Solid
-          - Solid Pattern
-          - Solid Pattern Tri
-          - Sparkle
-          - Sparkle Dark
-          - Sparkle+
-          - Spots
-          - Spots Fade
-          - Stream
-          - Stream 2
-          - Strobe
-          - Strobe Mega
-          - Strobe Rainbow
-          - Sunrise
-          - Sweep
-          - Sweep Random
-          - Theater
-          - Theater Rainbow
-          - Traffic Light
-          - Tri Chase
-          - Tri Fade
-          - Tri Wipe
-          - Twinkle
-          - Twinklecat
-          - Twinklefox
-          - Twinkleup
-          - Two Areas
-          - Two Dots
-          - Washingup
-          - Wipe
-          - Wipe Random
-        entity: light.zita_desk_back_light
-        group: true
-        header: Stream
-        type: 'custom:light-entity-card'
-      - entity: light.elgato_key_light_air_a54c
-        type: light
       - type: entities
         entities:
-          - entity: binary_sensor.tagreader_status
-          - entity: light.tagreader_led
-          - entity: switch.tagreader_buzzer_enabled
-          - entity: switch.tagreader_led_enabled
-        title: Tag Reader @adonno
-        show_header_toggle: false
-    icon: 'mdi:lightbulb-group-outline'
+          - switch.coridor
+        title: Coridor
+      - shorten_cards: false
+        consolidate_entities: false
+        child_card: false
+        hide_header: false
+        header: Stairs
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list: true
+        entity: light.stairs
+        group: true
+        type: custom:light-entity-card
+      - shorten_cards: false
+        consolidate_entities: false
+        child_card: false
+        hide_header: false
+        header: Rice lights
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list: true
+        entity: light.rice_lights
+        group: true
+        type: custom:light-entity-card
+      - shorten_cards: false
+        consolidate_entities: false
+        child_card: false
+        hide_header: false
+        header: Ledge
+        color_wheel: true
+        persist_features: true
+        brightness: true
+        color_temp: true
+        white_value: true
+        color_picker: true
+        smooth_color_wheel: true
+        show_slider_percent: true
+        full_width_sliders: false
+        brightness_icon: weather-sunny
+        white_icon: file-word-box
+        temperature_icon: thermometer
+        effects_list: true
+        entity: light.ledge
+        group: true
+        type: custom:light-entity-card
+    icon: mdi:lightbulb-group-outline
     panel: false
     title: Lights

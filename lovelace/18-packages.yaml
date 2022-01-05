@@ -9,7 +9,7 @@
             - entity_id: sensor.seventeentrack_package_*
               options:
                 secondary_info: last-changed
-        type: 'custom:auto-entities'
+        type: custom:auto-entities
       - entities:
           - entity: sensor.seventeentrack_packages_not_found
           - entity: sensor.seventeentrack_packages_in_transit
@@ -19,5 +19,5 @@
           - entity: sensor.seventeentrack_packages_undelivered
           - entity: sensor.seventeentrack_packages_expired
         type: entities
-    icon: 'mdi:package-variant'
+    icon: mdi:package-variant
     title: Package tracking

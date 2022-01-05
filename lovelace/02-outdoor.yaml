@@ -1,14 +1,14 @@
   - badges: []
     cards:
       - entity: weather.dark_sky
-        type: 'custom:weather-card'
+        type: custom:weather-card
         number_of_forecasts: '5'
         name: DS
-      - aspect_ratio: 75%
-        type: iframe
+      - type: iframe
         url: >-
           https://embed.windy.com/embed2.html?lat=45.804&lon=15.905&zoom=11&level=surface&overlay=rain&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=45.809&detailLon=15.921&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1
-      - type: 'custom:weather-card'
+        aspect_ratio: 100%
+      - type: custom:weather-card
         entity: weather.accuweather
         number_of_forecasts: '5'
         name: AW
@@ -23,6 +23,12 @@
         show_header_toggle: false
         title: Weather warning
         type: entities
+      - entity: weather.super_weather_station
+        type: custom:weather-card
+        number_of_forecasts: '5'
+        name: Super
+      - type: custom:meteoalarm-card
+        entity: binary_sensor.meteoalarm
       - entities:
           - entity: binary_sensor.protection_window
           - entity: sensor.current_uv_index
@@ -32,10 +38,13 @@
         title: UV levels
         type: entities
       - entities:
-          - entity: sensor.u_s_air_pollution_level
-          - entity: sensor.u_s_air_quality_index
-          - entity: sensor.u_s_main_pollutant
+          - entity: sensor.u_s_air_pollution_level_2
+          - entity: sensor.u_s_air_quality_index_2
+          - entity: sensor.chinese_main_pollutant_2
           - entity: sensor.current_ozone_level
+          - entity: sensor.chinese_air_pollution_level_2
+          - entity: sensor.chinese_air_quality_index_2
+          - entity: sensor.chinese_main_pollutant_2
         show_header_toggle: false
         title: 'Air quality '
         type: entities
@@ -59,7 +68,7 @@
         show:
           fill: false
           labels: true
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
           - sensor.luftdaten_43996_p25
         hours_to_show: 96
@@ -68,7 +77,7 @@
         show:
           fill: false
           labels: true
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
           - entity: sensor.blitzortung_lightning_azimuth
           - entity: sensor.blitzortung_lightning_counter
@@ -76,5 +85,5 @@
         show_header_toggle: false
         title: Lightnings
         type: entities
-    icon: 'mdi:weather-sunset'
+    icon: mdi:weather-sunset
     title: Outdoor

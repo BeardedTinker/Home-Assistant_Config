@@ -1,63 +1,158 @@
   - badges: []
     cards:
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.dining_room_temperature
+            min: 0
+            max: 100
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+          - type: gauge
+            entity: sensor.living_room_temperature
+            min: 0
+            max: 100
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.luka_room_temperature
+            min: 0
+            max: 100
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+          - type: gauge
+            entity: sensor.zita_room_temperature
+            min: 0
+            max: 100
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.bathroom_temperature
+            min: 0
+            max: 100
+            name: Bathroom
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+          - type: gauge
+            entity: sensor.shelly_h_t_d50641_temperature
+            min: 0
+            max: 100
+            name: Bedroom
+            severity:
+              green: 22
+              yellow: 25
+              red: 28
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.balcony_temperature
+            min: 0
+            max: 100
+            name: Balcony
+            severity:
+              green: 0
+              yellow: 29
+              red: 33
+          - type: gauge
+            entity: sensor.loggia_temperature
+            min: 0
+            max: 100
+            name: Loggia
+            severity:
+              green: 0
+              yellow: 29
+              red: 33
+      - type: horizontal-stack
+        cards:
+          - entity: sensor.bathroom_humidity
+            max: 100
+            min: 0
+            severity:
+              green: 0
+              red: 0
+              yellow: 0
+            theme: default
+            type: gauge
+            name: Bathroom Humidity
+          - entity: sensor.shelly_h_t_d50641_humidity
+            max: 100
+            min: 0
+            severity:
+              green: 0
+              red: 0
+              yellow: 0
+            theme: default
+            type: gauge
+            name: Bedroom Humidity
+      - type: horizontal-stack
+        cards:
+          - entity: sensor.balcony_humidity
+            max: 100
+            min: 0
+            severity:
+              green: 0
+              red: 0
+              yellow: 0
+            theme: default
+            type: gauge
+            name: Balcony Humidity
+          - entity: sensor.loggia_humidity
+            max: 100
+            min: 0
+            severity:
+              green: 0
+              red: 0
+              yellow: 0
+            theme: default
+            type: gauge
+            name: Loggia Humidity
       - entity: climate.living_room
         step_size: 0.1
-        type: 'custom:simple-thermostat'
-      - entities:
-          - sensor.min_temp_rooms
-          - sensor.max_temp_rooms
-        name: Minimum/Maximum
-        show:
-          fill: false
-          labels: true
-        type: 'custom:mini-graph-card'
+        type: custom:simple-thermostat
+      - entity: climate.dining_room
+        _2step_size: 0.1
+        type: custom:simple-thermostat
       - entity: climate.zita_room
         step_size: 0.1
-        type: 'custom:simple-thermostat'
-      - entities:
-          - sensor.living_room_temperature
-          - sensor.dining_room_temperature
-          - sensor.luka_room_temperature
-          - sensor.zita_room_temperature
-          - sensor.bathroom_temperature
-        show:
-          fill: false
-          labels: true
-        type: 'custom:mini-graph-card'
+        type: custom:simple-thermostat
       - entity: climate.luka_room
         step_size: 0.1
-        type: 'custom:simple-thermostat'
+        type: custom:simple-thermostat
       - entities:
           - sensor.living_room_humidity
-          - sensor.dining_room_temperature
+          - sensor.dining_room_humidity
           - sensor.luka_room_humidity
           - sensor.zita_room_humidity
           - sensor.bathroom_humidity
         show:
           fill: false
           labels: true
-        type: 'custom:mini-graph-card'
-      - entity: climate.dining_room
-        _2step_size: 0.1
-        type: 'custom:simple-thermostat'
+        type: custom:mini-graph-card
       - entities:
+          - sensor.living_room_temperature
+          - sensor.dining_room_temperature
+          - sensor.luka_room_temperature
+          - sensor.zita_room_temperature
           - sensor.bathroom_temperature
-          - sensor.bathroom_humidity
-        name: Bathroom
+          - sensor.shelly_h_t_d50641_temperature
         show:
           fill: false
-          icon: 'mdi:temperature-celsius'
           labels: true
-        type: 'custom:mini-graph-card'
-      - entity: sensor.bathroom_temperature
-        max: 45
-        min: 0
-        severity:
-          green: 0
-          red: 0
-          yellow: 0
-        theme: default
-        type: gauge
+        type: custom:mini-graph-card
       - entities:
           - entity: sensor.living_room_heating
           - entity: sensor.luka_room_heating
@@ -66,44 +161,29 @@
         type: entities
         title: Heating status
         show_header_toggle: false
-      - entity: sensor.bathroom_humidity
-        max: 100
-        min: 0
-        severity:
-          green: 0
-          red: 0
-          yellow: 0
-        theme: default
-        type: gauge
-      - type: grid
-        columns: 2
-        cards:
-          - type: entity
-            entity: sensor.heating_living_room_last_24hr
-            name: Living room (24hr)
-          - type: entity
-            entity: sensor.heating_dining_room_last_24hr
-            name: Dining room (24hr)
-          - type: entity
-            entity: sensor.heating_luka_room_last_24hr
-            name: Luka room (24hr)
-          - type: entity
-            entity: sensor.heating_zita_room_last_24hr
-            name: Zita room (24hr)
-      - type: grid
-        columns: 2
-        cards:
-          - type: entity
-            entity: sensor.heating_living_room_last_30d
-            name: Living room (30d)
-          - type: entity
-            entity: sensor.heating_dining_room_last_30d
-            name: Dining room (30d)
-          - type: entity
-            entity: sensor.heating_luka_room_last_30d
-            name: Luka room (30d)
-          - type: entity
-            entity: sensor.heating_zita_room_last_30d
-            name: Zita room (30d)
-    icon: 'mdi:home-thermometer-outline'
+      - entities:
+          - sensor.min_temp_rooms
+          - sensor.max_temp_rooms
+        name: Minimum/Maximum
+        show:
+          fill: false
+          labels: true
+        type: custom:mini-graph-card
+      - type: entities
+        entities:
+          - entity: switch.switchbot_humidifier
+          - entity: sensor.switchbot_humidifier_humidity
+          - entity: sensor.switchbot_humidifier_temp
+          - entity: binary_sensor.switchbot_humidifier_power
+          - entity: binary_sensor.switchbot_humidifier_childlock
+          - entity: binary_sensor.switchbot_humidifier_water
+          - entity: binary_sensor.switchbot_humidifier_sound
+          - entity: sensor.switchbot_humidifier_nebulization
+        title: SwitchBot Humidifier
+      - type: entities
+        entities:
+          - entity: sensor.switchbot_meter_temp
+          - entity: sensor.switchbot_meter_humidity
+        title: SwitchBot Meter
+    icon: mdi:home-thermometer-outline
     title: Climate

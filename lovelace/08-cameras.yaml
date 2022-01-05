@@ -1,15 +1,14 @@
   - badges: []
     cards:
       - type: picture-entity
-        entity: camera.ebroznas_rlc_410_5mp
-        image: 'https://demo.home-assistant.io/stub_config/bedroom.png'
-        camera_image: camera.ebroznas_rlc_410_5mp
+        entity: camera.ebroz920_terasa2
+        camera_image: camera.ebroz920_terasa2
       - camera_image: camera.saved_image
         entities: []
         title: saved image
         type: picture-glance
       - aspect_ratio: 0%
-        camera_image: camera.elevator_profile1
+        camera_image: camera.ebroz920_lift
         camera_view: live
         entities:
           - entity: camera.elevator_profile1
@@ -21,27 +20,68 @@
         type: picture-glance
       - type: picture-glance
         title: RLC-410-5MP
-        image: 'https://demo.home-assistant.io/stub_config/kitchen.png'
+        image: https://demo.home-assistant.io/stub_config/kitchen.png
         entities:
-          - entity: switch.rlc_410_5mp_ir_lights
-          - entity: binary_sensor.rlc_410_5mp_motion
-          - entity: switch.rlc_410_5mp_record_audio
-        camera_image: camera.rlc_410_5mp
+          - entity: switch.balcony_ir_lights
+          - entity: binary_sensor.balcony_motion
+          - entity: switch.balcony_record_audio
+          - entity: switch.balcony_recording
+        camera_image: camera.balcony
         camera_view: live
       - aspect_ratio: 0%
-        camera_image: camera.ebroznas_indoor2
+        camera_image: camera.ebroz920_indoor2
         camera_view: live
         entities:
-          - entity: camera.ebroznas_indoor2
-        title: Indoor 2
+          - entity: camera.ebroz920_indoor2
+        title: Indoor
         type: picture-glance
       - entities:
           - entity: image_processing.facebox_saved_image
           - entity: camera.saved_image
           - entity: camera.saved_elevator_image
           - entity: automation.ss_balcony_webhook
-          - entity: automation.ss_elevator_webhook_2
+            icon: mdi:webhook
+          - entity: automation.ss_elevator_webhook
+            icon: mdi:webhook
           - entity: binary_sensor.front_door_contact
+          - entity: binary_sensor.living_room_motion_occupancy
+          - entity: binary_sensor.bathroom_motion_occupancy
+          - entity: binary_sensor.kitchen_motion
         type: entities
-    icon: 'mdi:cctv'
+      - type: entities
+        entities:
+          - entity: binary_sensor.nuki_bridge_bridge_callback_set
+            name: Bridge Callback Set
+          - entity: binary_sensor.nuki_bridge_connected
+            name: Connected
+          - entity: sensor.nuki_bridge_firmware_version
+            name: Firmware Version
+          - entity: sensor.nuki_bridge_wifi_firmware_version
+            name: WiFi Firmware Version
+        title: Nuki Bridge
+      - type: entities
+        entities:
+          - entity: lock.nuki_front_door_lock
+            name: Lock
+        title: Nuki Front Door
+      - type: entities
+        entities:
+          - entity: binary_sensor.nuki_front_door_door_open
+            name: Door Open
+          - entity: sensor.nuki_front_door_door_security_state
+            name: Door Security State
+          - entity: binary_sensor.nuki_front_door_locked
+            name: Locked
+        title: Nuki Front Door
+      - type: entities
+        entities:
+          - entity: lock.nuki_opener_lock
+            name: Lock
+        title: Nuki Opener
+      - type: entities
+        entities:
+          - entity: binary_sensor.nuki_opener_locked
+            name: Locked
+        title: Nuki Opener
+    icon: mdi:cctv
     title: Cameras

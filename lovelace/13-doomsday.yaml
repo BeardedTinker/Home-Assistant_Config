@@ -1,0 +1,58 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: sensor.radiation_level
+            index: 0
+        icon: mdi:radioactive
+        type: custom:mini-graph-card
+      - entities:
+          - entity: sensor.croatia_coronavirus_confirmed
+            icon: mdi:emoticon-neutral-outline
+            name: Confirmed
+          - entity: sensor.croatia_coronavirus_deaths
+            icon: mdi:emoticon-dead-outline
+            name: Deaths
+        show_icon: true
+        show_name: true
+        show_state: true
+        title: Croatia
+        type: glance
+      - entity: sensor.gdacs
+        type: entity
+      - geo_location_sources:
+          - all
+        type: map
+      - type: entities
+        entities:
+          - entity: binary_sensor.radiation_warning
+          - entity: sensor.radiation_level
+          - entity: sensor.geiger_counter
+      - entities:
+          - entity: sensor.worldwide_coronavirus_confirmed
+            icon: mdi:emoticon-neutral-outline
+            name: Confirmed
+          - entity: sensor.worldwide_coronavirus_deaths
+            icon: mdi:emoticon-dead-outline
+            name: Deaths
+        show_icon: true
+        show_name: true
+        show_state: true
+        title: Worldwide
+        type: glance
+      - type: entities
+        entities:
+          - entity: sensor.geiger_counter_radiation_dose_per_hour
+          - entity: sensor.geiger_counter_radioactive_events_per_minute
+          - entity: sensor.geiger_counter_action
+          - entity: number.geiger_counter_alert_threshold
+          - entity: switch.geiger_counter_buzzer_feedback
+          - entity: switch.geiger_counter_led_feedback
+          - entity: number.geiger_counter_sensitivity
+          - entity: number.geiger_counter_sensors_count
+          - entity: sensor.geiger_counter_linkquality
+      - type: entity
+        entity: sensor.earthquakes
+        icon: mdi:waveform
+    icon: mdi:nuke
+    path: apokalipsa
+    title: Doomsday

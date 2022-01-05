@@ -1,0 +1,100 @@
+  - title: Shelly
+    path: shelly
+    icon: mdi:cpu-32-bit
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: sensor.shelly_em_channel_1_energy
+          - entity: sensor.shelly_em_channel_1_energy_returned
+          - entity: sensor.shelly_em_channel_1_power
+          - entity: sensor.shelly_em_channel_1_voltage
+          - entity: button.shellyem_109665_ota_update
+          - entity: button.shellyem_109665_reboot
+          - entity: sensor.shellyem_109665_uptime
+      - type: entities
+        entities:
+          - entity: switch.3d_printer
+          - entity: sensor.3d_printer_device_temperature
+          - entity: sensor.3d_printer_total_consumption
+          - entity: sensor.3d_printer_current_consumption
+          - entity: button.shellyplug_s_b86647_ota_update
+          - entity: button.shellyplug_s_b86647_reboot
+          - entity: sensor.3d_printer_uptime
+      - type: entities
+        entities:
+          - entity: switch.washing_machine
+          - entity: sensor.shellyplug_s_01e22b_device_temperature
+          - entity: sensor.washing_machine_total_consumption
+          - entity: sensor.washing_machine_current_consumption
+          - entity: button.shellyplug_s_01e22b_ota_update
+          - entity: button.shellyplug_s_01e22b_reboot
+          - entity: sensor.shellyplug_s_01e22b_uptime
+      - type: entities
+        entities:
+          - entity: switch.shellyplug_s_b4944b
+          - entity: sensor.shellyplug_s_b4944b_device_temperature
+          - entity: sensor.dishwasher_total_consumption
+          - entity: sensor.dishwasher_current_consumption
+          - entity: button.shellyplug_s_b4944b_ota_update
+          - entity: button.shellyplug_s_b4944b_reboot
+          - entity: sensor.shellyplug_s_b4944b_uptime
+      - type: entities
+        entities:
+          - entity: sensor.bathroom_vent_energy_0
+          - entity: sensor.bathroom_vent_power_0
+          - entity: binary_sensor.bathroom_vent_overtemperature
+          - entity: switch.bathroom_vent_relay_0
+          - entity: sensor.bathroom_vent_temperature
+          - entity: button.shelly_1l_vent_ota_update
+          - entity: button.shelly_1l_vent_reboot
+          - entity: sensor.bathroom_vent_uptime
+      - type: entities
+        entities:
+          - entity: sensor.shelly_gas_10521cef4a01_concentration
+          - entity: binary_sensor.shelly_gas_10521cef4a01_gas
+          - entity: sensor.shelly_gas_10521cef4a01_operation
+          - entity: sensor.shelly_gas_10521cef4a01_self_test
+          - entity: button.shelly_gas_10521cef4a01_self_test
+          - entity: button.shelly_gas_10521cef4a01_update_firmware
+          - entity: sensor.shelly_gas_10521cef4a01_uptime
+      - type: entities
+        entities:
+          - entity: binary_sensor.shelly_button1_e09806a9844e_shortpush
+          - entity: binary_sensor.shelly_button1_e09806a9844e_longpush
+          - entity: binary_sensor.shelly_button1_e09806a9844e_double_shortpush
+          - entity: binary_sensor.shelly_button1_e09806a9844e_triple_shortpush
+          - entity: binary_sensor.shelly_button1_e09806a9844e_charger
+          - entity: sensor.shelly_button1_e09806a9844e_battery
+      - type: entities
+        entities:
+          - entity: binary_sensor.kitchen_motion
+          - entity: binary_sensor.kitchen_motion_charger
+          - entity: sensor.kitchen_motion_lux
+          - entity: binary_sensor.kitchen_motion_vibration
+          - entity: sensor.kitchen_motion_uptime
+      - type: entities
+        entities:
+          - entity: binary_sensor.bathroom_vent_firmware_update
+          - entity: binary_sensor.kitchen_motion_firmware_update
+          - entity: binary_sensor.shelly_button1_e09806a9844e_firmware_update
+          - entity: binary_sensor.shelly_door_window_2_e8db84d4093a_firmware_update
+          - entity: binary_sensor.shelly_em_firmware_update
+          - entity: binary_sensor.shelly_gas_10521cef4a01_firmware_update
+          - entity: binary_sensor.shelly_h_t_d50641_firmware_update
+          - entity: binary_sensor.shellyplug_s_01e22b_firmware_update
+          - entity: binary_sensor.shellyplug_s_b4944b_firmware_update
+          - entity: binary_sensor.shellyplug_s_b86647_firmware_update
+      - type: entities
+        entities:
+          - entity: binary_sensor.shelly_door_window_2_e8db84d4093a_opening
+          - entity: sensor.shelly_door_window_2_e8db84d4093a_tilt
+          - entity: binary_sensor.shelly_door_window_2_e8db84d4093a_vibration
+          - entity: sensor.shelly_door_window_2_e8db84d4093a_lux
+          - entity: sensor.shelly_door_window_2_e8db84d4093a_temperature
+          - entity: sensor.shelly_door_window_2_e8db84d4093a_ip
+      - type: entities
+        entities:
+          - entity: sensor.shelly_h_t_d50641_humidity
+          - entity: sensor.shelly_h_t_d50641_ip
+          - entity: sensor.shelly_h_t_d50641_temperature

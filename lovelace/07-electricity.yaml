@@ -1,19 +1,6 @@
   - badges: []
     cards:
       - entities:
-          - entity: sensor.shelly_em_total_consumption
-            index: 0
-        hours_to_show: 168
-        points_per_hour: 0.25
-        type: 'custom:mini-graph-card'
-      - entities:
-          - entity: sensor.shelly_em_current_consumption
-        hours_to_show: 168
-        points_per_hour: 0.25
-        show:
-          graph: bar
-        type: 'custom:mini-graph-card'
-      - entities:
           - entity: sensor.daily_energy_peak
             name: Peak
           - entity: sensor.daily_energy_offpeak
@@ -21,40 +8,27 @@
         name: Daily Energy Usage
         show:
           graph: bar
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
-          - entity: sensor.washing_machine_current_consumption
+          - entity: sensor.shelly_em_channel_1_energy
+            index: 0
         hours_to_show: 168
         points_per_hour: 0.25
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
           - entity: sensor.monthly_energy_peak
             name: Peak
           - entity: sensor.monthly_energy_offpeak
             name: Offpeak
         name: Monthly Energy Usage
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
-          - entity: sensor.washing_machine_total_consumption
+          - entity: sensor.shelly_em_channel_1_power
         hours_to_show: 168
         points_per_hour: 0.25
-        type: 'custom:mini-graph-card'
-      - cards:
-          - entities:
-              - sensor.daily_energy_peak
-            font_size: 75
-            line_color: blue
-            line_width: 8
-            name: Daily Peak
-            type: 'custom:mini-graph-card'
-          - entities:
-              - sensor.daily_energy_offpeak
-            font_size: 75
-            line_color: var(--accent-color)
-            line_width: 8
-            name: Daily OffPeak
-            type: 'custom:mini-graph-card'
-        type: horizontal-stack
+        show:
+          graph: bar
+        type: custom:mini-graph-card
       - cards:
           - entities:
               - sensor.monthly_energy_peak
@@ -62,33 +36,71 @@
             line_color: blue
             line_width: 8
             name: Monthly Peak
-            type: 'custom:mini-graph-card'
+            type: custom:mini-graph-card
           - entities:
               - sensor.monthly_energy_offpeak
             font_size: 75
             line_color: var(--accent-color)
             line_width: 8
             name: Monthly OffPeak
-            type: 'custom:mini-graph-card'
+            type: custom:mini-graph-card
         type: horizontal-stack
+      - cards:
+          - entities:
+              - sensor.daily_energy_peak
+            font_size: 75
+            line_color: blue
+            line_width: 8
+            name: Daily Peak
+            type: custom:mini-graph-card
+          - entities:
+              - sensor.daily_energy_offpeak
+            font_size: 75
+            line_color: var(--accent-color)
+            line_width: 8
+            name: Daily OffPeak
+            type: custom:mini-graph-card
+        type: horizontal-stack
+      - type: grid
+        columns: 2
+        cards:
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.washing_machine_current_consumption
+            hours_to_show: 168
+            points_per_hour: 0.25
+          - entities:
+              - entity: sensor.washing_machine_total_consumption
+            hours_to_show: 168
+            points_per_hour: 0.25
+            type: custom:mini-graph-card
+      - type: grid
+        columns: 2
+        cards:
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.dishwasher_current_consumption
+            hours_to_show: 168
+            points_per_hour: 0.25
+          - entities:
+              - entity: sensor.dishwasher_total_consumption
+            hours_to_show: 168
+            points_per_hour: 0.25
+            type: custom:mini-graph-card
       - entities:
           - entity: switch.washing_machine
           - entity: utility_meter.daily_energy
           - entity: utility_meter.monthly_energy
-          - entity: sensor.shelly_em_voltage
+          - entity: sensor.shelly_em_channel_1_voltage
         show_header_toggle: false
         title: shelly
         type: entities
       - entities:
-          - entity: sensor.ender_3_current_consumption
-        title: 3D Printer
-        type: entities
-      - entities:
-          - entity: sensor.ender_3_current_consumption
-          - entity: sensor.ender_3_total_consumption
+          - entity: sensor.ender_3_pro_current_consumption
+          - entity: sensor.ender_3_pro_total_consumption
         hours_to_show: 168
         points_per_hour: 0.25
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - entities:
           - entity: sensor.daily_energy_offpeak
           - entity: sensor.daily_energy_peak
@@ -138,8 +150,8 @@
             value: 2400
         color_thresholds_transition: hard
         entities:
-          - sensor.shelly_em_current_consumption
-          - color: 'rgba(0,0,255,1)'
+          - sensor.shelly_em_channel_1_power
+          - color: rgba(0,0,255,1)
             entity: binary_sensor.dark_outside
             show_line: false
             y_axis: secondary
@@ -164,7 +176,7 @@
           ha-card {
             border: solid 2px var(--primary-color);
           }
-        type: 'custom:mini-graph-card'
+        type: custom:mini-graph-card
       - color_thresholds:
           - color: '#039BE5'
             value: 0
@@ -176,7 +188,7 @@
             value: 2400
         color_thresholds_transition: hard
         entities:
-          - sensor.shelly_em_voltage
+          - sensor.shelly_em_channel_1_voltage
         group: false
         hour24: true
         hours_to_show: 24
@@ -198,44 +210,48 @@
           ha-card {
             border: solid 2px var(--primary-color);
           }
-        type: 'custom:mini-graph-card'
-      - type: 'custom:power-distribution-card'
+        type: custom:mini-graph-card
+      - type: custom:power-distribution-card
         title: ''
         entities:
           - decimals: 2
             display_abs: true
             name: grid
             unit_of_display: W
-            icon: 'mdi:transmission-tower'
-            entity: sensor.shelly_em_current_consumption
+            icon: mdi:transmission-tower
+            entity: sensor.shelly_em_channel_1_power
             preset: grid
           - decimals: '2'
             display_abs: true
             name: Washing
             unit_of_display: W
             consumer: true
-            icon: 'mdi:washing-machine'
+            icon: mdi:washing-machine
             entity: sensor.washing_machine_current_consumption
             preset: consumer
             icon_color:
               bigger: ''
               equal: ''
               smaller: ''
-          - decimals: 2
-            display_abs: true
-            name: home
-            unit_of_display: W
-            consumer: true
-            icon: 'mdi:home-assistant'
-            entity: sensor.shelly_em_current_consumption
-            preset: home
           - decimals: '2'
             display_abs: true
             name: Ender 3
             unit_of_display: W
             consumer: true
-            icon: 'mdi:printer-3d'
-            entity: sensor.ender_3_current_consumption
+            icon: mdi:printer-3d
+            entity: sensor.ender_3_pro_current_consumption
+            preset: consumer
+            icon_color:
+              bigger: ''
+              equal: ''
+              smaller: ''
+          - decimals: '2'
+            display_abs: true
+            name: consumer
+            unit_of_display: W
+            consumer: true
+            icon: mdi:dishwasher
+            entity: sensor.dishwasher_current_consumption
             preset: consumer
             icon_color:
               bigger: ''
@@ -249,6 +265,8 @@
             - preset: ratio
               name: ratio
         animation: slide
-    icon: 'mdi:flash'
+      - type: energy-distribution
+        link_dashboard: true
+    icon: mdi:flash
     path: electricity
     title: Electricity

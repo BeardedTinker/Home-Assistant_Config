@@ -1,20 +1,26 @@
   - title: Battery
     path: battery
-    icon: 'mdi:battery-charging-medium'
+    icon: mdi:battery-charging-medium
     badges: []
     cards:
-      - type: 'custom:battery-state-card'
+      - type: custom:battery-state-card
         title: Plant batteries
         entities:
-          - entity: sensor.cherry_tomatoes_battery
-            name: Cherry Tomatoes battery
-          - entity: sensor.ficus_benjamina_battery
+          - entity: sensor.dracena_marginata_battery_2
+            name: Dracena Marginata battery
+          - entity: sensor.dypsis_lutescenes_battery_2
+            name: Dypsis Lutescenes battery
+          - entity: sensor.ficus_benjamina_battery_2
             name: Ficus Benjamina battery
-          - entity: sensor.dracena_marginata_large_battery
-            name: Dracena Marginata large
-          - entity: sensor.dracena_marginata_small_battery
-            name: Dracena Marginata small
-      - type: 'custom:battery-state-card'
+          - entity: sensor.parthenocissus_small_battery_2
+            name: Parthenocissus small
+          - entity: sensor.parthenocissus_battery_2
+            name: Parthenocissus batery
+          - entity: sensor.schefflera_arboricola_battery_2
+            name: Schefflera Arbicola battrery
+          - entity: sensor.ficus_benjamina_natasja_battery
+            name: Ficus Benjamina Natasja
+      - type: custom:battery-state-card
         title: Phone battery levels
         entities:
           - entity: sensor.ele_l29_battery_level
@@ -25,26 +31,36 @@
             name: Luka phone battery
           - entity: sensor.fig_lx1_battery_level
             name: Zita phone battery
-      - type: 'custom:battery-state-card'
+      - type: custom:battery-state-card
         title: Xiaomi battery levels
         entities:
+          - entity: sensor.balcony_battery
+            name: Balcony humidity & temp
           - entity: sensor.bathroom_battery
             name: Bathroom humidity & temp
+          - entity: sensor.bathroom_motion_battery
+            name: Bathroom motion
           - entity: sensor.0x00158d00039dc604_battery
-            name: Vibration sensor
+            name: Vibration
           - entity: sensor.cube_battery
             name: Cube
           - entity: sensor.front_door_battery
             name: Front door sensor
           - entity: sensor.living_room_motion_battery
-            name: Living room sensor
+            name: Living room motion
+          - entity: sensor.loggia_battery
+            name: Loggia humidity & temp
           - entity: sensor.luka_switch_battery
             name: Luka room button
           - entity: sensor.zita_switch_battery
             name: Zita room button
-          - entity: sensor.wx08zm_battery_level
-            name: Mosquito Repellent
-      - type: 'custom:battery-state-card'
+          - entity: sensor.leak_sensor_battery
+            name: Leak sensor
+          - entity: sensor.zita_battery_level
+            name: Zita mosquito Repellent
+          - entity: sensor.luka_battery_level
+            name: Luka mosquito Repellent
+      - type: custom:battery-state-card
         title: IKEA battery levels
         entities:
           - entity: sensor.bedroom_dimmer_battery
@@ -57,3 +73,10 @@
             name: Kitchen dimmer
           - entity: sensor.living_room_remote_battery
             name: Living room remote
+      - type: entities
+        entities:
+          - entity: sensor.shelly_button1_e09806a9844e_battery
+          - entity: sensor.shelly_door_window_2_e8db84d4093a_battery
+          - entity: sensor.shelly_h_t_d50641_battery
+          - entity: sensor.kitchen_motion_battery
+        title: Shelly battery levels

@@ -1,4 +1,4 @@
-  - icon: 'mdi:tune-vertical'
+  - icon: mdi:tune-vertical
     title: Configuration
     badges: []
     cards:
@@ -28,3 +28,30 @@
         show_header_toggle: false
       - type: entity
         entity: input_boolean.guest_mode
+      - type: entities
+        entities:
+          - entity: counter.dishwasher_pods
+          - entity: counter.washing_pods
+        title: Detergent pods
+      - type: entities
+        entities:
+          - entity: input_datetime.school_first_day_luka
+          - entity: input_datetime.school_last_day_luka
+        title: Luka school
+      - type: entities
+        entities:
+          - entity: input_datetime.school_first_day_zita
+          - entity: input_datetime.school_last_day_zita
+        title: Zita school
+      - type: entities
+        entities:
+          - entity: input_text.chores_dog
+          - entity: input_text.chores_dishwasher
+          - entity: input_text.chores_washing_machine
+          - entity: input_text.chores_trash
+        title: Today chores
+      - type: entities
+        entities:
+          - entity: input_number.offpeak_energy_cost
+          - entity: input_number.peak_energy_cost
+        title: Electricity price

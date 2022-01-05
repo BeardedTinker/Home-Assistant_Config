@@ -1,0 +1,154 @@
+  - badges: []
+    cards:
+      - type: custom:github-flexi-card
+        title: Github projects
+        entities:
+          - entity: sensor.bt_s_ha_config
+            name: Main HA config
+            url: true
+            secondary_info: 'Clones: {clones}'
+            attributes:
+              - views
+              - stargazers
+              - forks
+              - open_issues
+          - entity: sensor.bt_s_thermal_printer
+            name: Thermal Printer
+            url: true
+            secondary_info: 'Clones: {clones}'
+            attributes:
+              - views
+              - stargazers
+              - forks
+              - open_issues
+          - entity: sensor.pesor_s_higrow_repo_2
+            name: Pesors Higrow firmware
+            secondary_info: 'Clones: {clones}'
+            url: true
+            attributes:
+              - views
+              - stargazers
+              - forks
+              - open_issues
+          - entity: sensor.ha_core_repo
+            name: HA Core ({latest_release_tag})
+            url: true
+            attributes:
+              - stargazers
+              - forks
+              - open_issues
+      - entities:
+          - entity: input_select.logger_level
+        show_header_toggle: false
+        title: Logger
+        type: entities
+      - entities:
+          - entity: input_text.version_latest_notified
+        title: HA Update
+        type: entities
+      - entities:
+          - entity: sensor.count_alert
+          - entity: sensor.count_automations
+          - entity: sensor.count_binary_sensor
+          - entity: sensor.count_camera
+          - entity: sensor.count_climate
+          - entity: sensor.count_counter
+          - entity: sensor.count_devices
+          - entity: sensor.count_entities
+          - entity: sensor.count_groups
+          - entity: sensor.count_image_processing
+          - entity: sensor.count_boolean
+          - entity: sensor.count_datetime
+          - entity: sensor.count_number
+          - entity: sensor.count_select
+          - entity: sensor.count_text
+          - entity: sensor.count_lights
+          - entity: sensor.number_of_lines_of_code_yaml
+          - entity: sensor.count_locks
+          - entity: sensor.count_media_player
+          - entity: sensor.count_person
+          - entity: sensor.count_plants
+          - entity: sensor.count_rest
+          - entity: sensor.count_script
+          - entity: sensor.count_sensor
+          - entity: sensor.count_switch
+          - entity: sensor.count_timer
+          - entity: sensor.count_utility_meter
+          - entity: sensor.count_vacuum
+          - entity: sensor.count_weather
+        title: System statistics
+        type: entities
+      - type: entities
+        entities:
+          - entity: binary_sensor.updater
+          - entity: binary_sensor.updater_addons
+          - entity: binary_sensor.updater_hacs
+          - entity: binary_sensor.updater_supervisor
+          - entity: sensor.supervisor_updates
+          - entity: sensor.hacs
+      - type: entities
+        title: Home Assistant Config CI
+        entities:
+          - entity: sensor.github_checkrun_remarklint
+            name: Remarklint
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+          - entity: sensor.github_checkrun_yamllint
+            name: YAMLlint
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+          - entity: sensor.github_checkrun_home_assistant_current
+            name: Current version
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+          - entity: sensor.github_checkrun_home_assistant_stable
+            name: Latest version
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+          - entity: sensor.github_checkrun_home_assistant_beta
+            name: Beta version
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+          - entity: sensor.github_checkrun_home_assistant_dev
+            name: Dev version
+            secondary_info:
+              attribute: id
+            type: custom:multiple-entity-row
+            entities:
+              - attribute: started_at
+                format: datetime
+              - attribute: completed_at
+                format: datetime
+    icon: mdi:bug
+    path: system
+    title: System

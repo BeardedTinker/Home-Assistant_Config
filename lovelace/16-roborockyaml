@@ -1,0 +1,41 @@
+  - icon: mdi:robot-vacuum
+    title: Roborosk S5 max
+    path: roborosk-s5-max
+    badges: []
+    cards:
+      - type: picture-entity
+        camera_image: camera.xiaomi_cloud_map_extractor
+        entity: vacuum.xiaomi_vacuum_cleaner
+      - type: custom:xiaomi-vacuum-map-card
+        entity: vacuum.xiaomi_vacuum_cleaner
+        map_source:
+          camera: camera.xiaomi_cloud_map_extractor
+        calibration_source:
+          camera: true
+        map_modes:
+          - template: vacuum_clean_zone
+          - template: vacuum_goto
+          - template: vacuum_clean_zone_predefined
+            predefined_selections:
+              - zones:
+                  - - 25500
+                    - 25500
+                    - 26500
+                    - 26500
+              - zones:
+                  - - 24215
+                    - 28125
+                    - 29465
+                    - 32175
+                  - - 27492
+                    - 26789
+                    - 28942
+                    - 27889
+      - type: entities
+        entities:
+          - entity: vacuum.xiaomi_vacuum_cleaner
+      - type: custom:xiaomi-vacuum-card
+        entity: vacuum.xiaomi_vacuum_cleaner
+        name: Robo
+        vendor: xiaomi
+        image: /local/img/vacuum.png

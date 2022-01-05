@@ -1,63 +1,123 @@
   - badges: []
     cards:
-      - entity: plant.cherry_tomatoes
-        name: Cherry Tomatoes
-        type: plant-status
       - entity: plant.ficus_benjamina
         name: Ficus Benjamina
         type: plant-status
       - type: plant-status
-        entity: plant.dracena_marginata_small
-        name: Dracena Marginata - small
+        entity: plant.schefflera_arboricola
+        name: Scherriera Arboricola
+      - entity: plant.parthenocissus_small
+        name: Parthenocissus small
+        type: plant-status
       - type: plant-status
-        entity: plant.dracena_marginata_large
-        name: Dracena Marginata - large
-      - type: 'custom:battery-state-card'
-        title: Battery levels
-        entities:
-          - entity: sensor.cherry_tomatoes_battery
-            name: Cherry Tomatoes battery
-          - entity: sensor.ficus_benjamina_battery
-            name: Ficus Benjamina battery
-          - entity: sensor.dracena_marginata_small_battery
-            name: Dracena Marginata small
-          - entity: sensor.dracena_marginata_large_battery
-            name: Dracena Marginata large
-      - entities:
-          - entity: sensor.cherry_tomatoes_date
-          - entity: sensor.cherry_tomatoes_time
-          - entity: sensor.ficus_benjamina_date
-          - entity: sensor.ficus_benjamina_time
-          - entity: sensor.dracena_marginata_large_date
-          - entity: sensor.dracena_marginata_large_time
-          - entity: sensor.dracena_marginata_small_date
-          - entity: sensor.dracena_marginata_small_time
-          - entity: sensor.cherry_tomatoes_humidity
-          - entity: sensor.cherry_tomatoes_fertilize_state
-          - entity: sensor.cherry_tomatoes_charging
-          - entity: sensor.cherry_tomatoes_bootcount
-          - entity: sensor.cherry_tomatoes_sleep5count
-          - entity: sensor.ficus_benjamina_humidity
-          - entity: sensor.ficus_benjamina_fertilize_state
-          - entity: sensor.ficus_benjamina_charging
-          - entity: sensor.ficus_benjamina_bootcount
-          - entity: sensor.ficus_benjamina_sleep5count
-          - entity: sensor.dracena_marginata_large_time
-          - entity: sensor.dracena_marginata_large_time
-        show_header_toggle: false
-        title: My plant
-        type: entities
+        entity: plant.parthenocissus
+        name: Parthenocissus
+      - type: plant-status
+        entity: plant.dypsis_lutescenes
+        name: Dypsis Lutenscenes
+      - type: plant-status
+        name: Dracena Marginata
+        entity: plant.dracena_marginata
+      - type: plant-status
+        entity: plant.ficus_benjamin_natasya
+        name: Ficus Benjamina Natasja
       - type: entities
         entities:
-          - entity: sensor.cherry_tomatoes_last_charge
-          - entity: input_datetime.cherry_tomatoes_last_changed
-          - entity: sensor.dracena_marginata_large_last_charge
-          - entity: input_datetime.dracena_marginata_large_last_changed
-          - entity: sensor.dracena_marginata_small_last_charge
-          - entity: input_datetime.dracena_marginata_small_last_changed
-          - entity: sensor.ficus_benjamina_last_charge
-          - entity: input_datetime.ficus_benjamina_last_changed
-        title: Last charge for plant sensors
-    icon: 'mdi:flower'
+          - entity: sensor.schefflera_arboricola_temperature
+          - entity: sensor.schefflera_arboricola_humidity
+          - entity: sensor.schefflera_arboricola_illuminance
+          - entity: sensor.schefflera_arboricola_soil_moisture
+          - entity: sensor.schefflera_arboricola_salt
+          - entity: sensor.schefflera_arboricola_battery
+          - entity: input_boolean.schefflera_arboricola_prevent_deep_sleep
+          - entity: binary_sensor.schefflera_arboricola_wake_button
+          - entity: sensor.schefflera_arboricola_wifi_uptime
+          - entity: sensor.schefflera_arboricola_tx
+          - entity: sensor.schefflera_arboricola_rx
+        title: Schefflera Arboricola
+      - type: entities
+        entities:
+          - entity: sensor.ficus_benjamina_temperature
+          - entity: sensor.ficus_benjamina_humidity
+          - entity: sensor.ficus_benjamina_illuminance
+          - entity: sensor.ficus_benjamina_soil_moisture
+          - entity: sensor.ficus_benjamina_salt
+          - entity: sensor.ficus_benjamina_battery
+          - entity: binary_sensor.ficus_benjamina_wake_button
+          - entity: sensor.ficus_benjamina_wifi_uptime
+          - entity: sensor.ficus_benjamina_tx
+          - entity: sensor.ficus_benjamina_rx
+        title: Ficus Benjamina
+      - type: entities
+        entities:
+          - entity: sensor.parthenocissus_temperature
+          - entity: sensor.parthenocissus_humidity
+          - entity: sensor.parthenocissus_illuminance
+          - entity: sensor.parthenocissus_soil_moisture
+          - entity: sensor.parthenocissus_salt
+          - entity: sensor.parthenocissus_battery
+          - entity: binary_sensor.parthenocissus_wake_button
+          - entity: sensor.parthenocissus_wifi_uptime
+          - entity: sensor.parthenocissus_tx
+          - entity: sensor.parthenocissus_rx
+        state_color: false
+        title: Parthenocissus
+      - type: entities
+        entities:
+          - entity: sensor.parthenocissus_small_temperature
+          - entity: sensor.parthenocissus_small_humidity
+          - entity: sensor.parthenocissus_small_illuminance
+          - entity: sensor.parthenocissus_small_soil_moisture
+          - entity: sensor.parthenocissus_small_salt
+          - entity: sensor.parthenocissus_small_battery
+          - entity: binary_sensor.parthenocissus_small_wake_button
+          - entity: sensor.parthenocissus_small_uptime
+          - entity: sensor.parthenocissus_small_tx
+          - entity: sensor.parthenocissus_small_rx
+        title: Parthenocissus Small
+      - type: entities
+        entities:
+          - entity: sensor.dracena_marginata_temperature
+          - entity: sensor.dracena_marginata_humidity
+          - entity: sensor.dracena_marginata_illuminance
+          - entity: sensor.dracena_marginata_soil_moisture
+          - entity: sensor.dracena_marginata_salt
+          - entity: sensor.dracena_marginata_battery
+          - entity: sensor.dracena_marginata_battery_2
+          - entity: switch.watering_station_pump_2
+          - entity: binary_sensor.dracena_marginata_wake_button
+          - entity: sensor.dracena_marginata_wifi_uptime
+          - entity: sensor.dracena_marginata_tx
+          - entity: sensor.dracena_marginata_rx
+        title: Dracena Marginata
+      - type: entities
+        entities:
+          - entity: sensor.dypsis_lutescenes_temperature
+          - entity: sensor.dypsis_lutescenes_humidity
+          - entity: sensor.dypsis_lutescenes_illuminance
+          - entity: sensor.dypsis_lutescenes_soil_moisture
+          - entity: sensor.dypsis_lutescenes_salt
+          - entity: sensor.dypsis_lutescenes_battery
+          - entity: sensor.dypsis_lutescenes_battery_2
+          - entity: switch.watering_station_pump_1
+          - entity: binary_sensor.dypsis_lutescenes_wake_button
+          - entity: sensor.dypsis_lutescenes_wifi_uptime
+          - entity: sensor.dypsis_lutescenes_tx
+          - entity: sensor.dypsis_lutescenes_rx
+        title: Dypsis Lutescenes
+      - type: entity
+        entity: switch.watering_station_pump_1
+        state_color: true
+      - type: entity
+        entity: switch.watering_station_pump_2
+        state_color: true
+      - type: history-graph
+        entities:
+          - entity: switch.watering_station_pump_1
+          - entity: switch.watering_station_pump_2
+        refresh_interval: 0
+        hours_to_show: 72
+        title: Watering station
+    icon: mdi:flower
     path: plants
     title: Plants

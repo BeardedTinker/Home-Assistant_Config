@@ -1,6 +1,6 @@
   - badges: []
     cards:
-      - entity: sensor.synology_cpu_load_total
+      - entity: sensor.ebroz920_cpu_utilization_total
         max: 100
         min: 0
         name: CPU load
@@ -10,7 +10,7 @@
           yellow: 80
         theme: default
         type: gauge
-      - entity: sensor.synology_memory_usage_real
+      - entity: sensor.ebroz920_memory_usage_real
         max: 100
         min: 0
         name: RAM usage
@@ -20,7 +20,7 @@
           yellow: 70
         theme: default
         type: gauge
-      - entity: sensor.synology_volume_used_volume_1
+      - entity: sensor.ebroz920_volume_1_volume_used
         max: 100
         min: 0
         name: HDD usage
@@ -31,31 +31,11 @@
         theme: default
         type: gauge
       - entities:
-          - sensor.synology_network_down
-          - sensor.synology_network_up
-        icon: 'mdi:network'
+          - sensor.ebroz920_network_down
+          - sensor.ebroz920_network_up
+        icon: mdi:network
         name: Network
-        type: 'custom:mini-graph-card'
-      - entities:
-          - sensor.synology_temperature_sda
-          - sensor.synology_temperature_sdb
-          - sensor.synology_temperature_sdc
-          - sensor.synology_temperature_sdd
-        icon: 'mdi:harddisk'
-        name: Disk temperature
-        show:
-          labels: hover
-          legend: false
-        type: 'custom:mini-graph-card'
-      - entities:
-          - entity: sensor.ups_battery_runtime
-          - entity: sensor.ups_input_voltage
-          - entity: sensor.ups_nominal_real_power
-          - entity: sensor.ups_status
-          - entity: sensor.ups_status_data
-          - entity: sensor.ups_battery_charge
-          - entity: input_boolean.ups_on_batteries
-        type: entities
+        type: custom:mini-graph-card
       - entity: sensor.ups_load
         max: 100
         min: 0
@@ -66,34 +46,88 @@
         theme: default
         type: gauge
       - entities:
-          - entity: binary_sensor.ebroznas_security_status
+          - entity: sensor.ups_battery_runtime
+          - entity: sensor.ups_input_voltage
+          - entity: sensor.ups_nominal_real_power
+          - entity: sensor.ups_status
+          - entity: sensor.ups_status_data
+          - entity: sensor.ups_battery_charge
+          - entity: input_boolean.ups_on_batteries
+        type: entities
+      - entities:
+          - entity: binary_sensor.ebroz920_security_status
+          - entity: binary_sensor.bt415_security_status
         type: entities
         show_header_toggle: false
       - type: entities
         entities:
-          - entity: sensor.synology_average_disk_temp_volume_1
-          - entity: sensor.synology_maximum_disk_temp_volume_1
-          - entity: sensor.synology_status_volume_1
-          - entity: sensor.synology_temperature_sda
-          - entity: sensor.synology_total_size_volume_1
+          - entity: sensor.ebroz920_volume_1_average_disk_temp
+          - entity: sensor.ebroz920_volume_1_status
+          - entity: sensor.ebroz920_network_down
+          - entity: sensor.ebroz920_network_up
+          - entity: sensor.ebroz920_volume_1_volume_used
+      - type: entities
+        title: Samba backup
+        entities:
+          - sensor.samba_backup
+          - type: custom:entity-attributes-card
+            heading_name: Samba Backuo
+            heading_state: State
+            filter:
+              include:
+                - key: sensor.samba_backup.backups_local
+                  name: Local backups
+                - key: sensor.samba_backup.backups_remote
+                  name: Remote backups
+                - key: sensor.samba_backup.total_backups_succeeded
+                  name: Successful backups
+      - type: custom:uptime-card
+        entity: binary_sensor.mqtt_status
+        name: MQTT status
+        title_adaptive_color: false
+        status_adaptive_color: false
+        bar: {}
+        icon_adaptive_color: true
+      - type: custom:uptime-card
+        entity: sensor.storj_node_status
+        ok: '200'
+        icon_adaptive_color: true
+        name: Storj Node status
       - type: entities
         entities:
-          - device_tracker.mikrotik_ether1
-          - sensor.mikrotik_ether1_rx
-          - sensor.mikrotik_ether1_tx
-          - switch.mikrotik_port_ether1
+          - entity: sensor.bt415_temperature
+          - entity: sensor.ebroz920_temperature
+      - type: custom:uptime-card
+        entity: binary_sensor.mikrotik_status
+        name: Mikrotik Status
+        status_adaptive_color: false
+        title_adaptive_color: false
+        icon_adaptive_color: true
+        bar:
+          amount: 36
+          round: 1
+          height: 46
+          spacing: 4
+      - type: custom:uptime-card
+        entity: binary_sensor.facebox_status
+        name: Facebox status
+        icon_adaptive_color: true
+        bar:
+          amount: 36
+          round: 1
+          height: 46
+          spacing: 4
       - type: entities
         entities:
-          - device_tracker.mikrotik_iskon_internet
-          - sensor.mikrotik_iskon_internet_rx
-          - sensor.mikrotik_iskon_internet_tx
-          - switch.mikrotik_port_iskon_internet
+          - entity: binary_sensor.mikrotik_iskon_internet
+          - entity: switch.mikrotik_port_iskon_internet
+          - entity: sensor.mikrotik_uptime
+        title: Router
       - type: entities
         entities:
-          - sensor.mikrotik_cpu_load
-          - binary_sensor.mikrotik_firmware_update
-          - sensor.mikrotik_hdd_usage
-          - sensor.mikrotik_memory_usage
-          - sensor.mikrotik_temperature
-    icon: 'mdi:nas'
+          - sensor.920_nas_rx
+          - sensor.920_nas_tx
+          - sensor.920_nas_uptime
+        title: UniFi Controller
+    icon: mdi:nas
     title: Backend

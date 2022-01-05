@@ -11,56 +11,52 @@
       - cards:
           - entity: media_player.clock_me
             group: true
-            icon: 'mdi:google-home'
+            icon: mdi:google-home
             icon_state: true
             tts:
               language: en
-              platform: google
-            type: 'custom:mini-media-player'
+              platform: google_translate
+            type: custom:mini-media-player
           - entity: media_player.whatever_me
             group: true
-            icon: 'mdi:google-home'
+            icon: mdi:google-home
             icon_state: true
             tts:
               language: en
-              platform: google
-            type: 'custom:mini-media-player'
+              platform: google_translate
+            type: custom:mini-media-player
           - entity: media_player.mini_me
             group: true
-            icon: 'mdi:google-home'
+            icon: mdi:google-home
             icon_state: true
             tts:
               language: en
-              platform: google
-            type: 'custom:mini-media-player'
+              platform: google_translate
+            type: custom:mini-media-player
           - entity: media_player.display_me
             group: true
-            icon: 'mdi:google-home'
+            icon: mdi:google-home
             icon_state: true
             tts:
               language: en
-              platform: google
-            type: 'custom:mini-media-player'
+              platform: google_translate
+            type: custom:mini-media-player
         type: vertical-stack
       - cards:
           - artwork: cover
             entity: media_player.lg_tv
-            icon: 'mdi:tv'
-            type: 'custom:mini-media-player'
+            icon: mdi:tv
+            type: custom:mini-media-player
           - artwork: cover
+            icon: mdi:cast
+            type: custom:mini-media-player
             entity: media_player.mi_tv
-            icon: 'mdi:cast'
-            type: 'custom:mini-media-player'
           - artwork: cover
+            icon: mdi:cast
+            type: custom:mini-media-player
             entity: media_player.living_room_tv
-            icon: 'mdi:cast'
-            type: 'custom:mini-media-player'
-          - entity: media_player.loft_tv
-            type: 'custom:mini-media-player'
-          - artwork: cover
-            entity: media_player.emby_mi_tv_stick
-            icon: 'mdi:cast'
-            type: 'custom:mini-media-player'
+          - type: custom:mini-media-player
+            entity: media_player.loft_tv
         type: vertical-stack
       - entities:
           - entity: input_select.radio_station
@@ -69,18 +65,15 @@
           - entity: script.radio_play
         type: entities
         title: Radio
-      - entity: sensor.emby_latest_catroons
-        image_style: fanart
-        title: Latest Cartoons
-        type: 'custom:upcoming-media-card'
-      - entity: sensor.emby_latest_movies
-        image_style: fanart
-        title: Latest Movies
-        type: 'custom:upcoming-media-card'
-      - entity: sensor.emby_latest_tv_shows
-        image_style: fanart
-        title: Latest TV Shows
-        type: 'custom:upcoming-media-card'
-    icon: 'mdi:youtube-tv'
+      - entities:
+          - entity: sensor.total_tv_time
+        show_header_toggle: false
+        title: Statistics
+        type: entities
+      - type: custom:notify-card
+        target: on_the_clock_me
+        notification_ title:
+          input: Put Title here
+    icon: mdi:youtube-tv
     path: media
     title: Media

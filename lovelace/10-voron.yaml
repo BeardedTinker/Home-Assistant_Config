@@ -1,0 +1,74 @@
+- icon: mdi:printer-3d
+  title: 3D Printers
+  badges: []
+  cards:
+    - type: picture-entity
+      camera_image: camera.voron_2_4
+      entity: camera.voron_2_4
+      camera_view: live
+    - type: entities
+      entities:
+        - entity: sensor.v24_state
+        - entity: sensor.v24_bed_actual
+          name: Bed Actual
+        - entity: sensor.v24_bed_target
+        - entity: sensor.v24_bed_temp
+        - entity: sensor.v24_hotend_actual
+        - entity: sensor.v24_hotend_target
+        - entity: sensor.v24_nozzle_temp
+        - entity: sensor.v24_current_print
+        - entity: sensor.v24_current_progress
+        - entity: sensor.v24_eta
+        - entity: sensor.v24_print_time
+        - entity: sensor.v24_time_remaining
+      title: Voron 2.4
+    - animate: true
+      entities:
+        - entity: sensor.3d_printer_current_consumption
+          show_state: true
+      hour24: true
+      hours_to_show: 24
+      labels: true
+      legend: true
+      name: Ender 3 Pro W usage
+      points_per_hour: 4
+      show:
+        graph: bar
+      type: custom:mini-graph-card
+    - type: entity
+      entity: switch.3d_printer
+    - type: entities
+      entities:
+        - entity: light.voron
+        - entity: select.voron_playlist
+          name: Playlist
+        - entity: select.voron_preset_3
+          name: Preset
+        - entity: select.voron_color_palette_3
+      title: WLED
+    - type: entities
+      entities:
+        - entity: sensor.voron_24_sensor
+    - type: entities
+      entities:
+        - entity: select.voron_color_palette_3
+          name: Color Palette
+        - entity: number.voron_intensity
+          name: Intensity
+        - entity: select.voron_live_override
+          name: Live Override
+        - entity: switch.voron_nightlight
+          name: Nightlight
+        - entity: button.voron_restart
+          name: Restart
+        - entity: switch.voron_reverse
+          name: Reverse
+        - entity: number.voron_speed
+          name: Speed
+        - entity: switch.voron_sync_receive
+          name: Sync Receive
+        - entity: switch.voron_sync_send
+          name: Sync Send
+        - entity: button.voron_update
+          name: Update
+      title: Voron

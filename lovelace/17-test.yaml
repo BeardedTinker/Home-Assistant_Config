@@ -1,0 +1,188 @@
+  - badges: []
+    cards:
+      - entities:
+          - entity: binary_sensor.super_secret_server_status
+          - entity: sensor.super_secret_server_latency_time
+          - entity: sensor.super_secret_server_players_max
+          - entity: sensor.super_secret_server_players_online
+          - entity: sensor.super_secret_server_protocol_version
+          - entity: sensor.super_secret_server_version
+        show_header_toggle: false
+        title: 'Another secret Minecraft server '
+        type: entities
+      - entities:
+          - entity: binary_sensor.pm10_increase
+          - entity: binary_sensor.pm25_increase
+        title: AQ trends
+        type: entities
+      - entities:
+          - entity: binary_sensor.front_door_contact
+          - entity: timer.front_door_open
+          - entity: binary_sensor.living_room_motion_occupancy
+          - entity: timer.living_room_motion
+        title: Timers
+        type: entities
+      - entities:
+          - entity: sensor.0x00158d00039dc604_action
+          - entity: sensor.0x00158d00039dc604_battery
+          - entity: sensor.0x00158d00039dc604_linkquality
+          - entity: sensor.0x00158d00039dc604_sensitivity
+          - entity: sensor.0x00158d00039dc604_strength
+        title: Xiaomi Vibration sensor
+        type: entities
+      - entities:
+          - entity: sensor.0x00158d00039dc604_strength
+        refresh_interval: 0
+        title: vibration strength
+        type: history-graph
+        hours_to_show: 48
+      - entities:
+          - entity: sensor.hp_deskjet_3520_series
+          - entity: sensor.hp_deskjet_3520_series_black_ink
+          - entity: sensor.hp_deskjet_3520_series_cyan_ink
+          - entity: sensor.hp_deskjet_3520_series_magenta_ink
+          - entity: sensor.hp_deskjet_3520_series_yellow_ink
+        show_header_toggle: false
+        title: HP DeskJet 3520
+        type: entities
+      - entities:
+          - entity: sensor.ccs811_eco2_value
+          - entity: sensor.ccs811_total_volatile_organic_compound
+        title: My Title
+        type: entities
+      - entities:
+          - entity: binary_sensor.storm_warning
+          - entity: sensor.distance_to_storm
+          - entity: sensor.lightning_energy
+        title: AS3935
+        type: entities
+      - type: entities
+        entities:
+          - entity: binary_sensor.leak_sensor_battery_low
+          - entity: sensor.leak_sensor_linkquality
+          - entity: sensor.leak_sensor_voltage
+          - entity: binary_sensor.leak_sensor_water_leak
+      - type: entities
+        entities:
+          - entity: sensor.xiaomi_mi_body_composition_scale_weight
+          - entity: sensor.xiaomi_mi_body_composition_scale_impedance
+          - entity: sensor.weight_andrej
+          - entity: sensor.impedance_andrej
+          - entity: sensor.weight_mirta
+          - entity: sensor.impedance_mirta
+          - entity: sensor.weight_luka
+          - entity: sensor.impedance_luka
+          - entity: sensor.weight_zita
+          - entity: sensor.impedance_zita
+        title: Mi Body Composition Scale
+      - type: custom:mini-graph-card
+        entities:
+          - switch.bathroom_vent_relay_0
+          - sensor.bathroom_humidity
+        hours_to_show: 8
+        points_per_hour: 60
+        update_interval: 30
+        state_map:
+          - value: 'off'
+            label: Clear
+          - value: 'on'
+            label: Detected
+      - type: grid
+        columns: 2
+        cards:
+          - type: entity
+            entity: sensor.heating_living_room_last_24hr
+            name: Living room (24hr)
+          - type: entity
+            entity: sensor.heating_dining_room_last_24hr
+            name: Dining room (24hr)
+          - type: entity
+            entity: sensor.heating_luka_room_last_24hr
+            name: Luka room (24hr)
+          - type: entity
+            entity: sensor.heating_zita_room_last_24hr
+            name: Zita room (24hr)
+      - type: grid
+        columns: 2
+        cards:
+          - type: entity
+            entity: sensor.heating_living_room_last_30d
+            name: Living room (30d)
+          - type: entity
+            entity: sensor.heating_dining_room_last_30d
+            name: Dining room (30d)
+          - type: entity
+            entity: sensor.heating_luka_room_last_30d
+            name: Luka room (30d)
+          - type: entity
+            entity: sensor.heating_zita_room_last_30d
+            name: Zita room (30d)
+      - type: history-graph
+        entities:
+          - entity: sensor.ficus_benjamina_natasja_soil
+          - entity: sensor.dracena_marginata_soil_moisture
+          - entity: sensor.dypsis_lutescenes_soil_moisture
+          - entity: sensor.ficus_benjamina_soil_moisture
+          - entity: sensor.parthenocissus_small_soil_moisture
+          - entity: sensor.parthenocissus_soil_moisture
+          - entity: sensor.schefflera_arboricola_soil_moisture
+        refresh_interval: 0
+        hours_to_show: 168
+      - type: entities
+        entities:
+          - switch.tagreader_buzzer_enabled
+          - switch.tagreader_led_enabled
+          - binary_sensor.tagreader_status
+      - type: light
+        entity: light.tagreader_led
+      - type: entities
+        entities:
+          - sensor.rx_26
+          - sensor.tx_26
+          - sensor.uptime_27
+          - sensor.ccs811_total_volatile_organic_compound
+          - sensor.ccs811_eco2_value
+      - type: custom:auto-entities
+        card:
+          type: entities
+        filter:
+          include:
+            - domain: light
+              state: 'on'
+          exclude: []
+        sort:
+          method: none
+      - type: entities
+        entities:
+          - entity: sensor.withings_body_temperature_c_mirta
+            name: Mirta Body Temperature
+          - entity: sensor.withings_skin_temperature_c_mirta
+            name: Skin termperature
+          - entity: sensor.withings_temperature_c_mirta
+            name: Room temperature
+        title: Mirta temperature
+        state_color: true
+      - type: entities
+        entities:
+          - entity: sensor.withings_body_temperature_c_andrej
+            name: Andrej Body Temperature
+          - entity: sensor.withings_skin_temperature_c_andrej
+            name: Skin termperature
+          - entity: sensor.withings_temperature_c_andrej
+            name: Room temperature
+        title: Mirta temperature
+        state_color: true
+      - entities:
+          - entity: sensor.living_room_motion_illuminance
+        hours_to_show: 24
+        refresh_interval: 0
+        type: history-graph
+      - entities:
+          - entity: sensor.cube_battery
+          - entity: sensor.cube_action
+          - entity: sensor.cube_linkquality
+          - entity: sensor.cube_state
+        type: entities
+    icon: mdi:beta
+    path: beardedtest
+    title: BeardedTest
