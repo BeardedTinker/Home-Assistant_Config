@@ -3039,7 +3039,7 @@ for relay_id in range(relays):
         if relays_bin_sensors_topics and relays_bin_sensors_topics[bin_sensor_id]:
             state_topic = f"{relays_bin_sensors_topics[bin_sensor_id]}/{relay_id}"
         else:
-            state_topic = f"{relays_bin_sensors[bin_sensor_id]}/{relay_id}"
+            state_topic = f"~{relays_bin_sensors[bin_sensor_id]}/{relay_id}"
         if not roller_mode:
             payload = {
                 KEY_NAME: sensor_name,
@@ -3325,7 +3325,7 @@ for bin_sensor_id in range(len(bin_sensors)):
     if bin_sensors_topics[bin_sensor_id]:
         state_topic = f"{bin_sensors_topics[bin_sensor_id]}"
     elif relays > 0 or len(white_lights) > 0:
-        state_topic = f"{bin_sensors[bin_sensor_id]}"
+        state_topic = f"~{bin_sensors[bin_sensor_id]}"
     elif bin_sensors[bin_sensor_id] == SENSOR_OPENING:
         state_topic = "~sensor/state"
     else:
