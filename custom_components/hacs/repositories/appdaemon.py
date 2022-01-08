@@ -1,17 +1,24 @@
 """Class for appdaemon apps in HACS."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aiogithubapi import AIOGitHubAPIException
 
-from custom_components.hacs.enums import HacsCategory
-from custom_components.hacs.exceptions import HacsException
-from custom_components.hacs.helpers.classes.repository import HacsRepository
+from ..enums import HacsCategory
+from ..exceptions import HacsException
+from .base import HacsRepository
+
+if TYPE_CHECKING:
+    from ..base import HacsBase
 
 
 class HacsAppdaemonRepository(HacsRepository):
     """Appdaemon apps in HACS."""
 
-    def __init__(self, full_name):
+    def __init__(self, hacs: HacsBase, full_name: str):
         """Initialize."""
-        super().__init__()
+        super().__init__(hacs=hacs)
         self.data.full_name = full_name
         self.data.full_name_lower = full_name.lower()
         self.data.category = HacsCategory.APPDAEMON
@@ -32,11 +39,11 @@ class HacsAppdaemonRepository(HacsRepository):
             addir = await self.repository_object.get_contents("apps", self.ref)
         except AIOGitHubAPIException:
             raise HacsException(
-                f"Repostitory structure for {self.ref.replace('tags/','')} is not compliant"
+                f"Repository structure for {self.ref.replace('tags/','')} is not compliant"
             ) from None
 
         if not isinstance(addir, list):
-            self.validate.errors.append("Repostitory structure not compliant")
+            self.validate.errors.append("Repository structure not compliant")
 
         self.content.path.remote = addir[0].path
         self.content.objects = await self.repository_object.get_contents(

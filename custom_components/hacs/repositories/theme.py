@@ -1,16 +1,22 @@
 """Class for themes in HACS."""
-from custom_components.hacs.enums import HacsCategory
-from custom_components.hacs.exceptions import HacsException
-from custom_components.hacs.helpers.classes.repository import HacsRepository
-from custom_components.hacs.helpers.functions.information import find_file_name
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ..enums import HacsCategory
+from ..exceptions import HacsException
+from .base import HacsRepository
+
+if TYPE_CHECKING:
+    from ..base import HacsBase
 
 
 class HacsThemeRepository(HacsRepository):
     """Themes in HACS."""
 
-    def __init__(self, full_name):
+    def __init__(self, hacs: HacsBase, full_name: str):
         """Initialize."""
-        super().__init__()
+        super().__init__(hacs=hacs)
         self.data.full_name = full_name
         self.data.full_name_lower = full_name.lower()
         self.data.category = HacsCategory.THEME
@@ -27,7 +33,7 @@ class HacsThemeRepository(HacsRepository):
         """Run post installation steps."""
         try:
             await self.hacs.hass.services.async_call("frontend", "reload_themes", {})
-        except (Exception, BaseException):  # pylint: disable=broad-except
+        except BaseException:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
             pass
 
     async def validate_repository(self):
@@ -43,7 +49,7 @@ class HacsThemeRepository(HacsRepository):
                 break
         if not compliant:
             raise HacsException(
-                f"Repostitory structure for {self.ref.replace('tags/','')} is not compliant"
+                f"Repository structure for {self.ref.replace('tags/','')} is not compliant"
             )
 
         if self.data.content_in_root:
@@ -59,7 +65,7 @@ class HacsThemeRepository(HacsRepository):
     async def async_post_registration(self):
         """Registration."""
         # Set name
-        find_file_name(self)
+        self.update_filenames()
         self.content.path.local = self.localpath
 
     async def update_repository(self, ignore_issues=False, force=False):
@@ -72,5 +78,13 @@ class HacsThemeRepository(HacsRepository):
             self.content.path.remote = ""
 
         # Update name
-        find_file_name(self)
+        self.update_filenames()
         self.content.path.local = self.localpath
+
+    def update_filenames(self) -> None:
+        """Get the filename to target."""
+        for treefile in self.tree:
+            if treefile.full_path.startswith(
+                self.content.path.remote
+            ) and treefile.full_path.endswith(".yaml"):
+                self.data.file_name = treefile.filename

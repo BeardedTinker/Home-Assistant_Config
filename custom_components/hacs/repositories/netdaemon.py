@@ -1,18 +1,23 @@
 """Class for netdaemon apps in HACS."""
-from custom_components.hacs.enums import HacsCategory
-from custom_components.hacs.exceptions import HacsException
-from custom_components.hacs.helpers.classes.repository import HacsRepository
-from custom_components.hacs.helpers.functions.filters import (
-    get_first_directory_in_directory,
-)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ..enums import HacsCategory
+from ..exceptions import HacsException
+from ..utils import filters
+from .base import HacsRepository
+
+if TYPE_CHECKING:
+    from ..base import HacsBase
 
 
 class HacsNetdaemonRepository(HacsRepository):
     """Netdaemon apps in HACS."""
 
-    def __init__(self, full_name):
+    def __init__(self, hacs: HacsBase, full_name: str):
         """Initialize."""
-        super().__init__()
+        super().__init__(hacs=hacs)
         self.data.full_name = full_name
         self.data.full_name_lower = full_name.lower()
         self.data.category = HacsCategory.NETDAEMON
@@ -34,7 +39,9 @@ class HacsNetdaemonRepository(HacsRepository):
                 self.content.path.remote = ""
 
         if self.content.path.remote == "apps":
-            self.data.domain = get_first_directory_in_directory(self.tree, self.content.path.remote)
+            self.data.domain = filters.get_first_directory_in_directory(
+                self.tree, self.content.path.remote
+            )
             self.content.path.remote = f"apps/{self.data.name}"
 
         compliant = False
@@ -44,7 +51,7 @@ class HacsNetdaemonRepository(HacsRepository):
                 break
         if not compliant:
             raise HacsException(
-                f"Repostitory structure for {self.ref.replace('tags/','')} is not compliant"
+                f"Repository structure for {self.ref.replace('tags/','')} is not compliant"
             )
 
         # Handle potential errors
@@ -65,7 +72,9 @@ class HacsNetdaemonRepository(HacsRepository):
                 self.content.path.remote = ""
 
         if self.content.path.remote == "apps":
-            self.data.domain = get_first_directory_in_directory(self.tree, self.content.path.remote)
+            self.data.domain = filters.get_first_directory_in_directory(
+                self.tree, self.content.path.remote
+            )
             self.content.path.remote = f"apps/{self.data.name}"
 
         # Set local path
@@ -77,5 +86,5 @@ class HacsNetdaemonRepository(HacsRepository):
             await self.hacs.hass.services.async_call(
                 "hassio", "addon_restart", {"addon": "c6a2317c_netdaemon"}
             )
-        except (Exception, BaseException):  # pylint: disable=broad-except
+        except BaseException:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
             pass
