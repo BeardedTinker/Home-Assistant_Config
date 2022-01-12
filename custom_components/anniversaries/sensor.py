@@ -5,6 +5,7 @@ from datetime import datetime, date
 from homeassistant.helpers.entity import Entity, generate_entity_id
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.helpers import template as templater
+import homeassistant.util.dt as dt_util
 
 from homeassistant.const import (
     CONF_NAME,
@@ -19,7 +20,6 @@ from .const import (
     CONF_ICON_SOON,
     CONF_DATE,
     CONF_DATE_TEMPLATE,
-    CONF_DATE_FORMAT,
     CONF_SOON,
     CONF_HALF_ANNIVERSARY,
     CONF_UNIT_OF_MEASUREMENT,
@@ -73,13 +73,13 @@ class anniversaries(Entity):
             self._template_sensor = True
         else:
             self._date, self._unknown_year = validate_date(config.get(CONF_DATE))
+            self._date = self._date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
             if self._show_half_anniversary:
                 self._half_date = self._date + relativedelta(months=+6)
         self._icon_normal = config.get(CONF_ICON_NORMAL)
         self._icon_today = config.get(CONF_ICON_TODAY)
         self._icon_soon = config.get(CONF_ICON_SOON)
         self._soon = config.get(CONF_SOON)
-        self._date_format = config.get(CONF_DATE_FORMAT)
         self._icon = self._icon_normal
         self._years_next = 0
         self._years_current = 0
@@ -116,16 +116,10 @@ class anniversaries(Entity):
         if not self._unknown_year:
             res[ATTR_YEARS_NEXT] = self._years_next
             res[ATTR_YEARS_CURRENT] = self._years_current
-        try:
-            res[ATTR_DATE] = datetime.strftime(self._date,self._date_format)
-        except:
-            res[ATTR_DATE] = self._date
+        res[ATTR_DATE] = self._date
         res[ATTR_WEEKS] = self._weeks_remaining
         if self._show_half_anniversary:
-            try:
-                res[ATTR_HALF_DATE] = datetime.strftime(self._half_date, self._date_format)
-            except:
-                res[ATTR_HALF_DATE] = self._half_date
+            res[ATTR_HALF_DATE] = self._half_date
             res[ATTR_HALF_DAYS] = self._half_days_remaining
         return res
 
@@ -146,6 +140,7 @@ class anniversaries(Entity):
             try:
                 template_date = templater.Template(self._date_template, self.hass).async_render()
                 self._date, self._unknown_year = validate_date(template_date)
+                self._date = self._date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
             except:
                 self._state = "Invalid Template"
                 return
@@ -170,6 +165,7 @@ class anniversaries(Entity):
         
         if self._unknown_year:
             self._date = datetime(nextDate.year, nextDate.month, nextDate.day)
+            self._date = self._date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
 
         if daysRemaining == 0:
             self._icon = self._icon_today
@@ -196,3 +192,4 @@ class anniversaries(Entity):
                 nextHalfDate = self._half_date.date() + relativedelta(year = today.year + 1)
             self._half_days_remaining = (nextHalfDate - today).days
             self._half_date = datetime(nextHalfDate.year, nextHalfDate.month, nextHalfDate.day)
+            self._half_date = self._half_date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)

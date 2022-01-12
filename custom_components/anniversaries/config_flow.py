@@ -12,7 +12,6 @@ from .const import (
     DEFAULT_ICON_NORMAL,
     DEFAULT_ICON_SOON,
     DEFAULT_ICON_TODAY,
-    DEFAULT_DATE_FORMAT,
     DEFAULT_SOON,
     DEFAULT_HALF_ANNIVERSARY,
     DEFAULT_UNIT_OF_MEASUREMENT,
@@ -23,7 +22,6 @@ from .const import (
     CONF_ICON_TODAY,
     CONF_ICON_SOON,
     CONF_DATE,
-    CONF_DATE_FORMAT,
     CONF_SOON,
     CONF_HALF_ANNIVERSARY,
     CONF_UNIT_OF_MEASUREMENT,
@@ -68,7 +66,6 @@ class AnniversariesFlowHandler(config_entries.ConfigFlow):
         count_up = DEFAULT_COUNT_UP
         one_time = DEFAULT_ONE_TIME
         half_anniversary = DEFAULT_HALF_ANNIVERSARY
-        date_format = DEFAULT_DATE_FORMAT
         unit_of_measurement = DEFAULT_UNIT_OF_MEASUREMENT
         id_prefix = DEFAULT_ID_PREFIX
         if user_input is not None:
@@ -82,8 +79,6 @@ class AnniversariesFlowHandler(config_entries.ConfigFlow):
                 one_time = user_input[CONF_ONE_TIME]
             if CONF_HALF_ANNIVERSARY in user_input:
                 half_anniversary = user_input[CONF_HALF_ANNIVERSARY]
-            if CONF_DATE_FORMAT in user_input:
-                date_format = user_input[CONF_DATE_FORMAT]
             if CONF_UNIT_OF_MEASUREMENT in user_input:
                 unit_of_measurement = user_input[CONF_UNIT_OF_MEASUREMENT]
             if CONF_ID_PREFIX in user_input:
@@ -94,7 +89,6 @@ class AnniversariesFlowHandler(config_entries.ConfigFlow):
         data_schema[vol.Required(CONF_COUNT_UP, default=count_up)] = bool
         data_schema[vol.Required(CONF_ONE_TIME, default=one_time)] = bool
         data_schema[vol.Required(CONF_HALF_ANNIVERSARY, default=half_anniversary)] = bool
-        data_schema[vol.Required(CONF_DATE_FORMAT, default=date_format)] = str
         data_schema[vol.Required(CONF_UNIT_OF_MEASUREMENT, default=unit_of_measurement)] = str
         data_schema[vol.Optional(CONF_ID_PREFIX, default=id_prefix)] = str
         return self.async_show_form(step_id="user", data_schema=vol.Schema(data_schema), errors=self._errors)
@@ -196,7 +190,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         data_schema[vol.Required(CONF_COUNT_UP, default=count_up,)] = bool
         data_schema[vol.Required(CONF_ONE_TIME, default=one_time,)] = bool
         data_schema[vol.Required(CONF_HALF_ANNIVERSARY,default=half_anniversary,)] = bool
-        data_schema[vol.Required(CONF_DATE_FORMAT,default=self.config_entry.options.get(CONF_DATE_FORMAT),)] = str
         data_schema[vol.Required(CONF_UNIT_OF_MEASUREMENT,default=unit_of_measurement,)] = str
         return self.async_show_form(
             step_id="init", data_schema=vol.Schema(data_schema), errors=self._errors
