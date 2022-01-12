@@ -31,6 +31,7 @@ DEVICE_CLASS = "garbage_collection__schedule"
 CONF_SENSOR = "sensor"
 CONF_ENABLED = "enabled"
 CONF_FREQUENCY = "frequency"
+CONF_MANUAL = "manual_update"
 CONF_ICON_NORMAL = "icon_normal"
 CONF_ICON_TODAY = "icon_today"
 CONF_ICON_TOMORROW = "icon_tomorrow"
@@ -229,6 +230,13 @@ class configuration(config_singularity):
             "validator": cv.string,
         },
         ATTR_HIDDEN: {
+            "step": 1,
+            "method": vol.Optional,
+            "default": False,
+            "type": bool,
+            "validator": cv.boolean,
+        },
+        CONF_MANUAL: {
             "step": 1,
             "method": vol.Optional,
             "default": False,

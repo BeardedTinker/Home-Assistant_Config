@@ -109,3 +109,8 @@ class config_singularity:
                 type(data[key]) not in [list, dict] or len(data[key]) != 0
             ):
                 self._defaults[key] = data[key]
+
+    def join_list(self, key: str) -> None:
+        """Convert a list to comma separated string."""
+        if key in self._defaults and isinstance(self._defaults[key], list):
+            self._defaults[key] = ",".join(self._defaults[key])

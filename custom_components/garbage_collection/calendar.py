@@ -94,8 +94,7 @@ class EntitiesCalendarData:
             ):
                 continue
             garbage_collection = hass.data[DOMAIN][SENSOR_PLATFORM][entity]
-            await garbage_collection.async_load_holidays(start_date)
-            start = await garbage_collection.async_find_next_date(start_date, True)
+            start = await garbage_collection.async_next_date(start_date, True)
             while start is not None and start >= start_date and start <= end_date:
                 try:
                     end = start + timedelta(days=1)
@@ -126,7 +125,7 @@ class EntitiesCalendarData:
                         "allDay": False,
                     }
                 events.append(event)
-                start = await garbage_collection.async_find_next_date(
+                start = await garbage_collection.async_next_date(
                     start + timedelta(days=1), True
                 )
         return events

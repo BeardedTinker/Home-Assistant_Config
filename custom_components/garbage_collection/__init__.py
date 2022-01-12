@@ -6,13 +6,16 @@ from datetime import timedelta
 import homeassistant.helpers.config_validation as cv
 import homeassistant.util.dt as dt_util
 import voluptuous as vol
+from dateutil.relativedelta import relativedelta
 from homeassistant import config_entries
 from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
 from homeassistant.helpers import discovery
 
 from .const import (
     ATTR_LAST_COLLECTION,
+    CONF_DATE,
     CONF_FREQUENCY,
+    CONF_OFFSET,
     CONF_SENSORS,
     DOMAIN,
     SENSOR_PLATFORM,
@@ -38,8 +41,29 @@ CONFIG_SCHEMA = vol.Schema(
 
 COLLECT_NOW_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_ENTITY_ID): cv.string,
+        vol.Required(CONF_ENTITY_ID): vol.All(cv.ensure_list, [cv.string]),
         vol.Optional(ATTR_LAST_COLLECTION): cv.datetime,
+    }
+)
+
+UPDATE_STATE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_ENTITY_ID): vol.All(cv.ensure_list, [cv.string]),
+    }
+)
+
+ADD_REMOVE_DATE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_ENTITY_ID): vol.All(cv.ensure_list, [cv.string]),
+        vol.Required(CONF_DATE): cv.date,
+    }
+)
+
+OFFSET_DATE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_ENTITY_ID): vol.All(cv.ensure_list, [cv.string]),
+        vol.Required(CONF_DATE): cv.date,
+        vol.Required(CONF_OFFSET): vol.All(vol.Coerce(int), vol.Range(min=-31, max=31)),
     }
 )
 
@@ -47,27 +71,96 @@ COLLECT_NOW_SCHEMA = vol.Schema(
 async def async_setup(hass, config):
     """Set up this component using YAML."""
 
-    def handle_collect_garbage(call):
-        """Handle the service call."""
-        entity_id = call.data.get(CONF_ENTITY_ID)
-        last_collection = call.data.get(ATTR_LAST_COLLECTION)
-        _LOGGER.debug("called collect_garbage for %s", entity_id)
-        try:
-            entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
-            if last_collection is None:
-                entity.last_collection = dt_util.now()
-            else:
-                entity.last_collection = dt_util.as_local(last_collection)
-        except Exception as err:
-            _LOGGER.error("Failed setting last collection for %s - %s", entity_id, err)
-        hass.services.call("homeassistant", "update_entity", {"entity_id": entity_id})
+    async def handle_add_date(call):
+        """Handle the add_date service call."""
+        for entity_id in call.data.get(CONF_ENTITY_ID):
+            collection_date = call.data.get(CONF_DATE)
+            _LOGGER.debug("called add_date %s from %s", collection_date, entity_id)
+            try:
+                entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
+                await entity.add_date(collection_date)
+            except Exception as err:
+                _LOGGER.error("Failed adding date for %s - %s", entity_id, err)
+
+    async def handle_remove_date(call):
+        """Handle the remove_date service call."""
+        for entity_id in call.data.get(CONF_ENTITY_ID):
+            collection_date = call.data.get(CONF_DATE)
+            _LOGGER.debug("called remove_date %s from %s", collection_date, entity_id)
+            try:
+                entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
+                await entity.remove_date(collection_date)
+            except Exception as err:
+                _LOGGER.error("Failed removing date for %s - %s", entity_id, err)
+
+    async def handle_offset_date(call):
+        """Handle the offset_date service call."""
+        for entity_id in call.data.get(CONF_ENTITY_ID):
+            offset = call.data.get(CONF_OFFSET)
+            collection_date = call.data.get(CONF_DATE)
+            _LOGGER.debug(
+                "called offset_date %s by %d days for %s",
+                collection_date,
+                offset,
+                entity_id,
+            )
+            try:
+                new_date = collection_date + relativedelta(days=offset)
+            except Exception as err:
+                _LOGGER.error("Failed to offset the date - %s", err)
+                break
+            try:
+                entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
+                await entity.remove_date(collection_date)
+                await entity.add_date(new_date)
+            except Exception as err:
+                _LOGGER.error("Failed ofsetting date for %s - %s", entity_id, err)
+
+    async def handle_update_state(call):
+        """Handle the update_state service call."""
+        for entity_id in call.data.get(CONF_ENTITY_ID):
+            _LOGGER.debug("called update_state for %s", entity_id)
+            try:
+                entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
+                await entity.async_update_state()
+            except Exception as err:
+                _LOGGER.error("Failed updating state for %s - %s", entity_id, err)
+
+    async def handle_collect_garbage(call):
+        """Handle the collect_garbage service call."""
+        for entity_id in call.data.get(CONF_ENTITY_ID):
+            last_collection = call.data.get(ATTR_LAST_COLLECTION)
+            _LOGGER.debug("called collect_garbage for %s", entity_id)
+            try:
+                entity = hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
+                if last_collection is None:
+                    entity.last_collection = dt_util.now()
+                else:
+                    entity.last_collection = dt_util.as_local(last_collection)
+                await entity.async_update_state()
+            except Exception as err:
+                _LOGGER.error(
+                    "Failed setting last collection for %s - %s", entity_id, err
+                )
 
     if DOMAIN not in hass.services.async_services():
         hass.services.async_register(
             DOMAIN, "collect_garbage", handle_collect_garbage, schema=COLLECT_NOW_SCHEMA
         )
+        hass.services.async_register(
+            DOMAIN, "update_state", handle_update_state, schema=UPDATE_STATE_SCHEMA
+        )
+        hass.services.async_register(
+            DOMAIN, "add_date", handle_add_date, schema=ADD_REMOVE_DATE_SCHEMA
+        )
+        hass.services.async_register(
+            DOMAIN, "remove_date", handle_remove_date, schema=ADD_REMOVE_DATE_SCHEMA
+        )
+        hass.services.async_register(
+            DOMAIN, "offset_date", handle_offset_date, schema=OFFSET_DATE_SCHEMA
+        )
     else:
-        _LOGGER.debug("Service already registered")
+        _LOGGER.debug("Services already registered")
 
     if config.get(DOMAIN) is None:
         # We get here if the integration is set up using config flow
