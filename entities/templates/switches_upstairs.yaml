@@ -1,0 +1,15 @@
+#####
+# Improved tracker on active lights and switches 
+# Thanks Alexey - https://gist.github.com/alphasixtyfive/499986276170a52fcb7a767569b7229d
+#####
+
+- sensor:
+  - name: Upstairs switches on
+    icon: mdi:power-socket-eu
+    state: >-
+      {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+      {{ states.switch | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | list | count }}
+    attributes:
+      areas: >-
+        {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+        {{ states.switch | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | unique | list }}

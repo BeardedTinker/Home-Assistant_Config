@@ -1,0 +1,15 @@
+#####
+# Improved tracker on active lights and switches 
+# Thanks Alexey - https://gist.github.com/alphasixtyfive/499986276170a52fcb7a767569b7229d
+#####
+
+- sensor:
+  - name: Downstairs lights on
+    icon: mdi:lightbulb
+    state: >-
+      {% set areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall'] %}
+      {{ states.light | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | list | count }}
+    attributes:
+      areas: >-
+        {% set areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall'] %}
+        {{ states.light | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | unique | list }}
