@@ -1,0 +1,9 @@
+#####
+# Counting number of warnings in HA
+#
+#####
+
+homeassistant_warnings:
+  name: Warnings
+  icon: mdi:alert
+  restore: false

@@ -1,0 +1,7 @@
+#####
+# Using this integration to trigger events for log entries
+# https://www.home-assistant.io/integrations/system_log/
+#####
+
+system_log:
+  fire_event: true

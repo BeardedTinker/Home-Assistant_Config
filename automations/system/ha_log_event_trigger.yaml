@@ -1,0 +1,34 @@
+#####
+# Triggers when there is new warning or error
+# https://community.home-assistant.io/t/counter-warning-error-issue/85490/11
+#####
+
+alias: Count Home Assistant errors
+id: 'c057ca2c-ab20-4fe0-a32b-5980c0990fb2'
+
+trigger:
+  - platform: event
+    event_type: system_log_event
+    event_data:
+      level: ERROR
+    id: error
+  - platform: event
+    event_type: system_log_event
+    event_data:
+      level: WARNING
+    id: warning
+
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: warning
+      sequence:
+        - service: counter.increment
+          entity_id: counter.homeassistant_warnings
+    - conditions:
+      - condition: trigger
+        id: error
+      sequence:
+        - service: counter.increment
+          entity_id: counter.homeassistant_errors
