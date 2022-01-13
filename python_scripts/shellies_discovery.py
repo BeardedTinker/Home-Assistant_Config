@@ -437,6 +437,15 @@ TOPIC_LIGHT_POWER_RGBW2_COLOR = "~color/{light_id}/power"
 TOPIC_LIGHT_POWER_RGBW2_WHITE = "~white/{light_id}/power"
 TOPIC_LIGHT_SET = "~light/{light_id}/set"
 TOPIC_LIGHT_STATUS = "~light/{light_id}/status"
+TOPIC_METER_CURRENT = "~emeter/{meter_id}/current"
+TOPIC_METER_ENERGY = "~emeter/{meter_id}/energy"
+TOPIC_METER_POWER = "~emeter/{meter_id}/power"
+TOPIC_METER_POWER_FACTOR = "~emeter/{meter_id}/pf"
+TOPIC_METER_REACTIVE_POWER = "~emeter/{meter_id}/reactive_power"
+TOPIC_METER_RETURNED_ENERGY = "~emeter/{meter_id}/returned_energy"
+TOPIC_METER_TOTAL = "~emeter/{meter_id}/total"
+TOPIC_METER_TOTAL_RETURNED = "~emeter/{meter_id}/total_returned"
+TOPIC_METER_VOLTAGE = "~emeter/{meter_id}/voltage"
 TOPIC_MUTE = "~sensor/mute"
 TOPIC_ONLINE = "~online"
 TOPIC_OVERPOWER_VALUE = "overpower_value"
@@ -653,6 +662,38 @@ if use_kwh:
         KEY_UNIT: UNIT_KWH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN_KWH,
     }
+    OPTIONS_SENSOR_ENERGY_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_ENERGY,
+        KEY_UNIT: UNIT_KWH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN_KWH,
+    }
+    OPTIONS_SENSOR_RETURNED_ENERGY_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_RETURNED_ENERGY,
+        KEY_UNIT: UNIT_KWH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN_KWH,
+    }
+    OPTIONS_SENSOR_TOTAL_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_TOTAL,
+        KEY_UNIT: UNIT_KWH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WH_KWH,
+    }
+    OPTIONS_SENSOR_TOTAL_RETURNED_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_TOTAL_RETURNED,
+        KEY_UNIT: UNIT_KWH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WH_KWH,
+    }
     OPTIONS_SENSOR_ROLLER_ENERGY = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         KEY_ENABLED_BY_DEFAULT: True,
@@ -701,6 +742,38 @@ else:
         KEY_STATE_TOPIC: TOPIC_RELAY_ENERGY,
         KEY_UNIT: UNIT_WH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN,
+    }
+    OPTIONS_SENSOR_ENERGY_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_ENERGY,
+        KEY_UNIT: UNIT_WH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN,
+    }
+    OPTIONS_SENSOR_RETURNED_ENERGY_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_RETURNED_ENERGY,
+        KEY_UNIT: UNIT_WH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN,
+    }
+    OPTIONS_SENSOR_TOTAL_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_TOTAL,
+        KEY_UNIT: UNIT_WH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WH,
+    }
+    OPTIONS_SENSOR_TOTAL_RETURNED_METER = {
+        KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+        KEY_ENABLED_BY_DEFAULT: True,
+        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_TOPIC: TOPIC_METER_TOTAL_RETURNED,
+        KEY_UNIT: UNIT_WH,
+        KEY_VALUE_TEMPLATE: TPL_ENERGY_WH,
     }
     OPTIONS_SENSOR_ROLLER_ENERGY = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
@@ -795,6 +868,46 @@ OPTIONS_SENSOR_POWER = {
     KEY_STATE_TOPIC: TOPIC_POWER,
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_POWER,
+}
+OPTIONS_SENSOR_POWER_METER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_POWER,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_METER_POWER,
+    KEY_UNIT: UNIT_WATT,
+    KEY_VALUE_TEMPLATE: TPL_POWER,
+}
+OPTIONS_SENSOR_REACTIVE_POWER_METER = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ICON: "mdi:flash-outline",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_METER_REACTIVE_POWER,
+    KEY_UNIT: UNIT_VAR,
+    KEY_VALUE_TEMPLATE: TPL_POWER,
+}
+OPTIONS_SENSOR_POWER_FACTOR_METER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_POWER_FACTOR,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_METER_POWER_FACTOR,
+    KEY_UNIT: UNIT_PERCENT,
+    KEY_VALUE_TEMPLATE: TPL_POWER_FACTOR,
+}
+OPTIONS_SENSOR_VOLTAGE_METER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_VOLTAGE,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_METER_VOLTAGE,
+    KEY_UNIT: UNIT_VOLT,
+    KEY_VALUE_TEMPLATE: TPL_VOLTAGE,
+}
+OPTIONS_SENSOR_CURRENT_METER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_CURRENT,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_METER_CURRENT,
+    KEY_UNIT: UNIT_AMPERE,
+    KEY_VALUE_TEMPLATE: TPL_CURRENT,
 }
 OPTIONS_SENSOR_RSSI = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_SIGNAL_STRENGTH,
@@ -1208,12 +1321,7 @@ lights_bin_sensors_device_classes = []
 lights_bin_sensors_pl = []
 lights_bin_sensors_tpls = []
 meters = 0
-meters_sensors = []
-meters_sensors_device_classes = []
-meters_sensors_state_classes = []
-meters_sensors_tpls = []
-meters_sensors_units = []
-meters_sensors_units = []
+meter_sensors = {}
 model = None
 relay_components = [COMP_SWITCH, COMP_LIGHT, COMP_FAN]
 relays = 0
@@ -2329,61 +2437,15 @@ if model_id == MODEL_SHELLYEM_ID or dev_id_prefix == MODEL_SHELLYEM_PREFIX:
     relays_bin_sensors_topics = [TOPIC_RELAY]
     relays_bin_sensors_tpls = [TPL_OVERPOWER_RELAY]
     relays_bin_sensors_device_classes = [DEVICE_CLASS_PROBLEM]
-    meters_sensors = [
-        SENSOR_POWER,
-        SENSOR_REACTIVE_POWER,
-        SENSOR_VOLTAGE,
-        SENSOR_ENERGY,
-        SENSOR_RETURNED_ENERGY,
-        SENSOR_TOTAL,
-        SENSOR_TOTAL_RETURNED,
-    ]
-    meters_sensors_state_classes = [
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-    ]
-    meters_sensors_units = [
-        UNIT_WATT,
-        UNIT_VAR,
-        UNIT_VOLT,
-        UNIT_WH,
-        UNIT_WH,
-        UNIT_WH,
-        UNIT_WH,
-    ]
-    if use_kwh:
-        meters_sensors_units[3] = UNIT_KWH
-        meters_sensors_units[4] = UNIT_KWH
-        meters_sensors_units[5] = UNIT_KWH
-        meters_sensors_units[6] = UNIT_KWH
-    meters_sensors_device_classes = [
-        DEVICE_CLASS_POWER,
-        None,
-        DEVICE_CLASS_VOLTAGE,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-    ]
-    meters_sensors_tpls = [
-        TPL_POWER,
-        TPL_POWER,
-        TPL_VOLTAGE,
-        TPL_ENERGY_WMIN,
-        TPL_ENERGY_WMIN,
-        TPL_ENERGY_WH,
-        TPL_ENERGY_WH,
-    ]
-    if use_kwh:
-        meters_sensors_tpls[3] = TPL_ENERGY_WMIN_KWH
-        meters_sensors_tpls[4] = TPL_ENERGY_WMIN_KWH
-        meters_sensors_tpls[5] = TPL_ENERGY_WH_KWH
-        meters_sensors_tpls[6] = TPL_ENERGY_WH_KWH
+    meter_sensors = {
+        SENSOR_ENERGY: OPTIONS_SENSOR_ENERGY_METER,
+        SENSOR_POWER: OPTIONS_SENSOR_POWER_METER,
+        SENSOR_REACTIVE_POWER: OPTIONS_SENSOR_REACTIVE_POWER_METER,
+        SENSOR_RETURNED_ENERGY: OPTIONS_SENSOR_RETURNED_ENERGY_METER,
+        SENSOR_TOTAL_RETURNED: OPTIONS_SENSOR_TOTAL_RETURNED_METER,
+        SENSOR_TOTAL: OPTIONS_SENSOR_TOTAL_METER,
+        SENSOR_VOLTAGE: OPTIONS_SENSOR_VOLTAGE_METER,
+    }
     bin_sensors = [SENSOR_FIRMWARE_UPDATE]
     bin_sensors_entity_categories = [ENTITY_CATEGORY_DIAGNOSTIC]
     bin_sensors_enabled = [True]
@@ -2408,66 +2470,16 @@ if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
     relays_bin_sensors_topics = [TOPIC_RELAY]
     relays_bin_sensors_tpls = [TPL_OVERPOWER_RELAY]
     relays_bin_sensors_device_classes = [DEVICE_CLASS_PROBLEM]
-    meters_sensors = [
-        SENSOR_CURRENT,
-        SENSOR_POWER,
-        SENSOR_POWER_FACTOR,
-        SENSOR_VOLTAGE,
-        SENSOR_ENERGY,
-        SENSOR_RETURNED_ENERGY,
-        SENSOR_TOTAL,
-        SENSOR_TOTAL_RETURNED,
-    ]
-    meters_sensors_state_classes = [
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_MEASUREMENT,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-        STATE_CLASS_TOTAL_INCREASING,
-    ]
-    meters_sensors_units = [
-        UNIT_AMPERE,
-        UNIT_WATT,
-        UNIT_PERCENT,
-        UNIT_VOLT,
-        UNIT_WH,
-        UNIT_WH,
-        UNIT_WH,
-        UNIT_WH,
-    ]
-    if use_kwh:
-        meters_sensors_units[4] = UNIT_KWH
-        meters_sensors_units[5] = UNIT_KWH
-        meters_sensors_units[6] = UNIT_KWH
-        meters_sensors_units[7] = UNIT_KWH
-    meters_sensors_device_classes = [
-        DEVICE_CLASS_CURRENT,
-        DEVICE_CLASS_POWER,
-        DEVICE_CLASS_POWER_FACTOR,
-        DEVICE_CLASS_VOLTAGE,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-        DEVICE_CLASS_ENERGY,
-    ]
-    meters_sensors_tpls = [
-        TPL_CURRENT,
-        TPL_POWER,
-        TPL_POWER_FACTOR,
-        TPL_VOLTAGE,
-        TPL_ENERGY_WMIN,
-        TPL_ENERGY_WMIN,
-        TPL_ENERGY_WH,
-        TPL_ENERGY_WH,
-    ]
-    if use_kwh:
-        meters_sensors_tpls[4] = TPL_ENERGY_WMIN_KWH
-        meters_sensors_tpls[5] = TPL_ENERGY_WMIN_KWH
-        meters_sensors_tpls[6] = TPL_ENERGY_WH_KWH
-        meters_sensors_tpls[7] = TPL_ENERGY_WH_KWH
+    meter_sensors = {
+        SENSOR_CURRENT: OPTIONS_SENSOR_CURRENT_METER,
+        SENSOR_ENERGY: OPTIONS_SENSOR_ENERGY_METER,
+        SENSOR_POWER_FACTOR: OPTIONS_SENSOR_POWER_FACTOR_METER,
+        SENSOR_POWER: OPTIONS_SENSOR_POWER_METER,
+        SENSOR_RETURNED_ENERGY: OPTIONS_SENSOR_RETURNED_ENERGY_METER,
+        SENSOR_TOTAL_RETURNED: OPTIONS_SENSOR_TOTAL_RETURNED_METER,
+        SENSOR_TOTAL: OPTIONS_SENSOR_TOTAL_METER,
+        SENSOR_VOLTAGE: OPTIONS_SENSOR_VOLTAGE_METER,
+    }
     bin_sensors = [SENSOR_FIRMWARE_UPDATE]
     bin_sensors_entity_categories = [ENTITY_CATEGORY_DIAGNOSTIC]
     bin_sensors_enabled = [True]
@@ -2761,6 +2773,8 @@ device_info = {
     KEY_CONFIGURATION_URL: f"http://{host}/",
 }
 
+default_topic = f"shellies/{dev_id}/"
+
 if battery_powered:
     if model == MODEL_SHELLYMOTION:
         expire_after = device_config.get(
@@ -2784,7 +2798,7 @@ if battery_powered:
             CONF_EXPIRE_AFTER, EXPIRE_AFTER_FOR_BATTERY_POWERED
         )
 
-    if not isinstance(expire_after, int):
+    if expire_after and not isinstance(expire_after, int):
         raise TypeError(
             f"expire_after value {expire_after} is not an integer, check script configuration"
         )
@@ -2794,7 +2808,6 @@ for number, number_options in numbers.items():
     config_topic = f"{disc_prefix}/number/{dev_id}-{number}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
-    default_topic = f"shellies/{dev_id}/"
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(number)}",
@@ -2830,7 +2843,6 @@ for switch, switch_options in switches.items():
     config_topic = f"{disc_prefix}/switch/{dev_id}-{switch}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
-    default_topic = f"shellies/{dev_id}/"
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(switch)}",
@@ -2866,7 +2878,6 @@ for select, select_options in selectors.items():
     config_topic = f"{disc_prefix}/select/{dev_id}-{select}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
-    default_topic = f"shellies/{dev_id}/"
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(select)}",
@@ -2900,7 +2911,6 @@ for button, button_options in buttons.items():
     config_topic = f"{disc_prefix}/button/{dev_id}-{button}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
-    default_topic = f"shellies/{dev_id}/"
 
     payload = {
         KEY_NAME: f"{device_name} {clean_name(button)}",
@@ -2928,7 +2938,6 @@ for button, button_options in buttons.items():
 
 # climate entities
 if climate_entity_option:
-    default_topic = f"shellies/{dev_id}/"
     temperature_command_topic = "~thermostat/0/command/target_t"
     config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
         "ascii", "ignore"
@@ -2983,7 +2992,6 @@ for roller_id in range(rollers):
             logger.error(  # noqa: F821
                 f"{wrong_class} is the wrong roller class, the default value None was used"
             )
-    default_topic = f"shellies/{dev_id}/"
     state_topic = f"~roller/{roller_id}"
     command_topic = f"{state_topic}/command"
     position_topic = f"{state_topic}/pos"
@@ -3032,7 +3040,6 @@ for relay_id in range(relays):
         relay_name = device_config[f"relay-{relay_id}-name"]
     else:
         relay_name = f"{device_name} Relay {relay_id}"
-    default_topic = f"shellies/{dev_id}/"
     state_topic = f"~relay/{relay_id}"
     command_topic = f"{state_topic}/command"
     unique_id = f"{dev_id}-relay-{relay_id}".lower()
@@ -3077,7 +3084,6 @@ for relay_id in range(relays):
                 "ascii", "ignore"
             ).decode("utf-8")
         )
-        default_topic = f"shellies/{dev_id}/"
 
         payload = {
             KEY_NAME: f"{device_name} {clean_name(sensor)} {relay_id}",
@@ -3213,7 +3219,6 @@ for sensor, sensor_options in sensors.items():
     config_topic = f"{disc_prefix}/sensor/{dev_id}-{sensor}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
-    default_topic = f"shellies/{dev_id}/"
     if model in (MODEL_SHELLY2, MODEL_SHELLY25) and sensor in (
         SENSOR_ENERGY,
         SENSOR_POWER,
@@ -3341,7 +3346,6 @@ for sensor_id in range(ext_temp_sensors):
             "ascii", "ignore"
         ).decode("utf-8")
     )
-    default_topic = f"shellies/{dev_id}/"
     sensor_name = f"{device_name} External Temperature {sensor_id}"
     state_topic = f"~{SENSOR_EXT_TEMPERATURE}/{sensor_id}"
     if device_config.get(f"ext-temperature-{sensor_id}"):
@@ -3379,7 +3383,6 @@ for sensor_id in range(ext_humi_sensors):
             "ascii", "ignore"
         ).decode("utf-8")
     )
-    default_topic = f"shellies/{dev_id}/"
     sensor_name = f"{device_name} External Humidity {sensor_id}"
     state_topic = f"~{SENSOR_EXT_HUMIDITY}/{sensor_id}"
     if device_config.get(f"ext-temperature-{sensor_id}"):
@@ -3418,7 +3421,6 @@ for bin_sensor_id in range(len(bin_sensors)):
     ).decode(
         "utf-8"
     )
-    default_topic = f"shellies/{dev_id}/"
     if bin_sensors[bin_sensor_id] == SENSOR_EXT_SWITCH:
         sensor_name = f"{device_name} External Switch"
     else:
@@ -3523,7 +3525,6 @@ for light_id in range(rgbw_lights):
         light_name = device_config[f"light-{light_id}-name"]
     else:
         light_name = f"{device_name} Light {light_id}"
-    default_topic = f"shellies/{dev_id}/"
     state_topic = f"~color/{light_id}/status"
     command_topic = f"~color/{light_id}/set"
     availability_topic = TOPIC_ONLINE
@@ -3662,7 +3663,6 @@ for light_id in range(rgbw_lights):
                 "ascii", "ignore"
             ).decode("utf-8")
         )
-        default_topic = f"shellies/{dev_id}/"
 
         payload = {
             KEY_NAME: f"{device_name} {clean_name(sensor)} {light_id}",
@@ -3731,7 +3731,7 @@ for light_id, light_options in white_lights.items():
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: str(qos),
         KEY_DEVICE: device_info,
-        "~": f"shellies/{dev_id}/",
+        "~": default_topic,
     }
 
     if light_options.get(KEY_COLOR_TEMP_TEMPLATE):
@@ -3811,7 +3811,6 @@ for light_id, light_options in white_lights.items():
                 "ascii", "ignore"
             ).decode("utf-8")
         )
-        default_topic = f"shellies/{dev_id}/"
 
         payload = {
             KEY_NAME: f"{device_name} {clean_name(sensor)} {light_id}",
@@ -3845,42 +3844,43 @@ for light_id, light_options in white_lights.items():
 
         mqtt_publish(config_topic, payload, retain)
 
-# meters
+# meter sensors
 for meter_id in range(meters):
     force_update = False
     if isinstance(device_config.get(CONF_FORCE_UPDATE_SENSORS), bool):
         force_update = device_config.get(CONF_FORCE_UPDATE_SENSORS)
+    for sensor, sensor_options in meter_sensors.items():
+        config_topic = (
+            f"{disc_prefix}/sensor/{dev_id}-emeter-{sensor}-{meter_id}/config".encode(
+                "ascii", "ignore"
+            ).decode("utf-8")
+        )
 
-    default_topic = f"shellies/{dev_id}/"
-    for sensor_id in range(len(meters_sensors)):
-        unique_id = f"{dev_id}-emeter-{meters_sensors[sensor_id]}-{meter_id}".lower()
-        config_topic = f"{disc_prefix}/sensor/{dev_id}-emeter-{meters_sensors[sensor_id]}-{meter_id}/config".encode(
-            "ascii", "ignore"
-        ).decode(
-            "utf-8"
-        )
-        sensor_name = (
-            f"{device_name} Meter {clean_name(meters_sensors[sensor_id])} {meter_id}"
-        )
-        state_topic = f"~emeter/{meter_id}/{meters_sensors[sensor_id]}"
         payload = {
-            KEY_NAME: sensor_name,
-            KEY_STATE_TOPIC: state_topic,
-            KEY_UNIT: meters_sensors_units[sensor_id],
-            KEY_VALUE_TEMPLATE: meters_sensors_tpls[sensor_id],
+            KEY_NAME: f"{device_name} {clean_name(sensor)} {meter_id}",
+            KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(meter_id=meter_id),
             KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_FORCE_UPDATE: str(force_update).lower(),
-            KEY_UNIQUE_ID: unique_id,
+            KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
+            KEY_UNIQUE_ID: f"{dev_id}-emeter-{sensor}-{meter_id}".lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
             "~": default_topic,
         }
-        if meters_sensors_state_classes[sensor_id]:
-            payload[KEY_STATE_CLASS] = meters_sensors_state_classes[sensor_id]
-        if meters_sensors_device_classes and meters_sensors_device_classes[sensor_id]:
-            payload[KEY_DEVICE_CLASS] = meters_sensors_device_classes[sensor_id]
+        if sensor_options.get(KEY_ENTITY_CATEGORY):
+            payload[KEY_ENTITY_CATEGORY] = sensor_options[KEY_ENTITY_CATEGORY]
+        if sensor_options.get(KEY_DEVICE_CLASS):
+            payload[KEY_DEVICE_CLASS] = sensor_options[KEY_DEVICE_CLASS]
+        if sensor_options.get(KEY_STATE_CLASS):
+            payload[KEY_STATE_CLASS] = sensor_options[KEY_STATE_CLASS]
+        if sensor_options.get(KEY_UNIT):
+            payload[KEY_UNIT] = sensor_options[KEY_UNIT]
+        if sensor_options.get(KEY_VALUE_TEMPLATE):
+            payload[KEY_VALUE_TEMPLATE] = sensor_options[KEY_VALUE_TEMPLATE]
+        if sensor_options.get(ATTR_ICON):
+            payload[KEY_ICON] = sensor_options[ATTR_ICON]
         if dev_id.lower() in ignored:
             payload = ""
 
