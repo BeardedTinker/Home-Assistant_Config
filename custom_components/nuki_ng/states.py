@@ -23,12 +23,14 @@ class LockStates(BaseStates):
 
 
 class DoorSensorStates(BaseStates):
-    UNAVAILABLE = 0
     DEACTIVATED = 1
     DOOR_CLOSED = 2
     DOOR_OPENED = 3
-    UNKNOWN = 4
+    DOOR_UNKNOWN = 4
     CALIBRATING = 5
+    UNCALIBRATED = 16
+    REMOVED = 240
+    UNKNOWN = 255
 
 
 class DoorSecurityStates(BaseStates):

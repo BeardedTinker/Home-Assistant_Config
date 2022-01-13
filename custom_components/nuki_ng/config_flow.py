@@ -24,6 +24,11 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
         title = None
         if nuki.token:
+            hass_url = config.get("hass_url", "")
+            if hass_url.lower().startswith("https://"):
+                _LOGGER.error(
+                    f"Bridge doesn't support HTTPS callback URLs: {hass_url}")
+                return title, "https_not_supported"
             try:
                 response = await nuki.bridge_list()
                 _LOGGER.debug(f"bridge devices: {response}")
