@@ -32,3 +32,5 @@ action:
       sequence:
         - service: counter.increment
           entity_id: counter.homeassistant_errors
+
+mode: queued
