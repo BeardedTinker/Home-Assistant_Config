@@ -7,15 +7,15 @@ id: '831d3b09-56ff-4bbd-96ab-fca8fae57c2f'
 
 trigger:
 - platform: state
-  entity_id: sensor.luka_switch_click
+  entity_id: sensor.luka_switch_action
   to: single
   id: single
 - platform: state
-  entity_id: sensor.luka_switch_click
+  entity_id: sensor.luka_switch_action
   to: double
   id: double
 - platform: state
-  entity_id: sensor.luka_switch_click
+  entity_id: sensor.luka_switch_action
   to: triple
   id: triple
 
@@ -46,4 +46,4 @@ action:
             entity_id:
               - light.luka_ceiling_light
     default: []
-mode: single
+mode: parallel

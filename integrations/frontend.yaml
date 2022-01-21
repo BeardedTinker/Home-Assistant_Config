@@ -16,3 +16,5 @@ frontend:
 # deprecated
   # We can define additional/custom themes for the frontend here.
   themes: !include_dir_merge_named ../themes
+  extra_module_url:
+    - /local/community/custom-brand-icons/custom-brand-icons.js
