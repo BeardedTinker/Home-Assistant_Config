@@ -251,7 +251,7 @@ class SpaceXSensor(CoordinatorEntity):
         return self._unit_of_measure
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the attributes."""
         coordinator_data = self.coordinator.data
         starman_data = coordinator_data["starman"]
