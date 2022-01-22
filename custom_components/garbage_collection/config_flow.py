@@ -27,7 +27,7 @@ from .const import (
     CONF_INCLUDE_DATES,
     CONF_WEEK_ORDER_NUMBER,
     CONF_WEEKDAY_ORDER_NUMBER,
-    DAILY_FREQUENCY,
+    DAILY_BLANK_FREQUENCY,
     DOMAIN,
     GROUP_FREQUENCY,
     MONTHLY_FREQUENCY,
@@ -113,7 +113,6 @@ class garbage_collection_shared:
         # Do not show name for Options_Flow. The name cannot be changed here
         if defaults is not None and CONF_NAME in self.data_schema:
             del self.data_schema[CONF_NAME]
-
         return False
 
     def step2_annual_group(self, user_input: Dict, defaults=None):
@@ -286,7 +285,7 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         if next_step:
             if self.shared_class.frequency in ANNUAL_GROUP_FREQUENCY:
                 return await self.async_step_annual_group()
-            elif self.shared_class.frequency in DAILY_FREQUENCY:
+            elif self.shared_class.frequency in DAILY_BLANK_FREQUENCY:
                 return await self.async_step_final()
             else:
                 return await self.async_step_detail()
@@ -389,7 +388,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if next_step:
             if self.shared_class.frequency in ANNUAL_GROUP_FREQUENCY:
                 return await self.async_step_annual_group()
-            elif self.shared_class.frequency in DAILY_FREQUENCY:
+            elif self.shared_class.frequency in DAILY_BLANK_FREQUENCY:
                 return await self.async_step_final()
             else:
                 return await self.async_step_detail()
