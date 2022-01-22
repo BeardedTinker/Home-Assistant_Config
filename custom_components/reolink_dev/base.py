@@ -38,6 +38,7 @@ from .const import (
     CONF_PROTOCOL,
     CONF_STREAM,
     CONF_STREAM_FORMAT,
+    CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
     DEFAULT_USE_HTTPS,
     DEFAULT_CHANNEL,
     DEFAULT_MOTION_OFF_DELAY,
@@ -45,6 +46,7 @@ from .const import (
     DEFAULT_STREAM,
     DEFAULT_STREAM_FORMAT,
     DEFAULT_TIMEOUT,
+    DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY,
     DOMAIN,
     PUSH_MANAGER,
     SESSION_RENEW_THRESHOLD,
@@ -139,6 +141,13 @@ class ReolinkBase:
             self._thumbnail_path = None
         else:
             self._thumbnail_path: str = options[CONF_THUMBNAIL_PATH]
+
+        from .binary_sensor import MotionSensor, ObjectDetectedSensor
+
+        if CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY not in options:
+            self.motion_states_update_fallback_delay = DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY
+        else:
+            self.motion_states_update_fallback_delay = options[CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY]
 
         from .binary_sensor import MotionSensor, ObjectDetectedSensor
 

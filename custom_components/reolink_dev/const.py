@@ -4,6 +4,7 @@ DOMAIN = "reolink_dev"
 DOMAIN_DATA = "reolink_dev_devices"
 EVENT_DATA_RECEIVED = "reolink_dev-event"
 COORDINATOR = "coordinator"
+MOTION_UPDATE_COORDINATOR = "motion_update_coordinator"
 BASE = "base"
 PUSH_MANAGER = "push_manager"
 SESSION_RENEW_THRESHOLD = 300
@@ -21,6 +22,7 @@ CONF_CHANNEL = "channel"
 CONF_MOTION_OFF_DELAY = "motion_off_delay"
 CONF_PLAYBACK_MONTHS = "playback_months"
 CONF_THUMBNAIL_PATH = "playback_thumbnail_path"
+CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY = "motion_states_update_fallback_delay"
 
 DEFAULT_USE_HTTPS = True
 DEFAULT_CHANNEL = 1
@@ -28,6 +30,7 @@ DEFAULT_MOTION_OFF_DELAY = 60
 DEFAULT_PROTOCOL = "rtmp"
 DEFAULT_STREAM = "main"
 DEFAULT_STREAM_FORMAT = "h264"
+DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY = 30
 
 DEFAULT_TIMEOUT = 30
 DEFAULT_PLAYBACK_MONTHS = 2

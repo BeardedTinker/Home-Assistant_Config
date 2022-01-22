@@ -4,11 +4,11 @@ import datetime
 import logging
 import traceback
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, Event
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
-from .entity import ReolinkEntity
-from .const import BASE, DOMAIN
+from .entity import ReolinkEntity, CoordinatorEntity
+from .const import BASE, DOMAIN, MOTION_UPDATE_COORDINATOR
 from .base import ReolinkBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,6 +46,7 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
         """Initialize a the switch."""
         ReolinkEntity.__init__(self, hass, config)
         BinarySensorEntity.__init__(self)
+        CoordinatorEntity.__init__(self, hass.data[DOMAIN][config.entry_id][MOTION_UPDATE_COORDINATOR])
 
         self._available = False
         self._event_state = False
@@ -85,7 +86,9 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return self._available
+        if self._base.motion_states_update_fallback_delay is None or self._base.motion_states_update_fallback_delay <= 0:
+            return self._available
+        return self._base.api.session_active
 
     @property
     def device_class(self):
@@ -125,13 +128,21 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
         if self._event_state:
             self._last_motion = datetime.datetime.now()
-
-            if self._base.api.ai_state:
-                # send an event to AI based motion sensor entities
-                self._hass.bus.async_fire(self._base.event_id, {"ai_refreshed": True})
         else:
             if self._base.motion_off_delay > 0:
                 await asyncio.sleep(self._base.motion_off_delay)
+
+        if self._base.api.ai_state:
+            # send an event to AI based motion sensor entities
+            if self._base.sensor_person_detection is not None:
+                await self._base.sensor_person_detection.handle_event(
+                    Event(self._base.event_id, {"ai_refreshed": True}))
+            if self._base.sensor_vehicle_detection is not None:
+                await self._base.sensor_vehicle_detection.handle_event(
+                    Event(self._base.event_id, {"ai_refreshed": True}))
+            if self._base.sensor_pet_detection is not None:
+                await self._base.sensor_pet_detection.handle_event(
+                    Event(self._base.event_id, {"ai_refreshed": True}))
 
         if self.enabled:
             self.async_schedule_update_ha_state()
@@ -184,6 +195,10 @@ class MotionSensor(ReolinkEntity, BinarySensorEntity):
 
         return attrs
 
+    async def request_refresh(self):
+        """Call the coordinator to update the API."""
+        await self.coordinator.async_request_refresh()
+
 
 class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
     """An implementation of a Reolink IP camera object motion sensor."""
@@ -232,13 +247,14 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
     def is_on(self):
         """Return the state of the sensor."""
         self._state = self._event_state
-
         return self._state
 
     @property
     def available(self):
         """Return True if entity is available."""
-        return self._available
+        if self._base.motion_states_update_fallback_delay is None or self._base.motion_states_update_fallback_delay <= 0:
+            return self._available
+        return self._base.api.ai_state and self._base.api.session_active
 
     @property
     def device_class(self):

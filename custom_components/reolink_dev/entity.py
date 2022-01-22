@@ -4,7 +4,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import BASE, COORDINATOR, DOMAIN
+from .const import BASE, COORDINATOR, DOMAIN, MOTION_UPDATE_COORDINATOR
 from .base import ReolinkBase
 
 

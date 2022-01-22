@@ -142,6 +142,7 @@ class IRLightsSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
@@ -192,6 +193,7 @@ class SpotLightSwitch(ReolinkEntity, ToggleEntity):
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
         self._slstatus = False
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
@@ -271,6 +273,7 @@ class SirenSwitch(ReolinkEntity, ToggleEntity):
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
         self._sistatus = False
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
@@ -317,8 +320,6 @@ class SirenSwitch(ReolinkEntity, ToggleEntity):
         await self.request_refresh()
 
 
-
-
 class PushSwitch(ReolinkEntity, ToggleEntity):
     """An implementation of a Reolink IP camera push switch."""
 
@@ -326,6 +327,7 @@ class PushSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
@@ -372,6 +374,7 @@ class RecordingSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
@@ -419,6 +422,7 @@ class AudioSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
+        self._attr_entity_category = "config"
 
     @property
     def unique_id(self):
