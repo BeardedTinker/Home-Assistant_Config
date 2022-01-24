@@ -12,6 +12,7 @@ from homeassistant.const import (
 )
 
 from .const import (
+    PLATFORMS,
     DOMAIN,
     DATA_CLIENT,
     RUN_SCRIPT_COMMAND,
@@ -36,12 +37,22 @@ async def async_setup(hass, _config):
 
 
 # ---------------------------
+#   update_listener
+# ---------------------------
+async def update_listener(hass, config_entry) -> None:
+    """Handle options update."""
+    await hass.config_entries.async_reload(config_entry.entry_id)
+
+
+# ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry):
+async def async_setup_entry(hass, config_entry) -> bool:
     """Set up Mikrotik Router as config entry."""
     controller = MikrotikControllerData(hass, config_entry)
     await controller.async_hwinfo_update()
+    if not controller.connected():
+        raise ConfigEntryNotReady(f"Cannot connect to host")
 
     await controller.async_update()
 
@@ -51,21 +62,8 @@ async def async_setup_entry(hass, config_entry):
     await controller.async_init()
     hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = controller
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
-
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "binary_sensor")
-    )
-
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "device_tracker")
-    )
-
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "switch")
-    )
+    hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
+    config_entry.async_on_unload(config_entry.add_update_listener(update_listener))
 
     hass.services.async_register(
         DOMAIN, RUN_SCRIPT_COMMAND, controller.run_script, schema=SCRIPT_SCHEMA
@@ -74,7 +72,7 @@ async def async_setup_entry(hass, config_entry):
     device_registry = await hass.helpers.device_registry.async_get_registry()
     device_registry.async_get_or_create(
         config_entry_id=config_entry.entry_id,
-        connections={(DOMAIN, controller.data["routerboard"]["serial-number"])},
+        connections={(DOMAIN, f"{controller.data['routerboard']['serial-number']}")},
         manufacturer=controller.data["resource"]["platform"],
         model=controller.data["routerboard"]["model"],
         name=f"{config_entry.data[CONF_NAME]} {controller.data['routerboard']['model']}",
@@ -83,7 +81,7 @@ async def async_setup_entry(hass, config_entry):
         identifiers={
             DOMAIN,
             "serial-number",
-            controller.data["routerboard"]["serial-number"],
+            f"{controller.data['routerboard']['serial-number']}",
             "sensor",
             f"{config_entry.data[CONF_NAME]} {controller.data['routerboard']['model']}",
         },
@@ -95,14 +93,15 @@ async def async_setup_entry(hass, config_entry):
 # ---------------------------
 #   async_unload_entry
 # ---------------------------
-async def async_unload_entry(hass, config_entry):
+async def async_unload_entry(hass, config_entry) -> bool:
     """Unload a config entry."""
-    controller = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
-    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
-    await hass.config_entries.async_forward_entry_unload(config_entry, "binary_sensor")
-    await hass.config_entries.async_forward_entry_unload(config_entry, "device_tracker")
-    await hass.config_entries.async_forward_entry_unload(config_entry, "switch")
-    hass.services.async_remove(DOMAIN, RUN_SCRIPT_COMMAND)
-    await controller.async_reset()
-    hass.data[DOMAIN][DATA_CLIENT].pop(config_entry.entry_id)
-    return True
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        config_entry, PLATFORMS
+    )
+    if unload_ok:
+        controller = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+        await controller.async_reset()
+        hass.services.async_remove(DOMAIN, RUN_SCRIPT_COMMAND)
+        hass.data[DOMAIN][DATA_CLIENT].pop(config_entry.entry_id)
+
+    return unload_ok

@@ -9,6 +9,7 @@ from homeassistant.components.device_tracker.const import SOURCE_TYPE_ROUTER
 from homeassistant.const import (
     CONF_NAME,
     ATTR_ATTRIBUTION,
+    STATE_NOT_HOME,
 )
 from homeassistant.core import callback
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
@@ -299,6 +300,13 @@ class MikrotikControllerHostDeviceTracker(MikrotikControllerDeviceTracker):
         ):
             return "mdi:lan-connect"
         return "mdi:lan-disconnect"
+
+    @property
+    def state(self) -> str:
+        """Return the state of the device."""
+        if self.is_connected:
+            return self._ctrl.option_zone
+        return STATE_NOT_HOME
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:

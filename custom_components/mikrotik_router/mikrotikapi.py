@@ -52,7 +52,7 @@ class MikrotikAPI:
         self._connection_retry_sec = 58
         self.error = None
         self.connection_error_reported = False
-        self.accounting_last_run = None
+        self.client_traffic_last_run = None
 
         # Default ports
         if not self._port:
@@ -644,64 +644,65 @@ class MikrotikAPI:
         return True, True
 
     # ---------------------------
-    #   take_accounting_snapshot
+    #   take_client_traffic_snapshot
     #   Returns float -> period in seconds between last and current run
     # ---------------------------
-    def take_accounting_snapshot(self) -> float:
-        """Get accounting data"""
+    def take_client_traffic_snapshot(self, use_accounting) -> float:
+        """Tako accounting snapshot and return time diff"""
         if not self.connection_check():
             return 0
 
-        accounting = self.path("/ip/accounting", return_list=False)
+        if use_accounting:
+            accounting = self.path("/ip/accounting", return_list=False)
 
-        self.lock.acquire()
-        try:
-            # Prepare command
-            take = accounting("snapshot/take")
-        except librouteros.exceptions.ConnectionClosed:
-            self.disconnect()
-            self.lock.release()
-            return 0
-        except (
-            librouteros.exceptions.TrapError,
-            librouteros.exceptions.MultiTrapError,
-            librouteros.exceptions.ProtocolError,
-            librouteros.exceptions.FatalError,
-            socket_timeout,
-            socket_error,
-            ssl.SSLError,
-            BrokenPipeError,
-            OSError,
-            ValueError,
-        ) as api_error:
-            self.disconnect("accounting_snapshot", api_error)
-            self.lock.release()
-            return 0
-        except:
-            self.disconnect("accounting_snapshot")
-            self.lock.release()
-            return 0
+            self.lock.acquire()
+            try:
+                # Prepare command
+                take = accounting("snapshot/take")
+            except librouteros.exceptions.ConnectionClosed:
+                self.disconnect()
+                self.lock.release()
+                return 0
+            except (
+                librouteros.exceptions.TrapError,
+                librouteros.exceptions.MultiTrapError,
+                librouteros.exceptions.ProtocolError,
+                librouteros.exceptions.FatalError,
+                socket_timeout,
+                socket_error,
+                ssl.SSLError,
+                BrokenPipeError,
+                OSError,
+                ValueError,
+            ) as api_error:
+                self.disconnect("accounting_snapshot", api_error)
+                self.lock.release()
+                return 0
+            except:
+                self.disconnect("accounting_snapshot")
+                self.lock.release()
+                return 0
 
-        try:
-            list(take)
-        except librouteros.exceptions.ConnectionClosed as api_error:
-            self.disconnect("accounting_snapshot", api_error)
-            self.lock.release()
-            return 0
-        except:
-            self.disconnect("accounting_snapshot")
-            self.lock.release()
-            return 0
+            try:
+                list(take)
+            except librouteros.exceptions.ConnectionClosed as api_error:
+                self.disconnect("accounting_snapshot", api_error)
+                self.lock.release()
+                return 0
+            except:
+                self.disconnect("accounting_snapshot")
+                self.lock.release()
+                return 0
 
-        self.lock.release()
+            self.lock.release()
 
         # First request will be discarded because we cannot know when the last data was retrieved
         # prevents spikes in data
-        if not self.accounting_last_run:
-            self.accounting_last_run = self._current_milliseconds()
+        if not self.client_traffic_last_run:
+            self.client_traffic_last_run = self._current_milliseconds()
             return 0
 
         # Calculate time difference in seconds and return
-        time_diff = self._current_milliseconds() - self.accounting_last_run
-        self.accounting_last_run = self._current_milliseconds()
+        time_diff = self._current_milliseconds() - self.client_traffic_last_run
+        self.client_traffic_last_run = self._current_milliseconds()
         return time_diff / 1000

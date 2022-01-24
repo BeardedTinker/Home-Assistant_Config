@@ -60,6 +60,25 @@ DEVICE_ATTRIBUTES_IFACE = [
     "actual-mtu",
     "type",
     "name",
+]
+
+DEVICE_ATTRIBUTES_IFACE_ETHER = [
+    "running",
+    "enabled",
+    "comment",
+    "client-ip-address",
+    "client-mac-address",
+    "port-mac-address",
+    "last-link-down-time",
+    "last-link-up-time",
+    "link-downs",
+    "actual-mtu",
+    "type",
+    "name",
+    "status",
+    "auto-negotiation",
+    "rate",
+    "full-duplex",
     "default-name",
     "poe-out",
 ]
@@ -158,7 +177,7 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
     new_sensors = []
 
     # Add switches
-    for sid, sid_uid, sid_name, sid_ref, sid_func in zip(
+    for sid, sid_uid, sid_name, sid_ref, sid_attr, sid_func in zip(
         # Data point name
         ["ppp_secret", "interface"],
         # Data point unique id
@@ -167,6 +186,8 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
         ["name", "name"],
         # Entry Unique id
         ["name", "port-mac-address"],
+        # Attr
+        [None, DEVICE_ATTRIBUTES_IFACE],
         # Tracker function
         [
             MikrotikControllerPPPSecretBinarySensor,
@@ -201,6 +222,7 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
                 "sid_uid": sid_uid,
                 "sid_name": sid_name,
                 "sid_ref": sid_ref,
+                "sid_attr": sid_attr,
             }
             sensors[item_id] = sid_func(
                 inst, uid, mikrotik_controller, config_entry, sid_data
@@ -216,7 +238,7 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
             continue
 
         sensors[item_id] = MikrotikControllerBinarySensor(
-            mikrotik_controller=mikrotik_controller, inst=inst, sensor=sensor
+            mikrotik_controller=mikrotik_controller, inst=inst, sid_data=sensor
         )
         new_sensors.append(sensors[item_id])
 
@@ -227,28 +249,24 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
 class MikrotikControllerBinarySensor(BinarySensorEntity):
     """Define an Mikrotik Controller Binary Sensor."""
 
-    def __init__(self, mikrotik_controller, inst, sensor):
+    def __init__(self, mikrotik_controller, inst, sid_data):
         """Initialize."""
         self._inst = inst
-        self._sensor = sensor
+        self._sensor = sid_data
         self._ctrl = mikrotik_controller
-        if sensor in SENSOR_TYPES:
-            self._data = mikrotik_controller.data[SENSOR_TYPES[sensor][ATTR_PATH]]
-            self._type = SENSOR_TYPES[sensor]
-            self._attr = SENSOR_TYPES[sensor][ATTR_ATTR]
+        if sid_data in SENSOR_TYPES:
+            self._data = mikrotik_controller.data[SENSOR_TYPES[sid_data][ATTR_PATH]]
+            self._type = SENSOR_TYPES[sid_data]
+            self._attr = SENSOR_TYPES[sid_data][ATTR_ATTR]
+            self._dcls = SENSOR_TYPES[sid_data][ATTR_DEVICE_CLASS]
+            self._ctgr = SENSOR_TYPES[sid_data][ATTR_CTGR]
         else:
             self._type = {}
             self._attr = None
+            self._dcls = None
+            self._ctgr = None
 
-        if ATTR_CTGR in self._type:
-            self._entity_category = self._type[ATTR_CTGR]
-        else:
-            self._entity_category = None
-
-        self._device_class = None
         self._state = None
-        self._icon = None
-        self._unit_of_measurement = None
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
 
     @property
@@ -260,6 +278,11 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         return self._attrs
+
+    @property
+    def device_class(self) -> Optional[str]:
+        """Return the device class."""
+        return self._dcls
 
     @property
     def unique_id(self) -> str:
@@ -274,10 +297,7 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
     @property
     def entity_category(self) -> str:
         """Return entity category"""
-        if self._entity_category:
-            return self._entity_category
-
-        return None
+        return self._ctgr
 
     @property
     def device_info(self) -> Dict[str, Any]:
@@ -286,7 +306,9 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
             self._type[ATTR_GROUP] = self._ctrl.data["resource"]["board-name"]
 
         info = {
-            "connections": {(DOMAIN, self._ctrl.data["routerboard"]["serial-number"])},
+            "connections": {
+                (DOMAIN, f"{self._ctrl.data['routerboard']['serial-number']}")
+            },
             "manufacturer": self._ctrl.data["resource"]["platform"],
             "model": self._ctrl.data["resource"]["board-name"],
             "name": f"{self._inst} {self._type[ATTR_GROUP]}",
@@ -298,7 +320,7 @@ class MikrotikControllerBinarySensor(BinarySensorEntity):
                 (
                     DOMAIN,
                     "serial-number",
-                    self._ctrl.data["routerboard"]["serial-number"],
+                    f"{self._ctrl.data['routerboard']['serial-number']}",
                     "sensor",
                     f"{self._inst} {self._type[ATTR_GROUP]}",
                 )
@@ -398,7 +420,7 @@ class MikrotikControllerPPPSecretBinarySensor(MikrotikControllerBinarySensor):
                 (
                     DOMAIN,
                     "serial-number",
-                    self._ctrl.data["routerboard"]["serial-number"],
+                    f"{self._ctrl.data['routerboard']['serial-number']}",
                     "switch",
                     "PPP",
                 )
@@ -478,12 +500,19 @@ class MikrotikControllerPortBinarySensor(MikrotikControllerBinarySensor):
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
-        for variable in DEVICE_ATTRIBUTES_IFACE:
-            if variable in self._data:
-                attributes[format_attribute(variable)] = self._data[variable]
 
-        if "sfp-shutdown-temperature" in self._data:
-            for variable in DEVICE_ATTRIBUTES_IFACE_SFP:
+        if self._data["type"] == "ether":
+            for variable in DEVICE_ATTRIBUTES_IFACE_ETHER:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
+
+            if "sfp-shutdown-temperature" in self._data:
+                for variable in DEVICE_ATTRIBUTES_IFACE_SFP:
+                    if variable in self._data:
+                        attributes[format_attribute(variable)] = self._data[variable]
+
+        else:
+            for variable in self._sid_data["sid_attr"]:
                 if variable in self._data:
                     attributes[format_attribute(variable)] = self._data[variable]
 

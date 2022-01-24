@@ -9,6 +9,7 @@ from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
     TEMP_CELSIUS,
+    ELECTRIC_POTENTIAL_VOLT,
 )
 
 from homeassistant.helpers.entity import EntityCategory
@@ -63,6 +64,17 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "temperature",
+        ATTR_CTGR: None,
+    },
+    "system_voltage": {
+        ATTR_DEVICE_CLASS: SensorDeviceClass.VOLTAGE,
+        ATTR_ICON: "mdi:lightning-bolt",
+        ATTR_LABEL: "Voltage",
+        ATTR_UNIT: ELECTRIC_POTENTIAL_VOLT,
+        ATTR_GROUP: "System",
+        ATTR_PATH: "health",
+        ATTR_ATTR: "voltage",
+        ATTR_CTGR: EntityCategory.DIAGNOSTIC,
     },
     "system_cpu-temperature": {
         ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
@@ -72,6 +84,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "cpu-temperature",
+        ATTR_CTGR: None,
     },
     "system_board-temperature1": {
         ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
@@ -81,6 +94,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "board-temperature1",
+        ATTR_CTGR: None,
     },
     "system_power-consumption": {
         ATTR_DEVICE_CLASS: SensorDeviceClass.POWER,
@@ -90,6 +104,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "power-consumption",
+        ATTR_CTGR: None,
     },
     "system_fan1-speed": {
         ATTR_DEVICE_CLASS: None,
@@ -99,6 +114,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "fan1-speed",
+        ATTR_CTGR: None,
     },
     "system_fan2-speed": {
         ATTR_DEVICE_CLASS: None,
@@ -108,6 +124,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "health",
         ATTR_ATTR: "fan2-speed",
+        ATTR_CTGR: None,
     },
     "system_uptime": {
         ATTR_DEVICE_CLASS: SensorDeviceClass.TIMESTAMP,
@@ -127,6 +144,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "resource",
         ATTR_ATTR: "cpu-load",
+        ATTR_CTGR: None,
     },
     "system_memory-usage": {
         ATTR_DEVICE_CLASS: None,
@@ -136,6 +154,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "resource",
         ATTR_ATTR: "memory-usage",
+        ATTR_CTGR: None,
     },
     "system_hdd-usage": {
         ATTR_DEVICE_CLASS: None,
@@ -145,6 +164,7 @@ SENSOR_TYPES = {
         ATTR_GROUP: "System",
         ATTR_PATH: "resource",
         ATTR_ATTR: "hdd-usage",
+        ATTR_CTGR: None,
     },
     "traffic_tx": {
         ATTR_DEVICE_CLASS: None,
@@ -154,6 +174,7 @@ SENSOR_TYPES = {
         ATTR_UNIT_ATTR: "tx-bits-per-second-attr",
         ATTR_PATH: "interface",
         ATTR_ATTR: "tx-bits-per-second",
+        ATTR_CTGR: None,
     },
     "traffic_rx": {
         ATTR_DEVICE_CLASS: None,
@@ -163,46 +184,51 @@ SENSOR_TYPES = {
         ATTR_UNIT_ATTR: "rx-bits-per-second-attr",
         ATTR_PATH: "interface",
         ATTR_ATTR: "rx-bits-per-second",
+        ATTR_CTGR: None,
     },
-    "accounting_lan_tx": {
+    "client_traffic_lan_tx": {
         ATTR_DEVICE_CLASS: None,
         ATTR_ICON: "mdi:upload-network",
         ATTR_LABEL: "LAN TX",
         ATTR_UNIT: "ps",
         ATTR_UNIT_ATTR: "tx-rx-attr",
-        ATTR_PATH: "accounting",
+        ATTR_PATH: "client_traffic",
         ATTR_ATTR: "lan-tx",
+        ATTR_CTGR: None,
     },
-    "accounting_lan_rx": {
+    "client_traffic_lan_rx": {
         ATTR_DEVICE_CLASS: None,
         ATTR_ICON: "mdi:download-network",
         ATTR_LABEL: "LAN RX",
         ATTR_UNIT: "ps",
         ATTR_UNIT_ATTR: "tx-rx-attr",
-        ATTR_PATH: "accounting",
+        ATTR_PATH: "client_traffic",
         ATTR_ATTR: "lan-rx",
+        ATTR_CTGR: None,
     },
-    "accounting_wan_tx": {
+    "client_traffic_wan_tx": {
         ATTR_DEVICE_CLASS: None,
         ATTR_ICON: "mdi:upload-network",
         ATTR_LABEL: "WAN TX",
         ATTR_UNIT: "ps",
         ATTR_UNIT_ATTR: "tx-rx-attr",
-        ATTR_PATH: "accounting",
+        ATTR_PATH: "client_traffic",
         ATTR_ATTR: "wan-tx",
+        ATTR_CTGR: None,
     },
-    "accounting_wan_rx": {
+    "client_traffic_wan_rx": {
         ATTR_DEVICE_CLASS: None,
         ATTR_ICON: "mdi:download-network",
         ATTR_LABEL: "WAN RX",
         ATTR_UNIT: "ps",
         ATTR_UNIT_ATTR: "tx-rx-attr",
-        ATTR_PATH: "accounting",
+        ATTR_PATH: "client_traffic",
         ATTR_ATTR: "wan-rx",
+        ATTR_CTGR: None,
     },
 }
 
-DEVICE_ATTRIBUTES_ACCOUNTING = ["address", "mac-address", "host-name"]
+DEVICE_ATTRIBUTES_CLIENT_TRAFFIC = ["address", "mac-address", "host-name"]
 
 
 # ---------------------------
@@ -279,9 +305,11 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
             new_sensors.append(sensors[item_id])
 
     for sensor in SENSOR_TYPES:
-        if "system_" in sensor:
+        if sensor.startswith("system_"):
             if (
-                mikrotik_controller.data[SENSOR_TYPES[sensor][ATTR_PATH]][
+                SENSOR_TYPES[sensor][ATTR_ATTR]
+                not in mikrotik_controller.data[SENSOR_TYPES[sensor][ATTR_PATH]]
+                or mikrotik_controller.data[SENSOR_TYPES[sensor][ATTR_PATH]][
                     SENSOR_TYPES[sensor][ATTR_ATTR]
                 ]
                 == "unknown"
@@ -299,7 +327,7 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
             )
             new_sensors.append(sensors[item_id])
 
-        if "traffic_" in sensor:
+        if sensor.startswith("traffic_"):
             if not config_entry.options.get(
                 CONF_SENSOR_PORT_TRAFFIC, DEFAULT_SENSOR_PORT_TRAFFIC
             ):
@@ -322,9 +350,9 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
                     )
                     new_sensors.append(sensors[item_id])
 
-        if "accounting_" in sensor:
-            for uid in mikrotik_controller.data["accounting"]:
-                item_id = f"{inst}-{sensor}-{mikrotik_controller.data['accounting'][uid]['mac-address']}"
+        if sensor.startswith("client_traffic_"):
+            for uid in mikrotik_controller.data["client_traffic"]:
+                item_id = f"{inst}-{sensor}-{mikrotik_controller.data['client_traffic'][uid]['mac-address']}"
                 if item_id in sensors:
                     if sensors[item_id].enabled:
                         sensors[item_id].async_schedule_update_ha_state()
@@ -332,9 +360,9 @@ def update_items(inst, config_entry, mikrotik_controller, async_add_entities, se
 
                 if (
                     SENSOR_TYPES[sensor][ATTR_ATTR]
-                    in mikrotik_controller.data["accounting"][uid].keys()
+                    in mikrotik_controller.data["client_traffic"][uid].keys()
                 ):
-                    sensors[item_id] = MikrotikAccountingSensor(
+                    sensors[item_id] = MikrotikClientTrafficSensor(
                         mikrotik_controller=mikrotik_controller,
                         inst=inst,
                         sensor=sensor,
@@ -361,25 +389,18 @@ class MikrotikControllerSensor(SensorEntity):
         if sid_data in SENSOR_TYPES:
             self._data = mikrotik_controller.data[SENSOR_TYPES[sid_data][ATTR_PATH]]
             self._type = SENSOR_TYPES[sid_data]
-            self._attr = SENSOR_TYPES[sid_data][ATTR_ATTR]
+            self._icon = self._type[ATTR_ICON]
+            self._attr = self._type[ATTR_ATTR]
+            self._dcls = self._type[ATTR_DEVICE_CLASS]
+            self._ctgr = self._type[ATTR_CTGR]
         else:
             self._type = {}
-            self._attr = None
-
-        self._device_class = None
-        self._state = None
-
-        if ATTR_CTGR in self._type:
-            self._entity_category = self._type[ATTR_CTGR]
-        else:
-            self._entity_category = None
-
-        if ATTR_ICON in self._type:
-            self._icon = self._type[ATTR_ICON]
-        else:
             self._icon = None
+            self._attr = None
+            self._dcls = None
+            self._ctgr = None
 
-        self._unit_of_measurement = None
+        self._state = None
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
 
     @property
@@ -404,26 +425,17 @@ class MikrotikControllerSensor(SensorEntity):
     @property
     def icon(self) -> str:
         """Return the icon."""
-        if self._icon:
-            return self._icon
-
-        return None
+        return self._icon
 
     @property
     def entity_category(self) -> str:
         """Return entity category"""
-        if self._entity_category:
-            return self._entity_category
-
-        return None
+        return self._ctgr
 
     @property
     def device_class(self) -> Optional[str]:
         """Return the device class."""
-        if ATTR_DEVICE_CLASS in self._type:
-            return self._type[ATTR_DEVICE_CLASS]
-
-        return None
+        return self._dcls
 
     @property
     def unique_id(self) -> str:
@@ -451,7 +463,9 @@ class MikrotikControllerSensor(SensorEntity):
             self._type[ATTR_GROUP] = self._ctrl.data["resource"]["board-name"]
 
         info = {
-            "connections": {(DOMAIN, self._ctrl.data["routerboard"]["serial-number"])},
+            "connections": {
+                (DOMAIN, f"{self._ctrl.data['routerboard']['serial-number']}")
+            },
             "manufacturer": self._ctrl.data["resource"]["platform"],
             "model": self._ctrl.data["resource"]["board-name"],
             "name": f"{self._inst} {self._type[ATTR_GROUP]}",
@@ -463,7 +477,7 @@ class MikrotikControllerSensor(SensorEntity):
                 (
                     DOMAIN,
                     "serial-number",
-                    self._ctrl.data["routerboard"]["serial-number"],
+                    f"{self._ctrl.data['routerboard']['serial-number']}",
                     "sensor",
                     f"{self._inst} {self._type[ATTR_GROUP]}",
                 )
@@ -520,10 +534,10 @@ class MikrotikControllerTrafficSensor(MikrotikControllerSensor):
 
 
 # ---------------------------
-#   MikrotikAccountingSensor
+#   MikrotikClientTrafficSensor
 # ---------------------------
-class MikrotikAccountingSensor(MikrotikControllerSensor):
-    """Define an Mikrotik Accounting sensor."""
+class MikrotikClientTrafficSensor(MikrotikControllerSensor):
+    """Define an Mikrotik MikrotikClientTrafficSensor sensor."""
 
     def __init__(self, mikrotik_controller, inst, sensor, uid):
         """Initialize."""
@@ -571,7 +585,7 @@ class MikrotikAccountingSensor(MikrotikControllerSensor):
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attributes = self._attrs
-        for variable in DEVICE_ATTRIBUTES_ACCOUNTING:
+        for variable in DEVICE_ATTRIBUTES_CLIENT_TRAFFIC:
             if variable in self._data:
                 attributes[format_attribute(variable)] = self._data[variable]
 
@@ -619,7 +633,7 @@ class MikrotikControllerEnvironmentSensor(MikrotikControllerSensor):
                 (
                     DOMAIN,
                     "serial-number",
-                    self._ctrl.data["routerboard"]["serial-number"],
+                    f"{self._ctrl.data['routerboard']['serial-number']}",
                     "sensor",
                     "Environment",
                 )

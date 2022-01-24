@@ -1,5 +1,13 @@
 """Constants used by the Mikrotik Router component and platforms."""
+from homeassistant.const import Platform
 
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.DEVICE_TRACKER,
+    Platform.SWITCH,
+    Platform.BUTTON,
+]
 DOMAIN = "mikrotik_router"
 DEFAULT_NAME = "Mikrotik Router"
 DATA_CLIENT = "client"

@@ -16,6 +16,8 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SSL,
+    CONF_ZONE,
+    STATE_HOME,
 )
 from homeassistant.core import callback
 
@@ -207,6 +209,10 @@ class MikrotikControllerOptionsFlowHandler(OptionsFlow):
                             CONF_TRACK_HOSTS_TIMEOUT, DEFAULT_TRACK_HOST_TIMEOUT
                         ),
                     ): int,
+                    vol.Optional(
+                        CONF_ZONE,
+                        default=self.config_entry.options.get(CONF_ZONE, STATE_HOME),
+                    ): str,
                 }
             ),
         )
