@@ -142,8 +142,6 @@ class ReolinkBase:
         else:
             self._thumbnail_path: str = options[CONF_THUMBNAIL_PATH]
 
-        from .binary_sensor import MotionSensor, ObjectDetectedSensor
-
         if CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY not in options:
             self.motion_states_update_fallback_delay = DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY
         else:

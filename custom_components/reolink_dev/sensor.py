@@ -157,10 +157,10 @@ class LastEventSensor(ReolinkEntity, SensorEntity):
     async def handle_event(self, event):
         """Handle incoming event for VoD update"""
 
-        if not "motion" in event.data:
+        if "motion" not in event.data:
             return
 
-        self._hass.async_add_job(self._update_event_range)
+        await self._hass.async_add_job(self._update_event_range)
 
     @property
     def unique_id(self):

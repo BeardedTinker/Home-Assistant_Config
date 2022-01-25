@@ -133,7 +133,7 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_validate_input(self, hass: core.HomeAssistant, user_input: dict):
         """Validate the user input allows us to connect."""
-        self.base = ReolinkBase(hass, user_input, [])
+        self.base = ReolinkBase(hass, user_input, {})
 
         if not await self.base.connect_api():
             raise CannotConnect
@@ -147,7 +147,7 @@ class ReolinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_finish_flow(self, flow, result):
         """Finish flow."""
         # if result['type'] == data_entry_flow.RESULT_TYPE_ABORT:
-        self.base.disconnect_api()
+        await self.base.disconnect_api()
 
 
 class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
