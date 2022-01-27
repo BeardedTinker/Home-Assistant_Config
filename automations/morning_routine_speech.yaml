@@ -1,0 +1,27 @@
+#####
+# Finally doing overdue Morning routine speech
+# Thanks @thejeffreystone for nudge
+#####
+
+alias: Good Morning Report
+id: b663bab6-dc32-4808-be7f-5812ab340722
+
+initial_state: true
+
+trigger:
+  - platform: state
+    entity_id: binary_sensor.kitchen_motion
+    to: 'on'
+
+condition:
+  - condition: time
+    after: '07:00:00'
+    before: '09:30:00'
+  - condition: state
+    entity_id: input_boolean.morning_report_done
+    state: 'off'
+
+action:
+- service: script.morning_briefing
+- service: input_boolean.turn_on
+  entity_id: input_boolean.morning_report_done

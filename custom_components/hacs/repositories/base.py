@@ -39,6 +39,7 @@ from ..utils.version import (
     version_left_higher_then_right,
     version_to_download,
 )
+from ..utils.workarounds import DOMAIN_OVERRIDES
 
 if TYPE_CHECKING:
     from ..base import HacsBase
@@ -417,11 +418,13 @@ class HacsRepository:
                         return True
                     return False
             if self.display_version_or_commit == "version":
-                if version_left_higher_then_right(
-                    self.display_available_version,
-                    self.display_installed_version,
-                ):
-                    return True
+                if (
+                    result := version_left_higher_then_right(
+                        self.display_available_version,
+                        self.display_installed_version,
+                    )
+                ) is not None:
+                    return result
             if self.display_installed_version != self.display_available_version:
                 return True
 
@@ -517,6 +520,10 @@ class HacsRepository:
         except HacsRepositoryExistException:
             self.data.full_name = self.hacs.common.renamed_repositories[self.data.full_name]
             await self.common_update_data(ignore_issues=ignore_issues, force=force)
+
+        except HacsException:
+            if not ignore_issues and not force:
+                return False
 
         if not self.data.installed and (current_etag == self.data.etag_repository) and not force:
             self.logger.debug("Did not update %s, content was not modified", self.data.full_name)
@@ -678,7 +685,7 @@ class HacsRepository:
 
     async def uninstall(self) -> None:
         """Run uninstall tasks."""
-        self.logger.info("%s Uninstalling", self)
+        self.logger.info("%s Removing", self)
         if not await self.remove_local_directory():
             raise HacsException("Could not uninstall")
         self.data.installed = False
@@ -719,8 +726,12 @@ class HacsRepository:
                 local_path = self.content.path.local
             elif self.data.category == "integration":
                 if not self.data.domain:
-                    self.logger.error("%s Missing domain", self)
-                    return False
+                    if domain := DOMAIN_OVERRIDES.get(self.data.full_name):
+                        self.data.domain = domain
+                        self.content.path.local = self.localpath
+                    else:
+                        self.logger.error("%s Missing domain", self)
+                        return False
                 local_path = self.content.path.local
             else:
                 local_path = self.content.path.local
@@ -943,12 +954,12 @@ class HacsRepository:
             self.validate.errors.append("Repository is archived.")
             if self.data.full_name not in self.hacs.common.archived_repositories:
                 self.hacs.common.archived_repositories.append(self.data.full_name)
-            raise HacsRepositoryArchivedException("Repository is archived.")
+            raise HacsRepositoryArchivedException(f"{self} Repository is archived.")
 
         # Make sure the repository is not in the blacklist.
         if self.hacs.repositories.is_removed(self.data.full_name) and not ignore_issues:
-            self.validate.errors.append("Repository is in the blacklist.")
-            raise HacsException("Repository is in the blacklist.")
+            self.validate.errors.append("Repository has been requested to be removed.")
+            raise HacsException(f"{self} Repository has been requested to be removed.")
 
         # Get releases.
         try:
