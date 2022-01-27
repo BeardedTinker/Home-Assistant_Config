@@ -1,0 +1,12 @@
+#####
+#
+#
+#####
+
+morning_briefing:
+  sequence:
+  - service: script.speech_engine
+    data:
+      who: 'kitchen'
+      when: 'morning'
+      message: !include ../templates/speech/briefing.yaml

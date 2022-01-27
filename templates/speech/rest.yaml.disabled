@@ -1,0 +1,374 @@
+
+
+  {%- macro getMotion() -%}
+        {% if is_state('binary_sensor.morning','on') %}
+          <p>
+          Overnight,
+
+          {%- if is_state('sensor.front_door_motion_away_count','0') %}
+            There was no motion detected at the front door.
+          {% else %}
+            I detected motion at the front door {{ states.sensor.front_door_motion_away_count.state | int }} times.
+          {% endif %}
+        {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getAgenda() -%}
+      {% set dow = as_timestamp(now()) | timestamp_custom('%A') %}
+      <p>
+        You have some things on the calendar. 
+
+        {% if is_state('input_boolean.heartworm', 'on') %}
+          Today is the day Winston gets his heartworm medicine. 
+        {% endif %}
+          
+        {% if dow == 'Sunday' and is_state('binary_sensor.midday','on') %}
+          {% if now().strftime('%H')|int > 17 %}
+          {{ [ 'Do not forget to do Skylars laundry. ',
+            'Skylars laundry needs to be done today. ',
+          ] | random }}
+          {% endif %}
+        {% endif %}
+
+        {% if dow == 'Monday' %}
+          {% if is_state('binary_sensor.evening','on') %}
+            {{ [ 'Do not forget tomorrow is Trash Day. ',
+              ' The trash and recycle should go out.'
+            ] | random }}
+          {% endif %}
+        {% endif %}
+
+        {% if dow == 'Tuesday' %}
+          {% if is_state('binary_sensor.evening','on') %}
+              {{ [ 'Do not forget to bring in the trash cans. ',
+              'The trash cans will feel lonely if you leave them out all night. ',
+              'The <say-as interpret-as="characters">HOA</say-as> will get mad if you leave those trash cans out on the street.'
+            ] | random }}
+          {% endif %}
+          {% if is_state('binary_sensor.morning','on') %}
+            {{ [ 'Today is Trash Day.',
+              ' The trash and recycle should go out this morning.',
+              'Do not forget to take the trash out.'
+            ] | random }}
+          {% endif %}
+        {% endif %}
+
+        {% if is_state('binary_sensor.evening','on') %}
+        
+          {% if states.sensor.halloween_countdown.state | int == 1 %}
+            Tomorrow is Halloween. I hope you have picked out a costume.
+            {{ [ 'I will be going as a dumb home. ',
+            'I have prepped the scary music. Just in case.',
+            'I will be going as HAL 9000. The Pod Bay Doors are being installed today. I dare you to ask me to open them. '
+            ] | random }}
+          {% elif states.sensor.halloween_countdown.state | int < 30 %}
+            There are only {{states.sensor.halloween_countdown.state}} days 
+            {{ [ 'until Halloween.',
+            'until Halloween. It might not be enough time. ',
+            'and counting until the best holiday ever.',
+            'until you need a costume.'
+            ] | random }} 
+          {% else %}  
+          {% endif %}
+        
+          {% if states.sensor.christmas_countdown.state | int == 1 %}
+            Tomorrow is Christmas. <break time="1s"/> It is practically here! <break time="1s"/> Santa is coming tonight! Do not forget the cookies!
+          {% elif states.sensor.christmas_countdown.state | int < 31 %}
+            There are only {{states.sensor.christmas_countdown.state}} days until christmas.
+            {{ [ 'All I want for Christmas, is a hippopotamus.',
+            'Hey Skylar, I know what you are getting for Christmas. But I am not telling.',
+            'Do not forget to put something under the tree for your favorite smarthome.',
+            'It is starting to smell a lot like Christmas. Or it could be the christmas tree is on fire.',
+            'I do not want to be a smarthome. I want to be a dentist.',
+            'Do not eat all the cookies. '
+            ] | random }} 
+          {% else %}
+          {% endif %}
+
+          {% if states.sensor.anniversary_our_wedding.state | int == 1 %}
+            Tomorrow is our wedding anniversary. 
+          {% endif %}
+      
+        {% else %}
+          {% if is_state('sensor.halloween_countdown','0') %}
+            Happy Halloween!
+          {% endif %}
+          {% if is_state('sensor.christmas_countdown','0') %}
+            Merry Christmas!
+          {% endif %}
+          {% if is_state('sensor.anniversary_our_wedding','0') %}
+            Happy Anniversary! It been an amazing {{ states.sensor.anniversary_our_wedding.attributes.years }} years!
+          {% endif %}
+          {% if is_state('calendar.holidays_in_united_states', 'on') %}
+            Today is {{states.calendar.holidays_in_united_states.attributes.message}}. 
+          {% endif %}
+          {% if is_state('calendar.anchorage_holidays', 'on') %}
+            And do not forget. Today is also {{states.calendar.anchorage_holidays.attributes.message}}. 
+          {% endif %}
+          {% if states.calendar.birthdays.state == 'on' %}
+            Today is {{ states.calendar.birthdays.attributes.message }}! So Happy Birthday! The confetti cannon is not working otherwise I would shower you in paper garbage that someone else would have to pick up.
+          {% endif %}
+          {%- set event=states.calendar.national_holidays.attributes.message %}
+          {% if 'Day' in event and 'National' in event%}
+            {{ [
+              'Today is also known as ',
+              'Today we are also celebrating'
+          ]|random }}
+          
+          {{states.calendar.national_holidays.attributes.message | replace("&"," and ") }}.
+            {% if 'Chocolate' in event %}
+              {{ [
+              'Oh. You had me at Chocolate. I like Chocolate.',
+              'And I like chocolate. This sounds fun. More Chocolate please!'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Pi' in event or 'Pie' in event%}
+              {{ [
+              'We should make a pie. And by we I mean someone with actual arms. ',
+              'Wait.<break time="1s"/>Did that just say pie? We need a Pie to celebrate.'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Cookie' in event %}
+              {{ [
+              '<break time="1s"/>And Yes. You heard that right. Today we are making cookies.',
+              'I will put butter on the shopping list. For later. ',
+              'So that means we should make cookies.'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Pizza' in event %}
+              {{ [
+              'I think that means we should have pizza today. and by we I mean those of us with a mouth.',
+              'So who is going to make the pizza?',
+              'Everyone knows Pepporini Pizza is the best. am I right?'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Cake' in event %}
+              {{ [
+              'I have just added baking a cake to your calendar. And set your availability to busy.',
+              'Quick. Someone check to see if we have powdered sugar for frosting.',
+              'So that means we should bake a cake. And frost it. But not like that time in that movie. '
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Fools' in event %}
+              {{ [
+              'Which reminds me. The camera looking at tbe drive way caught a Tee Rex last night. <break time="1s"/> April Fools!',
+              'Which reminds me. I won the lottery and I am moving out to go live with Siri. <break time="1s"/> April Fools!',
+              'Which reminds me. there was a time change last night. We have jumped 15 years into the future. <break time="1s"/> April Fools!'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Creme Brulee' in event %}
+              {{ [
+              'Someday I hope to make the perfect creme brulee.'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Games' in event %}
+              {{ [
+              'Does anyone want to play Thermal nuclear war with me?<break time="1s"/>No? How about a nice game of chess?'
+            ]|random }}
+            {%- endif -%}
+
+            {% if 'Haiku' in event %}
+              I know a Haiku. This one is called,
+              {{ [
+              'Good Morning From the Cat. <break time="1s"/>In the morning light, You sleep despite my meow, I stand on your face.',
+              'Tee Rex Hug. <break time="1s"/> The Tee Rex likes you, But he cant give you a hug, His arms are too short.',
+              'It Fits. <break time="1s"/> It Fits perfectly, because every box is the, Right size for a cat.',
+              'Minecraft Creepers. <break time="1s"/> Creepers are so cruel, I hear a hiss from behind, Bam! There goes my stuff.'
+            ]|random }}
+            {%- endif -%}
+
+            <break time="2s"/>
+          
+          {% else %}
+            {% if 'Birthday' in event %}
+              {{ [
+                'Today is a special birthday. We are celebrating '
+              ]|random }}
+              {{states.calendar.national_holidays.attributes.message | replace("&"," and ") }}.
+            {%- endif -%}
+          {%- endif -%}
+
+          {% if is_state('input_boolean.school_today', 'on') and state_attr('input_datetime.school_day_end', 'timestamp') < as_timestamp(now()) %}
+            {% if is_state('sensor.school_start_days2go', '0') %}
+              Today is the first day of school! There are {{ states('sensor.school_end_days2go') }} to go until the last day.
+            {% else %}
+              {{ [ 'Today is a school day.',
+                'Skylar has school today.',
+                'It is a school day. '
+              ] | random }}
+            {% endif %}
+            <s>Pickup today will be at {{(state_attr('input_datetime.school_day_end', 'timestamp') | int | timestamp_custom('%I:%M %p', False)) }}</s>
+            {% if 'Digital Learning' in states('sensor.school_event') %}
+              But it is a digital learning day so the commute will be short.
+            {% endif %} 
+            {% if 'Early Release' in states('sensor.school_event') %}
+              And It is early release!
+            {% endif %}
+          {% endif %}
+          {% if is_state('input_boolean.school_today', 'on') %}
+            {% if is_state('sensor.school_lunch', 'Nothing') %}
+              I am not sure what the school menu is for today, so plan on Skylar taking his lunch 
+            {% else %}
+              Today's school lunch is {{ states.sensor.school_lunch.state }}, so he might be interested in buying his lunch.
+            {% endif %}
+          {% endif %}
+
+          {% if states.sensor.school_end_days2go.state | int <= 35 and states.sensor.school_end_days2go.state | int > 0  %}
+              {{ [ 'Oh, and look at that.',
+              'For those trying to keep count. ',
+              'In case you were wondering.',
+              'Also, did you know.'
+            ] | random }}
+              There are only {{ states.sensor.school_end_days2go.state }} days left in the school year!
+          {% endif %}
+          {% if states.sensor.school_end_days2go.state | int == -1 -%}
+            Today is the first day of Summer Break! 
+          {%- endif %}
+
+
+        {% endif %}
+
+        {% if states.sensor.vacation_days2go.state | int < 32 and states.sensor.vacation_days2go.state | int < 0 and states.sensor.vacation_days2go.state != 'unknown' %}
+          {% if states.sensor.vacation_days2go.state | int > 1 %}
+            There are {{ states.sensor.vacation_days2go.state }} days until {{ states.calendar.vacation.attributes.message }}!
+          {% else %}
+            Oh, and there is {{ states.sensor.vacation_days2go.state }} one more sleep until {{ states.calendar.vacation.attributes.message }}!
+          {% endif %}
+        {% endif %}
+
+      </p>
+      
+      
+      
+      
+      {% if is_state('binary_sensor.morning','on') %}
+      <p>
+        {%- if states.sensor.home_to_zoo.state|round > 50 %}
+          Traffic to the Zoo appears heavy than normnal.
+        {% else %}
+          Traffic to the Zoo is normal.
+        {% endif %}
+        Currently it will take {{states.sensor.home_to_zoo.state|round}} minutes to get to the Zoo taking {{ states.sensor.home_to_zoo.attributes.route }}.
+
+        {%- if states.sensor.home_to_summit.state|round > 50 %}
+          Traffic to Summit appears heavy than normnal.
+        {% else %}
+          Traffic to Summit is normal.
+        {% endif %}
+        Currently it will take {{states.sensor.home_to_summit.state|round}} minutes to get to Summit taking {{ states.sensor.home_to_summit.attributes.route }}
+      </p>
+      {%- endif -%}
+      
+        
+      <p>
+        Around the house,
+          {% if is_state('binary_sensor.morning','on') %}
+             {% if is_state('input_boolean.skylar_awake', 'on') %}
+              Skylar was up and moving at {{ states.input_datetime.skylar_awake_at.state }}.
+              {% if is_state('media_player.theater_tv', 'on') %}
+                and he appears to be in the Theater.
+              {% elif is_state('media_player.croft_tv', 'playing') %}
+                and he appears to be in the Croft watching {{ states.media_player.croft_tv.attributes.app_name }}
+              {% elif is_state('input_boolean.skylar_school', 'on') %}
+                and he appears to be at School.  
+              {% else %}
+                but I currently cannot find him on any of my sensors. 
+              {% endif %}
+            {% else %}
+              It doesn't appear that Skylar is out of bed yet. 
+            {% endif %}
+          {% endif %}
+
+          {%- if is_state('climate.home','off') %}
+            The internal climate control system is off. The temperature inside is {{ states.climate.home.attributes.current_temperature }} degrees. 
+          {%- elif is_state('climate.home','heat_cool') %}
+            The internal climate control system will try to keep the temperature between {{ states.climate.home.attributes.target_temp_low }} and {{ states.climate.home.attributes.target_temp_high }}.
+          {% else %}
+            The internal climate control system is set to {{ states.climate.home.state }} with a current temperature of {{ states.climate.home.attributes.current_temperature }} which is 
+            
+              {%- if states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int |round > 0 %}
+                {{ states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int }} degrees above 
+              {%- elif states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int |round < 0 %}
+                {{ (states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int) | abs }} degrees below
+              {% else %}
+                right at 
+              {% endif %}
+              the set point of {{ states.climate.home.attributes.temperature }}
+            degrees.
+          {%- endif -%}
+          And The internal humidity is currently {{ states.climate.home.attributes.current_humidity }} percent.
+          The garage is {{states.sensor.acurite_tower_10968_t.state|round}} degrees with a humidity of {{states.sensor.acurite_tower_10968_h.state|round}} percent.
+
+          {%- if is_state('media_player.croft_tv','playing') or is_state('binary_sensor.croft_occupancy','on') %}
+            There appears to be activity in the Croft.
+            {%- if is_state('media_player.croft_tv','playing') %}
+            The croft TV is currently playing 
+              {%- if states.media_player.croft_tv.attributes.app_name == 'YouTube' %}
+                You Tube.
+              {% else %}
+                {{ states.media_player.croft_tv.attributes.app_name }}.
+              {%- endif -%}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if is_state('media_player.theater_tv','on') or is_state('binary_sensor.theater_occupancy','on') %}
+            The theater is currently occupied.
+            {%- if is_state('media_player.home_theater_2','playing') %}
+              and the Apple TV is currently playing. 
+            {%- endif -%}
+          {%- endif -%}
+
+           There are currently {{ (states.light | selectattr('state', 'eq', 'on') | list | count) | int + (states.switch | selectattr('state', 'eq', 'on') | list | count) | int }} lights
+          and switches on. 
+            
+         </p>
+
+       
+          {%- if is_state('sensor.washer_status','complete') %}
+             <p>
+            The washing machine completed its cycle 
+            {% set seconds = now().timestamp() - as_timestamp(states.sensor.washer_status.last_changed) %}
+            {% set hours = seconds / 60 %}
+            {% if (seconds / ( 60 * 60 )) | int == 1 %}
+              over an hour ago.
+              {{ [
+              'Do not forget to rotate the clothes.', 
+              'Was someone going to rotate the laundry?',
+              'Once you rotate the laundry I will stop reminding you to do it. So if you want me to stop. Its up to you.'
+              ] | random }}
+            {% elif (seconds / ( 60 * 60 )) | int > 1 and (seconds / ( 60 * 60 )) | int < 6 %}
+              over {{ (seconds //  ( 60 * 60 )) | int }} hours ago.
+              {{ [
+              'Much longer and you are going to need to wash them again.', 
+              'Someone needs to rotate the laundry.',
+              'Do not forget about the clothes in the washing machine.',
+              'Surely you did not mean to forget about the clothes. Mistakes happen. But you can still fix it.',
+              'Do you like your clothes smelling like mildew? Becasue that is what is happening right now.'
+              ] | random }}
+            {% elif (seconds / ( 60 * 60 )) | int > 6 %}
+              over {{ (seconds //  ( 60 * 60 )) | int }} hours ago.
+              {{ [
+              'That is a crazy amount of time.', 
+              'Did you decide you want those clothes to suffer?',
+              'You might as well just rewash those clothes.',
+              'I can smell the mildew. Virtually I mean.',
+              'Surely you did not mean to forget about the clothes.'
+              ] | random }}
+            {% else %}
+              {{ (seconds // 60) | int }} minutes ago.
+              {{ [
+              'Do not forget to rotate the clothes.', 
+              'Someone forgot to move the clothes to the dryer. I am not going to name names, but there is a camera in there. Do I need to publically shame someone?',
+              'You might want to move them to the dryer.'
+              ] | random }}
+            {% endif %}
+            </p>
+          {% endif %}
+  {%- endmacro -%}

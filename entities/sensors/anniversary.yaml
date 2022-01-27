@@ -1,0 +1,18 @@
+platform: anniversary
+name: events
+multiple: true
+date_format: '%d-%m-%Y'
+anniversaries:
+  - event: 'Mirta birthday'
+    date: '5-1'
+    icon: mdi:cake-variant
+  - event: 'Luka birthday'
+    date: '15-1'
+    icon: mdi:cake-variant
+  - event: 'Zita birthday'
+    date: '24-2'
+    icon: mdi:cake-variant
+  - event: 'Andrej birthday'
+    date: '16-4'
+  - event: 'Wedding anniversary'
+    date: '14-9'

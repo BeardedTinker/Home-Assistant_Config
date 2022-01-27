@@ -1,0 +1,140 @@
+>
+  {# Daily Briefing #}
+
+  {%- macro getGreeting() -%}
+    {% if now().strftime('%H')|int < 12 %}
+      Good morning.
+    {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
+      Good afternoon.
+    {% else %}
+      Good evening.
+    {% endif %}
+
+    {% if when == 'morning'  %}
+        Today is {{states.sensor.today_is.state }}, {{ as_timestamp(now()) | timestamp_custom('%B %d %Y') }}.
+    {% else %}
+        It is {{ now().strftime("%I:%M %p") }}
+
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getWeather() -%}
+    The Weather in Zagreb is {{states('sensor.accuweather_apparent_temperature')|round}} degrees 
+    {% if is_state('weather.accuweather', 'rainy') %}
+      {{ [
+      'with rain.', 
+      'with showers.'
+      ] | random }}
+    {% elif is_state('weather.accuweather', 'cloudy') %}
+      {{ [
+      'with clouds.', 
+      'with cloudy skies.'
+      ] | random }}
+    {% elif is_state('weather.accuweather', 'partlycloudy') %}
+      {{ [
+      'with some clouds.', 
+      'with partly cloudy skies.',
+      'with scattered clouds'
+      ] | random }}
+    {% elif is_state('weather.accuweather', 'sunny') %}
+      {% if is_state('sun.sun', 'above_horizon') %}
+        {{ [
+        'and sunny.', 
+        'with sun.'
+        ] | random }}
+      {% else %}
+        {{ [
+        'and clear.', 
+        'with clear skies.'
+        ] | random }}
+      {% endif %}
+    {% else %}
+      and {{ states.weather.accuweather.state }}
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getWeatherAlerts() -%}
+    {% if is_state('binary_sensor.meteoalarm','on') %}
+      There are currently Meteoalarm active weather alerts for our area.
+    {% endif %}
+
+    {% if when == 'evening' %}
+      The overnight forecast says we can expect {{ states.weather.accuweather.state }}.
+    {% else %}
+      The current forecast says we should expect {{ states.weather.accuweather.state }}.
+      {% if is_state('input_boolean.freeze_warning','on') %}
+      And based on the forecasted low, It will be near or below freezing.
+        {{ [ 'So, Someone might want to bring the lemon tree in. ',
+            'Like, the turn water solid kind of cold. Do not leave the lemon tree out to die.',
+            'I suggest bringing in the plants other wise, the temperature might kill them. And that will be on you.',
+            'I would say winter is coming. But, based on the weather forecast it appears to be here.',
+            'I would bring in the plants but I lack legs. And Arms. So I am forced to rely on you. Do not let me down.'
+          ] | random }}
+      {% endif %}
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getSun() -%}
+        {% if is_state('sun.sun', 'below_horizon') %}
+          You have
+          {% set seconds = as_timestamp(states.sun.sun.attributes.next_rising)-now().timestamp() %}
+          {% set hours = seconds / 60 %}
+          {% if seconds / ( 60 * 60 ) > 1 %}
+            {{ (seconds //  ( 60 * 60 )) | int }} hours
+          {% else %}
+            {{ (seconds // 60) | int }} minutes
+          {% endif %}
+          {{ [
+            'until the sun rises.',
+            'until the sun is up.',
+            'before the sun officially rises. '
+          ]|random }}
+        {% else %}
+          You have
+          {% set seconds = as_timestamp(states.sun.sun.attributes.next_setting)-now().timestamp() %}
+          {% set hours = seconds / 60 %}
+          {% if seconds / ( 60 * 60 ) > 1 %}
+            {{ (seconds //  ( 60 * 60 )) | int }} hours
+          {% else %}
+            {{ (seconds // 60) | int }} minutes
+          {% endif %}
+          {{ [
+            'until the sun sets for the day.',
+            'until the sun slips below the horizon.',
+            'before the sun officially sets. '
+          ]|random }}
+        {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getLukaCalendar() -%}
+    {% if is_state('calendar.luka_school', 'on') %}
+      Luka has {{ states.calendar.luka_school.attributes.message }} today as well!
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro getZitaCalendar() -%}
+    {% if is_state('calendar.zita_school', 'on') %}
+      Zita has {{ states.calendar.zita_school.attributes.message }} today as well!
+    {% endif %}
+  {%- endmacro -%}
+
+  {# a macro that removes all newline characters, empty spaces, and returns formatted text  #}
+    {%- macro cleanup(data) -%}
+      {%- for item in data.split("\n")  if item | trim != "" -%}
+        {{ item | trim }} {% endfor -%}
+  {%- endmacro -%}
+
+  {# a macro to call all macros :)  #}
+    {%- macro mother_of_all_macros() -%}
+      {{ getGreeting() }}
+      {{ getWeather() }}
+      {{ getWeatherAlerts() }}
+      {{ getSun() }}
+      {{ getLukaCalendar() }}
+      {{ getZitaCalendar() }}
+
+      {%- endmacro -%}
+    
+    {# Call the macro  #}
+    {{- cleanup(mother_of_all_macros()) -}}
+

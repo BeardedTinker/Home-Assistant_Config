@@ -1,0 +1,11 @@
+{
+  "domain": "anniversary",
+  "name": "Upcoming anniversary",
+  "documentation": "https://github.com/amaximus/anniversary",
+  "issue_tracker": "https://github.com/amaximus/anniversary/issues",
+  "version": "0.2.1",
+  "dependencies": [],
+  "codeowners": ["@amaximus"],
+  "iot_class": "calculated",
+  "requirements": []
+}
