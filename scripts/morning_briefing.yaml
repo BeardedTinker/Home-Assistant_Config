@@ -1,12 +1,14 @@
 #####
-#
-#
+# Morning briefing
+# Sent to kitchen (hardcoded for now) and using generic briefing file
+# where: location of the speaker
+# when: at what TOD (morning/evening)
 #####
 
 morning_briefing:
   sequence:
   - service: script.speech_engine
     data:
-      who: 'kitchen'
+      where: 'kitchen'
       when: 'morning'
-      message: !include ../templates/speech/briefing.yaml
+      speech_message: !include ../templates/speech/briefing.yaml

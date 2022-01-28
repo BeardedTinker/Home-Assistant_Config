@@ -1,5 +1,6 @@
 #####
-# Finally doing overdue Morning routine speech
+# Trigger morning report on first morning visit to kitchen
+# and toggle the Morning briefing binary sensor after triggering command
 # Thanks @thejeffreystone for nudge
 #####
 
@@ -22,6 +23,6 @@ condition:
     state: 'off'
 
 action:
-- service: script.morning_briefing
-- service: input_boolean.turn_on
-  entity_id: input_boolean.morning_report_done
+  - service: script.morning_briefing
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.morning_report_done

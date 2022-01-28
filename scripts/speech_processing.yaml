@@ -11,60 +11,34 @@
 speech_processing:
   mode: queued
   sequence:
-    - service: mqtt.publish
-      data:
-        topic: 'polly/lastmsg'
-        payload: "This message is from {{ now().strftime('%-I') }}:{{ now().strftime('%M') }} {{ now().strftime('%p') }}. {{ speech_message | truncate(220)}}"
-        retain: true
+  - service: mqtt.publish
+    data:
+      topic: 'tts/lastmsg'
+      payload: "This message is from {{ now().strftime('%-I') }}:{{ now().strftime('%M') }} {{ now().strftime('%p') }}. {{ speech_message | truncate(220)}}"
+      retain: true
 
-    - condition: and
-      conditions:
-        - condition: or
-          conditions:
-            - condition: state
-              entity_id: group.family
-              state: 'home'
-            - condition: state
-              entity_id: input_boolean.guest_mode
-              state: 'on'
-        - condition: or
-          conditions:
-            - condition: state
-              entity_id: group.bed
-              state: 'off'
-            - condition: time
-              after: '08:00:00'
-              before: '20:00:00'
-#            - condition: state
-#              entity_id: input_boolean.alert_mode
-#              state: 'on'
-        - condition: state
-          entity_id: input_boolean.audio_notifications
-          state: 'on'
+  - service: media_player.volume_set
+    data:
+      entity_id: >
+        {{ media_player }}
+      volume_level: >-
+        {% if now().strftime('%H')|int < 12 and now().strftime('%H')|int > 6 %}
+          0.4
+        {% elif now().strftime('%H')|int > 12 and now().strftime('%H')|int < 20 %}
+          0.5
+        {% else %}
+          0.3
+        {% endif %}
 
-#    - service: switch.turn_on
-#      entity_id: switch.lr_amp
+  - service: tts.google_translate_say
+    entity_id: >
+      {{ media_player }}
+    data:
+      message: >-
+          {{ speech_message }}
 
-    - service: media_player.volume_set
-      data:
-        entity_id: >
-          {{ media_player }}
-        volume_level: >-
-          {% if now().strftime('%H')|int < 12 and now().strftime('%H')|int > 6 %}
-            0.3
-          {% elif now().strftime('%H')|int > 12 and now().strftime('%H')|int < 20 %}
-            0.5
-          {% else %}
-            0.3
-          {% endif %}
-
-    - service: notify.test_group
-      data:
-        message: >-
-            {{ speech_message }}
-
-    - service: input_boolean.turn_off
-      data:
-        entity_id:
-          - input_boolean.alert_mode
-          - input_boolean.lastmsg
+  - service: input_boolean.turn_off
+    data:
+      entity_id:
+        - input_boolean.alert_mode
+        - input_boolean.lastmsg

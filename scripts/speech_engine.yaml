@@ -1,16 +1,5 @@
 #####
 # Script to send TTS notifications to Google devices during normal hours and only when we are home! 
-# Call like this:
-# action:
-#   service: script.speech_engine
-#   data:
-#     call_no_announcement
-#     call_dark_outside
-#     call_door_check
-#     call_chorse
-#     call_light_check
-#     call_inside_weather
-#     call_outside_weather
 # 
 # Original by @CCOSTAN Repo : https://github.com/CCOSTAN/Home-AssistantConfig
 #####
@@ -18,32 +7,18 @@
 speech_engine:
   mode: queued
   sequence:
-    - condition: or
-      conditions:
-        - condition: state
-          entity_id: group.family
-          state: 'home'
-        - condition: state
-          entity_id: input_boolean.guest_mode
-          state: 'on'
-
-    - service: script.speech_processing
-      data:
-        media_player: >-
-            {% if media_player | length == 0 %}
-              {% set media_player = [
-                'media_player.display_me',
-                'media_player.clock_me'
-              ] %}
-            {% endif %}
-            {% if media_player is not string and media_player is sequence %}
-              {% set media_player = media_player|join(', ') %}
-            {% endif %}
-            {{ media_player }}
-        speech_message: !include ../templates/briefing.yaml
-
-    - service: input_boolean.turn_off
-      data:
-        entity_id:
-          - input_boolean.home_info
-          - input_boolean.chores
+  - service: script.speech_processing
+    data:
+      media_player: >-
+          {% if media_player | length == 0 %}
+            {% set media_player = [
+              'media_player.display_me',
+              'media_player.clock_me'
+            ] %}
+          {% endif %}
+          {% if media_player is not string and media_player is sequence %}
+            {% set media_player = media_player|join(', ') %}
+          {% endif %}
+          {{ media_player }}
+      speech_message: >
+        {{ speech_message }}
