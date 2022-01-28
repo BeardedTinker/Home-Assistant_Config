@@ -1,0 +1,28 @@
+#####
+# Trigger evening report on first evening visit to kitchen
+# and toggle the Morning briefing binary sensor after triggering command
+# Thanks @thejeffreystone for nudge
+#####
+
+alias: Good Evening Report
+id: c87553ab-ec4c-4909-b116-b35dde76593a
+
+initial_state: true
+
+trigger:
+  - platform: state
+    entity_id: binary_sensor.kitchen_motion
+    to: 'on'
+
+condition:
+  - condition: time
+    after: '18:00:00'
+    before: '20:45:00'
+  - condition: state
+    entity_id: input_boolean.evening_report_done
+    state: 'off'
+
+action:
+  - service: script.evening_briefing
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.evening_report_done
