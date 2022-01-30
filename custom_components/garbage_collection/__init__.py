@@ -9,7 +9,6 @@ import voluptuous as vol
 from dateutil.relativedelta import relativedelta
 from homeassistant import config_entries
 from homeassistant.const import CONF_ENTITY_ID, CONF_NAME
-from homeassistant.helpers import discovery
 
 from .const import (
     ATTR_LAST_COLLECTION,
@@ -171,32 +170,30 @@ async def async_setup(hass, config):
     if not platform_config:
         return False
 
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if entry.source == config_entries.SOURCE_IMPORT:
+            _LOGGER.error(
+                "garbage_collection already imported. "
+                "Remove it from configuration.yaml now!"
+            )
+            return True
     for entry in platform_config:
         _LOGGER.debug(
-            "Setting %s(%s) from YAML configuration",
+            "Importing %s(%s) from YAML configuration",
             entry[CONF_NAME],
             entry[CONF_FREQUENCY],
         )
-        # If entry is not enabled, skip.
-        # if not entry[CONF_ENABLED]:
-        #     continue
+        # Import YAML to ConfigFlow
         hass.async_create_task(
-            discovery.async_load_platform(hass, SENSOR_PLATFORM, DOMAIN, entry, config)
+            hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=entry
+            )
         )
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data={}
-        )
-    )
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up this integration using UI."""
-    if config_entry.source == config_entries.SOURCE_IMPORT:
-        # We get here if the integration is set up using YAML
-        hass.async_create_task(hass.config_entries.async_remove(config_entry.entry_id))
-        return False
     _LOGGER.debug(
         "Setting %s (%s) from ConfigFlow",
         config_entry.title,

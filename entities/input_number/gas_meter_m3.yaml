@@ -1,0 +1,12 @@
+#####
+# Gas meter counter
+#
+####
+
+gas_meter_m3:
+  name: Gas Meter Reading
+  min: 0
+  max: 999999
+  step: 0.001
+  unit_of_measurement: m/3
+  mode: box

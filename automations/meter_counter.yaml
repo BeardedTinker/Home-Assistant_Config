@@ -1,0 +1,19 @@
+#####
+# Meter test
+#
+#####
+
+id: energy_gas_pulse_received
+alias: Energy - Gas - Pulse Received
+trigger:
+- platform: state
+  entity_id: binary_sensor.0x54ef44100027d518_contact
+condition:
+- condition: state
+  entity_id: binary_sensor.0x54ef44100027d518_contact
+  state: 'off'
+action:
+- service: input_number.set_value
+  data_template:
+    entity_id: input_number.gas_meter_m3
+    value: '{{ (states.input_number.gas_meter_m3.state | float ) + 0.010 }}'

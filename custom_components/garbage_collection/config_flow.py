@@ -36,7 +36,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class garbage_collection_shared:
+class GarbageCollectionShared:
     """Store configuration for both YAML and config_flow."""
 
     def __init__(self, unique_id):
@@ -55,7 +55,7 @@ class garbage_collection_shared:
             for (key, value) in config_definition.options.items()
             if ("step" in value and value["step"] == step)
         }
-        for key, value in items.items():
+        for key in items:
             if key in self._data and (key not in user_input or user_input[key] == ""):
                 del self._data[key]
         if CONF_NAME in self._data:
@@ -79,8 +79,9 @@ class garbage_collection_shared:
             if defaults is not None and CONF_NAME in validation:
                 del validation[CONF_NAME]
             try:
-                _ = vol.Schema(validation)(user_input)
+                _ = vol.Schema(validation, extra=vol.ALLOW_EXTRA)(user_input)
             except vol.Invalid as exception:
+                _LOGGER.debug("Config flow error (step1): %s", exception)
                 error = str(exception)
                 if (
                     CONF_INCLUDE_DATES in error
@@ -97,7 +98,7 @@ class garbage_collection_shared:
                 elif CONF_EXPIRE_AFTER in error:
                     self.errors["base"] = "time"
                 else:
-                    _LOGGER.error(f"Unknown exception: {exception}")
+                    _LOGGER.error("Unknown exception: %s", exception)
                     self.errors["base"] = "value"
                 config_definition.set_defaults(1, user_input)
             if self.errors == {}:
@@ -124,12 +125,13 @@ class garbage_collection_shared:
             validation = vol.Schema(
                 config_definition.compile_schema(
                     step=2, valid_for=self._data[CONF_FREQUENCY]
-                )
+                ),
+                extra=vol.ALLOW_EXTRA,
             )
             try:
                 updates = validation(user_input)
-            except vol.Invalid:
-                # _LOGGER.debug(error)
+            except vol.Invalid as exception:
+                _LOGGER.debug("Config flow error (step2): %s", exception)
                 if self._data[CONF_FREQUENCY] in ANNUAL_FREQUENCY:
                     self.errors["base"] = "month_day"
                 else:
@@ -162,13 +164,12 @@ class garbage_collection_shared:
                 validation_schema[
                     vol.Optional(CONF_FORCE_WEEK_NUMBERS, default=False)
                 ] = cv.boolean
-            validation = vol.Schema(validation_schema)
+            validation = vol.Schema(validation_schema, extra=vol.ALLOW_EXTRA)
             try:
                 updates = validation(updates)
             except vol.Invalid as exception:
-                _LOGGER.error(f"Unknown exception: {exception}")
+                _LOGGER.debug("Config flow error (step2): %s", exception)
                 self.errors["base"] = "value"
-
             if len(updates[CONF_COLLECTION_DAYS]) == 0:
                 self.errors["base"] = "days"
             if self.errors == {}:
@@ -207,7 +208,8 @@ class garbage_collection_shared:
             validation = vol.Schema(
                 config_definition.compile_schema(
                     step=4, valid_for=self._data[CONF_FREQUENCY]
-                )
+                ),
+                extra=vol.ALLOW_EXTRA,
             )
             if CONF_HOLIDAY_POP_NAMED in updates:
                 updates[CONF_HOLIDAY_POP_NAMED] = string_to_list(
@@ -216,8 +218,8 @@ class garbage_collection_shared:
             try:
                 updates = validation(updates)
             except vol.Invalid as exception:
+                _LOGGER.debug("Config flow error (step3): %s", exception)
                 self.errors["base"] = "value"
-                _LOGGER.error(f"Unknown exception: {exception}")
             if self._data[CONF_FREQUENCY] in MONTHLY_FREQUENCY:
                 if self._data[CONF_FORCE_WEEK_NUMBERS]:
                     if len(updates[CONF_WEEK_ORDER_NUMBER]) == 0:
@@ -256,7 +258,7 @@ class garbage_collection_shared:
         """Return the collection frequency."""
         try:
             return self._data[CONF_FREQUENCY]
-        except Exception:
+        except KeyError:
             return None
 
     @property
@@ -275,7 +277,8 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
     def __init__(self):
         """Initialize."""
         config_definition.reset_defaults()
-        self.shared_class = garbage_collection_shared(str(uuid.uuid4()))
+        self._import = {}
+        self.shared_class = GarbageCollectionShared(str(uuid.uuid4()))
 
     async def async_step_user(
         self, user_input={}
@@ -284,45 +287,48 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         next_step = self.shared_class.step1_user_init(user_input)
         if next_step:
             if self.shared_class.frequency in ANNUAL_GROUP_FREQUENCY:
-                return await self.async_step_annual_group()
-            elif self.shared_class.frequency in DAILY_BLANK_FREQUENCY:
-                return await self.async_step_final()
-            else:
-                return await self.async_step_detail()
-        else:
-            return self.async_show_form(
-                step_id="user",
-                data_schema=vol.Schema(self.shared_class.data_schema),
-                errors=self.shared_class.errors,
-            )
+                return await self.async_step_annual_group(self._import)
+            if self.shared_class.frequency in DAILY_BLANK_FREQUENCY:
+                return await self.async_step_final(self._import)
+            return await self.async_step_detail(self._import)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                self.shared_class.data_schema, extra=vol.ALLOW_EXTRA
+            ),
+            errors=self.shared_class.errors,
+        )
 
     async def async_step_annual_group(
         self, user_input={}
     ):  # pylint: disable=dangerous-default-value
         """Step 2 - annual or group (no week days)."""
-        next_step = self.shared_class.step2_annual_group(user_input)
+        next_step = self.shared_class.step2_annual_group(user_input, self._import)
         if next_step:
             return self.async_create_entry(
                 title=self.shared_class.name, data=self.shared_class.data
             )
-        else:
-            return self.async_show_form(
-                step_id="annual_group",
-                data_schema=vol.Schema(self.shared_class.data_schema),
-                errors=self.shared_class.errors,
-            )
+        return self.async_show_form(
+            step_id="annual_group",
+            data_schema=vol.Schema(
+                self.shared_class.data_schema, extra=vol.ALLOW_EXTRA
+            ),
+            errors=self.shared_class.errors,
+        )
 
     async def async_step_detail(
         self, user_input={}
     ):  # pylint: disable=dangerous-default-value
         """Step 2 - other than annual or group."""
-        next_step = self.shared_class.step3_detail(user_input)
+        next_step = self.shared_class.step3_detail(user_input, self._import)
         if next_step:
-            return await self.async_step_final()
+            return await self.async_step_final(self._import)
         else:
             return self.async_show_form(
                 step_id="detail",
-                data_schema=vol.Schema(self.shared_class.data_schema),
+                data_schema=vol.Schema(
+                    self.shared_class.data_schema, extra=vol.ALLOW_EXTRA
+                ),
                 errors=self.shared_class.errors,
             )
 
@@ -330,26 +336,23 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         self, user_input={}
     ):  # pylint: disable=dangerous-default-value
         """Step 3 - additional parameters."""
-        if self.shared_class.step4_final(user_input):
+        if self.shared_class.step4_final(user_input, self._import):
             return self.async_create_entry(
                 title=self.shared_class.name, data=self.shared_class.data
             )
-        else:
-            return self.async_show_form(
-                step_id="final",
-                data_schema=vol.Schema(self.shared_class.data_schema),
-                errors=self.shared_class.errors,
-            )
+        return self.async_show_form(
+            step_id="final",
+            data_schema=vol.Schema(
+                self.shared_class.data_schema, extra=vol.ALLOW_EXTRA
+            ),
+            errors=self.shared_class.errors,
+        )
 
     async def async_step_import(self, user_input):  # pylint: disable=unused-argument
-        """Import a config entry.
-
-        Special type of import, we're not actually going to store any data.
-        Instead, we're going to rely on the values that are in config file.
-        """
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
-        return self.async_create_entry(title="configuration.yaml", data={})
+        """Import config from configuration.yaml."""
+        _LOGGER.debug("Importing config for %s", user_input)
+        self._import = user_input
+        return await self.async_step_user(self._import)
 
     @staticmethod
     @callback
@@ -357,8 +360,7 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         """Return options flow handler, or empty options flow if no unique_id."""
         if config_entry.data.get("unique_id", None) is not None:
             return OptionsFlowHandler(config_entry)
-        else:
-            return EmptyOptions(config_entry)
+        return EmptyOptions(config_entry)
 
 
 """
@@ -376,9 +378,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Create and initualize class variables."""
         self.config_entry = config_entry
-        self.shared_class = garbage_collection_shared(
-            config_entry.data.get("unique_id")
-        )
+        self.shared_class = GarbageCollectionShared(config_entry.data.get("unique_id"))
 
     async def async_step_init(self, user_input=None):
         """Genral parameters."""
@@ -473,6 +473,8 @@ def is_date(date) -> bool:
 
 def string_to_list(string) -> list:
     """Convert comma separated text to list."""
+    if isinstance(string, list):
+        return string  # Already list
     if string is None or string == "":
         return []
     return list(map(lambda x: x.strip("'\" "), string.split(",")))
@@ -480,6 +482,8 @@ def string_to_list(string) -> list:
 
 def days_to_list(src):
     """Compile a list of days from individual variables."""
+    if CONF_COLLECTION_DAYS in src:
+        return  # Already list
     src[CONF_COLLECTION_DAYS] = []
     for day in WEEKDAYS:
         if src[f"collection_days_{day.lower()}"]:
@@ -489,6 +493,8 @@ def days_to_list(src):
 
 def weekdays_to_list(src, prefix):
     """Compile a list of weekdays from individual variables."""
+    if prefix in src:
+        return  # Already list
     src[prefix] = []
     for i in range(5):
         if src[f"{prefix}_{i+1}"]:
