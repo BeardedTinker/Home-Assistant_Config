@@ -13,7 +13,7 @@
     {% if when == 'morning'  %}
         Today is {{states.sensor.today_is.state }}, {{ as_timestamp(now()) | timestamp_custom('%B %d %Y') }}.
     {% else %}
-        It is {{ now().strftime("%I:%M %p") }}
+        It is {{ now().strftime("%I:%M %p") }}.
 
     {% endif %}
   {%- endmacro -%}
@@ -106,6 +106,34 @@
         {% endif %}
   {%- endmacro -%}
 
+  {%- macro getClimate() -%}
+    {%- if is_state('climate.living_room','off') %}
+      The internal heating is off. The temperature inside is {{ states.climate.living_room.attributes.current_temperature }} degrees. 
+    {%- elif is_state('climate.living_room','heat_cool') %}
+      The internal air condition will try to keep the temperature between {{ states.climate.living_room.attributes.target_temp_low }} and {{ states.climate.living_room.attributes.target_temp_high }}.
+    {% else %}
+      The internal heating is set to {{ states.climate.living_room.state }} with a current temperature of {{ states.climate.living_room.attributes.current_temperature }} which is 
+      
+        {%- if states.climate.living_room.attributes.current_temperature | int - states.climate.living_room.attributes.temperature | int |round > 0 %}
+          {{ states.climate.living_room.attributes.current_temperature | int - states.climate.living_room.attributes.temperature | int }} degrees above 
+        {%- elif states.climate.living_room.attributes.current_temperature | int - states.climate.living_room.attributes.temperature | int |round < 0 %}
+          {{ (states.climate.living_room.attributes.current_temperature | int - states.climate.living_room.attributes.temperature | int) | abs }} degrees below
+        {% else %}
+          right at 
+        {% endif %}
+        the set point of {{ states.climate.living_room.attributes.temperature }}
+      degrees.
+    {%- endif -%}
+    And The internal humidity is currently {{ states.climate.living_room.attributes.current_humidity }} percent.
+    The balcony is {{states.sensor.balcony_temperature.state|round}} degrees with a humidity of {{states.sensor.balcony_humidity.state|round}} percent.
+  {%- endmacro -%}
+
+  {%- macro getEvents() -%}
+    {% if states.sensor.anniversary_wedding.state | int == 1 %}
+      Tomorrow is our wedding anniversary. 
+    {% endif %}
+  {%- endmacro -%}
+
   {%- macro getLukaCalendar() -%}
     {% if is_state('calendar.luka_school', 'on') %}
       Luka has {{ states.calendar.luka_school.attributes.message }} today as well!
@@ -127,8 +155,10 @@
   {# a macro to call all macros :)  #}
     {%- macro mother_of_all_macros() -%}
       {{ getGreeting() }}
+      {{ getEvents() }}
       {{ getWeather() }}
       {{ getWeatherAlerts() }}
+      {{ getClimate() }}
       {{ getSun() }}
       {{ getLukaCalendar() }}
       {{ getZitaCalendar() }}

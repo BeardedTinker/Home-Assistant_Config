@@ -286,25 +286,6 @@
             {% endif %}
           {% endif %}
 
-          {%- if is_state('climate.home','off') %}
-            The internal climate control system is off. The temperature inside is {{ states.climate.home.attributes.current_temperature }} degrees. 
-          {%- elif is_state('climate.home','heat_cool') %}
-            The internal climate control system will try to keep the temperature between {{ states.climate.home.attributes.target_temp_low }} and {{ states.climate.home.attributes.target_temp_high }}.
-          {% else %}
-            The internal climate control system is set to {{ states.climate.home.state }} with a current temperature of {{ states.climate.home.attributes.current_temperature }} which is 
-            
-              {%- if states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int |round > 0 %}
-                {{ states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int }} degrees above 
-              {%- elif states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int |round < 0 %}
-                {{ (states.climate.home.attributes.current_temperature | int - states.climate.home.attributes.temperature | int) | abs }} degrees below
-              {% else %}
-                right at 
-              {% endif %}
-              the set point of {{ states.climate.home.attributes.temperature }}
-            degrees.
-          {%- endif -%}
-          And The internal humidity is currently {{ states.climate.home.attributes.current_humidity }} percent.
-          The garage is {{states.sensor.acurite_tower_10968_t.state|round}} degrees with a humidity of {{states.sensor.acurite_tower_10968_h.state|round}} percent.
 
           {%- if is_state('media_player.croft_tv','playing') or is_state('binary_sensor.croft_occupancy','on') %}
             There appears to be activity in the Croft.
