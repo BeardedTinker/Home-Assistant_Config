@@ -201,10 +201,14 @@ class GarbageCollectionShared:
         if user_input is not None and user_input != {}:
             updates = user_input.copy()
             if self._data[CONF_FREQUENCY] in MONTHLY_FREQUENCY:
-                if self._data[CONF_FORCE_WEEK_NUMBERS]:
-                    weekdays_to_list(updates, CONF_WEEK_ORDER_NUMBER)
+                if (CONF_WEEK_ORDER_NUMBER not in updates 
+                    and CONF_WEEKDAY_ORDER_NUMBER not in updates):
+                    if self._data[CONF_FORCE_WEEK_NUMBERS]:
+                        weekdays_to_list(updates, CONF_WEEK_ORDER_NUMBER)
+                    else:
+                        weekdays_to_list(updates, CONF_WEEKDAY_ORDER_NUMBER)
                 else:
-                    weekdays_to_list(updates, CONF_WEEKDAY_ORDER_NUMBER)
+                    self._data[CONF_FORCE_WEEK_NUMBERS] = CONF_WEEK_ORDER_NUMBER in updates
             validation = vol.Schema(
                 config_definition.compile_schema(
                     step=4, valid_for=self._data[CONF_FREQUENCY]
