@@ -1,6 +1,7 @@
 #####
 # LG TV media player
 # https://www.home-assistant.io/integrations/webostv/
+# Removed in 2022.2
 #####
 
 webostv:
