@@ -9,5 +9,5 @@ offpeak_energy_cost:
   min: 0
   max: 100
   initial: 0.46
-  unit_of_measurement: "HRK"
+  unit_of_measurement: "HRK/kWh"
   icon: mdi:currency-eur-off

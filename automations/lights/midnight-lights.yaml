@@ -18,8 +18,8 @@ condition:
 action:
 - service: script.midnightlightsoffspeech
 - service: light.turn_off
-  target:
-    entity_id: all
+#  target:
+  entity_id: all
   data:
     transition: 60
 - service: notify.lg_tv
