@@ -9,6 +9,8 @@
 platform: command_line
 switches: 
   switchbot_humidifier:
+    value_template: "{{ value_json.body.power == 'on' }}"
     command_on: !secret sbot_hum_on
     command_off: !secret sbot_hum_off
+    command_state: !secret sbot_hum_state
     friendly_name: Humidifier
