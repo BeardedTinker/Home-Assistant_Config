@@ -9,10 +9,12 @@ id: 'b216c364-ece7-4f15-aa63-fb5ff87cfc0e'
 trigger:
 - platform: state
   entity_id: sensor.kitchen_dimmer_action
+  from: 'off'
   to: 'on'
   id: turn_on
 - platform: state
   entity_id: sensor.kitchen_dimmer_action
+  from: 'on'
   to: 'off'
   id: turn_off
 

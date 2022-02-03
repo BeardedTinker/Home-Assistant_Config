@@ -9,6 +9,7 @@ id: a3c9272c-9488-4933-afda-43ac915f2432
 trigger:
 - entity_id: binary_sensor.living_room_motion_occupancy
   platform: state
+  from: 'off'
   to: 'on'
 
 condition:

@@ -9,10 +9,12 @@ id: '92d27451-c458-4356-9b8b-64eba6b396ef'
 trigger:
 - platform: state
   entity_id: sensor.dining_room_dimmer_action
+  from: 'off'
   to: 'on'
   id: turn_on
 - platform: state
   entity_id: sensor.dining_room_dimmer_action
+  from: 'on'
   to: 'off'
   id: turn_off
 

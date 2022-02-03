@@ -11,5 +11,5 @@ trigger:
 action:
   - service: wake_on_lan.send_magic_packet
     data:
-      broadcast_address: 192.168.3.255
+      #broadcast_address: 192.168.3.255
       mac: C8-08-E9-57-F8-8D

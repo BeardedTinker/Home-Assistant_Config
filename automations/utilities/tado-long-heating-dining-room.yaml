@@ -11,6 +11,7 @@ trigger:
   entity_id: binary_sensor.dining_room_heating
   for: 01:30:00
   platform: state
+  from: 'off'
   to: 'on'
 
 condition: []

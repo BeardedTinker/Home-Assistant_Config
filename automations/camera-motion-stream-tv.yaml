@@ -9,6 +9,7 @@ id: cdb7d334-883a-41a2-8062-5eb08612f0e9
 trigger:
   - entity_id: binary_sensor.living_room_motion_occupancy
     platform: state
+    from: 'off'
     to: 'on'
 
 condition: []

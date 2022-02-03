@@ -9,6 +9,7 @@ id: d08d6a44-9ffc-49d1-a3df-894756e77186
 trigger:
 - platform: state
   entity_id: binary_sensor.z2m_health
+  from: 'off'
   to: 'on'
 
 condition: []

@@ -9,20 +9,24 @@ description: ''
 trigger:
 - platform: state
   entity_id: binary_sensor.shelly_button1_e09806a9844e_shortpush
+  from: 'off'
   to: 'on'
   id: single
 - platform: state
   entity_id: binary_sensor.shelly_button1_e09806a9844e_double_shortpush
-  id: double
+  from: 'off'
   to: 'on'
+  id: double
 - platform: state
   entity_id: binary_sensor.shelly_button1_e09806a9844e_triple_shortpush
-  id: triple
+  from: 'off'
   to: 'on'
+  id: triple
 - platform: state
   entity_id: binary_sensor.shelly_button1_e09806a9844e_longpush
-  id: long
+  from: 'off'
   to: 'on'
+  id: long
 
 condition: []
 

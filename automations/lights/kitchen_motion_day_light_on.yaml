@@ -9,6 +9,7 @@ id: 962990c3-07ef-4e97-a2c2-3477eeb323d6
 trigger:
 - entity_id: binary_sensor.kitchen_motion
   platform: state
+  from: 'off'
   to: 'on'
 
 condition:

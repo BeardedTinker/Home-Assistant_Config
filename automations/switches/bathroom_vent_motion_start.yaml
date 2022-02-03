@@ -9,6 +9,7 @@ id: 5d1610d0-4d75-45c5-a344-26fe44e501f9
 trigger:
   - entity_id: binary_sensor.bathroom_motion_occupancy
     platform: state
+    from: 'off'
     to: 'on'
 
 condition:

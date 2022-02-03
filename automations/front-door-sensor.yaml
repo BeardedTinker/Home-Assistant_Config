@@ -8,10 +8,12 @@ id: 35d7007f-da7e-4896-8eaf-1e1e1d99a9da
 trigger:
 - platform: state
   entity_id: binary_sensor.front_door_contact
+  from: 'off'
   to: 'on'
   id: open
 - platform: state
   entity_id: binary_sensor.front_door_contact
+  from: 'off'
   to: 'on'
   for: 00:05
   id: open_5
