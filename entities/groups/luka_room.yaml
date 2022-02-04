@@ -5,4 +5,4 @@
 luka_room:
   - light.luka_floor_light
   - light.luka_table_light
-#  - light.luka_ceiling_light
+  - light.luka_ceiling_light

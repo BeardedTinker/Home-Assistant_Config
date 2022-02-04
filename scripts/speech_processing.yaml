@@ -36,8 +36,8 @@ speech_processing:
       message: >-
           {{ speech_message }}
 
-  - service: input_boolean.turn_off
-    data:
-      entity_id:
-        - input_boolean.alert_mode
-        - input_boolean.lastmsg
+#  - service: input_boolean.turn_off
+#    data:
+#      entity_id:
+#        - input_boolean.alert_mode
+#        - input_boolean.lastmsg

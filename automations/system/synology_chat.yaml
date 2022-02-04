@@ -3,8 +3,8 @@
 # Turn light on if there is new message in chat
 #####
 
-alias: 'webhook_test'
-id: f0ab7485-6759-44ca-90bb-ba7ddb6ba316
+alias: 'Synology chat webhook'
+id: ad71ef48-da55-4ecc-9645-894d5f95e32f
 
 trigger:
   - platform: webhook

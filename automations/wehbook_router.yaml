@@ -1,0 +1,25 @@
+#####
+# Router webhook
+#####
+
+alias: Router unknown webhook
+id: a715637b-41fa-42e9-8536-db0a1a425a14
+
+trigger:
+  platform: webhook
+  webhook_id: !secret router_wh 
+
+condition: []
+
+action:
+  service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '🎮*Router webhook*'
+    value1: 'Somethig tripped the webhook'
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300

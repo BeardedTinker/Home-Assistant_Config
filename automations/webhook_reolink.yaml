@@ -1,0 +1,25 @@
+#####
+# Reolink camera webhook
+#####
+
+alias: Reolink camera webhook
+id: c0449754-3f87-43b8-ab6b-271b3f476c7e
+
+trigger:
+  platform: webhook
+  webhook_id: !secret reolink_wh 
+
+condition: []
+
+action:
+  service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '🎮*Reolink webhook*'
+    value1: 'Somethig tripped the webhook'
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300

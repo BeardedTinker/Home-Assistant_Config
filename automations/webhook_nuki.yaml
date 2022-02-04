@@ -1,0 +1,25 @@
+#####
+# Nuki bridge webhook
+#####
+
+alias: Nuki bridge webhook
+id: 91d650da-538b-494e-af37-b9260e32e98f
+
+trigger:
+  platform: webhook
+  webhook_id: !secret nuki_wh
+
+condition: []
+
+action:
+  service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '🎮*Nuki webhook*'
+    value1: 'Somethig tripped the webhook'
+    group: system
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+    sticky: 'false'
+    timeout: 300
