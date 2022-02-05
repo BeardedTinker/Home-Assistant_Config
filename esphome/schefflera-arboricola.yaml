@@ -3,8 +3,8 @@
 substitutions:
   devicename: schefflera_arboricola
   upper_devicename: Schefflera Arboricola
-  awake_for: 8s      # set how long to stay awake - NOT less then 10sec
-  sleep_for: 60min    # set how long to sleep in minutes
+  awake_for: 5s      # set how long to stay awake - NOT less then 10sec
+  sleep_for: 90min    # set how long to sleep in minutes
 
 # WiFi and IP addresss setup.
 # We use FIXED IP address to speed up this process and also Fast Connect

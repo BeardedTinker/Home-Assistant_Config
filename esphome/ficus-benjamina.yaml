@@ -3,7 +3,7 @@
 substitutions:
   devicename: ficus_benjamina
   upper_devicename: Ficus Benjamina
-  awake_for: 8s      # set how long to stay awake - NOT less then 10sec
+  awake_for: 5s      # set how long to stay awake - NOT less then 10sec
   sleep_for: 60min    # set how long to sleep in minutes
 
 # WiFi and IP addresss setup.
