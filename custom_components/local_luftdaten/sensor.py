@@ -54,7 +54,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     resource = config.get(CONF_RESOURCE).format(host)
 
     session = async_get_clientsession(hass, verify_ssl)
-    rest_client = LuftdatenClient(hass.loop, session, resource, scan_interval)
+    rest_client = LuftdatenClient(session, resource, scan_interval)
 
     devices = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
@@ -132,9 +132,8 @@ class LuftdatenError(Exception):
 class LuftdatenClient(object):
     """Class for handling the data retrieval."""
 
-    def __init__(self, loop, session, resource, scan_interval):
+    def __init__(self, session, resource, scan_interval):
         """Initialize the data object."""
-        self._loop = loop
         self._session = session
         self._resource = resource
         self.lastUpdate = datetime.datetime.now()
@@ -160,7 +159,7 @@ class LuftdatenClient(object):
             responseData = None
             try:
                 _LOGGER.debug("Get data from %s", str(self._resource))
-                with async_timeout.timeout(30, loop=self._loop):
+                with async_timeout.timeout(30):
                     response = await self._session.get(self._resource)
                 responseData = await response.text()
                 _LOGGER.debug("Received data: %s", str(self.data))
