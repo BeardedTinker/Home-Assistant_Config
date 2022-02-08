@@ -1,6 +1,7 @@
 #####
 # GitHub Integration
 # https://www.home-assistant.io/integrations/github/
+# Disabled in 2022.2
 #####
 
 platform: github
