@@ -10,4 +10,4 @@ username: !secret roborock_user
 password: !secret roborock_pass
 draw: ['all']
 attributes:
-  - calibration_points    
+  - calibration_points

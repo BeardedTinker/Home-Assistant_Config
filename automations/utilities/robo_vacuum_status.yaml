@@ -8,7 +8,7 @@ id: 8c045beb-9ca4-4e20-8306-5ed08989f8fa
   
 trigger:
 - platform: state
-  entity_id: vacuum.xiaomi_vacuum_cleaner
+  entity_id: vacuum.roborock_s5_max
   for:
     seconds: 30
 
