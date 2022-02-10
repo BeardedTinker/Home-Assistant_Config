@@ -1,7 +1,7 @@
 {
   "domain": "emscrss",
   "name": "EMSC Earthquake RSS Feed",
-  "version": "1.0",
+  "version": "1.1",
   "documentation": "https://github.com/msekoranja/emsc-hacs-repository",
   "issue_tracker": "https://github.com/msekoranja/emsc-hacs-repository/issues",
   "dependencies": [],
@@ -11,5 +11,6 @@
   ],
   "requirements": [
     "georss_emsc_csem_earthquakes_client==0.3"
-  ]
+  ],
+  "iot_class": "cloud_polling"
 }

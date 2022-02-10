@@ -16,7 +16,7 @@ from homeassistant.const import (
     CONF_NAME,
     CONF_RADIUS,
     CONF_URL,
-    LENGTH_KILOMETERS
+    LENGTH_KILOMETERS,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
@@ -41,7 +41,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_RADIUS, default=DEFAULT_RADIUS_IN_KM): vol.Coerce(float),
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONF_MAGNITUDE, default=DEFAULT_MAGNITUDE): vol.Coerce(float),
-        vol.Optional(CONF_AGE, default=DEFAULT_AGE_HOURS): vol.Coerce(float)
+        vol.Optional(CONF_AGE, default=DEFAULT_AGE_HOURS): vol.Coerce(float),
     }
 )
 
@@ -63,7 +63,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         url,
         radius_in_km,
         magnitude,
-        age
+        age,
     )
 
     # Create all sensors based on categories.
@@ -78,9 +78,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class EMSCRSSServiceSensor(Entity):
     """Representation of a Sensor."""
 
-    def __init__(
-        self, service_name, coordinates, url, radius, magnitude, age
-    ):
+    def __init__(self, service_name, coordinates, url, radius, magnitude, age):
         """Initialize the sensor."""
         self._service_name = service_name
         self._state = None
@@ -91,7 +89,7 @@ class EMSCRSSServiceSensor(Entity):
             url,
             filter_radius=radius,
             filter_minimum_magnitude=magnitude,
-            filter_timespan=age
+            filter_timespan=age,
         )
 
     @property
@@ -115,7 +113,7 @@ class EMSCRSSServiceSensor(Entity):
         return ICON
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         return self._state_attributes
 
