@@ -1,6 +1,7 @@
 #####
 # Version component for hassio - newest release
 # https://www.home-assistant.io/integrations/version/
+# Deprecated YAML configuration
 #####
 
 platform: version
