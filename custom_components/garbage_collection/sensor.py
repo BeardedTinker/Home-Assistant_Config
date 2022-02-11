@@ -2,62 +2,24 @@
 import asyncio
 import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
-import holidays
 import homeassistant.util.dt as dt_util
-from dateutil.parser import parse
+from dateutil.parser import ParserError, parse
 from dateutil.relativedelta import relativedelta
-from homeassistant.const import ATTR_HIDDEN, CONF_ENTITIES, CONF_NAME, WEEKDAYS
+from homeassistant.const import (
+    ATTR_DEVICE_CLASS,
+    ATTR_HIDDEN,
+    CONF_ENTITIES,
+    CONF_NAME,
+    WEEKDAYS,
+)
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from . import const
 from .calendar import EntitiesCalendarData
-from .const import (
-    ATTR_DAYS,
-    ATTR_HOLIDAYS,
-    ATTR_LAST_COLLECTION,
-    ATTR_LAST_UPDATED,
-    ATTR_NEXT_DATE,
-    CALENDAR_NAME,
-    CALENDAR_PLATFORM,
-    CONF_COLLECTION_DAYS,
-    CONF_DATE,
-    CONF_DATE_FORMAT,
-    CONF_EXCLUDE_DATES,
-    CONF_EXPIRE_AFTER,
-    CONF_FIRST_DATE,
-    CONF_FIRST_MONTH,
-    CONF_FIRST_WEEK,
-    CONF_FREQUENCY,
-    CONF_HOLIDAY_IN_WEEK_MOVE,
-    CONF_HOLIDAY_MOVE_OFFSET,
-    CONF_HOLIDAY_POP_NAMED,
-    CONF_ICON_NORMAL,
-    CONF_ICON_TODAY,
-    CONF_ICON_TOMORROW,
-    CONF_INCLUDE_DATES,
-    CONF_LAST_MONTH,
-    CONF_MANUAL,
-    CONF_MOVE_COUNTRY_HOLIDAYS,
-    CONF_OBSERVED,
-    CONF_OFFSET,
-    CONF_PERIOD,
-    CONF_PROV,
-    CONF_STATE,
-    CONF_VERBOSE_FORMAT,
-    CONF_VERBOSE_STATE,
-    CONF_WEEK_ORDER_NUMBER,
-    CONF_WEEKDAY_ORDER_NUMBER,
-    DEFAULT_DATE_FORMAT,
-    DEFAULT_VERBOSE_FORMAT,
-    DEVICE_CLASS,
-    DOMAIN,
-    MONTH_OPTIONS,
-    SENSOR_PLATFORM,
-    STATE_TODAY,
-    STATE_TOMORROW,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,37 +27,38 @@ SCAN_INTERVAL = timedelta(seconds=10)
 THROTTLE_INTERVAL = timedelta(seconds=60)
 
 
+# Do I still need this?
 async def async_setup_platform(hass, _, async_add_entities, discovery_info=None):
     """Create garbage collection entities defined in YAML and add them to HA."""
-    async_add_entities([GarbageCollection(hass, discovery_info)], True)
+    # async_add_entities([GarbageCollection(hass, discovery_info)], True)
 
 
 async def async_setup_entry(hass, config_entry, async_add_devices):
     """Create garbage collection entities defined in config_flow and add them to HA."""
-    async_add_devices(
-        [GarbageCollection(hass, config_entry.data, config_entry.title)], True
-    )
+    async_add_devices([GarbageCollection(hass, config_entry)], True)
 
 
-def nth_week_date(n: int, date_of_month: date, collection_day: int) -> date:
+def nth_week_date(week_number: int, date_of_month: date, collection_day: int) -> date:
     """Find weekday in the nth week of the month."""
     first_of_month = date(date_of_month.year, date_of_month.month, 1)
     return first_of_month + relativedelta(
-        days=collection_day - first_of_month.weekday() + (n - 1) * 7
+        days=collection_day - first_of_month.weekday() + (week_number - 1) * 7
     )
 
 
-def nth_weekday_date(n: int, date_of_month: date, collection_day: int) -> date:
+def nth_weekday_date(
+    weekday_number: int, date_of_month: date, collection_day: int
+) -> date:
     """Find nth weekday of the month."""
     first_of_month = date(date_of_month.year, date_of_month.month, 1)
     # 1st of the month is before the day of collection
     # (so 1st collection week the week when month starts)
     if collection_day >= first_of_month.weekday():
         return first_of_month + relativedelta(
-            days=collection_day - first_of_month.weekday() + (n - 1) * 7
+            days=collection_day - first_of_month.weekday() + (weekday_number - 1) * 7
         )
     return first_of_month + relativedelta(
-        days=7 - first_of_month.weekday() + collection_day + (n - 1) * 7
+        days=7 - first_of_month.weekday() + collection_day + (weekday_number - 1) * 7
     )
 
 
@@ -114,7 +77,7 @@ def parse_datetime(text: str) -> Optional[datetime]:
     """Parse text to datetime object."""
     try:
         return parse(text)
-    except Exception:
+    except (ParserError, TypeError):
         return None
 
 
@@ -122,7 +85,7 @@ def parse_date(text: str) -> Optional[date]:
     """Parse text to date object."""
     try:
         return parse(text).date()
-    except Exception:
+    except (ParserError, AttributeError, TypeError):
         return None
 
 
@@ -151,44 +114,42 @@ def dates_to_texts(dates: List[date]) -> List[str]:
 class GarbageCollection(RestoreEntity):
     """GarbageCollection Sensor class."""
 
-    def __init__(self, hass, config, title=None):
+    def __init__(self, hass, config_entry):
         """Read configuration and initialise class variables."""
-        self.config = config
-        self._name = title if title is not None else config.get(CONF_NAME)
+        config = config_entry.data
+        self.config_entry = config_entry
+        self._name = (
+            config_entry.title
+            if config_entry.title is not None
+            else config.get(CONF_NAME)
+        )
         self._hidden = config.get(ATTR_HIDDEN, False)
-        self._frequency = config.get(CONF_FREQUENCY)
-        self._manual = config.get(CONF_MANUAL)
-        self._collection_days = config.get(CONF_COLLECTION_DAYS)
-        first_month = config.get(CONF_FIRST_MONTH)
-        if first_month in MONTH_OPTIONS:
-            self._first_month = MONTH_OPTIONS.index(first_month) + 1
+        self._frequency = config.get(const.CONF_FREQUENCY)
+        self._manual = config.get(const.CONF_MANUAL)
+        self._collection_days = config.get(const.CONF_COLLECTION_DAYS)
+        first_month = config.get(const.CONF_FIRST_MONTH)
+        if first_month in const.MONTH_OPTIONS:
+            self._first_month = const.MONTH_OPTIONS.index(first_month) + 1
         else:
             self._first_month = 1
-        last_month = config.get(CONF_LAST_MONTH)
-        if last_month in MONTH_OPTIONS:
-            self._last_month = MONTH_OPTIONS.index(last_month) + 1
+        last_month = config.get(const.CONF_LAST_MONTH)
+        if last_month in const.MONTH_OPTIONS:
+            self._last_month = const.MONTH_OPTIONS.index(last_month) + 1
         else:
             self._last_month = 12
-        self._weekday_order_numbers = config.get(CONF_WEEKDAY_ORDER_NUMBER)
-        self._week_order_numbers = config.get(CONF_WEEK_ORDER_NUMBER)
-        self._monthly_force_week_numbers = bool(
-            self._week_order_numbers is not None and len(self._week_order_numbers) != 0
+        self._monthly_force_week_numbers = config.get(
+            const.CONF_FORCE_WEEK_NUMBERS, False
         )
-        self._include_dates = to_dates(config.get(CONF_INCLUDE_DATES, []))
-        self._exclude_dates = to_dates(config.get(CONF_EXCLUDE_DATES, []))
-        self._country_holidays = config.get(CONF_MOVE_COUNTRY_HOLIDAYS)
-        self._holiday_move_offset = config.get(CONF_HOLIDAY_MOVE_OFFSET, 1)
-        self._holiday_pop_named = config.get(CONF_HOLIDAY_POP_NAMED)
-        self._holiday_in_week_move = config.get(CONF_HOLIDAY_IN_WEEK_MOVE)
-        self._holiday_prov = config.get(CONF_PROV)
-        self._holiday_state = config.get(CONF_STATE)
-        self._holiday_observed = config.get(CONF_OBSERVED, True)
-        self._holidays = []
-        self._holidays_log = ""
-        self._period = config.get(CONF_PERIOD)
-        self._first_week = config.get(CONF_FIRST_WEEK)
+        if self._monthly_force_week_numbers:
+            self._weekday_order_numbers = []
+            self._week_order_numbers = config.get(const.CONF_WEEKDAY_ORDER_NUMBER)
+        else:
+            self._weekday_order_numbers = config.get(const.CONF_WEEKDAY_ORDER_NUMBER)
+            self._week_order_numbers = []
+        self._period = config.get(const.CONF_PERIOD)
+        self._first_week = config.get(const.CONF_FIRST_WEEK)
         try:
-            self._first_date = to_date(config.get(CONF_FIRST_DATE))
+            self._first_date = to_date(config.get(const.CONF_FIRST_DATE))
         except ValueError:
             self._first_date = None
         self._collection_dates = []
@@ -196,119 +157,86 @@ class GarbageCollection(RestoreEntity):
         self._last_updated = None
         self.last_collection = None
         self._days = None
-        self._date = config.get(CONF_DATE)
+        self._date = config.get(const.CONF_DATE)
         self._entities = config.get(CONF_ENTITIES)
-        self._verbose_state = config.get(CONF_VERBOSE_STATE)
+        self._verbose_state = config.get(const.CONF_VERBOSE_STATE)
         self._state = "" if bool(self._verbose_state) else 2
-        self._offset = config.get(CONF_OFFSET, 0)
-        self._icon_normal = config.get(CONF_ICON_NORMAL)
-        self._icon_today = config.get(CONF_ICON_TODAY)
-        self._icon_tomorrow = config.get(CONF_ICON_TOMORROW)
-        exp = config.get(CONF_EXPIRE_AFTER)
+        self._icon_normal = config.get(const.CONF_ICON_NORMAL)
+        self._icon_today = config.get(const.CONF_ICON_TODAY)
+        self._icon_tomorrow = config.get(const.CONF_ICON_TOMORROW)
+        exp = config.get(const.CONF_EXPIRE_AFTER)
         self.expire_after = (
             None if exp is None else datetime.strptime(exp, "%H:%M").time()
         )
-        self._date_format = config.get(CONF_DATE_FORMAT, DEFAULT_DATE_FORMAT)
-        self._verbose_format = config.get(CONF_VERBOSE_FORMAT, DEFAULT_VERBOSE_FORMAT)
+        self._date_format = config.get(
+            const.CONF_DATE_FORMAT, const.DEFAULT_DATE_FORMAT
+        )
+        self._verbose_format = config.get(
+            const.CONF_VERBOSE_FORMAT, const.DEFAULT_VERBOSE_FORMAT
+        )
         self._icon = self._icon_normal
-
-    async def async_load_holidays(self, today: date) -> None:
-        """Load the holidays from from a date."""
-        self._holidays_log = ""
-        log = ""
-        self._holidays.clear()
-        if self._country_holidays is not None and self._country_holidays != "":
-            this_year = today.year
-            years = [this_year - 1, this_year, this_year + 1]
-            _LOGGER.debug(
-                "(%s) Country Holidays with parameters: "
-                "country: %s, prov: %s, state: %s, observed: %s",
-                self._name,
-                self._country_holidays,
-                self._holiday_prov,
-                self._holiday_state,
-                self._holiday_observed,
-            )
-            kwargs = {"years": years}
-            if self._holiday_state is not None and self._holiday_state != "":
-                kwargs["state"] = self._holiday_state
-            if self._holiday_prov is not None and self._holiday_prov != "":
-                kwargs["prov"] = self._holiday_prov
-            if (
-                self._holiday_observed is not None
-                and isinstance(self._holiday_observed, bool)
-                and not self._holiday_observed
-            ):
-                kwargs["observed"] = self._holiday_observed  # type: ignore
-            hol = holidays.CountryHoliday(self._country_holidays, **kwargs)
-            if self._holiday_pop_named is not None:
-                for pop in self._holiday_pop_named:
-                    try:
-                        hol.pop_named(pop)
-                    except Exception as err:
-                        _LOGGER.error("(%s) Holiday not removed (%s)", self._name, err)
-            try:
-                for holiday_date, holiday_name in hol.items():
-                    self._holidays.append(holiday_date)
-                    log += f"\n  {holiday_date}: {holiday_name}"
-                    self._holidays_log += f"\n  {holiday_date}: {holiday_name}"
-            except KeyError:
-                _LOGGER.error(
-                    "(%s) Invalid country code (%s)",
-                    self._name,
-                    self._country_holidays,
-                )
-            _LOGGER.debug("(%s) Found these holidays: %s", self._name, log)
 
     async def async_added_to_hass(self):
         """When sensor is added to hassio, add it to calendar."""
         await super().async_added_to_hass()
-        if DOMAIN not in self.hass.data:
-            self.hass.data[DOMAIN] = {}
-        if SENSOR_PLATFORM not in self.hass.data[DOMAIN]:
-            self.hass.data[DOMAIN][SENSOR_PLATFORM] = {}
-        self.hass.data[DOMAIN][SENSOR_PLATFORM][self.entity_id] = self
+        if const.DOMAIN not in self.hass.data:
+            self.hass.data[const.DOMAIN] = {}
+        if const.SENSOR_PLATFORM not in self.hass.data[const.DOMAIN]:
+            self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM] = {}
+        self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][self.entity_id] = self
 
         state = await self.async_get_last_state()
         if state is not None:
             self.last_collection = parse_datetime(
-                state.attributes.get(ATTR_LAST_COLLECTION)
+                state.attributes.get(const.ATTR_LAST_COLLECTION)
             )
 
+        device_registry = dr.async_get(self.hass)
+        device_registry.async_get_or_create(
+            config_entry_id=self.config_entry.entry_id,
+            identifiers={(const.DOMAIN, self.unique_id)},
+            name=self.name,
+            manufacturer="bruxy70",
+        )
+
         if not self.hidden:
-            if CALENDAR_PLATFORM not in self.hass.data[DOMAIN]:
-                self.hass.data[DOMAIN][CALENDAR_PLATFORM] = EntitiesCalendarData(
-                    self.hass
-                )
+            if const.CALENDAR_PLATFORM not in self.hass.data[const.DOMAIN]:
+                self.hass.data[const.DOMAIN][
+                    const.CALENDAR_PLATFORM
+                ] = EntitiesCalendarData(self.hass)
                 _LOGGER.debug("Creating garbage_collection calendar")
                 self.hass.async_create_task(
                     async_load_platform(
                         self.hass,
-                        CALENDAR_PLATFORM,
-                        DOMAIN,
-                        {"name": CALENDAR_NAME},
-                        {"name": CALENDAR_NAME},
+                        const.CALENDAR_PLATFORM,
+                        const.DOMAIN,
+                        {"name": const.CALENDAR_NAME},
+                        {"name": const.CALENDAR_NAME},
                     )
                 )
-            self.hass.data[DOMAIN][CALENDAR_PLATFORM].add_entity(self.entity_id)
+            self.hass.data[const.DOMAIN][const.CALENDAR_PLATFORM].add_entity(
+                self.entity_id
+            )
 
     async def async_will_remove_from_hass(self):
         """When sensor is added to hassio, remove it."""
         await super().async_will_remove_from_hass()
-        del self.hass.data[DOMAIN][SENSOR_PLATFORM][self.entity_id]
-        self.hass.data[DOMAIN][CALENDAR_PLATFORM].remove_entity(self.entity_id)
+        del self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][self.entity_id]
+        self.hass.data[const.DOMAIN][const.CALENDAR_PLATFORM].remove_entity(
+            self.entity_id
+        )
 
     @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
-        return self.config.get("unique_id", None)
+        return self.config_entry.data.get("unique_id", None)
 
     @property
     def device_info(self):
         """Return device info."""
         return {
-            "identifiers": {(DOMAIN, self.config.get("unique_id", None))},
-            "name": self.config.get("name"),
+            "identifiers": {(const.DOMAIN, self.unique_id)},
+            "name": self.config_entry.data.get("name"),
             "manufacturer": "bruxy70",
         }
 
@@ -316,6 +244,11 @@ class GarbageCollection(RestoreEntity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def next_date(self):
+        """Return next date attribute."""
+        return self._next_date
 
     @property
     def hidden(self):
@@ -337,37 +270,31 @@ class GarbageCollection(RestoreEntity):
         """Return the state attributes."""
         res = {}
         if self._next_date is None:
-            res[ATTR_NEXT_DATE] = None
+            res[const.ATTR_NEXT_DATE] = None
         else:
-            res[ATTR_NEXT_DATE] = datetime(
+            res[const.ATTR_NEXT_DATE] = datetime(
                 self._next_date.year, self._next_date.month, self._next_date.day
             ).astimezone()
-        res[ATTR_DAYS] = self._days
-        res[ATTR_LAST_COLLECTION] = self.last_collection
-        res[ATTR_LAST_UPDATED] = self._last_updated
-        res[ATTR_HOLIDAYS] = self._holidays_log
+        res[const.ATTR_DAYS] = self._days
+        res[const.ATTR_LAST_COLLECTION] = self.last_collection
+        res[const.ATTR_LAST_UPDATED] = self._last_updated
+        # Needed for translations to work
+        res[ATTR_DEVICE_CLASS] = self.DEVICE_CLASS
         return res
 
     @property
-    def device_class(self):
+    def DEVICE_CLASS(self):  # pylint: disable=C0103
         """Return the class of the sensor."""
-        return DEVICE_CLASS
+        return const.DEVICE_CLASS
 
     def __repr__(self):
         """Return main sensor parameters."""
         return (
-            f"Garbagecollection[ name: {self._name}, "
+            f"GarbageCollection[name: {self._name}, "
             f"entity_id: {self.entity_id}, "
             f"state: {self.state}\n"
-            f"config: {self.config}]"
+            f"attributes: {self.extra_state_attributes}]"
         )
-
-    def date_inside(self, dat: date) -> bool:
-        """Check if the date is inside first and last date."""
-        month = dat.month
-        if self._first_month <= self._last_month:
-            return bool(month >= self._first_month and month <= self._last_month)
-        return bool(month <= self._last_month or month >= self._first_month)
 
     async def _async_monthly_candidate(self, day1: date) -> date:
         """Calculate possible date, for monthly frequency."""
@@ -405,6 +332,57 @@ class GarbageCollection(RestoreEntity):
             WEEKDAYS.index(self._collection_days[0]),
         )
 
+    async def _async_weekly_candidate(
+        self, day1: date, period: int, first_week: int
+    ) -> date:
+        """Calculate possible date, for weekly frequency."""
+        week = day1.isocalendar()[1]
+        weekday = day1.weekday()
+        offset = -1
+        if (week - first_week) % period == 0:  # Collection this week
+            for day_name in self._collection_days:
+                day_index = WEEKDAYS.index(day_name)
+                if day_index >= weekday:  # Collection still did not happen
+                    offset = day_index - weekday
+                    break
+        iterate_by_week = 7 - weekday + WEEKDAYS.index(self._collection_days[0])
+        while offset == -1:  # look in following weeks
+            candidate = day1 + relativedelta(days=iterate_by_week)
+            week = candidate.isocalendar()[1]
+            if (week - first_week) % period == 0:
+                offset = iterate_by_week
+                break
+            iterate_by_week += 7
+        return day1 + relativedelta(days=offset)
+
+    async def _async_daily_candidate(self, day1: date) -> date:
+        """Calculate possible date, for every-n-days frequency."""
+        try:
+            if (day1 - self._first_date).days % self._period == 0:
+                return day1
+            offset = self._period - ((day1 - self._first_date).days % self._period)
+        except TypeError as error:
+            raise ValueError(
+                f"({self._name}) Please configure first_date and period "
+                "for every-n-days collection frequency."
+            ) from error
+        return day1 + relativedelta(days=offset)
+
+    async def _async_annual_candidate(self, day1: date) -> date:
+        """Calculate possible date, for annual frequency."""
+        year = day1.year
+        try:
+            conf_date = datetime.strptime(self._date, "%m/%d").date()
+        except TypeError as error:
+            raise ValueError(
+                f"({self._name}) Please configure the date "
+                "for annual collection frequency."
+            ) from error
+        candidate_date = date(year, conf_date.month, conf_date.day)
+        if candidate_date < day1:
+            candidate_date = date(year + 1, conf_date.month, conf_date.day)
+        return candidate_date
+
     async def _async_find_candidate_date(self, day1: date):
         """Find the next possible date starting from day1.
 
@@ -412,12 +390,8 @@ class GarbageCollection(RestoreEntity):
         """
         if self._frequency == "blank":
             return None
-        week = day1.isocalendar()[1]
-        weekday = day1.weekday()
-        year = day1.year
         if self._frequency in ["weekly", "even-weeks", "odd-weeks", "every-n-weeks"]:
-            # Everything except montthly
-            # convert to every-n-weeks
+            # convert weekly and even/odd weeks to every-n-weeks
             if self._frequency == "weekly":
                 period = 1
                 first_week = 1
@@ -430,35 +404,10 @@ class GarbageCollection(RestoreEntity):
             else:
                 period = self._period
                 first_week = self._first_week
-            offset = -1
-            if (week - first_week) % period == 0:  # Collection this week
-                for day_name in self._collection_days:
-                    day_index = WEEKDAYS.index(day_name)
-                    if day_index >= weekday:  # Collection still did not happen
-                        offset = day_index - weekday
-                        break
-            iterate_by_week = 7 - weekday + WEEKDAYS.index(self._collection_days[0])
-            while offset == -1:  # look in following weeks
-                candidate = day1 + relativedelta(days=iterate_by_week)
-                week = candidate.isocalendar()[1]
-                if (week - first_week) % period == 0:
-                    offset = iterate_by_week
-                    break
-                iterate_by_week += 7
-            return day1 + relativedelta(days=offset)
+            return await self._async_weekly_candidate(day1, period, first_week)
         elif self._frequency == "every-n-days":
-            try:
-                if (day1 - self._first_date).days % self._period == 0:
-                    return day1
-                offset = self._period - ((day1 - self._first_date).days % self._period)
-            except TypeError:
-                raise ValueError(
-                    f"({self._name}) Please configure first_date and period "
-                    "for every-n-days collection frequency."
-                )
-            return day1 + relativedelta(days=offset)
+            return await self._async_daily_candidate(day1)
         elif self._frequency == "monthly":
-            # Monthly
             if self._period is None or self._period == 1:
                 return await self._async_monthly_candidate(day1)
             else:
@@ -469,81 +418,27 @@ class GarbageCollection(RestoreEntity):
                     )
                 return candidate_date
         elif self._frequency == "annual":
-            # Annual
-            try:
-                conf_date = datetime.strptime(self._date, "%m/%d").date()
-            except TypeError:
-                raise ValueError(
-                    f"({self._name}) Please configure the date "
-                    "for annual collection frequency."
-                )
-            candidate_date = date(year, conf_date.month, conf_date.day)
-            if candidate_date < day1:
-                candidate_date = date(year + 1, conf_date.month, conf_date.day)
-            return candidate_date
+            return await self._async_annual_candidate(day1)
         elif self._frequency == "group":
             candidate_date = None  # type: ignore
             try:
                 for entity_id in self._entities:
-                    entity = self.hass.data[DOMAIN][SENSOR_PLATFORM][entity_id]
-                    d = await entity.async_next_date(day1)
-                    if d is not None and (candidate_date is None or d < candidate_date):
-                        candidate_date = d
-            except KeyError:
-                raise ValueError
-            except TypeError:
+                    entity = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][
+                        entity_id
+                    ]
+                    next_date = await entity.async_next_date(day1)
+                    if next_date is not None and (
+                        candidate_date is None or next_date < candidate_date
+                    ):
+                        candidate_date = next_date
+            except KeyError as error:
+                raise ValueError from error
+            except TypeError as error:
                 _LOGGER.error("(%s) Please add entities for the group.", self._name)
-                raise ValueError
+                raise ValueError from error
             return candidate_date
         _LOGGER.error("(%s) Unknown frequency %s", self._name, self._frequency)
         raise ValueError
-
-    async def _async_skip_holidays(self, date_candidate: date) -> date:
-        """Skip holidays."""
-        if self._holiday_in_week_move:
-            holidays_in_week = list(
-                filter(
-                    lambda date: date
-                    >= (date_candidate - relativedelta(days=date_candidate.weekday()))
-                    and date <= date_candidate,
-                    self._holidays,
-                )
-            )
-            if len(holidays_in_week) > 0:
-                _LOGGER.debug(
-                    "(%s) Move possible collection day, "
-                    "because public holiday in week on %s",
-                    self._name,
-                    date_candidate,
-                )
-                date_candidate = self._skip_holiday(date_candidate)
-        while date_candidate in self._holidays:
-            _LOGGER.debug(
-                "(%s) Skipping public holiday on %s", self._name, date_candidate
-            )
-            date_candidate = self._skip_holiday(date_candidate)
-        return date_candidate
-
-    def _insert_include_date(self, day1: date, next_date: Union[date, None]):
-        """Add include dates."""
-        include_dates = list(filter(lambda date: date >= day1, self._include_dates))
-        if len(include_dates) > 0 and (
-            next_date is None or include_dates[0] < next_date
-        ):
-            _LOGGER.debug(
-                "(%s) Inserting include_date %s", self._name, include_dates[0]
-            )
-            return include_dates[0]
-        return next_date
-
-    def _skip_holiday(self, day: date) -> date:
-        """Move holidays by holiday move offset."""
-        skip_days = (
-            1
-            if self._holiday_move_offset is None or self._holiday_move_offset == 0
-            else self._holiday_move_offset
-        )
-        return day + relativedelta(days=skip_days)
 
     async def _async_ready_for_update(self) -> bool:
         """Check if the entity is ready for the update.
@@ -564,12 +459,15 @@ class GarbageCollection(RestoreEntity):
                 state_object = self.hass.states.get(entity_id)
                 try:
                     # Wait for all members to get updated
-                    if state_object.attributes.get(ATTR_LAST_UPDATED).date() != today:
+                    if (
+                        state_object.attributes.get(const.ATTR_LAST_UPDATED).date()
+                        != today
+                    ):
                         members_ready = False
                         break
                     # A member got updated after the group update
                     if (
-                        state_object.attributes.get(ATTR_LAST_UPDATED)
+                        state_object.attributes.get(const.ATTR_LAST_UPDATED)
                         > self._last_updated
                     ):
                         ready_for_update = True
@@ -597,9 +495,16 @@ class GarbageCollection(RestoreEntity):
                 pass
         return ready_for_update
 
+    def date_inside(self, dat: date) -> bool:
+        """Check if the date is inside first and last date."""
+        month = dat.month
+        if self._first_month <= self._last_month:
+            return bool(month >= self._first_month and month <= self._last_month)
+        return bool(month <= self._last_month or month >= self._first_month)
+
     def move_to_range(self, day: date) -> date:
         """If the date is not in range, move to the range."""
-        if not (day in self._include_dates or self.date_inside(day)):
+        if not self.date_inside(day):
             year = day.year
             month = day.month
             if self._first_month <= self._last_month and month > self._last_month:
@@ -607,7 +512,7 @@ class GarbageCollection(RestoreEntity):
                     "(%s) %s outside the range, lookig from %s next year",
                     self._name,
                     day,
-                    MONTH_OPTIONS[self._first_month - 1],
+                    const.MONTH_OPTIONS[self._first_month - 1],
                 )
                 return date(year + 1, self._first_month, 1)
             else:
@@ -615,7 +520,7 @@ class GarbageCollection(RestoreEntity):
                     "(%s) %s outside the range, searching from %s",
                     self._name,
                     day,
-                    MONTH_OPTIONS[self._first_month - 1],
+                    const.MONTH_OPTIONS[self._first_month - 1],
                 )
                 return date(year, self._first_month, 1)
         return day
@@ -625,23 +530,15 @@ class GarbageCollection(RestoreEntity):
         # Today's collection can be triggered by past collection with offset
         if self._frequency == "blank":
             return None
-        if self._holiday_in_week_move:
-            look_back = max(
-                self._offset, self._holiday_move_offset, first_date.weekday()
-            )
-        else:
-            look_back = max(self._offset, self._holiday_move_offset)
-        day1 = first_date - relativedelta(days=look_back)
         # Move starting date if today is out of range
-        day1 = self.move_to_range(day1)
+        day1 = self.move_to_range(first_date)
         next_date = None
         while next_date is None:
             try:
-                next_date = await self._async_find_candidate_date(day1) + relativedelta(
-                    days=self._offset
-                )
-                next_date = await self._async_skip_holidays(next_date)
+                next_date = await self._async_find_candidate_date(day1)
             except (TypeError, ValueError):
+                return None
+            if next_date is None:
                 return None
             # Check if the date is within the range
             new_date = self.move_to_range(next_date)
@@ -652,14 +549,7 @@ class GarbageCollection(RestoreEntity):
                 # Date is before starting date
                 if next_date < first_date:
                     next_date = None
-                # Remove exclude dates
-                if next_date in self._exclude_dates:
-                    _LOGGER.debug(
-                        "(%s) Skipping exclude_date %s", self._name, next_date
-                    )
-                    next_date = None
                 day1 += relativedelta(days=1)  # look from the next day
-        next_date = self._insert_include_date(first_date, next_date)
         return next_date
 
     async def _async_load_collection_dates(self) -> None:
@@ -672,15 +562,16 @@ class GarbageCollection(RestoreEntity):
 
         self._collection_dates.clear()
         try:
-            await asyncio.wait_for(self.async_load_holidays(today), timeout=10)
-            d = await self._async_find_next_date(start_date)
+            next_date = await self._async_find_next_date(start_date)
         except asyncio.TimeoutError:
-            _LOGGER.error("(%s) Timeout loading collection dats", self._name)
+            _LOGGER.error("(%s) Timeout loading collection dates", self._name)
             return
 
-        while d is not None and d >= start_date and d <= end_date:
-            self._collection_dates.append(d)
-            d = await self._async_find_next_date(d + timedelta(days=1))
+        while (
+            next_date is not None and next_date >= start_date and next_date <= end_date
+        ):
+            self._collection_dates.append(next_date)
+            next_date = await self._async_find_next_date(next_date + timedelta(days=1))
         self._collection_dates.sort()
 
     async def add_date(self, collection_date: date) -> None:
@@ -700,7 +591,7 @@ class GarbageCollection(RestoreEntity):
     ) -> Optional[date]:
         """Get next date from self._collection_dates."""
         now = dt_util.now()
-        for d in self._collection_dates:
+        for d in self._collection_dates:  # pylint: disable=invalid-name
             if d < first_date:
                 continue
             if not ignore_today and d == now.date():
@@ -767,13 +658,13 @@ class GarbageCollection(RestoreEntity):
             else:
                 if self._days == 0:
                     if bool(self._verbose_state):
-                        self._state = STATE_TODAY
+                        self._state = const.STATE_TODAY
                     else:
                         self._state = self._days
                     self._icon = self._icon_today
                 elif self._days == 1:
                     if bool(self._verbose_state):
-                        self._state = STATE_TOMORROW
+                        self._state = const.STATE_TOMORROW
                     else:
                         self._state = self._days
                     self._icon = self._icon_tomorrow
