@@ -5,6 +5,6 @@
 - sensor:
     - name: Daily Total Energy Cost
       state: "{{ (states('sensor.daily_peak_energy_cost')|float + states('sensor.daily_offpeak_energy_cost')|float + states('input_number.energy_daily_cost')|float)|round(2) }}"
-      unit_of_measurement: "HRK/kWh"
+      unit_of_measurement: "HRK"
       state_class: measurement
-      device_class: energy
+      device_class: monetary
