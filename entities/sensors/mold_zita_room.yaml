@@ -1,0 +1,12 @@
+#####
+# Mold indicator sensor Zita room
+# Calculating possibiliy of mold
+# Check video here: https://youtu.be/8KwRPF5NoI8
+#####
+
+platform: mold_indicator
+name: Zita room mold indicator
+indoor_temp_sensor: sensor.luka_room_temperature
+indoor_humidity_sensor: sensor.luka_room_humidity
+outdoor_temp_sensor: sensor.balcony_temperature
+calibration_factor: 1.5
