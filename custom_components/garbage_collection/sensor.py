@@ -7,6 +7,7 @@ from typing import Any, List, Optional
 import homeassistant.util.dt as dt_util
 from dateutil.parser import ParserError, parse
 from dateutil.relativedelta import relativedelta
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_HIDDEN,
@@ -27,15 +28,9 @@ SCAN_INTERVAL = timedelta(seconds=10)
 THROTTLE_INTERVAL = timedelta(seconds=60)
 
 
-# Do I still need this?
-async def async_setup_platform(hass, _, async_add_entities, discovery_info=None):
-    """Create garbage collection entities defined in YAML and add them to HA."""
-    # async_add_entities([GarbageCollection(hass, discovery_info)], True)
-
-
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(_, config_entry, async_add_devices):
     """Create garbage collection entities defined in config_flow and add them to HA."""
-    async_add_devices([GarbageCollection(hass, config_entry)], True)
+    async_add_devices([GarbageCollection(config_entry)], True)
 
 
 def nth_week_date(week_number: int, date_of_month: date, collection_day: int) -> date:
@@ -63,7 +58,10 @@ def nth_weekday_date(
 
 
 def to_date(day: Any) -> date:
-    """Convert datetime or text to date, if not already datetime."""
+    """Convert datetime or text to date, if not already datetime.
+
+    Used for the first date for every_n_days (configured as text)
+    """
     if day is None:
         raise ValueError
     if isinstance(day, date):
@@ -81,28 +79,9 @@ def parse_datetime(text: str) -> Optional[datetime]:
         return None
 
 
-def parse_date(text: str) -> Optional[date]:
-    """Parse text to date object."""
-    try:
-        return parse(text).date()
-    except (ParserError, AttributeError, TypeError):
-        return None
-
-
-def to_dates(dates: List[Any]) -> List[date]:
-    """Convert list of text to datetimes, if not already datetimes."""
-    converted = []  # type: List[date]
-    for day in dates:
-        try:
-            converted.append(to_date(day))
-        except ValueError:
-            continue
-    return converted
-
-
 def dates_to_texts(dates: List[date]) -> List[str]:
     """Convert list of dates to texts."""
-    converted = []  # type: List[str]
+    converted: List[str] = []
     for day in dates:
         try:
             converted.append(day.isoformat())
@@ -114,7 +93,7 @@ def dates_to_texts(dates: List[date]) -> List[str]:
 class GarbageCollection(RestoreEntity):
     """GarbageCollection Sensor class."""
 
-    def __init__(self, hass, config_entry):
+    def __init__(self, config_entry: ConfigEntry):
         """Read configuration and initialise class variables."""
         config = config_entry.data
         self.config_entry = config_entry
@@ -149,14 +128,16 @@ class GarbageCollection(RestoreEntity):
         self._period = config.get(const.CONF_PERIOD)
         self._first_week = config.get(const.CONF_FIRST_WEEK)
         try:
-            self._first_date = to_date(config.get(const.CONF_FIRST_DATE))
+            self._first_date: Optional[date] = to_date(
+                config.get(const.CONF_FIRST_DATE)
+            )
         except ValueError:
             self._first_date = None
-        self._collection_dates = []
-        self._next_date = None
-        self._last_updated = None
-        self.last_collection = None
-        self._days = None
+        self._collection_dates: List[date] = []
+        self._next_date: Optional[date] = None
+        self._last_updated: Optional[datetime] = None
+        self.last_collection: Optional[datetime] = None
+        self._days: Optional[int] = None
         self._date = config.get(const.CONF_DATE)
         self._entities = config.get(CONF_ENTITIES)
         self._verbose_state = config.get(const.CONF_VERBOSE_STATE)
@@ -358,9 +339,11 @@ class GarbageCollection(RestoreEntity):
     async def _async_daily_candidate(self, day1: date) -> date:
         """Calculate possible date, for every-n-days frequency."""
         try:
-            if (day1 - self._first_date).days % self._period == 0:
+            if (day1 - self._first_date).days % self._period == 0:  # type: ignore
                 return day1
-            offset = self._period - ((day1 - self._first_date).days % self._period)
+            offset = self._period - (
+                (day1 - self._first_date).days % self._period  # type: ignore
+            )
         except TypeError as error:
             raise ValueError(
                 f"({self._name}) Please configure first_date and period "
@@ -383,7 +366,7 @@ class GarbageCollection(RestoreEntity):
             candidate_date = date(year + 1, conf_date.month, conf_date.day)
         return candidate_date
 
-    async def _async_find_candidate_date(self, day1: date):
+    async def _async_find_candidate_date(self, day1: date) -> Optional[date]:
         """Find the next possible date starting from day1.
 
         Only based on calendar, not looking at include/exclude days.
@@ -420,7 +403,7 @@ class GarbageCollection(RestoreEntity):
         elif self._frequency == "annual":
             return await self._async_annual_candidate(day1)
         elif self._frequency == "group":
-            candidate_date = None  # type: ignore
+            candidate_date = None
             try:
                 for entity_id in self._entities:
                     entity = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][
@@ -450,7 +433,7 @@ class GarbageCollection(RestoreEntity):
         now = dt_util.now()
         today = now.date()
         try:
-            ready_for_update = bool(self._last_updated.date() != today)
+            ready_for_update = bool(self._last_updated.date() != today)  # type: ignore
         except AttributeError:
             ready_for_update = True
         if self._frequency == "group":
@@ -525,7 +508,7 @@ class GarbageCollection(RestoreEntity):
                 return date(year, self._first_month, 1)
         return day
 
-    async def _async_find_next_date(self, first_date: date):
+    async def _async_find_next_date(self, first_date: date) -> Optional[date]:
         """Get date within configured date range."""
         # Today's collection can be triggered by past collection with offset
         if self._frequency == "blank":
@@ -646,7 +629,7 @@ class GarbageCollection(RestoreEntity):
                 next_date_txt,
                 self._days,
             )
-            if self._days > 1:
+            if self._days > 1:  # type: ignore
                 if bool(self._verbose_state):
                     self._state = self._verbose_format.format(
                         date=next_date_txt, days=self._days

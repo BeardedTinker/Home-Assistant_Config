@@ -2,7 +2,7 @@
 import logging
 import uuid
 from collections import OrderedDict
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -41,7 +41,7 @@ class GarbageCollectionShared:
             const.CONF_DATE_FORMAT: const.DEFAULT_DATE_FORMAT,
         }
 
-    def update_data(self, user_input: Dict):
+    def update_data(self, user_input: Dict) -> None:
         """Remove empty fields, and fields that should not be stored in the config."""
         self._data.update(user_input)
         for key, value in user_input.items():
@@ -51,7 +51,7 @@ class GarbageCollectionShared:
             self.name = self._data[CONF_NAME]
             del self._data[CONF_NAME]
 
-    def required(self, key, options):
+    def required(self, key: str, options: Optional[dict]) -> vol.Required:
         """Return vol.Required."""
         if isinstance(options, dict) and key in options:
             suggested_value = options[key]
@@ -63,7 +63,7 @@ class GarbageCollectionShared:
             return vol.Required(key)
         return vol.Required(key, description={"suggested_value": suggested_value})
 
-    def optional(self, key, options):
+    def optional(self, key: str, options: Optional[dict]) -> vol.Optional:
         """Return vol.Optional."""
         if isinstance(options, dict) and key in options:
             suggested_value = options[key]
@@ -75,7 +75,7 @@ class GarbageCollectionShared:
             return vol.Optional(key)
         return vol.Optional(key, description={"suggested_value": suggested_value})
 
-    def step1_frequency(self, user_input: Dict, options=False):
+    def step1_frequency(self, user_input: Dict, options: bool = False) -> bool:
         """Step 1 - choose frequency and common parameters."""
         self.errors = {}
         if user_input is not None:
@@ -114,7 +114,7 @@ class GarbageCollectionShared:
         self.data_schema[self.optional(const.CONF_MANUAL, user_input)] = bool
         return False
 
-    def step2_detail(self, user_input: Dict):
+    def step2_detail(self, user_input: Dict) -> bool:
         """Step 2 - enter detail that depend on frequency."""
         self.errors = {}
         self.data_schema = {}
@@ -210,7 +210,7 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         self.shared_class = GarbageCollectionShared({"unique_id": str(uuid.uuid4())})
 
     async def async_step_user(
-        self, user_input={}
+        self, user_input: Dict = {}
     ):  # pylint: disable=dangerous-default-value
         """Step 1 - set general parameters."""
         next_step = self.shared_class.step1_frequency(user_input)
@@ -225,7 +225,7 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
         )
 
     async def async_step_detail(
-        self, user_input={}
+        self, user_input: Dict = {}
     ):  # pylint: disable=dangerous-default-value
         """Step 2 - enter detail depending on frequency."""
         self.shared_class.hass = self.hass
@@ -242,7 +242,9 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
             errors=self.shared_class.errors,
         )
 
-    async def async_step_import(self, user_input):  # pylint: disable=unused-argument
+    async def async_step_import(
+        self, user_input: Dict
+    ):  # pylint: disable=unused-argument
         """Import config from configuration.yaml."""
         _LOGGER.info("Importing config for %s", user_input)
         to_remove = [
@@ -287,9 +289,7 @@ class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
     @callback
     def async_get_options_flow(config_entry):
         """Return options flow handler, or empty options flow if no unique_id."""
-        if config_entry.data.get("unique_id", None) is not None:
-            return OptionsFlowHandler(config_entry)
-        return EmptyOptions(config_entry)
+        return OptionsFlowHandler(config_entry)
 
 
 # O P T I O N S   F L O W
@@ -302,7 +302,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Create and initualize class variables."""
         self.shared_class = GarbageCollectionShared(config_entry.data)
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, user_input: Optional[Dict] = None):
         """Set genral parameters."""
         next_step = self.shared_class.step1_frequency(user_input, options=True)
         if next_step:
@@ -314,7 +314,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def async_step_detail(
-        self, user_input={}
+        self, user_input: Dict = {}
     ):  # pylint: disable=dangerous-default-value
         """Step 2 - annual or group (no week days)."""
         self.shared_class.hass = self.hass
@@ -326,11 +326,3 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(self.shared_class.data_schema),
             errors=self.shared_class.errors,
         )
-
-
-class EmptyOptions(config_entries.OptionsFlow):
-    """A class for default options. Not sure why this is required."""
-
-    def __init__(self, _):
-        """Just set the config_entry parameter."""
-        return

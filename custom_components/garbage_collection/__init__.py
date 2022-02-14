@@ -8,7 +8,7 @@ import homeassistant.helpers.config_validation as cv
 import homeassistant.util.dt as dt_util
 import voluptuous as vol
 from dateutil.relativedelta import relativedelta
-from homeassistant import config_entries
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
     ATTR_HIDDEN,
     CONF_ENTITIES,
@@ -16,6 +16,7 @@ from homeassistant.const import (
     CONF_NAME,
     WEEKDAYS,
 )
+from homeassistant.core import Config, HomeAssistant, ServiceCall
 
 from . import const
 
@@ -25,7 +26,6 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_SCHEMA = vol.Schema(
     {
-        # vol.Optional(const.CONF_NAME): str,
         vol.Required(const.CONF_FREQUENCY): vol.In(const.FREQUENCY_OPTIONS),
         vol.Optional(const.CONF_ICON_NORMAL): cv.icon,
         vol.Optional(const.CONF_ICON_TODAY): cv.icon,
@@ -36,7 +36,9 @@ SENSOR_SCHEMA = vol.Schema(
         vol.Optional(const.CONF_MANUAL): cv.boolean,
         vol.Optional(const.CONF_DATE): const.month_day_text,
         vol.Optional(CONF_ENTITIES): cv.entity_ids,
-        vol.Optional(const.CONF_COLLECTION_DAYS): cv.multi_select(WEEKDAYS),
+        vol.Optional(const.CONF_COLLECTION_DAYS): vol.All(
+            cv.ensure_list, [vol.In(WEEKDAYS)]
+        ),
         vol.Optional(const.CONF_FIRST_MONTH): vol.In(const.MONTH_OPTIONS),
         vol.Optional(const.CONF_LAST_MONTH): vol.In(const.MONTH_OPTIONS),
         vol.Optional(const.CONF_WEEKDAY_ORDER_NUMBER): vol.All(
@@ -98,10 +100,10 @@ OFFSET_DATE_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(hass, config):
+async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up this component using YAML."""
 
-    async def handle_add_date(call):
+    async def handle_add_date(call: ServiceCall) -> None:
         """Handle the add_date service call."""
         for entity_id in call.data.get(CONF_ENTITY_ID):
             collection_date = call.data.get(const.CONF_DATE)
@@ -112,7 +114,7 @@ async def async_setup(hass, config):
             except KeyError as err:
                 _LOGGER.error("Failed adding date for %s - %s", entity_id, err)
 
-    async def handle_remove_date(call):
+    async def handle_remove_date(call: ServiceCall) -> None:
         """Handle the remove_date service call."""
         for entity_id in call.data.get(CONF_ENTITY_ID):
             collection_date = call.data.get(const.CONF_DATE)
@@ -123,7 +125,7 @@ async def async_setup(hass, config):
             except KeyError as err:
                 _LOGGER.error("Failed removing date for %s - %s", entity_id, err)
 
-    async def handle_offset_date(call):
+    async def handle_offset_date(call: ServiceCall) -> None:
         """Handle the offset_date service call."""
         for entity_id in call.data.get(CONF_ENTITY_ID):
             offset = call.data.get(const.CONF_OFFSET)
@@ -146,7 +148,7 @@ async def async_setup(hass, config):
             except KeyError as err:
                 _LOGGER.error("Failed ofsetting date for %s - %s", entity_id, err)
 
-    async def handle_update_state(call):
+    async def handle_update_state(call: ServiceCall) -> None:
         """Handle the update_state service call."""
         for entity_id in call.data.get(CONF_ENTITY_ID):
             _LOGGER.debug("called update_state for %s", entity_id)
@@ -156,7 +158,7 @@ async def async_setup(hass, config):
             except KeyError as err:
                 _LOGGER.error("Failed updating state for %s - %s", entity_id, err)
 
-    async def handle_collect_garbage(call):
+    async def handle_collect_garbage(call: ServiceCall) -> None:
         """Handle the collect_garbage service call."""
         for entity_id in call.data.get(CONF_ENTITY_ID):
             last_collection = call.data.get(const.ATTR_LAST_COLLECTION)
@@ -211,7 +213,7 @@ async def async_setup(hass, config):
         return False
 
     for entry in hass.config_entries.async_entries(const.DOMAIN):
-        if entry.source == config_entries.SOURCE_IMPORT:
+        if entry.source == SOURCE_IMPORT:
             _LOGGER.error(
                 "garbage_collection already imported. "
                 "Remove it from configuration.yaml now!"
@@ -227,14 +229,14 @@ async def async_setup(hass, config):
         hass.async_create_task(
             hass.config_entries.flow.async_init(
                 const.DOMAIN,
-                context={"source": config_entries.SOURCE_IMPORT},
+                context={"source": SOURCE_IMPORT},
                 data=entry,
             )
         )
     return True
 
 
-async def async_setup_entry(hass, config_entry):
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     _LOGGER.debug(
         "Setting %s (%s) from ConfigFlow",
@@ -253,7 +255,7 @@ async def async_setup_entry(hass, config_entry):
     return True
 
 
-async def async_remove_entry(hass, config_entry):
+async def async_remove_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
     """Handle removal of an entry."""
     try:
         await hass.config_entries.async_forward_entry_unload(
@@ -266,7 +268,7 @@ async def async_remove_entry(hass, config_entry):
         pass
 
 
-async def async_migrate_entry(_, config_entry: config_entries.ConfigEntry) -> bool:
+async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
     """Migrate old entry."""
     _LOGGER.info(
         "Migrating %s from version %s", config_entry.title, config_entry.version
