@@ -8,10 +8,10 @@ logbook:
   include:
     domains:
 #    - alarm_control_panel
-      - climate
 #    - cover
 #    - input_boolean
 #    - input_select
+      - climate
       - light
       - media_player
       - switch
@@ -22,15 +22,15 @@ logbook:
       - binary_sensor.people_home
   exclude:
     domains:
-      - sun
-#      - binary_sensor
+#    - binary_sensor
 #    - camera
 #    - device_tracker
-      - group
 #    - input_number
 #    - input_text
 #    - script
 #    - sensor
+      - sun
+      - group
       - weather
       - zone
       - automation
