@@ -4,20 +4,38 @@ wifi:
     - ssid: !secret wifi_ssid          # Uncomment this line (remove # at beginning of line) and enter your details in secrets.yaml file!
       password: !secret wifi_key  # Uncomment this line (remove # at beginning of line) and enter your details in secrets.yaml file!
   ap:
-    ssid: ${devicename}
-
+    ssid: ${name}
+  manual_ip:
+    static_ip: 192.168.1.212
+    gateway: 192.168.1.1
+    subnet: 255.255.252.0
 # Enable the captive portal for inital WiFi setup
 captive_portal:
 
+dashboard_import:
+  package_import_url: github://adonno/tagreader/tagreader.yaml
+
+improv_serial:
+
+
 substitutions:
-  devicename: tagreader
+  name: tagreader
   friendly_name: TagReader
 
 esphome:
-  name: $devicename
+  name: $name
   platform: ESP8266
   board: d1_mini
 
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+
+  # This will allow for (future) project identification,
+  # configuration and updates.
+  project:
+    name: adonno.tag_reader
+    version: "1.4"
 # If buzzer is enabled, notify on api connection success
   on_boot:
     priority: -10
@@ -33,6 +51,8 @@ esphome:
         green: 0%
         blue: 100%
         flash_length: 500ms
+    - switch.turn_on: buzzer_enabled
+    - switch.turn_on: led_enabled
 
 # Define switches to control LED and buzzer from HA
 switch:
@@ -41,12 +61,82 @@ switch:
   id: buzzer_enabled
   icon: mdi:volume-high
   optimistic: true
+  restore_state: true
+  entity_category: config
 - platform: template
-  name: "${friendly_name} LED Enabled"
+  name: "${friendly_name} LED enabled"
   id: led_enabled
   icon: mdi:alarm-light-outline
   optimistic: true
+  restore_state: true
+  entity_category: config
+  
+# Define buttons for writing tags via HA 
+button:
+  - platform: template
+    name: Write Tag Random
+    id: write_tag_random
+    # Optional variables:
+    icon: "mdi:pencil-box"
+    on_press:
+      then:
+      - light.turn_on:
+          id: activity_led
+          brightness: 100%
+          red: 100%
+          green: 0%
+          blue: 100%    
+      - lambda: |-
+          static const char alphanum[] = "0123456789abcdef";
+          std::string uri = "https://www.home-assistant.io/tag/";
+          for (int i = 0; i < 8; i++)
+            uri += alphanum[random_uint32() % (sizeof(alphanum) - 1)];
+          uri += "-";
+          for (int j = 0; j < 3; j++) {
+            for (int i = 0; i < 4; i++)
+              uri += alphanum[random_uint32() % (sizeof(alphanum) - 1)];
+            uri += "-";
+          }
+          for (int i = 0; i < 12; i++)
+            uri += alphanum[random_uint32() % (sizeof(alphanum) - 1)];
+          auto message = new nfc::NdefMessage();
+          message->add_uri_record(uri);
+          ESP_LOGD("tagreader", "Writing payload: %s", uri.c_str());
+          id(pn532_board).write_mode(message);
+      - wait_until:
+          not:
+            pn532.is_writing:
+      - light.turn_off:
+          id: activity_led
+  - platform: template
+    name: Clean Tag
+    id: clean_tag
+    icon: "mdi:nfc-variant-off"
+    on_press:
+      then:
+      - light.turn_on:
+          id: activity_led
+          brightness: 100%
+          red: 100%
+          green: 64.7%
+          blue: 0%    
+      - lambda: 'id(pn532_board).clean_mode();'
+      - wait_until:
+          not:
+            pn532.is_writing:
+      - light.turn_off:
+          id: activity_led 
+  - platform: template
+    name: Cancel writing 
+    id: cancel_writing
+    icon: "mdi:pencil-off"
+    on_press:
+      then:
+      - lambda: 'id(pn532_board).read_mode();'
 
+  - platform: restart
+    name: "${friendly_name} Restart"
+    entity_category: config
 # Enable logging
 logger:
   # level: VERY_VERBOSE
@@ -69,6 +159,29 @@ api:
     then:
     - rtttl.play: !lambda 'return song_str;'
 
+  - service: write_tag_id
+    variables:
+      tag_id: string
+    then:
+    - light.turn_on:
+        id: activity_led
+        brightness: 100%
+        red: 100%
+        green: 0%
+        blue: 0%    
+    - lambda: |-
+        auto message = new nfc::NdefMessage();
+        std::string uri = "https://www.home-assistant.io/tag/";
+        uri += tag_id;
+        message->add_uri_record(uri);
+        id(pn532_board).write_mode(message);
+    - wait_until:
+        not:
+          pn532.is_writing:
+    - light.turn_off:
+        id: activity_led
+
+
 # Enable OTA upgrade
 ota:
 
@@ -80,7 +193,22 @@ pn532_i2c:
   id: pn532_board
   on_tag:
     then:
-    - homeassistant.tag_scanned: !lambda 'return x;'
+    - homeassistant.tag_scanned: !lambda |
+        if (!tag.has_ndef_message()) {
+          ESP_LOGD("tagreader", "No NDEF");
+          return x;
+        }
+        auto message = tag.get_ndef_message();
+        auto records = message->get_records();
+        for (auto &record : records) {
+          std::string payload = record->get_payload();
+          size_t pos = payload.find("https://www.home-assistant.io/tag/");
+          if (pos != std::string::npos) {
+            return payload.substr(pos + 34);
+          }
+        }
+        ESP_LOGD("tagreader", "Bad NDEF, fallback to uid");
+        return x;
     - if:
         condition:
           switch.is_on: buzzer_enabled
@@ -93,9 +221,9 @@ pn532_i2c:
         - light.turn_on:
             id: activity_led
             brightness: 100%
-            red: 25%
-            green: 50%
-            blue: 25%
+            red: 0%
+            green: 100%
+            blue: 0%
             flash_length: 500ms
 
 # Define the buzzer output
@@ -107,6 +235,23 @@ output:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
+    entity_category: diagnostic
+
+
+text_sensor:
+  - platform: version
+    hide_timestamp: true
+    name: "${friendly_name} ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP Address"
+      icon: mdi:wifi
+      entity_category: diagnostic
+    ssid:
+      name: "${friendly_name} Connected SSID"
+      icon: mdi:wifi-strength-2
+      entity_category: diagnostic
 
 # Define buzzer as output for RTTTL
 rtttl:
@@ -114,12 +259,13 @@ rtttl:
 
 # Configure LED
 light:
-- platform: fastled_clockless
-  chipset: WS2812
+- platform: neopixelbus
+  variant: WS2812
   pin: D8
-  default_transition_length: 10ms
   num_leds: 1
-  rgb_order: GRB
+  flash_transition_length: 500ms
+  type: GRB
   id: activity_led
   name: "${friendly_name} LED"
   restore_mode: ALWAYS_OFF
+  
