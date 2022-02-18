@@ -189,6 +189,12 @@ MIN_MOTION_FIRMWARE_DATE = 20210226
 # Firmware 2.1.3 release date
 MIN_VALVE_FIRMWARE_DATE = 20220202
 
+# Firmware 1.11.7 release date
+MIN_DIMMER_FIRMWARE_DATE = 20211109
+
+# Firmware 1.11.7 release date
+MIN_HT_FIRMWARE_DATE = 20211109
+
 # Firmware 1.11.8 release date
 MIN_FIRMWARE_DATE = 20220209
 
@@ -533,7 +539,7 @@ TPL_OVERPOWER_VALUE_TO_JSON = "{{{^overpower_value^:value}|tojson}}"
 TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
 TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
-TPL_RSSI = "{{value_json.wifi_sta.rssi}}"
+TPL_RSSI = "{%if value_json.wifi_sta.rssi!=0%}{{value_json.wifi_sta.rssi}}{%endif%}"
 TPL_SELF_TEST = "{{value.replace(^_^,^ ^)}}"
 TPL_SET_TARGET_TEMPERATURE = "{{value|int}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
@@ -1169,6 +1175,42 @@ DEVICE_TRIGGERS_MAP = {
     VALUE_BUTTON_TRIPLE_PRESS: "SSS",
 }
 
+DEVICE_FIRMWARE_MAP = {
+    MODEL_SHELLY1_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY1L_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY1PM_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY2_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY25_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY3EM_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLY4PRO_ID: MIN_4PRO_FIRMWARE_DATE,
+    MODEL_SHELLYAIR_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYBULB_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYBULBRGBW_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYBUTTON1_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYBUTTON1V2_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYDIMMER_ID: MIN_DIMMER_FIRMWARE_DATE,
+    MODEL_SHELLYDIMMER2_ID: MIN_DIMMER_FIRMWARE_DATE,
+    MODEL_SHELLYDUO_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYDW_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYDW2_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYEM_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYFLOOD_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYGAS_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYHT_ID: MIN_HT_FIRMWARE_DATE,
+    MODEL_SHELLYI3_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYMOTION_ID: MIN_MOTION_FIRMWARE_DATE,
+    MODEL_SHELLYPLUG_E_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYPLUG_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYPLUG_S_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYPLUG_US_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYRGBW2_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYSENSE_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYSMOKE_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYUNI_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYVALVE_ID: MIN_VALVE_FIRMWARE_DATE,
+    MODEL_SHELLYVINTAGE_ID: MIN_FIRMWARE_DATE,
+}
+
 PL_0_1 = {VALUE_ON: "0", VALUE_OFF: "1"}
 PL_1_0 = {VALUE_ON: "1", VALUE_OFF: "0"}
 PL_OPEN_CLOSE = {VALUE_ON: VALUE_OPEN, VALUE_OFF: VALUE_CLOSE}
@@ -1283,6 +1325,8 @@ if not fw_ver:
 
 mac = str(mac).lower()
 
+dev_id_prefix = dev_id.rsplit("-", 1)[0].lower()
+
 try:
     cur_ver_date = parse_version(fw_ver)
 except (IndexError, ValueError):
@@ -1290,41 +1334,11 @@ except (IndexError, ValueError):
         f"Firmware version {fw_ver} is not supported, update your device {dev_id}"
     )
 
-dev_id_prefix = dev_id.rsplit("-", 1)[0].lower()
+min_ver_date = DEVICE_FIRMWARE_MAP[model_id]
 
-if (
-    dev_id_prefix == MODEL_SHELLY4PRO_PREFIX or MODEL_SHELLY4PRO_ID == model_id
-) and cur_ver_date < MIN_4PRO_FIRMWARE_DATE:
+if cur_ver_date < min_ver_date:
     raise ValueError(
-        f"Firmware dated {MIN_4PRO_FIRMWARE_DATE} is required, update your device {dev_id}"
-    )
-
-if (
-    dev_id_prefix == MODEL_SHELLYMOTION_PREFIX or MODEL_SHELLYMOTION_ID == model_id
-) and cur_ver_date < MIN_MOTION_FIRMWARE_DATE:
-    raise ValueError(
-        f"Firmware dated {MIN_MOTION_FIRMWARE_DATE} is required, update your device {dev_id}"
-    )
-
-if (
-    dev_id_prefix == MODEL_SHELLYVALVE_PREFIX or MODEL_SHELLYVALVE_ID == model_id
-) and cur_ver_date < MIN_VALVE_FIRMWARE_DATE:
-    raise ValueError(
-        f"Firmware dated {MIN_VALVE_FIRMWARE_DATE} is required, update your device {dev_id}"
-    )
-
-if (
-    dev_id_prefix
-    not in (
-        MODEL_SHELLY4PRO_PREFIX,
-        MODEL_SHELLYMOTION_PREFIX,
-        MODEL_SHELLYVALVE_PREFIX,
-    )
-    and model_id
-    not in (MODEL_SHELLY4PRO_ID, MODEL_SHELLYMOTION_ID, MODEL_SHELLYVALVE_ID)
-) and cur_ver_date < MIN_FIRMWARE_DATE:
-    raise ValueError(
-        f"Firmware dated {MIN_FIRMWARE_DATE} is required, update your device {dev_id}"
+        f"Firmware dated {min_ver_date} is required, update your device {dev_id}"
     )
 
 logger.debug(  # noqa: F821
