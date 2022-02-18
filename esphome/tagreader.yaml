@@ -5,10 +5,7 @@ wifi:
       password: !secret wifi_key  # Uncomment this line (remove # at beginning of line) and enter your details in secrets.yaml file!
   ap:
     ssid: ${name}
-  manual_ip:
-    static_ip: 192.168.1.212
-    gateway: 192.168.1.1
-    subnet: 255.255.252.0
+
 # Enable the captive portal for inital WiFi setup
 captive_portal:
 
