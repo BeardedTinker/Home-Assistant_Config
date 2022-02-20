@@ -11,8 +11,11 @@ import tempfile
 from typing import TYPE_CHECKING, Any, List, Optional
 import zipfile
 
-from aiogithubapi import AIOGitHubAPIException, AIOGitHubAPINotModifiedException, GitHub
-from aiogithubapi.const import ACCEPT_HEADERS
+from aiogithubapi import (
+    AIOGitHubAPIException,
+    AIOGitHubAPINotModifiedException,
+    GitHubReleaseModel,
+)
 from aiogithubapi.objects.repository import AIOGitHubAPIRepository
 import attr
 from homeassistant.helpers.json import JSONEncoder
@@ -259,7 +262,7 @@ class RepositoryReleases:
     last_release_object = None
     last_release_object_downloads = None
     published_tags = []
-    objects = []
+    objects: list[GitHubReleaseModel] = []
     releases = False
     downloads = None
 
@@ -579,7 +582,7 @@ class HacsRepository:
     async def async_download_zip_file(self, content, validate) -> None:
         """Download ZIP archive from repository release."""
         try:
-            filecontent = await self.hacs.async_download_file(content.download_url)
+            filecontent = await self.hacs.async_download_file(content.browser_download_url)
 
             if filecontent is None:
                 validate.errors.append(f"[{content.name}] was not downloaded")
@@ -890,16 +893,8 @@ class HacsRepository:
     ) -> tuple[AIOGitHubAPIRepository, Any | None]:
         """Return a repository object."""
         try:
-            github = GitHub(
-                self.hacs.configuration.token,
-                self.hacs.session,
-                headers={
-                    "User-Agent": f"HACS/{self.hacs.version}",
-                    "Accept": ACCEPT_HEADERS["preview"],
-                },
-            )
-            repository = await github.get_repo(self.data.full_name, etag)
-            return repository, github.client.last_response.etag
+            repository = await self.hacs.github.get_repo(self.data.full_name, etag)
+            return repository, self.hacs.github.client.last_response.etag
         except AIOGitHubAPINotModifiedException as exception:
             raise HacsNotModifiedException(exception) from exception
         except (ValueError, AIOGitHubAPIException, Exception) as exception:
@@ -918,15 +913,20 @@ class HacsRepository:
         except (ValueError, AIOGitHubAPIException) as exception:
             raise HacsException(exception) from exception
 
-    async def get_releases(self, prerelease=False, returnlimit=5):
+    async def get_releases(self, prerelease=False, returnlimit=5) -> list[GitHubReleaseModel]:
         """Return the repository releases."""
-        if self.repository_object is None:
-            raise HacsException("No repository_object")
-        try:
-            releases = await self.repository_object.get_releases(prerelease, returnlimit)
-            return releases
-        except (ValueError, AIOGitHubAPIException) as exception:
-            raise HacsException(exception) from exception
+        response = await self.hacs.async_github_api_method(
+            method=self.hacs.githubapi.repos.releases.list,
+            repository=self.data.full_name,
+        )
+        releases = []
+        for release in response.data or []:
+            if len(releases) == returnlimit:
+                break
+            if release.draft or (release.prerelease and not prerelease):
+                continue
+            releases.append(release)
+        return releases
 
     async def common_update_data(self, ignore_issues: bool = False, force: bool = False) -> None:
         """Common update data."""
@@ -962,9 +962,11 @@ class HacsRepository:
             raise HacsRepositoryArchivedException(f"{self} Repository is archived.")
 
         # Make sure the repository is not in the blacklist.
-        if self.hacs.repositories.is_removed(self.data.full_name) and not ignore_issues:
-            self.validate.errors.append("Repository has been requested to be removed.")
-            raise HacsException(f"{self} Repository has been requested to be removed.")
+        if self.hacs.repositories.is_removed(self.data.full_name):
+            removed = self.hacs.repositories.removed_repository(self.data.full_name)
+            if removed.removal_type != "remove" and not ignore_issues:
+                self.validate.errors.append("Repository has been requested to be removed.")
+                raise HacsException(f"{self} Repository has been requested to be removed.")
 
         # Get releases.
         try:
@@ -974,11 +976,11 @@ class HacsRepository:
             )
             if releases:
                 self.data.releases = True
-                self.releases.objects = [x for x in releases if not x.draft]
+                self.releases.objects = releases
                 self.data.published_tags = [x.tag_name for x in self.releases.objects]
                 self.data.last_version = next(iter(self.data.published_tags))
 
-        except (AIOGitHubAPIException, HacsException):
+        except HacsException:
             self.data.releases = False
 
         if not self.force_branch:
@@ -986,9 +988,8 @@ class HacsRepository:
         if self.data.releases:
             for release in self.releases.objects or []:
                 if release.tag_name == self.ref:
-                    assets = release.assets
-                    if assets:
-                        downloads = next(iter(assets)).attributes.get("download_count")
+                    if assets := release.assets:
+                        downloads = next(iter(assets)).download_count
                         self.data.downloads = downloads
 
         self.hacs.log.debug("%s Running checks against %s", self, self.ref.replace("tags/", ""))
@@ -1019,7 +1020,9 @@ class HacsRepository:
             for release in releaseobjects or []:
                 if ref == release.tag_name:
                     for asset in release.assets or []:
-                        files.append(asset)
+                        files.append(
+                            FileInformation(asset.browser_download_url, asset.name, asset.name)
+                        )
             if files:
                 return files
 

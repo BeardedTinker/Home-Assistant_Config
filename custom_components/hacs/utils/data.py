@@ -56,6 +56,7 @@ class HacsData:
                 "onboarding_done": self.hacs.configuration.onboarding_done,
                 "archived_repositories": self.hacs.common.archived_repositories,
                 "renamed_repositories": self.hacs.common.renamed_repositories,
+                "ignored_repositories": self.hacs.common.ignored_repositories,
             },
         )
         await self._async_store_content_and_repos()
@@ -91,6 +92,7 @@ class HacsData:
             "name": repository.data.name,
             "new": repository.data.new,
             "repository_manifest": repository_manifest,
+            "releases": repository.data.releases,
             "selected_tag": repository.data.selected_tag,
             "show_beta": repository.data.show_beta,
             "stars": repository.data.stargazers_count,
@@ -141,6 +143,7 @@ class HacsData:
         self.hacs.configuration.frontend_compact = hacs.get("compact", False)
         self.hacs.configuration.onboarding_done = hacs.get("onboarding_done", False)
         self.hacs.common.archived_repositories = []
+        self.hacs.common.ignored_repositories = []
         self.hacs.common.renamed_repositories = {}
 
         # Clear out doubble renamed values
@@ -154,6 +157,11 @@ class HacsData:
         for entry in hacs.get("archived_repositories", []):
             if entry not in self.hacs.common.archived_repositories:
                 self.hacs.common.archived_repositories.append(entry)
+
+        # Clear out doubble ignored values
+        for entry in hacs.get("ignored_repositories", []):
+            if entry not in self.hacs.common.ignored_repositories:
+                self.hacs.common.ignored_repositories.append(entry)
 
         hass = self.hacs.hass
         stores = {}
@@ -219,6 +227,7 @@ class HacsData:
         repository.data.domain = repository_data.get("domain", None)
         repository.data.stargazers_count = repository_data.get("stars", 0)
         repository.releases.last_release = repository_data.get("last_release_tag")
+        repository.data.releases = repository_data.get("releases")
         repository.data.hide = repository_data.get("hide", False)
         repository.data.installed = repository_data.get("installed", False)
         repository.data.new = repository_data.get("new", True)

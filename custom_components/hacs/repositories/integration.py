@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.loader import async_get_custom_components
 
 from ..enums import HacsCategory, HacsGitHubRepo, RepositoryFile
-from ..exceptions import HacsException
+from ..exceptions import AddonRepositoryException, HacsException
 from ..utils.decode import decode_content
 from ..utils.decorator import concurrent
 from ..utils.filters import get_first_directory_in_directory
@@ -57,15 +57,11 @@ class HacsIntegrationRepository(HacsRepository):
             name = get_first_directory_in_directory(self.tree, "custom_components")
             if name is None:
                 if (
-                    self.data.full_name == "home-assistant/addons"
-                    or "repository.json" in self.treefiles
+                    "repository.json" in self.treefiles
                     or "repository.yaml" in self.treefiles
                     or "repository.yml" in self.treefiles
                 ):
-                    raise HacsException(
-                        "The repository does not seem to be a integration, "
-                        "but an add-on repository. HACS does not manage add-ons."
-                    )
+                    raise AddonRepositoryException()
                 raise HacsException(
                     f"Repository structure for {self.ref.replace('tags/','')} is not compliant"
                 )
