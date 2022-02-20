@@ -1327,6 +1327,13 @@ mac = str(mac).lower()
 
 dev_id_prefix = dev_id.rsplit("-", 1)[0].lower()
 
+# compatibility with old firmware
+if dev_id_prefix == MODEL_SHELLY4PRO_PREFIX:
+    model_id = MODEL_SHELLY4PRO_ID
+
+if not model_id:
+    raise ValueError("model_id value None is not valid, check script configuration")
+
 try:
     cur_ver_date = parse_version(fw_ver)
 except (IndexError, ValueError):
