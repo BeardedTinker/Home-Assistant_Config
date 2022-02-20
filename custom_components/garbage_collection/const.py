@@ -1,9 +1,5 @@
 """Define constants used in garbage_collection."""
 
-from datetime import datetime
-from typing import Any
-
-import voluptuous as vol
 
 # Constants for garbage_collection.
 # Base component constants
@@ -12,7 +8,7 @@ CALENDAR_NAME = "Garbage Collection"
 SENSOR_PLATFORM = "sensor"
 CALENDAR_PLATFORM = "calendar"
 ATTRIBUTION = "Data from this is provided by garbage_collection."
-VERSION = 4
+VERSION = 4.5
 
 ATTR_NEXT_DATE = "next_date"
 ATTR_DAYS = "days"
@@ -124,73 +120,3 @@ MONTH_OPTIONS = [
     "nov",
     "dec",
 ]
-
-
-def date_text(value: Any) -> str:
-    """Have to store date as text - datetime is not JSON serialisable."""
-    if value is None or value == "":
-        return ""
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").date().strftime("%Y-%m-%d")
-    except ValueError as error:
-        raise vol.Invalid(f"Invalid date: {value}") from error
-
-
-def time_text(value: Any) -> str:
-    """Have to store time as text - datetime is not JSON serialisable."""
-    if value is None or value == "":
-        return ""
-    try:
-        return datetime.strptime(value, "%H:%M").time().strftime("%H:%M")
-    except ValueError as error:
-        raise vol.Invalid(f"Invalid date: {value}") from error
-
-
-def string_to_list(string) -> list:
-    """Convert comma separated text to list."""
-    if isinstance(string, list):
-        return string  # Already list
-    if string is None or string == "":
-        return []
-    return list(map(lambda x: x.strip("'\" "), string.split(",")))
-
-
-def month_day_text(value: Any) -> str:
-    """Validate format month/day."""
-    if value is None or value == "":
-        return ""
-    try:
-        return datetime.strptime(value, "%m/%d").date().strftime("%m/%d")
-    except ValueError as error:
-        raise vol.Invalid(f"Invalid date: {value}") from error
-
-
-def is_date(date) -> bool:
-    """Validate yyyy-mm-dd format."""
-    if date == "":
-        return True
-    try:
-        datetime.strptime(date, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False
-
-
-def is_dates(dates) -> bool:
-    """Validate list of dates (yyyy-mm-dd, yyyy-mm-dd)."""
-    if dates == []:
-        return True
-    check = True
-    for date in dates:
-        if not is_date(date):
-            check = False
-    return check
-
-
-def is_month_day(date) -> bool:
-    """Validate mm/dd format."""
-    try:
-        date = datetime.strptime(date, "%m/%d")
-        return True
-    except ValueError:
-        return False

@@ -2,10 +2,9 @@
 import asyncio
 import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import homeassistant.util.dt as dt_util
-from dateutil.parser import ParserError, parse
 from dateutil.relativedelta import relativedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -19,13 +18,18 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from . import const
+from . import const, helpers
 from .calendar import EntitiesCalendarData
 
 _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(seconds=10)
 THROTTLE_INTERVAL = timedelta(seconds=60)
+
+
+def now() -> datetime:
+    """Return current date and time. Needed for testing."""
+    return dt_util.now()
 
 
 async def async_setup_entry(_, config_entry, async_add_devices):
@@ -57,39 +61,6 @@ def nth_weekday_date(
     )
 
 
-def to_date(day: Any) -> date:
-    """Convert datetime or text to date, if not already datetime.
-
-    Used for the first date for every_n_days (configured as text)
-    """
-    if day is None:
-        raise ValueError
-    if isinstance(day, date):
-        return day
-    if isinstance(day, datetime):
-        return day.date()
-    return date.fromisoformat(day)
-
-
-def parse_datetime(text: str) -> Optional[datetime]:
-    """Parse text to datetime object."""
-    try:
-        return parse(text)
-    except (ParserError, TypeError):
-        return None
-
-
-def dates_to_texts(dates: List[date]) -> List[str]:
-    """Convert list of dates to texts."""
-    converted: List[str] = []
-    for day in dates:
-        try:
-            converted.append(day.isoformat())
-        except ValueError:
-            continue
-    return converted
-
-
 class GarbageCollection(RestoreEntity):
     """GarbageCollection Sensor class."""
 
@@ -107,30 +78,36 @@ class GarbageCollection(RestoreEntity):
         self._manual = config.get(const.CONF_MANUAL)
         self._collection_days = config.get(const.CONF_COLLECTION_DAYS)
         first_month = config.get(const.CONF_FIRST_MONTH)
-        if first_month in const.MONTH_OPTIONS:
-            self._first_month = const.MONTH_OPTIONS.index(first_month) + 1
-        else:
-            self._first_month = 1
+        self._first_month: int = (
+            const.MONTH_OPTIONS.index(first_month) + 1
+            if first_month in const.MONTH_OPTIONS
+            else 1
+        )
         last_month = config.get(const.CONF_LAST_MONTH)
-        if last_month in const.MONTH_OPTIONS:
-            self._last_month = const.MONTH_OPTIONS.index(last_month) + 1
-        else:
-            self._last_month = 12
+        self._last_month: int = (
+            const.MONTH_OPTIONS.index(last_month) + 1
+            if last_month in const.MONTH_OPTIONS
+            else 12
+        )
         self._monthly_force_week_numbers = config.get(
             const.CONF_FORCE_WEEK_NUMBERS, False
         )
+        self._weekday_order_numbers: List
+        self._week_order_numbers: List
+        order_numbers: List = []
+        if const.CONF_WEEKDAY_ORDER_NUMBER in config:
+            order_numbers = list(map(int, config.get(const.CONF_WEEKDAY_ORDER_NUMBER)))
         if self._monthly_force_week_numbers:
             self._weekday_order_numbers = []
-            self._week_order_numbers = config.get(const.CONF_WEEKDAY_ORDER_NUMBER)
+            self._week_order_numbers = order_numbers
         else:
-            self._weekday_order_numbers = config.get(const.CONF_WEEKDAY_ORDER_NUMBER)
+            self._weekday_order_numbers = order_numbers
             self._week_order_numbers = []
         self._period = config.get(const.CONF_PERIOD)
         self._first_week = config.get(const.CONF_FIRST_WEEK)
+        self._first_date: Optional[date]
         try:
-            self._first_date: Optional[date] = to_date(
-                config.get(const.CONF_FIRST_DATE)
-            )
+            self._first_date = helpers.to_date(config.get(const.CONF_FIRST_DATE))
         except ValueError:
             self._first_date = None
         self._collection_dates: List[date] = []
@@ -146,6 +123,7 @@ class GarbageCollection(RestoreEntity):
         self._icon_today = config.get(const.CONF_ICON_TODAY)
         self._icon_tomorrow = config.get(const.CONF_ICON_TOMORROW)
         exp = config.get(const.CONF_EXPIRE_AFTER)
+        self.expire_after: Optional[time]
         self.expire_after = (
             None if exp is None else datetime.strptime(exp, "%H:%M").time()
         )
@@ -168,7 +146,7 @@ class GarbageCollection(RestoreEntity):
 
         state = await self.async_get_last_state()
         if state is not None:
-            self.last_collection = parse_datetime(
+            self.last_collection = helpers.parse_datetime(
                 state.attributes.get(const.ATTR_LAST_COLLECTION)
             )
 
@@ -430,8 +408,8 @@ class GarbageCollection(RestoreEntity):
         Except for the sensors with with next date today and after the expiration time
         For group sensors wait for update of the sensors in the group
         """
-        now = dt_util.now()
-        today = now.date()
+        current_date_time = now()
+        today = current_date_time.date()
         try:
             ready_for_update = bool(self._last_updated.date() != today)  # type: ignore
         except AttributeError:
@@ -466,7 +444,7 @@ class GarbageCollection(RestoreEntity):
                 if self._next_date == today and (
                     (
                         isinstance(self.expire_after, time)
-                        and now.time() >= self.expire_after
+                        and current_date_time.time() >= self.expire_after
                     )
                     or (
                         isinstance(self.last_collection, datetime)
@@ -539,7 +517,7 @@ class GarbageCollection(RestoreEntity):
         """Fill the collection dates list."""
         if self._frequency == "blank":
             return
-        today = dt_util.now().date()
+        today = now().date()
         start_date = end_date = date(today.year - 1, 1, 1)
         end_date = date(today.year + 1, 12, 31)
 
@@ -573,20 +551,20 @@ class GarbageCollection(RestoreEntity):
         self, first_date: date, ignore_today=False
     ) -> Optional[date]:
         """Get next date from self._collection_dates."""
-        now = dt_util.now()
+        current_date_time = now()
         for d in self._collection_dates:  # pylint: disable=invalid-name
             if d < first_date:
                 continue
-            if not ignore_today and d == now.date():
+            if not ignore_today and d == current_date_time.date():
                 expiration = (
                     self.expire_after
                     if self.expire_after is not None
                     else time(23, 59, 59)
                 )
-                if now.time() > expiration or (
+                if current_date_time.time() > expiration or (
                     self.last_collection is not None
-                    and self.last_collection.date() == now.date()
-                    and now.time() >= self.last_collection.time()
+                    and self.last_collection.date() == current_date_time.date()
+                    and current_date_time.time() >= self.last_collection.time()
                 ):
                     continue
             return d
@@ -604,7 +582,7 @@ class GarbageCollection(RestoreEntity):
         )
         event_data = {
             "entity_id": self.entity_id,
-            "collection_dates": dates_to_texts(self._collection_dates),
+            "collection_dates": helpers.dates_to_texts(self._collection_dates),
         }
         self.hass.bus.async_fire("garbage_collection_loaded", event_data)
         if not self._manual and self._frequency != "blank":
@@ -613,10 +591,9 @@ class GarbageCollection(RestoreEntity):
     async def async_update_state(self) -> None:
         """Pick the first event from collection dates, update attributes."""
         _LOGGER.debug("(%s) Looking for next collection", self._name)
-        now = dt_util.now()
-        today = now.date()
+        today = now().date()
         self._next_date = await self.async_next_date(today)
-        self._last_updated = now
+        self._last_updated = now()
         if self._next_date is not None:
             _LOGGER.debug(
                 "(%s) next_date (%s), today (%s)", self._name, self._next_date, today
@@ -629,7 +606,7 @@ class GarbageCollection(RestoreEntity):
                 next_date_txt,
                 self._days,
             )
-            if self._days > 1:  # type: ignore
+            if self._days > 1:
                 if bool(self._verbose_state):
                     self._state = self._verbose_format.format(
                         date=next_date_txt, days=self._days

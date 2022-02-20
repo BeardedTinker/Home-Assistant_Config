@@ -18,7 +18,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import Config, HomeAssistant, ServiceCall
 
-from . import const
+from . import const, helpers
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
@@ -30,11 +30,11 @@ SENSOR_SCHEMA = vol.Schema(
         vol.Optional(const.CONF_ICON_NORMAL): cv.icon,
         vol.Optional(const.CONF_ICON_TODAY): cv.icon,
         vol.Optional(const.CONF_ICON_TOMORROW): cv.icon,
-        vol.Optional(const.CONF_EXPIRE_AFTER): const.time_text,
+        vol.Optional(const.CONF_EXPIRE_AFTER): helpers.time_text,
         vol.Optional(const.CONF_VERBOSE_STATE): cv.boolean,
         vol.Optional(ATTR_HIDDEN): cv.boolean,
         vol.Optional(const.CONF_MANUAL): cv.boolean,
-        vol.Optional(const.CONF_DATE): const.month_day_text,
+        vol.Optional(const.CONF_DATE): helpers.month_day_text,
         vol.Optional(CONF_ENTITIES): cv.entity_ids,
         vol.Optional(const.CONF_COLLECTION_DAYS): vol.All(
             cv.ensure_list, [vol.In(WEEKDAYS)]
@@ -319,6 +319,15 @@ async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
                 _LOGGER.info("Updated options config for week_order_number")
             else:
                 new_options[const.CONF_FORCE_WEEK_NUMBERS] = False
+    if config_entry.version <= 4:
+        if const.CONF_WEEKDAY_ORDER_NUMBER in new_data:
+            new_data[const.CONF_WEEKDAY_ORDER_NUMBER] = list(
+                map(str, new_data[const.CONF_WEEKDAY_ORDER_NUMBER])
+            )
+        if const.CONF_WEEKDAY_ORDER_NUMBER in new_options:
+            new_options[const.CONF_WEEKDAY_ORDER_NUMBER] = list(
+                map(str, new_options[const.CONF_WEEKDAY_ORDER_NUMBER])
+            )
     config_entry.version = const.VERSION
     config_entry.data = {**new_data}
     config_entry.options = {**new_options}
