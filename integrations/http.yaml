@@ -6,8 +6,6 @@
 #####
 
 http:
-#  base_url: !secret my_url # the Home Assistant https url which is exposed to the internet.
-# base_url removed - will be deprecieted in version 0.115
   #ssl_profile: intermediate
   #ssl_certificate: !secret fullchain_pem
   #ssl_key: !secret privkey_pem
