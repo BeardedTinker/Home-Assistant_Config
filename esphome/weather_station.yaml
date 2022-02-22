@@ -1,0 +1,111 @@
+#####
+# Project author: Debasish Dutta
+# Kit supplied by PCBWay: # https://www.pcbway.com/project/shareproject/Solar_Powered_WiFi_Weather_Station_V3_0.html
+# Code adapted and expanded by Bearded Tinker ;)
+# 
+# Additional modules that can be use (and code takes them into account)
+# BME280  temperature, humidity and pressure OR BMP280 for temperature and pressure
+# DS18B20 additional temperature measurments
+# BH1750  lux sensor
+# SI1145  UV index
+# TX20    Wind speed and direction  
+#
+#####
+
+substitutions:
+  display_name: solarws
+
+esphome:
+  name: solar_weather
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+#  manual_ip:
+#    static_ip: !secret ip_solarweather
+#    gateway: !secret ip_gateway
+#    subnet: !secret ip_subnet
+#    dns1: !secret ip_dns1
+
+api:
+
+# Enable logging
+logger:
+
+#mqtt:
+#  broker: !secret mqtt_broker
+#  username: !secret mqtt_user
+#  password: !secret mqtt_pass
+#  birth_message:
+#    topic: solarsensor/birthdisable
+#    payload: disable
+#  will_message:
+#    topic: solarsensor/willdisable
+#    payload: disable
+
+ota:
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+sensor:
+# BME280 is used to get temperature, pressure and humidity
+# BMP280 only provides temperature and pressure
+  - platform: bmp280
+    temperature:
+      name: ${display_name} Temp
+      oversampling: 4x
+    pressure:
+      name: ${display_name} Pres
+      oversampling: 4x
+#    humidity:
+#      name: ${display_name} Humi
+#      oversampling: 4x
+    address: 0x76
+    update_interval: 30s
+
+# BH1750 sensor provides lux vaules
+  - platform: bh1750
+    name: ${display_name} Lux
+    address: 0x23
+    update_interval: 25s
+
+# ADC platform helps track status of battery
+  - platform: adc
+    pin: GPIO32
+    name: ${display_name} Battery
+    update_interval: 35s
+#    filters:
+#      - multiply: 5.1923
+
+# TX20 sensor is used for tracking wind speed and direction
+  - platform: tx20
+    wind_speed:
+      name: "Wind speed"
+    wind_direction_degrees:
+      name: "Wind direction degrees"
+    pin:
+      number: GPIO14
+
+# Pulse counter can be used to track rain gauge
+  - platform: pulse_counter
+    pin:
+      number: GPIO25
+      inverted: True
+      mode: INPUT_PULLUP    
+    unit_of_measurement: 'mm'
+    name: 'Rainfall'
+    filters:
+      - multiply: 0.367
+
+deep_sleep:
+  run_duration: 40s
+  sleep_duration: 4min
