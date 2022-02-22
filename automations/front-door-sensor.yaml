@@ -46,7 +46,7 @@ action:
           target:
             entity_id: 
               - media_player.display_me
-              - media_player.clock:me
+              - media_player.clock_me
           data:
             volume_level: 0.7
           
