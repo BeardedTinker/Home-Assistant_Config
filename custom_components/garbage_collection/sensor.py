@@ -541,11 +541,22 @@ class GarbageCollection(RestoreEntity):
             self._collection_dates.append(collection_date)
             self._collection_dates.sort()
         else:
-            raise KeyError(f"{collection_date} already on the collection schedule")
+            _LOGGER.error(
+                "%s not added to %s - already on the collection schedule",
+                collection_date,
+                self.name,
+            )
 
     async def remove_date(self, collection_date: date) -> None:
         """Remove date from _collection dates."""
-        self._collection_dates.remove(collection_date)
+        try:
+            self._collection_dates.remove(collection_date)
+        except ValueError:
+            _LOGGER.error(
+                "%s not removed from %s - not in the collection schedule",
+                collection_date,
+                self.name,
+            )
 
     async def async_next_date(
         self, first_date: date, ignore_today=False

@@ -112,7 +112,9 @@ async def async_setup(hass: HomeAssistant, config: Config) -> bool:
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
                 await entity.add_date(collection_date)
             except KeyError as err:
-                _LOGGER.error("Failed adding date for %s - %s", entity_id, err)
+                _LOGGER.error(
+                    "Failed adding date %s to %s (%s)", collection_date, entity_id, err
+                )
 
     async def handle_remove_date(call: ServiceCall) -> None:
         """Handle the remove_date service call."""
@@ -123,7 +125,14 @@ async def async_setup(hass: HomeAssistant, config: Config) -> bool:
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
                 await entity.remove_date(collection_date)
             except KeyError as err:
-                _LOGGER.error("Failed removing date for %s - %s", entity_id, err)
+                _LOGGER.error(
+                    "Failed removing date %s from %s. Most likely, "
+                    "it was removed by competing automation runing in parallel. "
+                    "(%s)",
+                    collection_date,
+                    entity_id,
+                    err,
+                )
 
     async def handle_offset_date(call: ServiceCall) -> None:
         """Handle the offset_date service call."""
@@ -247,7 +256,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     config_entry.options = {}
     config_entry.add_update_listener(update_listener)
     # Add sensor
-    hass.async_add_job(
+    hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(
             config_entry, const.SENSOR_PLATFORM
         )
