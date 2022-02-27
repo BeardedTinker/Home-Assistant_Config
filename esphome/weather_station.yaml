@@ -105,7 +105,8 @@ sensor:
     name: 'Rainfall'
     filters:
       - multiply: 0.367
+    update_interval: 30s
 
 deep_sleep:
-  run_duration: 40s
-  sleep_duration: 4min
+  run_duration: 45s
+  sleep_duration: 5min
