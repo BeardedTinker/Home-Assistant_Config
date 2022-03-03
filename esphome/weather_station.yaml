@@ -16,37 +16,19 @@ substitutions:
   display_name: solarws
 
 esphome:
-  name: solar_weather
+  name: solarweather
 
 esp32:
-  board: esp32dev
-  framework:
-    type: arduino
+  board: esp-wrover-kit
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_key
-#  manual_ip:
-#    static_ip: !secret ip_solarweather
-#    gateway: !secret ip_gateway
-#    subnet: !secret ip_subnet
-#    dns1: !secret ip_dns1
 
 api:
 
 # Enable logging
 logger:
-
-#mqtt:
-#  broker: !secret mqtt_broker
-#  username: !secret mqtt_user
-#  password: !secret mqtt_pass
-#  birth_message:
-#    topic: solarsensor/birthdisable
-#    payload: disable
-#  will_message:
-#    topic: solarsensor/willdisable
-#    payload: disable
 
 ota:
 
@@ -61,14 +43,26 @@ sensor:
 # BMP280 only provides temperature and pressure
   - platform: bmp280
     temperature:
-      name: ${display_name} Temp
+      name: ${display_name} Temperature
       oversampling: 4x
+      unit_of_measurement: "°C"
+      icon: "mdi:thermometer"
+      device_class: "temperature"
+      state_class: "measurement"
+      accuracy_decimals: 1      
     pressure:
-      name: ${display_name} Pres
+      name: ${display_name} Pressure
       oversampling: 4x
+      unit_of_measurement: "hPa"
+      device_class: "pressure"
+      state_class: "measurement"
 #    humidity:
-#      name: ${display_name} Humi
+#      name: ${display_name} Humidity
 #      oversampling: 4x
+#      unit_of_measurement: "%"
+#      icon: "mdi:thermometer"
+#      device_class: "humidity"
+#      state_class: "measurement"
     address: 0x76
     update_interval: 30s
 
@@ -76,15 +70,24 @@ sensor:
   - platform: bh1750
     name: ${display_name} Lux
     address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
     update_interval: 25s
 
 # ADC platform helps track status of battery
   - platform: adc
-    pin: GPIO32
+    pin: GPIO33
     name: ${display_name} Battery
-    update_interval: 35s
-#    filters:
-#      - multiply: 5.1923
+    unit_of_measurement: "V"
+    icon: "mdi:battery-high"
+    device_class: "voltage"
+    state_class: "measurement"
+    accuracy_decimals: 3
+    update_interval: 20s
+    attenuation: 11db
+
 
 # TX20 sensor is used for tracking wind speed and direction
   - platform: tx20
