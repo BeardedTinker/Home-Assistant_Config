@@ -2,14 +2,13 @@
 
 import logging
 from typing import Any, Dict
-
 from homeassistant.components.button import ButtonEntity
 from homeassistant.const import CONF_NAME, ATTR_ATTRIBUTION
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
-
-from .const import DOMAIN, DATA_CLIENT, ATTRIBUTION
+from .helper import format_attribute
+from .const import DOMAIN, ATTRIBUTION
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,28 +19,12 @@ DEVICE_ATTRIBUTES_SCRIPT = [
 
 
 # ---------------------------
-#   format_attribute
-# ---------------------------
-def format_attribute(attr):
-    res = attr.replace("-", " ")
-    res = res.capitalize()
-    res = res.replace(" ip ", " IP ")
-    res = res.replace(" mac ", " MAC ")
-    res = res.replace(" mtu", " MTU")
-    res = res.replace("Sfp", "SFP")
-    res = res.replace("Poe", "POE")
-    res = res.replace(" tx", " TX")
-    res = res.replace(" rx", " RX")
-    return res
-
-
-# ---------------------------
 #   async_setup_entry
 # ---------------------------
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up buttons for Mikrotik Router component."""
     inst = config_entry.data[CONF_NAME]
-    mikrotik_controller = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+    mikrotik_controller = hass.data[DOMAIN][config_entry.entry_id]
     buttons = {}
 
     @callback

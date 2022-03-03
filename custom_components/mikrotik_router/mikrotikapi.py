@@ -435,61 +435,6 @@ class MikrotikAPI:
         return True
 
     # ---------------------------
-    #   get_traffic
-    # ---------------------------
-    def get_traffic(self, interfaces) -> Optional(list):
-        """Get traffic stats"""
-        if not self.connection_check():
-            return None
-
-        response = self.path("/interface", return_list=False)
-        if response is None:
-            return None
-
-        args = {"interface": interfaces, "once": True}
-        self.lock.acquire()
-        try:
-            _LOGGER.debug("API query: %s", "/interface/monitor-traffic")
-            traffic = response("monitor-traffic", **args)
-        except librouteros.exceptions.ConnectionClosed:
-            self.disconnect()
-            self.lock.release()
-            return None
-        except (
-            librouteros.exceptions.TrapError,
-            librouteros.exceptions.MultiTrapError,
-            librouteros.exceptions.ProtocolError,
-            librouteros.exceptions.FatalError,
-            ssl.SSLError,
-            socket_timeout,
-            socket_error,
-            BrokenPipeError,
-            OSError,
-            ValueError,
-        ) as api_error:
-            self.disconnect("get_traffic", api_error)
-            self.lock.release()
-            return None
-        except:
-            self.disconnect("get_traffic")
-            self.lock.release()
-            return None
-
-        try:
-            traffic = list(traffic)
-        except librouteros.exceptions.ConnectionClosed as api_error:
-            self.disconnect("get_traffic", api_error)
-            self.lock.release()
-            return None
-        except:
-            self.disconnect("get_traffic")
-            self.lock.release()
-            return None
-
-        self.lock.release()
-        return traffic if traffic else None
-
-    # ---------------------------
     #   get_sfp
     # ---------------------------
     def get_sfp(self, interfaces) -> Optional(list):
