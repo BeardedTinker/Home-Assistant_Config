@@ -1,0 +1,10 @@
+#####
+# Binary sensor to prevent Deep Sleep for Solar WS
+# Needs coresponding code in ESPHome for it to work
+# Solar WS integration in Home Assistant should also exist 
+#####
+
+solarws_prevent_deep_sleep:
+  name: Prevent Solar WS Deep Sleep
+  icon: mdi:sleep-off
+  initial: false

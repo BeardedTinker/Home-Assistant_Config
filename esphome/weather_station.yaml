@@ -17,6 +17,10 @@ substitutions:
 
 esphome:
   name: solarweather
+# On boot run script to see if Deep Sleep is prevented or not  
+  on_boot:
+    then:
+      - script.execute: consider_deep_sleep
 
 esp32:
   board: esp-wrover-kit
@@ -31,6 +35,14 @@ api:
 logger:
 
 ota:
+# On OTA end toggle off HA boolean
+  on_end:
+    then:
+      - logger.log: "OTA end"
+      - homeassistant.service: 
+          service: input_boolean.turn_off
+          data:
+            entity_id: input_boolean.solarws_prevent_deep_sleep
 
 i2c:
   sda: 21
@@ -88,7 +100,6 @@ sensor:
     update_interval: 20s
     attenuation: 11db
 
-
 # TX20 sensor is used for tracking wind speed and direction
   - platform: tx20
     wind_speed:
@@ -110,6 +121,29 @@ sensor:
       - multiply: 0.367
     update_interval: 30s
 
+# Check status of Home Assistant input boolean to prevent Deep Sleep
+# Used for OTA - has BIG impact on battery life
+binary_sensor:
+  - platform: homeassistant
+    id: solarws_prevent_deep_sleep
+    name: Prevent Solar WS Deep Sleep
+    entity_id: input_boolean.solarws_prevent_deep_sleep
+
 deep_sleep:
-  run_duration: 45s
+  id: deep_sleep_control
+#  run_duration: 45s
   sleep_duration: 5min
+  
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - delay: 45s
+      - if:
+          condition:
+            binary_sensor.is_on: solarws_prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+          else:
+            - deep_sleep.enter: deep_sleep_control
+      - script.execute: consider_deep_sleep
