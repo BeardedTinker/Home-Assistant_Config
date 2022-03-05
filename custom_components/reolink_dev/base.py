@@ -19,6 +19,7 @@ from homeassistant.const import (
 from homeassistant.core import Context, HomeAssistant
 from homeassistant.helpers.network import get_url
 from homeassistant.helpers.storage import STORAGE_DIR
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.util.dt as dt_util
 
 from reolink.camera_api import Api
@@ -106,6 +107,9 @@ class ReolinkBase:
         else:
             self._protocol = options[CONF_PROTOCOL]
 
+        global last_known_hass
+        last_known_hass = hass
+
         self._api = Api(
             config[CONF_HOST],
             config[CONF_PORT],
@@ -117,6 +121,7 @@ class ReolinkBase:
             stream_format=self._stream_format,
             protocol=self._protocol,
             timeout=self._timeout,
+            aiohttp_get_session_callback=callback_get_iohttp_session
         )
 
         self._hass = hass
@@ -506,3 +511,15 @@ def searchtime_to_datetime(self: SearchTime, timezone: dt.tzinfo):
         self["sec"],
         tzinfo=timezone,
     )
+
+
+last_known_hass: Optional[HomeAssistant] = None
+
+
+def callback_get_iohttp_session():
+    """Return the iohttp session for the last known hass instance."""
+    global last_known_hass
+    if last_known_hass is None:
+        raise Exception("No Home Assistant instance found")
+    session = async_get_clientsession(last_known_hass, verify_ssl=False)
+    return session
