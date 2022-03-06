@@ -9,4 +9,4 @@ name: Zita room mold indicator
 indoor_temp_sensor: sensor.luka_room_temperature
 indoor_humidity_sensor: sensor.luka_room_humidity
 outdoor_temp_sensor: sensor.balcony_temperature
-calibration_factor: 1.5
+calibration_factor: 1.9288
