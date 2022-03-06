@@ -6,3 +6,4 @@
 schefflera_arboricola_prevent_deep_sleep:
   name: Schefflera Arboricola Prevent Deep Sleep
   icon: mdi:sleep-off
+  initial: false

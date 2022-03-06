@@ -1,0 +1,9 @@
+#####
+# Prvent Deep Sleep for HiGrow board
+# Parthenocissus Small
+#####
+
+parthenocissus_small_prevent_deep_sleep:
+  name: Parthenocissus Small Prevent Deep Sleep
+  icon: mdi:sleep-off
+  initial: false

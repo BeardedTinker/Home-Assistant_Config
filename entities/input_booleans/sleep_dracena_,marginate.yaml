@@ -1,0 +1,9 @@
+#####
+# Prvent Deep Sleep for HiGrow board
+# Dracena marginata
+#####
+
+dracena_marginata_prevent_deep_sleep:
+  name: Dracena Marginata Prevent Deep Sleep
+  icon: mdi:sleep-off
+  initial: false

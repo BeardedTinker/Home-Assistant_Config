@@ -1,0 +1,9 @@
+#####
+# Prvent Deep Sleep for HiGrow board
+# Dypsis Lutescenes
+#####
+
+dypsis_lutescenes_prevent_deep_sleep:
+  name: Dypsis Lutescenes Prevent Deep Sleep
+  icon: mdi:sleep-off
+  initial: false

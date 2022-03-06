@@ -1,0 +1,9 @@
+#####
+# Prvent Deep Sleep for HiGrow board
+# Ficus benjamina
+#####
+
+ficus_benjamina_prevent_deep_sleep:
+  name: Ficus Benjamina Prevent Deep Sleep
+  icon: mdi:sleep-off
+  initial: false
