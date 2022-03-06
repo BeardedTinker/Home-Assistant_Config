@@ -186,6 +186,9 @@ MIN_4PRO_FIRMWARE_DATE = 20200408
 # Firmware 1.1.0 release date
 MIN_MOTION_FIRMWARE_DATE = 20210226
 
+# Firmware 2.1.4-rc1 release date
+MIN_MOTION2_FIRMWARE_DATE = 20220301
+
 # Firmware 2.1.3 release date
 MIN_VALVE_FIRMWARE_DATE = 20220202
 
@@ -220,6 +223,7 @@ MODEL_SHELLYGAS = f"{ATTR_SHELLY} Gas"
 MODEL_SHELLYHT = f"{ATTR_SHELLY} H&T"
 MODEL_SHELLYI3 = f"{ATTR_SHELLY} i3"
 MODEL_SHELLYMOTION = f"{ATTR_SHELLY} Motion"
+MODEL_SHELLYMOTION2 = f"{ATTR_SHELLY} Motion 2"
 MODEL_SHELLYPLUG = f"{ATTR_SHELLY} Plug"
 MODEL_SHELLYPLUG_S = f"{ATTR_SHELLY} Plug S"
 MODEL_SHELLYPLUG_US = f"{ATTR_SHELLY} Plug US"
@@ -296,6 +300,9 @@ MODEL_SHELLYI3_PREFIX = "shellyix3"
 
 MODEL_SHELLYMOTION_ID = "SHMOS-01"  # Shelly Motion
 MODEL_SHELLYMOTION_PREFIX = "shellymotionsensor"
+
+MODEL_SHELLYMOTION2_ID = "SHMOS-02"  # Shelly Motion
+MODEL_SHELLYMOTION2_PREFIX = "shellymotionsensor2"
 
 MODEL_SHELLYPLUG_ID = "SHPLG-1"  # Shelly Plug
 MODEL_SHELLYPLUG_E_ID = "SHPLG2-1"  # Shelly Plug E
@@ -519,6 +526,7 @@ TPL_GAS_TO_JSON = "{{{^status^:value}|tojson}}"
 TPL_HUMIDITY = "{%if is_number(value) and 0<value|int<999%}{{value|round(1)}}{%else%}unknown{%endif%}"
 TPL_HUMIDITY_EXT = "{%if is_number(value) and 0<value|int<999%}{{value|float|round(1)}}{%else%}unknown{%endif%}"
 TPL_ILLUMINATION = "{{value_json.lux}}"
+TPL_ILLUMINATION_MOTION2 = "{{value_json.lux.value}}"
 TPL_ILLUMINATION_TO_JSON = "{{{^illumination^:value}|tojson}}"
 TPL_IP = "{{value_json.ip}}"
 TPL_IP_FROM_INFO = "{{value_json.wifi_sta.ip}}"
@@ -526,6 +534,7 @@ TPL_LONGPUSH = "{%if value_json.event==^L^%}ON{%else%}OFF{%endif%}"
 TPL_LONGPUSH_SHORTPUSH = "{%if value_json.event==^LS^%}ON{%else%}OFF{%endif%}"
 TPL_LUX = "{{value|float|round}}"
 TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
+TPL_MOTION_MOTION2 = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
@@ -549,6 +558,7 @@ TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
 TPL_TARGET_TEMPERATURE = "{{value_json.thermostats.0.target_t.value}}"
 TPL_TEMPERATURE = "{%if is_number(value) and -100<value|int<999%}{{value|round(1)}}{%else%}unknown{%endif%}"
+TPL_TEMPERATURE_MOTION2 = "{{value_json.tmp.value}}"
 TPL_TEMPERATURE_EXT = "{%if is_number(value) and -100<value|int<999%}{{value|float|round(1)}}{%else%}unknown{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
 TPL_TILT = "{{value|float}}"
@@ -556,6 +566,7 @@ TPL_TRIPLE_SHORTPUSH = "{%if value_json.event==^SSS^%}ON{%else%}OFF{%endif%}"
 TPL_UPDATE_TO_JSON = "{{value_json[^update^]|tojson}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.uptime)|timestamp_l" "ocal}}"
 TPL_VIBRATION = "{%if value_json.vibration==true%}ON{%else%}OFF{%endif%}"
+TPL_VIBRATION_MOTION2 = "{%if value_json.sensor.vibration==true%}ON{%else%}OFF{%endif%}"
 TPL_VOLTAGE = "{{value|float|round(1)}}"
 
 UNIT_AMPERE = "A"
@@ -1016,6 +1027,14 @@ OPTIONS_SENSOR_TEMPERATURE = {
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE,
 }
+OPTIONS_SENSOR_TEMPERATURE_MOTION2 = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_INFO,
+    KEY_UNIT: UNIT_CELSIUS,
+    KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_MOTION2,
+}
 OPTIONS_SENSOR_TEMPERATURE_STATUS = {
     KEY_ENABLED_BY_DEFAULT: False,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
@@ -1089,6 +1108,15 @@ OPTIONS_SENSOR_BATTERY_MOTION = {
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_BATTERY_FROM_JSON,
 }
+OPTIONS_SENSOR_BATTERY_MOTION2 = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_INFO,
+    KEY_UNIT: UNIT_PERCENT,
+    KEY_VALUE_TEMPLATE: TPL_BATTERY_FROM_INFO,
+}
 OPTIONS_SENSOR_BATTERY_VALVE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -1113,6 +1141,14 @@ OPTIONS_SENSOR_LUX_MOTION = {
     KEY_STATE_TOPIC: TOPIC_STATUS,
     KEY_UNIT: UNIT_LUX,
     KEY_VALUE_TEMPLATE: TPL_ILLUMINATION,
+}
+OPTIONS_SENSOR_LUX_MOTION2 = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ILLUMINANCE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_INFO,
+    KEY_UNIT: UNIT_LUX,
+    KEY_VALUE_TEMPLATE: TPL_ILLUMINATION_MOTION2,
 }
 OPTIONS_SENSOR_OPERATION = {
     KEY_ENABLED_BY_DEFAULT: True,
@@ -1201,6 +1237,7 @@ DEVICE_FIRMWARE_MAP = {
     MODEL_SHELLYHT_ID: MIN_HT_FIRMWARE_DATE,
     MODEL_SHELLYI3_ID: MIN_FIRMWARE_DATE,
     MODEL_SHELLYMOTION_ID: MIN_MOTION_FIRMWARE_DATE,
+    MODEL_SHELLYMOTION2_ID: MIN_MOTION2_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_E_ID: MIN_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_ID: MIN_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_S_ID: MIN_FIRMWARE_DATE,
@@ -1972,6 +2009,60 @@ if model_id == MODEL_SHELLYMOTION_ID or dev_id_prefix == MODEL_SHELLYMOTION_PREF
         TOPIC_INFO,
         TOPIC_STATUS,
         TOPIC_STATUS,
+        TOPIC_INFO,
+        TOPIC_INFO,
+    ]
+    battery_powered = True
+
+if model_id == MODEL_SHELLYMOTION2_ID or dev_id_prefix == MODEL_SHELLYMOTION2_PREFIX:
+    model = MODEL_SHELLYMOTION2
+    buttons = {
+        BUTTON_RESTART: OPTIONS_BUTTON_RESTART,
+        BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE,
+    }
+    sensors = {
+        SENSOR_BATTERY: OPTIONS_SENSOR_BATTERY_MOTION2,
+        SENSOR_IP: OPTIONS_SENSOR_IP,
+        SENSOR_LUX: OPTIONS_SENSOR_LUX_MOTION2,
+        SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
+        SENSOR_SSID: OPTIONS_SENSOR_SSID,
+        SENSOR_TEMPERATURE: OPTIONS_SENSOR_TEMPERATURE_MOTION2,
+        SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
+    }
+    bin_sensors = [
+        SENSOR_FIRMWARE_UPDATE,
+        SENSOR_MOTION,
+        SENSOR_VIBRATION,
+        SENSOR_CHARGER,
+        SENSOR_CLOUD,
+    ]
+    bin_sensors_entity_categories = [
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        None,
+        None,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+        ENTITY_CATEGORY_DIAGNOSTIC,
+    ]
+    bin_sensors_enabled = [True, True, True, True, False]
+    bin_sensors_device_classes = [
+        DEVICE_CLASS_UPDATE,
+        DEVICE_CLASS_MOTION,
+        DEVICE_CLASS_VIBRATION,
+        DEVICE_CLASS_BATTERY_CHARGING,
+        DEVICE_CLASS_CONNECTIVITY,
+    ]
+    bin_sensors_pl = [None, None, None, None, None]
+    bin_sensors_tpls = [
+        TPL_NEW_FIRMWARE_FROM_INFO,
+        TPL_MOTION_MOTION2,
+        TPL_VIBRATION_MOTION2,
+        TPL_CHARGER,
+        TPL_CLOUD,
+    ]
+    bin_sensors_topics = [
+        TOPIC_INFO,
+        TOPIC_INFO,
+        TOPIC_INFO,
         TOPIC_INFO,
         TOPIC_INFO,
     ]
