@@ -50,12 +50,27 @@ i2c:
   scan: true
   id: bus_a
 
+dallas:
+  - pin: GPIO4
+
+# Check status of Home Assistant input boolean to prevent Deep Sleep
+# Used for OTA - has BIG impact on battery life
+binary_sensor:
+  - platform: homeassistant
+    id: solarws_prevent_deep_sleep
+    name: Prevent Solar WS Deep Sleep
+    entity_id: input_boolean.solarws_prevent_deep_sleep
+
 sensor:
 # BME280 is used to get temperature, pressure and humidity
-# BMP280 only provides temperature and pressure
-  - platform: bmp280
+# BMP280 only provides temperature and pressure so please comment out hummidity section
+#  - platform: bmp280
+
+  - platform: bme280
+    address: 0x76
+    update_interval: 30s
     temperature:
-      name: ${display_name} Temperature
+      name: ${display_name} WS Temperature
       oversampling: 4x
       unit_of_measurement: "°C"
       icon: "mdi:thermometer"
@@ -68,25 +83,23 @@ sensor:
       unit_of_measurement: "hPa"
       device_class: "pressure"
       state_class: "measurement"
-#    humidity:
-#      name: ${display_name} Humidity
-#      oversampling: 4x
-#      unit_of_measurement: "%"
-#      icon: "mdi:thermometer"
-#      device_class: "humidity"
-#      state_class: "measurement"
-    address: 0x76
-    update_interval: 30s
+    humidity:
+      name: ${display_name} Humidity
+      oversampling: 4x
+      unit_of_measurement: "%"
+      icon: "mdi:thermometer"
+      device_class: "humidity"
+      state_class: "measurement"
 
-# BH1750 sensor provides lux vaules
-  - platform: bh1750
-    name: ${display_name} Lux
-    address: 0x23
-    unit_of_measurement: "lx"
-    icon: "mdi:white-balance-sunny"
-    device_class: "illuminance"
+# DS18B20 Dallas temperature sensor
+  - platform: dallas
+    address: 0xc43c01f096e8b728
+    name: ${display_name} Air Temperature
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    device_class: "temperature"
     state_class: "measurement"
-    update_interval: 25s
+    accuracy_decimals: 1    
 
 # ADC platform helps track status of battery
   - platform: adc
@@ -100,15 +113,6 @@ sensor:
     update_interval: 20s
     attenuation: 11db
 
-# TX20 sensor is used for tracking wind speed and direction
-  - platform: tx20
-    wind_speed:
-      name: "Wind speed"
-    wind_direction_degrees:
-      name: "Wind direction degrees"
-    pin:
-      number: GPIO14
-
 # Pulse counter can be used to track rain gauge
   - platform: pulse_counter
     pin:
@@ -121,13 +125,26 @@ sensor:
       - multiply: 0.367
     update_interval: 30s
 
-# Check status of Home Assistant input boolean to prevent Deep Sleep
-# Used for OTA - has BIG impact on battery life
-binary_sensor:
-  - platform: homeassistant
-    id: solarws_prevent_deep_sleep
-    name: Prevent Solar WS Deep Sleep
-    entity_id: input_boolean.solarws_prevent_deep_sleep
+### NOT TESTED/IMPLEMENTED
+
+# TX20 sensor is used for tracking wind speed and direction
+  - platform: tx20
+    wind_speed:
+      name: "Wind speed"
+    wind_direction_degrees:
+      name: "Wind direction degrees"
+    pin:
+      number: GPIO14
+
+# BH1750 sensor provides lux vaules
+  - platform: bh1750
+    name: ${display_name} Lux
+    address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
+    update_interval: 25s
 
 deep_sleep:
   id: deep_sleep_control
