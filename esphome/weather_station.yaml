@@ -14,6 +14,8 @@
 
 substitutions:
   display_name: solarws
+  awake_duration: 30s
+  sleep_duration: 5min
 
 esphome:
   name: solarweather
@@ -68,7 +70,7 @@ sensor:
 
   - platform: bme280
     address: 0x76
-    update_interval: 30s
+    update_interval: 25s
     temperature:
       name: ${display_name} WS Temperature
       oversampling: 4x
@@ -110,7 +112,7 @@ sensor:
     device_class: "voltage"
     state_class: "measurement"
     accuracy_decimals: 3
-    update_interval: 20s
+    update_interval: 25s
     attenuation: 11db
 
 # Pulse counter can be used to track rain gauge
@@ -123,7 +125,7 @@ sensor:
     name: 'Rainfall'
     filters:
       - multiply: 0.367
-    update_interval: 30s
+    update_interval: 25s
 
 ### NOT TESTED/IMPLEMENTED
 
@@ -149,13 +151,13 @@ sensor:
 deep_sleep:
   id: deep_sleep_control
 #  run_duration: 45s
-  sleep_duration: 5min
+  sleep_duration: ${sleep_duration}
   
 script:
   - id: consider_deep_sleep
     mode: queued
     then:
-      - delay: 45s
+      - delay: ${awake_duration}
       - if:
           condition:
             binary_sensor.is_on: solarws_prevent_deep_sleep
