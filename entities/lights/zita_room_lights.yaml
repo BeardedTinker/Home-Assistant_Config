@@ -8,4 +8,5 @@ entities:
   - light.goose
   - light.zita_ceiling
   - light.zita_tabletop
+  - light.zita_table_light
   - light.zita_desk_lights
