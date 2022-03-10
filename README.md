@@ -64,12 +64,13 @@ From other devices I use, here is a list:
   - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
   - [Shelly Door & Window 2](https://shelly.cloud/products/shelly-door-window-2-smart-home-automation-sensor/) sensor
 
-  Plus some Shelly devices that are waiting instalaltion and/or testing:
+  Plus some Shelly devices that are waiting installation and/or testing:
   - Shelly 1 
   - Shelly Uno 
   - Shelly UV light
   - Shelly Plus 1 
   - Shelly Plus 1PM 
+  - Shelly Plus 2PM
 
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
@@ -147,28 +148,37 @@ etc...
 Following is a list of active Integrations that are visible at Configuration->Integration page:
   - AccuWeather
   - AirVisual
+  - Alexa Media Player
+  - Anniversaries
   - Blitzortung (HACS)
   - Certificate Expiry
   - CO2Signal
   - COVID-19
+  - DLNA server
   - Elgato Key Light
   - EPSHome
-  - Forcast Solar
+  - Garbage collection
+  - GitHub
   - GDACS
   - Google Cast
   - HACS
   - Home Assistant Supervisor
+  - International Space Station
   - Internet Printing Protocol
-  - Kraken - REMOVED
-  - Luftdaten
+  - Launch library
+  - LG TV
   - Mikrotik
   - Minecraft Server
+  - MJPEG IP Camera
   - Mobile App
   - MQTT
   - Network UPS Tool
+  - Nuki
   - ONVIF
   - OpenUV
+  - Radio Browser
   - Reolink
+  - Sensor Community
   - Shelly
   - Shopping List
   - SpaceX
@@ -177,6 +187,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Tado
   - Tile
   - Ubiquity UniFi
+  - Version
   - Withings
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
   - Xiaomi Miio
@@ -195,35 +206,35 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   159 |
-| Binary sensors       |   250 |
+| Automations          |   169 |
+| Binary sensors       |   263 |
 | Cameras              |    12 |
 | Climates             |     4 |
-| Counters             |     2 |
-| Device trackers      |    56 |
-| Entities             |  2280 |
+| Counters             |     4 |
+| Device trackers      |    57 |
+| Entities             |  2496 |
 | Groups               |    17 |
 | Image Processing     |     1 |
-| Input Boolean        |    14 |
+| Input Boolean        |    20 |
 | Input Date/Time      |    25 |
-| Input Number         |    13 |
+| Input Number         |    14 |
 | Input Select         |    12 |
 | Input Text           |    20 |
-| Lights               |    43 |
-| Lines of code (YAML) | 24586 |
+| Lights               |    41 |
+| Lines of code (YAML) | 26017 |
 | Locks                |     3 |
-| Media players        |    43 |
+| Media players        |    45 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
-| Scripts              |    20 |
-| Sensors              |  1362 |
-| Switches             |    89 |
+| Scripts              |    22 |
+| Sensors              |  1496 |
+| Switches             |   120 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 31.12.2021 7:00PM
+* Updated: 10.03.2022 7:00PM
 
 ### Missing files
 
