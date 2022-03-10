@@ -70,7 +70,7 @@ sensor:
 
   - platform: bme280
     address: 0x76
-    update_interval: 25s
+#    update_interval: 25s
     temperature:
       name: ${display_name} WS Temperature
       oversampling: 4x
@@ -112,8 +112,8 @@ sensor:
     device_class: "voltage"
     state_class: "measurement"
     accuracy_decimals: 3
-    update_interval: 25s
     attenuation: 11db
+#    update_interval: 25s
 
 # Pulse counter can be used to track rain gauge
   - platform: pulse_counter
@@ -146,7 +146,7 @@ sensor:
     icon: "mdi:white-balance-sunny"
     device_class: "illuminance"
     state_class: "measurement"
-    update_interval: 25s
+#    update_interval: 25s
 
 deep_sleep:
   id: deep_sleep_control
