@@ -130,13 +130,28 @@ sensor:
 ### NOT TESTED/IMPLEMENTED
 
 # TX20 sensor is used for tracking wind speed and direction
-  - platform: tx20
-    wind_speed:
-      name: "Wind speed"
-    wind_direction_degrees:
-      name: "Wind direction degrees"
-    pin:
+  - platform: pulse_meter
+    pin: 
       number: GPIO14
+      mode: INPUT_PULLUP
+    name: '${display_name} Windspeed Meter'
+    icon: 'mdi:weather-windy'
+    id: wind_meter
+    unit_of_measurement: 'km/h'
+    accuracy_decimals: 1
+    timeout: 5s
+    filters:
+      - multiply: 0.02 #1.492mph per rotation so 1 / 60 / 2 * 1.491424
+      - sliding_window_moving_average: # Helps prevent too many datapoints
+          window_size: 15
+          send_every: 15
+#  - platform: tx20
+#    wind_speed:
+#      name: "Wind speed"
+#    wind_direction_degrees:
+#      name: "Wind direction degrees"
+#    pin:
+#      number: GPIO14
 
 # BH1750 sensor provides lux vaules
   - platform: bh1750
@@ -146,7 +161,7 @@ sensor:
     icon: "mdi:white-balance-sunny"
     device_class: "illuminance"
     state_class: "measurement"
-#    update_interval: 25s
+    update_interval: 25s
 
 deep_sleep:
   id: deep_sleep_control
