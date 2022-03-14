@@ -1,5 +1,5 @@
 #####
-# Sends notifications that HA nas shutsdown
+# Sends notifications that HA has shutdown
 #####
 
 alias: Home Assistant Shutdown - Notify
@@ -12,7 +12,7 @@ trigger:
 action:
 - service: script.notify_engine
   data:
-    who: 'andrej'
+    who: 'parents'
     title: '*HA shutdown*'
     value1: 'Home Assistant shutting down at {{ states("sensor.time") }}'
     group: ha
