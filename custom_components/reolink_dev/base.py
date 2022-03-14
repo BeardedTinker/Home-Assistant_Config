@@ -17,7 +17,7 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import Context, HomeAssistant
-from homeassistant.helpers.network import get_url
+from homeassistant.helpers.network import get_url, NoURLAvailableError
 from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.util.dt as dt_util
@@ -322,6 +322,9 @@ class ReolinkBase:
                 context=context,
             )
 
+# warning once in the logs that Internal URL has is using HTTP while external URL is using HTTPS which is incompatible
+# HomeAssistant starting 2022.3 when trying to retrieve internal URL
+warnedAboutNoURLAvailableError = False
 
 class ReolinkPush:
     """The implementation of the Reolink IP base class."""
@@ -348,12 +351,30 @@ class ReolinkPush:
 
     async def subscribe(self, event_id):
         """Subscribe to motion events and set the webhook as callback."""
+        global warnedAboutNoURLAvailableError
         self._event_id = event_id
         self._webhook_id = await self.register_webhook()
-        self._webhook_url = "{}{}".format(
-            get_url(self._hass, prefer_external=False),
-            self._hass.components.webhook.async_generate_path(self._webhook_id),
-        )
+
+        try:
+            self._webhook_url = "{}{}".format(
+                get_url(self._hass, prefer_external=False),
+                self._hass.components.webhook.async_generate_path(self._webhook_id),
+            )
+        except NoURLAvailableError as ex:
+            if not warnedAboutNoURLAvailableError:
+                warnedAboutNoURLAvailableError = True
+                _LOGGER.warning("Your are using HTTP for internal URL while using HTTPS for external URL in HA which is"
+                " not supported anymore by HomeAssistant starting 2022.3."
+                 "Please change your configuration to use HTTPS for internal URL or disable HTTPS for external.")
+            try:
+                self._webhook_url = "{}{}".format(
+                    get_url(self._hass, prefer_external=True),
+                    self._hass.components.webhook.async_generate_path(self._webhook_id),
+                )
+            except NoURLAvailableError as ex:
+                # If we can't get a URL for external or internal, we will still mark the camara as available
+                await self.set_available(True)
+                return True
 
         self._sman = Manager(self._host, self._port, self._username, self._password)
         if await self._sman.subscribe(self._webhook_url):

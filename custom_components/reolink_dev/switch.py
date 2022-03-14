@@ -4,7 +4,7 @@ import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.components.switch import DEVICE_CLASS_SWITCH
-from homeassistant.helpers.entity import ToggleEntity
+from homeassistant.helpers.entity import ToggleEntity, EntityCategory
 
 from .const import BASE, DOMAIN
 from .entity import ReolinkEntity
@@ -142,7 +142,7 @@ class IRLightsSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
@@ -193,7 +193,7 @@ class SpotLightSwitch(ReolinkEntity, ToggleEntity):
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
         self._slstatus = False
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
@@ -273,7 +273,7 @@ class SirenSwitch(ReolinkEntity, ToggleEntity):
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
         self._sistatus = False
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
@@ -327,7 +327,7 @@ class PushSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
@@ -374,7 +374,7 @@ class RecordingSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
@@ -422,7 +422,7 @@ class AudioSwitch(ReolinkEntity, ToggleEntity):
         """Initialize a Reolink camera."""
         ReolinkEntity.__init__(self, hass, config)
         ToggleEntity.__init__(self)
-        self._attr_entity_category = "config"
+        self._attr_entity_category = EntityCategory.CONFIG
 
     @property
     def unique_id(self):
