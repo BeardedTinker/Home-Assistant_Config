@@ -143,8 +143,8 @@ sensor:
     filters:
       - multiply: 0.02 #1.492mph per rotation so 1 / 60 / 2 * 1.491424
       - sliding_window_moving_average: # Helps prevent too many datapoints
-          window_size: 15
-          send_every: 15
+          window_size: 5
+          send_every: 5
 #  - platform: tx20
 #    wind_speed:
 #      name: "Wind speed"
