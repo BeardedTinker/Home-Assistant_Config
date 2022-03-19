@@ -141,7 +141,7 @@ sensor:
     accuracy_decimals: 1
     timeout: 5s
     filters:
-      - multiply: 0.02 #1.492mph per rotation so 1 / 60 / 2 * 1.491424
+      - multiply: 0.02 #1.492mph per rotation so 1 / 60 / 2 * 2.4
       - sliding_window_moving_average: # Helps prevent too many datapoints
           window_size: 5
           send_every: 5
