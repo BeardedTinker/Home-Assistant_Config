@@ -12,10 +12,15 @@
 #
 #####
 
+# Configuration variables
+
 substitutions:
   display_name: solarws
   awake_duration: 30s
   sleep_duration: 5min
+  battery_full: '3.16'
+  battery_empty: '2.492'
+  battery_diff: "${battery_full}-${battery_empty}"
 
 esphome:
   name: solarweather
@@ -40,7 +45,7 @@ ota:
 # On OTA end toggle off HA boolean
   on_end:
     then:
-      - logger.log: "OTA end"
+      - logger.log: 'OTA successful - flipping switch'
       - homeassistant.service: 
           service: input_boolean.turn_off
           data:
@@ -60,7 +65,7 @@ dallas:
 binary_sensor:
   - platform: homeassistant
     id: solarws_prevent_deep_sleep
-    name: Prevent Solar WS Deep Sleep
+    name: 'Prevent Solar WS Deep Sleep'
     entity_id: input_boolean.solarws_prevent_deep_sleep
 
 sensor:
@@ -72,7 +77,7 @@ sensor:
     address: 0x76
 #    update_interval: 25s
     temperature:
-      name: ${display_name} WS Temperature
+      name: '${display_name} WS Temperature'
       oversampling: 4x
       unit_of_measurement: "°C"
       icon: "mdi:thermometer"
@@ -80,13 +85,13 @@ sensor:
       state_class: "measurement"
       accuracy_decimals: 1      
     pressure:
-      name: ${display_name} Pressure
+      name: '${display_name} Pressure'
       oversampling: 4x
       unit_of_measurement: "hPa"
       device_class: "pressure"
       state_class: "measurement"
     humidity:
-      name: ${display_name} Humidity
+      name: '${display_name} Humidity'
       oversampling: 4x
       unit_of_measurement: "%"
       icon: "mdi:thermometer"
@@ -96,7 +101,7 @@ sensor:
 # DS18B20 Dallas temperature sensor
   - platform: dallas
     address: 0xc43c01f096e8b728
-    name: ${display_name} Air Temperature
+    name: '${display_name} Air Temperature'
     unit_of_measurement: "°C"
     icon: "mdi:thermometer"
     device_class: "temperature"
@@ -106,7 +111,7 @@ sensor:
 # ADC platform helps track status of battery
   - platform: adc
     pin: GPIO33
-    name: ${display_name} Battery
+    name: '${display_name} Battery'
     unit_of_measurement: "V"
     icon: "mdi:battery-high"
     device_class: "voltage"
@@ -115,16 +120,36 @@ sensor:
     attenuation: 11db
 #    update_interval: 25s
 
+  - platform: adc
+    pin: GPIO33
+    name: '${display_name} Battery %'
+    attenuation: 11db
+    unit_of_measurement: '%'
+    filters:
+      - lambda: |-
+          return x - ${battery_empty} / ${battery_diff} * 100.00;  
+#    update_interval: 3sec
+
 # Pulse counter can be used to track rain gauge
   - platform: pulse_counter
     pin:
       number: GPIO25
       inverted: True
       mode: INPUT_PULLUP    
-    unit_of_measurement: 'mm'
     name: 'Rainfall'
+    unit_of_measurement: 'mm'
     filters:
       - multiply: 0.367
+    update_interval: 25s
+
+# BH1750 sensor provides lux vaules
+  - platform: bh1750
+    name: '${display_name} Lux'
+    address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
     update_interval: 25s
 
 ### NOT TESTED/IMPLEMENTED
@@ -152,16 +177,6 @@ sensor:
 #      name: "Wind direction degrees"
 #    pin:
 #      number: GPIO14
-
-# BH1750 sensor provides lux vaules
-  - platform: bh1750
-    name: ${display_name} Lux
-    address: 0x23
-    unit_of_measurement: "lx"
-    icon: "mdi:white-balance-sunny"
-    device_class: "illuminance"
-    state_class: "measurement"
-    update_interval: 25s
 
 deep_sleep:
   id: deep_sleep_control
