@@ -20,7 +20,7 @@ substitutions:
   sleep_duration: 5min
   battery_full: '3.16'
   battery_empty: '2.492'
-  battery_diff: "${battery_full}-${battery_empty}"
+  battery_diff: '${battery_full}-${battery_empty}'
 
 esphome:
   name: solarweather
@@ -118,6 +118,7 @@ sensor:
     state_class: "measurement"
     accuracy_decimals: 3
     attenuation: 11db
+    id: voltage
 #    update_interval: 25s
 
   - platform: adc
@@ -127,7 +128,8 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return x - ${battery_empty} / ${battery_diff} * 100.00;  
+          return ((id(voltage).state - 2.492) / 0.6868 * 100.00);  
+#          return ((id(voltage).state - ${battery_empty}) / ${battery_diff} * 100.00);  
 #    update_interval: 3sec
 
 # Pulse counter can be used to track rain gauge
