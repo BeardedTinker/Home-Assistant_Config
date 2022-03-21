@@ -30,8 +30,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities,
-                               discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Create the launch sensor."""
     session = async_create_clientsession(hass)
     ics_data_provider = GetICSData(ICS_URL, session, hass)
@@ -52,8 +51,7 @@ async def async_setup_platform(hass, config, async_add_entities,
 
     nl_sensors = []
     for option in config.get("rocket_name"):
-        nl_sensors.append(GetNextLaunch(coordinator,
-                                        option, ics_data_provider))
+        nl_sensors.append(GetNextLaunch(coordinator, option, ics_data_provider))
 
     async_add_entities(nl_sensors, True)
 
@@ -75,7 +73,7 @@ class GetICSData:
         """Get the latest data from ics."""
         _LOGGER.debug("Get the latest data from ics")
 
-        async with async_timeout.timeout(10, loop=self.hass.loop):
+        async with async_timeout.timeout(10):
             resp = await self.session.get(self.url)
 
             if resp.status != 200:
@@ -143,8 +141,7 @@ class GetNextLaunch(Entity):
             selected_events = self.ics_data_provider.timeline
         else:
             selected_events = [
-                x for x in self.ics_data_provider.timeline
-                if self.rocket_name in x.name
+                x for x in self.ics_data_provider.timeline if self.rocket_name in x.name
             ]
 
         for event in selected_events:
