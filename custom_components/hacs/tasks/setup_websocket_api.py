@@ -274,6 +274,7 @@ async def hacs_repository_data(hass, connection, msg):
             repository.state = None
             if not was_installed:
                 hass.bus.async_fire("hacs/reload", {"force": True})
+                await hacs.async_recreate_entities()
 
         elif action == "add":
             repository.state = None
@@ -332,13 +333,14 @@ async def hacs_repository(hass, connection, msg):
             await repository.async_install()
             if not was_installed:
                 hass.bus.async_fire("hacs/reload", {"force": True})
+                await hacs.async_recreate_entities()
 
         elif action == "not_new":
             repository.data.new = False
 
         elif action == "uninstall":
             repository.data.new = False
-            await repository.update_repository(ignore_issues=True)
+            await repository.update_repository(ignore_issues=True, force=True)
             await repository.uninstall()
 
         elif action == "hide":
