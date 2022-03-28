@@ -2,6 +2,7 @@
 # Project author: Debasish Dutta
 # Kit supplied by PCBWay: # https://www.pcbway.com/project/shareproject/Solar_Powered_WiFi_Weather_Station_V3_0.html
 # Code adapted and expanded by Bearded Tinker ;)
+# GitHub: https://github.com/BeardedTinker/SolarWS
 # 
 # Additional modules that can be use (and code takes them into account)
 # BME280  temperature, humidity and pressure OR BMP280 for temperature and pressure
@@ -57,6 +58,7 @@ i2c:
   scan: true
   id: bus_a
 
+# Detect Dallas sensor address
 dallas:
   - pin: GPIO4
 
@@ -154,9 +156,7 @@ sensor:
     state_class: "measurement"
     update_interval: 25s
 
-### NOT TESTED/IMPLEMENTED
-
-# TX20 sensor is used for tracking wind speed and direction
+# Wind speed sensor
   - platform: pulse_meter
     pin: 
       number: GPIO14
@@ -172,6 +172,11 @@ sensor:
       - sliding_window_moving_average: # Helps prevent too many datapoints
           window_size: 5
           send_every: 5
+
+### NOT TESTED/IMPLEMENTED
+
+# TX20 sensor is used for tracking wind speed and direction
+
 #  - platform: tx20
 #    wind_speed:
 #      name: "Wind speed"
