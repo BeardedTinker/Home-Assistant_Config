@@ -8,23 +8,35 @@
 # BME280  temperature, humidity and pressure OR BMP280 for temperature and pressure
 # DS18B20 additional temperature measurments
 # BH1750  lux sensor
-# SI1145  UV index
+#
 # TX20    Wind speed and direction  
+#
+# NOT USED
+#
+# SI1145  UV index
 #
 #####
 
-# Configuration variables
+###########################
+# Configuration variables #
+###########################
 
 substitutions:
   display_name: solarws
   awake_duration: 30s
+  update_fq: 25s
   sleep_duration: 5min
   battery_full: '3.16'
   battery_empty: '2.492'
-  battery_diff: '${battery_full}-${battery_empty}'
+  battery_diff: '0.668' # '${battery_full}-${battery_empty}'
 
 esphome:
   name: solarweather
+
+####################################################
+##### No need to edit anything below this line #####
+####################################################
+
 # On boot run script to see if Deep Sleep is prevented or not  
   on_boot:
     then:
@@ -52,6 +64,7 @@ ota:
           data:
             entity_id: input_boolean.solarws_prevent_deep_sleep
 
+# Enable i2c
 i2c:
   sda: 21
   scl: 22
@@ -74,10 +87,8 @@ sensor:
 # BME280 is used to get temperature, pressure and humidity
 # BMP280 only provides temperature and pressure so please comment out hummidity section
 #  - platform: bmp280
-
   - platform: bme280
     address: 0x76
-#    update_interval: 25s
     temperature:
       name: '${display_name} WS Temperature'
       oversampling: 4x
@@ -110,6 +121,16 @@ sensor:
     state_class: "measurement"
     accuracy_decimals: 1    
 
+# BH1750 sensor provides lux vaules
+  - platform: bh1750
+    name: '${display_name} Lux'
+    address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
+    update_interval: ${update_fq}
+
 # ADC platform helps track status of battery
   - platform: adc
     pin: GPIO33
@@ -123,6 +144,7 @@ sensor:
     id: voltage
 #    update_interval: 25s
 
+# Another ADC platform to track battery %
   - platform: adc
     pin: GPIO33
     name: '${display_name} Battery %'
@@ -130,11 +152,11 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return ((id(voltage).state - 2.492) / 0.6868 * 100.00);  
+          return ((id(voltage).state - 2.492) / 0.668 * 100.00);  
 #          return ((id(voltage).state - ${battery_empty}) / ${battery_diff} * 100.00);  
-#    update_interval: 3sec
+    update_interval: ${update_fq}
 
-# Pulse counter can be used to track rain gauge
+# Rain gauge with pulse counter 
   - platform: pulse_counter
     pin:
       number: GPIO25
@@ -144,20 +166,10 @@ sensor:
     unit_of_measurement: 'mm'
     filters:
       - multiply: 0.367
-    update_interval: 25s
+    update_interval: ${update_fq}
 
-# BH1750 sensor provides lux vaules
-  - platform: bh1750
-    name: '${display_name} Lux'
-    address: 0x23
-    unit_of_measurement: "lx"
-    icon: "mdi:white-balance-sunny"
-    device_class: "illuminance"
-    state_class: "measurement"
-    update_interval: 25s
-
-# Wind speed sensor
-  - platform: pulse_meter
+# Wind speed sensor with pulse counter
+  - platform: pulse_counter
     pin: 
       number: GPIO14
       mode: INPUT_PULLUP
@@ -166,12 +178,10 @@ sensor:
     id: wind_meter
     unit_of_measurement: 'km/h'
     accuracy_decimals: 1
-    timeout: 5s
+    update_interval: ${update_fq}
+#    timeout: 5s
     filters:
-      - multiply: 0.02 #1.492mph per rotation so 1 / 60 / 2 * 2.4
-      - sliding_window_moving_average: # Helps prevent too many datapoints
-          window_size: 5
-          send_every: 5
+      - multiply: 0.048 #1.492mph per rotation so 1 / 25 (update_fq) / 2 * 2.4
 
 ### NOT TESTED/IMPLEMENTED
 
@@ -185,11 +195,12 @@ sensor:
 #    pin:
 #      number: GPIO14
 
+# Define length of Deep sleep
 deep_sleep:
   id: deep_sleep_control
-#  run_duration: 45s
   sleep_duration: ${sleep_duration}
-  
+
+# Deep sleep script if/then/else
 script:
   - id: consider_deep_sleep
     mode: queued
