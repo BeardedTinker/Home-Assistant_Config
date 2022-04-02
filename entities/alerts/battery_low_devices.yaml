@@ -3,7 +3,6 @@
 # https://community.home-assistant.io/t/alert-when-devices-have-low-battery/258072
 #####
 
-
 low_battery_devices:
   name: Devices have low battery
   entity_id: binary_sensor.devices_with_low_battery
