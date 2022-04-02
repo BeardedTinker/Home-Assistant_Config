@@ -1,0 +1,15 @@
+#####
+# Generic camera with GCode preview image (hopefully)
+#
+#####
+
+platform: generic
+name: V24 GCode Preview
+still_image_url: >
+  {% if states.sensor.gcode_preview.attributes["relative_path"] == "" %}
+      https://192.168.1.201:8123/local/no_preview.png
+  {% else %}
+      http://192.168.1.167:7125/server/files/gcodes/{{ states.sensor.gcode_preview.attributes["relative_path"] }}
+  {% endif %}
+scan_interval: 5
+content_type: image/png
