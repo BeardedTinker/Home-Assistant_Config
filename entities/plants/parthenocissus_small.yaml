@@ -9,7 +9,7 @@ parthenocissus_small:
     battery: sensor.parthenocissus_small_battery_2
     temperature: sensor.parthenocissus_small_temperature
     conductivity: sensor.parthenocissus_small_salt
-    brightness: sensor.parthenocissus_small_illuminance
+    brightness: sensor.parthenocissus_small_lux
   min_moisture: 60
   max_moisture: 85
   min_battery: 10

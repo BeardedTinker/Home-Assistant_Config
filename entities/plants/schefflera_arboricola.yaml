@@ -9,7 +9,7 @@ schefflera_arboricola:
     battery: sensor.schefflera_arboricola_battery_2
     temperature: sensor.schefflera_arboricola_temperature
     conductivity: sensor.schefflera_arboricola_salt
-    brightness: sensor.schefflera_arboricola_illuminance
+    brightness: sensor.schefflera_arboricola_lux
   min_moisture: 30
   max_moisture: 75
   min_battery: 10

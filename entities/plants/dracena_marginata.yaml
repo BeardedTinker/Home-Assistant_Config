@@ -9,7 +9,7 @@ dracena_marginata:
     battery: sensor.dracena_marginata_battery_2
     temperature: sensor.dracena_marginata_temperature
     conductivity: sensor.dracena_marginata_salt
-    brightness: sensor.dracena_marginata_illuminance
+    brightness: sensor.dracena_marginata_lux
   min_moisture: 30
   max_moisture: 75
   min_battery: 10

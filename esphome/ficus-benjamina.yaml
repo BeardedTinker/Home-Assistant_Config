@@ -1,188 +1,205 @@
-# This is used to set sensor name (device name) and friendly name for each sensor board 
-# Using _ in device name will result in warning!
-substitutions:
-  devicename: ficus_benjamina
-  upper_devicename: Ficus Benjamina
-  awake_for: 5s      # set how long to stay awake - NOT less then 10sec
-  sleep_for: 60min    # set how long to sleep in minutes
+###################################################
+# LilyGo HiGrow board code for ESPHome            #
+###################################################
+# Slapped together by BeardedTinker April 2022    #
+# YouTube: https://www.youtube.com/BeardedTinker  #
+# GitHub:  https://github.com/BeardedTinker/      #
+# Twitter: https://twitter.com/BeardedTinker      #
+#                                                 #
+# This version is for DHT version of board witout #
+# additional DS18B50 sensor                       #  
+###################################################
 
-# WiFi and IP addresss setup.
-# We use FIXED IP address to speed up this process and also Fast Connect
+#
+# This is used to set sensor name (device name) and friendly name for each sensor board
+# Using _ in device name will result in warning!
+# setup_priority needs to be specified for some components to work
+
+
+substitutions:
+  devicename: "ficus_benjamina"
+  upper_devicename: Ficus Benjamina
+  awake_duration: 6s      # set how long to stay awake - NOT less then 10sec
+  sleep_duration: 90min    # set how long to sleep in minutes
+  update_interval: 5s
+  fixed_ip: 192.168.2.51
+
+#############################################
+##### Nothing to change after this line #####
+##### Except for calibration data if    #####
+##### want to do it!                    #####
+#############################################
+
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_key
   manual_ip:
-    static_ip: 192.168.2.51
+    static_ip: ${fixed_ip}
     gateway: 192.168.1.1
     subnet: 255.255.252.0
 #  fast_connect: enable
 
-##### NOTHING SHOULD BE CHANGED AFTER THIS LINE
-
-# Enable logging
-logger:
-
-# Enable Home Assistant API and OTA
-# Password is disabled for OTA and API for faster data transfer and easier setup
-api:
-#  password: !secret api_password
-
-ota:
-#  password: !secret ota_password
-
-# Setup of platform
 esphome:
-  name: $devicename
+  name: "${devicename}"
   platform: ESP32
   board: esp32dev
-  on_shutdown:
-    then:
-      - switch.turn_off: spower
   on_boot:
-    priority: -200
     then:
-      - delay: 4s
-      - logger.log: "Checking sleep"
-      - lambda: |-
-          if (id(defer).state) {
-            ESP_LOGD("main", "Prevent sleep");
-            id(deep_sleeping).prevent_deep_sleep();
-          } else {
-            ESP_LOGD("main", "Allow sleep");
-          }
-          if (id(remote_defer).state) {
-            ESP_LOGD("main", "Remote prevent sleep");
-            id(deep_sleeping).prevent_deep_sleep();
-          } else {
-            ESP_LOGD("main", "Remote allow sleep");
-          }
-      - logger.log: "Sleep checked"
+      - script.execute: consider_deep_sleep
 
+ota:
+  on_end:
+    then:
+      - logger.log: 'OTA successful - flipping switch'
+      - homeassistant.service: 
+          service: input_boolean.turn_off
+          data:
+            entity_id: input_boolean.${devicename}_prevent_deep_sleep
+
+api:
+
+logger:
+
+i2c:
+  - id: bus_a
+    sda: 25
+    scl: 26
+    scan: true
+    setup_priority: -200
+  
 # Power switch
 switch:
   - platform: gpio
     pin: GPIO4
-    name: "${upper_devicename} Sensor Power"
+    name: "${upper_devicename} Power Sensors"
     id: spower
     restore_mode: ALWAYS_ON
     internal: true
     setup_priority: 1000
 
-# Wake button (GPIO35)
+### Sensors section
 binary_sensor:
-  - platform: gpio
-    pin: 
-      number: GPIO35
-      inverted: true
-    name: "${upper_devicename} Wake Button"
-    id: defer
   - platform: homeassistant
-    name: "${upper_devicename} Remote Prevent Sleep"
-    internal: true
-    id: "remote_defer"
+    id: ${devicename}_prevent_deep_sleep
+    name: 'Prevent sensor Deep Sleep'
     entity_id: input_boolean.${devicename}_prevent_deep_sleep
-    on_press:
-      then:
-        - logger.log: "Remote press defer"
-        - deep_sleep.prevent: deep_sleeping
-    on_state:
-      then:
-        - delay: 4s
-        - logger.log: "Remote state state"
-
-# Setting up i2C to get sensor data
-i2c:
-  sda: 25
-  scl: 26
-  scan: true
-  id: bus_a
-  setup_priority: -200
-
-# Deep sleep
-deep_sleep:
-  run_duration: ${awake_for}
-  sleep_duration: ${sleep_for}
-  id: deep_sleeping
 
 sensor:
 
-# Temperature & Humidity
+# Temperature and humidity
+
   - platform: dht
     pin: 16
     model: dht11
-    update_interval: 3sec
     temperature:
       name: "${upper_devicename} Temperature"
+      unit_of_measurement: "°C"
+      icon: "mdi:thermometer"
+      device_class: "temperature"
+      state_class: "measurement"
+      accuracy_decimals: 1            
     humidity:
       name: "${upper_devicename} Humidity"
+      unit_of_measurement: "%"
+      icon: "mdi:thermometer"
+      device_class: "humidity"
+      state_class: "measurement"      
+    update_interval: ${update_interval}
+    setup_priority: -100
 
-# Soil moisture %
+## Soil humidity raw data - needed just for calibration
+#  - platform: adc
+#    pin: 32
+#    name: "${upper_devicename} Soil Moisture raw"
+#    attenuation: 11db
+#    unit_of_measurement: 'V'
+
+# Soil humidity %
   - platform: adc
     pin: 32
     name: "${upper_devicename} Soil Moisture"
     attenuation: 11db
     unit_of_measurement: '%'
-    update_interval: 3sec
     filters:
-      # 1.48v = in water
-      # 3.34v = dry
+      # 1.410v = in water
+      # 2.834v = dry
       lambda: |-
-        return (3.3 - x) * 100.0 / (3.3 - 1.48);
-# Soil moisture raw data - not needed
-#  - platform: adc
-#    pin: 32
-#    name: "${upper_devicename} Soil Moisture raw"
-#    attenuation: 11db
-#    unit_of_measurement: '%'
-#    filters:
-#      # 1.1v = in water
-#      # 2.94v = dry
-#      lambda: |-
-#        return (2.95 - x) * 100.0 / (2.95 - 1.1);
-
-# Battery V
-  - platform: adc
-    pin: 33
-    name: "${upper_devicename} Battery"
-    attenuation: 6db
-    unit_of_measurement: 'V'
-    update_interval: 3sec
-    filters:
-      # Map 0.0 (from sensor) to 0.0 (true value)
-      - calibrate_linear:
-          - 0.0 -> 0.0
-          - 2.06 -> 1.89
-      - lambda: return x * 2.0;
-    id: ${devicename}_voltage
-
-# Battery %
-  - platform: adc
-    pin: 33
-    name: "${upper_devicename} Battery %"
-    attenuation: 6db
-    unit_of_measurement: '%'
-    update_interval: 3sec
-    filters:
-      - lambda: |-
-          return ((id(${devicename}_voltage).state -3.24) /0.8 * 100.00);  
-
-# Fertilizer / Salt %
+        return (2.834 - x) * 100.0 / (2.834 - 1.410);
+    update_interval: ${update_interval}
+    
+# Lux sensor
+  - platform: bh1750
+    i2c_id: bus_a
+    name: "${upper_devicename} Lux"
+    address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
+    setup_priority: -300
+    update_interval: ${update_interval}
+  
+# Fertilizer sensor
   - platform: adc
     pin: GPIO34
     name: "${upper_devicename} Salt"
-    update_interval: 3sec
     unit_of_measurement: '%'
     accuracy_decimals: 4
     filters:
       # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
           - 0.0 -> 0.0
-          - 1.1 -> 100.0
+          - 1.1 -> 100.0  
+    update_interval: ${update_interval}
+    
+# Battery V
+  - platform: adc
+    pin: 33
+    name: "${upper_devicename} Battery"
+    attenuation: 11db
+    unit_of_measurement: "V"
+    icon: "mdi:battery-high"
+    device_class: "voltage"
+    state_class: "measurement"
+    accuracy_decimals: 3
+#    filters:
+#      # Map 0.0 (from sensor) to 0.0 (true value)
+#      - calibrate_linear:
+#          - 0.0 -> 0.0
+#          - 2.06 -> 1.89
+#      - lambda: return x * 2.0;
+    id: ${devicename}_voltage
+    update_interval: ${update_interval}
 
-# Lux / Illuminance
-  - platform: bh1750
-    i2c_id: bus_a
-    name: "${upper_devicename} Illuminance"
-    address: 0x23
-    update_interval: 3sec
-    setup_priority: -300
+# Battery %
+  - platform: adc
+    pin: 33
+    name: "${upper_devicename} Battery %"
+    unit_of_measurement: '%'
+    filters:
+      - lambda: |-
+          return ((id(${devicename}_voltage).state - 2.76) * 100 / 0.369);  
+    # 2.76v = minimum
+    # 3.129v = maximum       
+    # (current - minimum) * 100 / difference between max & mix 
+    update_interval: ${update_interval}
+
+# Deep sleep section
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: ${sleep_duration}
+
+# Script section
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - delay: ${awake_duration}
+      - if:
+          condition:
+            binary_sensor.is_on: ${devicename}_prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+          else:
+            - deep_sleep.enter: deep_sleep_control
+      - script.execute: consider_deep_sleep
