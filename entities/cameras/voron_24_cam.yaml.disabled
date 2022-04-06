@@ -1,5 +1,6 @@
 #####
 # Create camera for Ender 3 Pro
+# Mjpeg to be removed in 2022.5
 #####
 
 platform: mjpeg

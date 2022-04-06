@@ -1,6 +1,7 @@
 #####
 # Load ISS component and get location
 # https://www.home-assistant.io/integrations/iss/
+# Disabled in 2022.4
 #####
 
 platform: iss

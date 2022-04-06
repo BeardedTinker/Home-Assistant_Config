@@ -1,6 +1,7 @@
 #####
 # Android TV integration for Mi TV stick
 # https://www.home-assistant.io/integrations/androidtv/
+# Removed in 2022.4
 #####
 
 platform: androidtv

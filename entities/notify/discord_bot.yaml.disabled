@@ -1,6 +1,7 @@
 #####
 # Discord bot
 # https://www.home-assistant.io/integrations/discord
+# TB
 #####
 
 platform: discord
