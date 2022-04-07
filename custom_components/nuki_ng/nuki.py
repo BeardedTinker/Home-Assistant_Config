@@ -1,3 +1,5 @@
+from hashlib import sha256
+from random import randint
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -9,7 +11,7 @@ import requests
 import logging
 import json
 import re
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from urllib.parse import urlencode
 
 from .constants import DOMAIN
@@ -21,19 +23,14 @@ BRIDGE_HOOK = "nuki_ng_bridge_hook"
 
 
 class NukiInterface:
-
     def __init__(
-        self,
-        hass,
-        *,
-        bridge: str = None,
-        token: str = None,
-        web_token: str = None
+        self, hass, *, bridge: str = None, token: str = None, web_token: str = None, use_hashed: bool = False
     ):
         self.hass = hass
         self.bridge = bridge
         self.token = token
         self.web_token = web_token
+        self.use_hashed = use_hashed
 
     async def async_json(self, cb):
         response = await self.hass.async_add_executor_job(lambda: cb(requests))
@@ -46,9 +43,7 @@ class NukiInterface:
 
     async def discover_bridge(self) -> str:
         try:
-            response = await self.async_json(
-                lambda r: r.get(BRIDGE_DISCOVERY_API)
-            )
+            response = await self.async_json(lambda r: r.get(BRIDGE_DISCOVERY_API))
             bridges = response.get("bridges", [])
             if len(bridges) > 0:
                 return bridges[0]["ip"]
@@ -62,6 +57,12 @@ class NukiInterface:
         if re.match(".+\\:\d+$", self.bridge):
             # Port inside
             url = f"http://{self.bridge}"
+        if self.use_hashed:
+            tz = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            rnr = randint(0, 65535)
+            to_hash = "%s,%s,%s" % (tz, rnr, self.token)
+            hashed = sha256(to_hash.encode("utf-8")).hexdigest()
+            return f"{url}{path}?ts={tz}&rnr={rnr}&hash={hashed}{extra_str}"
         return f"{url}{path}?token={self.token}{extra_str}"
 
     async def bridge_list(self):
@@ -82,17 +83,24 @@ class NukiInterface:
             "lock": 2,
             "open": 3,
             "lock_n_go": 4,
-            "lock_n_go_open": 5
+            "lock_n_go_open": 5,
+            "activate_rto": 1,
+            "deactivate_rto": 2,
+            "electric_strike_actuation": 3,
+            "activate_continuous_mode": 4,
+            "deactivate_continuous_mode": 5,
         }
         return await self.async_json(
-            lambda r: r.get(self.bridge_url(
-                "/lockAction",
-                dict(
-                    action=actions_map[action],
-                    nukiId=dev_id,
-                    deviceType=device_type
+            lambda r: r.get(
+                self.bridge_url(
+                    "/lockAction",
+                    dict(
+                        action=actions_map[action],
+                        nukiId=dev_id,
+                        deviceType=device_type,
+                    ),
                 )
-            ))
+            )
         )
 
     async def web_lock_action(self, dev_id: str, action: str):
@@ -102,21 +110,24 @@ class NukiInterface:
             "open": 3,
             "lock_n_go": 4,
             "lock_n_go_open": 5,
+            "activate_rto": 1,
+            "deactivate_rto": 2,
+            "electric_strike_actuation": 3,
             "activate_continuous_mode": 6,
-            "deactivate_continuous_mode": 7
+            "deactivate_continuous_mode": 7,
         }
         await self.web_async_json(
             lambda r, h: r.post(
                 self.web_url(f"/smartlock/{dev_id}/action"),
                 headers=h,
-                json=dict(action=actions_map.get(action))
+                json=dict(action=actions_map.get(action)),
             )
         )
 
     async def bridge_check_callback(self, callback: str, add: bool = True):
         callbacks = await self.async_json(
-            lambda r: r.get(self.bridge_url("/callback/list")
-                            ))
+            lambda r: r.get(self.bridge_url("/callback/list"))
+        )
         _LOGGER.debug(f"bridge_check_callback: {callbacks}, {callback}")
         result = dict()
         callbacks_list = callbacks.get("callbacks", [])
@@ -125,18 +136,14 @@ class NukiInterface:
                 if add:
                     return callbacks_list
                 result = await self.async_json(
-                    lambda r: r.get(self.bridge_url(
-                        "/callback/remove",
-                        {"id": item["id"]}
+                    lambda r: r.get(
+                        self.bridge_url("/callback/remove", {"id": item["id"]})
                     )
-                    ))
+                )
         if add:
             result = await self.async_json(
-                lambda r: r.get(self.bridge_url(
-                    "/callback/add",
-                    {"url": callback}
-                )
-                ))
+                lambda r: r.get(self.bridge_url("/callback/add", {"url": callback}))
+            )
         if not result.get("success", True):
             raise ConnectionError(result.get("message"))
         return callbacks_list
@@ -145,9 +152,9 @@ class NukiInterface:
         return f"https://api.nuki.io{path}"
 
     async def web_async_json(self, cb):
-        return await self.async_json(lambda r: cb(r, {
-            "authorization": f"Bearer {self.web_token}"
-        }))
+        return await self.async_json(
+            lambda r: cb(r, {"authorization": f"Bearer {self.web_token}"})
+        )
 
     def can_web(self):
         return True if self.web_token else False
@@ -158,53 +165,90 @@ class NukiInterface:
     async def web_list_all_auths(self, dev_id: str):
         result = {}
         response = await self.web_async_json(
-            lambda r, h: r.get(
-                self.web_url(f"/smartlock/{dev_id}/auth"),
-                headers=h
-            )
+            lambda r, h: r.get(self.web_url(f"/smartlock/{dev_id}/auth"), headers=h)
         )
         for item in response:
             result[item["id"]] = item
         return result
 
     async def web_list(self):
-        door_state_map = {1: "deactivated", 2: "door closed",
-                          3: "door opened", 4: "door state unknown", 5: "calibrating",
-                          16: "uncalibrated", 240: "removed", 255: "unknown"}
+        door_state_map = {
+            1: "deactivated",
+            2: "door closed",
+            3: "door opened",
+            4: "door state unknown",
+            5: "calibrating",
+            16: "uncalibrated",
+            240: "removed",
+            255: "unknown",
+        }
         device_state_map = {
-            0: {0: "uncalibrated", 1: "locked", 2: "unlocking", 3: "unlocked", 4: "locking", 5: "unlatched", 6: "unlocked (lock 'n' go)", 7: "unlatching", 254: "motor blocked", 255: "undefined"},
-            2: {0: "untrained", 1: "online", 3: "ring to open active", 5: "open", 7: "opening", 253: "boot run", 255: "undefined"},
-            4: {0: "uncalibrated", 1: "locked", 2: "unlocking", 3: "unlocked", 4: "locking", 5: "unlatched", 6: "unlocked (lock 'n' go)", 7: "unlatching", 254: "motor blocked", 255: "undefined"},
+            0: {
+                0: "uncalibrated",
+                1: "locked",
+                2: "unlocking",
+                3: "unlocked",
+                4: "locking",
+                5: "unlatched",
+                6: "unlocked (lock 'n' go)",
+                7: "unlatching",
+                254: "motor blocked",
+                255: "undefined",
+            },
+            2: {
+                0: "untrained",
+                1: "online",
+                3: "ring to open active",
+                5: "open",
+                7: "opening",
+                253: "boot run",
+                255: "undefined",
+            },
+            4: {
+                0: "uncalibrated",
+                1: "locked",
+                2: "unlocking",
+                3: "unlocked",
+                4: "locking",
+                5: "unlatched",
+                6: "unlocked (lock 'n' go)",
+                7: "unlatching",
+                254: "motor blocked",
+                255: "undefined",
+            },
         }
         resp = await self.web_async_json(
-            lambda r, h: r.get(
-                self.web_url(f"/smartlock"),
-                headers=h
-            )
+            lambda r, h: r.get(self.web_url(f"/smartlock"), headers=h)
         )
         result = []
         for item in resp:
             if item.get("type") not in (0, 2, 4):
                 continue
             state = item.get("state", {})
-            result.append({
-                "deviceType": item.get("type"),
-                "nukiId": item.get("smartlockId"),
-                "name": item.get("name"),
-                "firmwareVersion": str(item.get("firmwareVersion")),
-                "lastKnownState": {
-                    "mode": state.get("mode"),
-                    "state": state.get("state"),
-                    "stateName": device_state_map.get(item.get("type"), {}).get(state.get("state")),
-                    "batteryCritical": state.get("batteryCritical"),
-                    "batteryCharging": state.get("batteryCharging"),
-                    "batteryChargeState": state.get("batteryCharge"),
-                    "keypadBatteryCritical": state.get("keypadBatteryCritical"),
-                    "doorsensorState": state.get("doorState"),
-                    "doorsensorStateName": door_state_map.get(state.get("doorState")),
-                    "timestamp": item.get("updateDate")
+            result.append(
+                {
+                    "deviceType": item.get("type"),
+                    "nukiId": item.get("smartlockId"),
+                    "name": item.get("name"),
+                    "firmwareVersion": str(item.get("firmwareVersion")),
+                    "lastKnownState": {
+                        "mode": state.get("mode"),
+                        "state": state.get("state"),
+                        "stateName": device_state_map.get(item.get("type"), {}).get(
+                            state.get("state")
+                        ),
+                        "batteryCritical": state.get("batteryCritical"),
+                        "batteryCharging": state.get("batteryCharging"),
+                        "batteryChargeState": state.get("batteryCharge"),
+                        "keypadBatteryCritical": state.get("keypadBatteryCritical"),
+                        "doorsensorState": state.get("doorState"),
+                        "doorsensorStateName": door_state_map.get(
+                            state.get("doorState")
+                        ),
+                        "timestamp": item.get("updateDate"),
+                    },
                 }
-            })
+            )
         return result
 
     async def web_update_auth(self, dev_id: str, auth_id: str, changes: dict):
@@ -212,34 +256,33 @@ class NukiInterface:
             lambda r, h: r.post(
                 self.web_url(f"/smartlock/{dev_id}/auth/{auth_id}"),
                 headers=h,
-                json=changes
+                json=changes,
             )
         )
 
 
 class NukiCoordinator(DataUpdateCoordinator):
-
     def __init__(self, hass, entry, config: dict):
         self.entry = entry
         self.api = NukiInterface(
             hass,
             bridge=config.get("address"),
             token=config.get("token"),
-            web_token=config.get("web_token")
+            web_token=config.get("web_token"),
+            use_hashed=config.get("use_hashed", False),
         )
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
             update_method=self._make_update_method(),
-            update_interval=timedelta(seconds=config.get("update_seconds", 30))
+            update_interval=timedelta(seconds=config.get("update_seconds", 30)),
         )
 
         hook_id = "%s_%s" % (BRIDGE_HOOK, entry.entry_id)
 
         url = config.get("hass_url", get_url(hass))
-        self.bridge_hook = "{}{}".format(
-            url, webhook.async_generate_path(hook_id))
+        self.bridge_hook = "{}{}".format(url, webhook.async_generate_path(hook_id))
         webhook.async_unregister(hass, hook_id)
         webhook.async_register(
             hass,
@@ -247,6 +290,7 @@ class NukiCoordinator(DataUpdateCoordinator):
             "bridge",
             hook_id,
             handler=self._make_bridge_hook_handler(),
+            local_only=True,
         )
 
     def _add_update(self, dev_id: str, update):
@@ -271,10 +315,11 @@ class NukiCoordinator(DataUpdateCoordinator):
             device_list = None
             if self.api.can_bridge():
                 try:
-                    callbacks_list = await self.api.bridge_check_callback(self.bridge_hook)
+                    callbacks_list = await self.api.bridge_check_callback(
+                        self.bridge_hook
+                    )
                 except Exception:
-                    _LOGGER.exception(
-                        f"Failed to update callback {self.bridge_hook}")
+                    _LOGGER.exception(f"Failed to update callback {self.bridge_hook}")
                 bridge_info = await self.api.bridge_info()
                 for item in bridge_info.get("scanResults", []):
                     info_mapping[item.get("nukiId")] = item
@@ -291,8 +336,7 @@ class NukiCoordinator(DataUpdateCoordinator):
                     except ConnectionError:
                         _LOGGER.exception("Error while fetching auth:")
                 result["devices"][dev_id] = item
-                result["devices"][dev_id]["bridge_info"] = info_mapping.get(
-                    dev_id)
+                result["devices"][dev_id]["bridge_info"] = info_mapping.get(dev_id)
             _LOGGER.debug(f"_update: {json.dumps(result)}")
             return result
         except Exception as err:
@@ -302,6 +346,7 @@ class NukiCoordinator(DataUpdateCoordinator):
     def _make_update_method(self):
         async def _update_data():
             return await self._update()
+
         return _update_data
 
     def _make_bridge_hook_handler(self):
@@ -315,7 +360,9 @@ class NukiCoordinator(DataUpdateCoordinator):
     async def unload(self):
         try:
             if self.api.can_bridge():
-                result = await self.api.bridge_check_callback(self.bridge_hook, add=False)
+                result = await self.api.bridge_check_callback(
+                    self.bridge_hook, add=False
+                )
                 _LOGGER.debug(f"unload: {result} {self.bridge_hook}")
         except Exception:
             _LOGGER.exception(f"Failed to remove callback")
@@ -371,6 +418,7 @@ class NukiCoordinator(DataUpdateCoordinator):
         await self.api.web_update_auth(dev_id, auth["id"], changes)
         data = self.data
         for key in changes:
-            data.get(dev_id, {}).get("web_auth", {}).get(
-                auth["id"], {})[key] = changes[key]
+            data.get(dev_id, {}).get("web_auth", {}).get(auth["id"], {})[key] = changes[
+                key
+            ]
         self.async_set_updated_data(data)

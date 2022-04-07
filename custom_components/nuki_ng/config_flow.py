@@ -23,20 +23,23 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             web_token=config.get("web_token")
         )
         title = None
+        use_hashed_token = False
         if nuki.token:
             hass_url = config.get("hass_url", "")
             if hass_url.lower().startswith("https://"):
                 _LOGGER.error(
                     f"Bridge doesn't support HTTPS callback URLs: {hass_url}")
-                return title, "https_not_supported"
+                return title, "https_not_supported", None
             try:
+                info = await nuki.bridge_info()
+                use_hashed_token = info.get("bridgeType") == 1
                 response = await nuki.bridge_list()
                 _LOGGER.debug(f"bridge devices: {response}")
                 title = response[0]["name"]
             except Exception as err:
                 _LOGGER.exception(
                     f"Failed to get list of devices from bridge: {err}")
-                return title, "invalid_bridge_token"
+                return title, "invalid_bridge_token", None
         if nuki.web_token:
             try:
                 response = await nuki.web_list()
@@ -46,8 +49,8 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception as err:
                 _LOGGER.exception(
                     f"Failed to get list of devices from web API: {err}")
-                return title, "invalid_web_token"
-        return title, None
+                return title, "invalid_web_token", None
+        return title, None, use_hashed_token
 
     def _get_hass_url(self, hass):
         try:
@@ -72,11 +75,14 @@ class NukiNGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         elif user_input.get("token") and not user_input.get("address"):
             errors = dict(base="no_bridge_url")
         elif user_input.get("token") or user_input.get("web_token"):
-            title, err = await self.find_nuki_devices(user_input)
+            title, err, use_hashed_token = await self.find_nuki_devices(user_input)
             if not err:
                 return self.async_create_entry(
                     title=user_input.get("name") or title,
-                    data=user_input
+                    data={
+                        **user_input,
+                        "use_hashed": use_hashed_token,
+                    }
                 )
             errors = dict(base=err)
         schema = vol.Schema({

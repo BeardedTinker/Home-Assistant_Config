@@ -3,7 +3,7 @@ from .nuki import NukiCoordinator
 from .constants import DOMAIN, PLATFORMS
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import service
+from homeassistant.helpers import service, entity_registry, device_registry
 
 # from homeassistant.helpers import device_registry
 from homeassistant.helpers.update_coordinator import (
@@ -27,8 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     for p in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, p))
+        hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, p))
     return True
 
 
@@ -38,6 +37,19 @@ async def async_unload_entry(hass: HomeAssistant, entry):
         await hass.config_entries.async_forward_entry_unload(entry, p)
     hass.data[DOMAIN].pop(entry.entry_id)
     return True
+
+
+async def _extract_dev_ids(hass, service_call) -> set[str]:
+    entity_ids = await service.async_extract_entity_ids(hass, service_call)
+    result = set()
+    entity_reg = entity_registry.async_get(hass)
+    device_reg = device_registry.async_get(hass)
+    for id in entity_ids:
+        if entry := entity_reg.async_get(id):
+            if device := device_reg.async_get(entry.device_id):
+                ids = {x[0]: x[1] for x in device.identifiers}
+                result.add((entry.config_entry_id, ids.get("id")))
+    return result
 
 
 async def async_setup(hass: HomeAssistant, config) -> bool:
@@ -53,18 +65,25 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
 
     async def async_delete_callback(call):
         for entry_id in await service.async_extract_config_entry_ids(hass, call):
-            await hass.data[DOMAIN][entry_id].do_delete_callback(call.data.get("callback"))
+            await hass.data[DOMAIN][entry_id].do_delete_callback(
+                call.data.get("callback")
+            )
+
+    async def async_exec_action(call):
+        for entry_id, dev_id in await _extract_dev_ids(hass, call):
+            await hass.data[DOMAIN][entry_id].action(dev_id, call.data.get("action"))
 
     hass.services.async_register(DOMAIN, "bridge_reboot", async_reboot)
     hass.services.async_register(DOMAIN, "bridge_fwupdate", async_fwupdate)
     hass.services.async_register(
-        DOMAIN, "bridge_delete_callback", async_delete_callback)
+        DOMAIN, "bridge_delete_callback", async_delete_callback
+    )
+    hass.services.async_register(DOMAIN, "execute_action", async_exec_action)
 
     return True
 
 
 class NukiEntity(CoordinatorEntity):
-
     def __init__(self, coordinator, device_id: str):
         super().__init__(coordinator)
         self.device_id = device_id
@@ -123,8 +142,8 @@ class NukiEntity(CoordinatorEntity):
             "sw_version": self.data.get("firmwareVersion"),
             "via_device": (
                 "id",
-                self.coordinator.info_data().get("ids", {}).get("hardwareId")
-            )
+                self.coordinator.info_data().get("ids", {}).get("hardwareId"),
+            ),
         }
 
 
@@ -153,8 +172,9 @@ class NukiBridge(CoordinatorEntity):
 
     @property
     def device_info(self):
-        model = "Hardware Bridge" if self.data.get(
-            "bridgeType", 1) else "Software Bridge"
+        model = (
+            "Hardware Bridge" if self.data.get("bridgeType", 1) else "Software Bridge"
+        )
         versions = self.data.get("versions", {})
         return {
             "identifiers": {("id", self.get_id)},

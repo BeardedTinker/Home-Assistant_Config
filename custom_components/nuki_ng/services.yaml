@@ -24,3 +24,27 @@ bridge_delete_callback:
       example: "http://192.168.0.0/callback"
       selector:
         text: {}
+execute_action:
+  name: Execute arbitrary lock action via the Bridge or Web API
+  target:
+    device:
+      integration: nuki_ng
+  fields:
+    action:
+      name: Action
+      description: Lock action to execute
+      example: unlock
+      required: true
+      selector:
+        select:
+          options:
+            - unlock
+            - lock
+            - open
+            - lock_n_go
+            - lock_n_go_open
+            - activate_rto
+            - deactivate_rto
+            - electric_strike_actuation
+            - activate_continuous_mode
+            - deactivate_continuous_mode

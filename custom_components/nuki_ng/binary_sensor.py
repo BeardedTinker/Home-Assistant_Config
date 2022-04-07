@@ -1,4 +1,5 @@
 from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.helpers.entity import EntityCategory
 
 import logging
 
@@ -48,7 +49,7 @@ class BatteryLow(NukiEntity, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class BatteryCharging(NukiEntity, BinarySensorEntity):
@@ -64,7 +65,7 @@ class BatteryCharging(NukiEntity, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class KeypadBatteryLow(NukiEntity, BinarySensorEntity):
@@ -83,7 +84,7 @@ class KeypadBatteryLow(NukiEntity, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class RingAction(NukiEntity, BinarySensorEntity):
@@ -104,7 +105,7 @@ class RingAction(NukiEntity, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class LockState(NukiEntity, BinarySensorEntity):
@@ -161,7 +162,7 @@ class BridgeServerConnection(NukiBridge, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class BridgeCallbackSet(NukiBridge, BinarySensorEntity):
@@ -186,4 +187,4 @@ class BridgeCallbackSet(NukiBridge, BinarySensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC

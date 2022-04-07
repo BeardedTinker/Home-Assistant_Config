@@ -1,4 +1,5 @@
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.helpers.entity import EntityCategory
 
 import logging
 
@@ -86,4 +87,4 @@ class AuthEntry(NukiEntity, SwitchEntity):
 
     @property
     def entity_category(self):
-        return "config"
+        return EntityCategory.CONFIG

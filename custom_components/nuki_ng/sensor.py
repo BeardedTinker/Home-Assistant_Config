@@ -1,4 +1,5 @@
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.entity import EntityCategory
 
 import logging
 
@@ -53,7 +54,7 @@ class Battery(NukiEntity, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class LockState(NukiEntity, SensorEntity):
@@ -69,7 +70,7 @@ class LockState(NukiEntity, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class RSSI(NukiEntity, SensorEntity):
@@ -94,7 +95,7 @@ class RSSI(NukiEntity, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class DoorSensorState(NukiEntity, SensorEntity):
@@ -110,7 +111,7 @@ class DoorSensorState(NukiEntity, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class DoorSecurityState(NukiEntity, SensorEntity):
@@ -160,7 +161,7 @@ class BridgeWifiVersion(NukiBridge, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class BridgeVersion(NukiBridge, SensorEntity):
@@ -176,7 +177,7 @@ class BridgeVersion(NukiBridge, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
 
 
 class LockVersion(NukiEntity, SensorEntity):
@@ -192,4 +193,4 @@ class LockVersion(NukiEntity, SensorEntity):
 
     @property
     def entity_category(self):
-        return "diagnostic"
+        return EntityCategory.DIAGNOSTIC
