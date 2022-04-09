@@ -167,6 +167,8 @@ class GetNextLaunch(Entity):
         self._attributes[ATTR_ATTRIBUTION] = ATTRIBUTION
         self._attributes["last_update"] = datetime.now()
 
+        _LOGGER.debug("Async update done for %s: %s", self.name, self._state)
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -183,7 +185,7 @@ class GetNextLaunch(Entity):
         return "mdi:rocket"
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return attributes for the sensor."""
         return self._attributes
 

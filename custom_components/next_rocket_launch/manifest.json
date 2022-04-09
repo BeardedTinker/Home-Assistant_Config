@@ -3,7 +3,7 @@
   "name": "Next Rocket Launch",
   "documentation": "https://github.com/Verbalinsurection/next_rocket_launch",
   "issue_tracker": "https://github.com/Verbalinsurection/next_rocket_launch/issues",
-  "version": "v1.0.4",
+  "version": "v1.0.5",
   "config_flow": false,
   "requirements": ["ics==0.7"],
   "ssdp": [],
