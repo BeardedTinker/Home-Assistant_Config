@@ -164,6 +164,7 @@ KEY_STATE_TOPIC = "stat_t"
 KEY_STEP = "step"
 KEY_SUBTYPE = "stype"
 KEY_SW_VERSION = "sw"
+KEY_TEMP_STEP = "temp_step"
 KEY_TEMPERATURE_COMMAND_TEMPLATE = "temp_cmd_tpl"
 KEY_TEMPERATURE_COMMAND_TOPIC = "temp_cmd_t"
 KEY_TEMPERATURE_STATE_TEMPLATE = "temp_stat_tpl"
@@ -183,14 +184,17 @@ MAX_TRANSITION = 5000
 # Firmware 1.6.5 release date
 MIN_4PRO_FIRMWARE_DATE = 20200408
 
+# Firmware 1.9.4 release date
+MIN_PLUG_FIRMWARE_DATE = 20210115
+
 # Firmware 1.1.0 release date
 MIN_MOTION_FIRMWARE_DATE = 20210226
 
 # Firmware 2.1.4-rc1 release date
 MIN_MOTION2_FIRMWARE_DATE = 20220301
 
-# Firmware 2.1.3 release date
-MIN_VALVE_FIRMWARE_DATE = 20220202
+# Firmware 2.1.5 release date
+MIN_VALVE_FIRMWARE_DATE = 20220404
 
 # Firmware 1.11.7 release date
 MIN_DIMMER_FIRMWARE_DATE = 20211109
@@ -562,7 +566,7 @@ TPL_POWER = "{{value|float|round(1)}}"
 TPL_POWER_FACTOR = "{{value|float*100|round}}"
 TPL_RSSI = "{%if value_json.wifi_sta.rssi!=0%}{{value_json.wifi_sta.rssi}}{%else%}unknown{%endif%}"
 TPL_SELF_TEST = "{{value.replace(^_^,^ ^)}}"
-TPL_SET_TARGET_TEMPERATURE = "{{value|int}}"
+TPL_SET_TARGET_TEMPERATURE = "{{value}}"
 TPL_SHORTPUSH = "{%if value_json.event==^S^%}ON{%else%}OFF{%endif%}"
 TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
@@ -1260,7 +1264,7 @@ DEVICE_FIRMWARE_MAP = {
     MODEL_SHELLYMOTION_ID: MIN_MOTION_FIRMWARE_DATE,
     MODEL_SHELLYMOTION2_ID: MIN_MOTION2_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_E_ID: MIN_FIRMWARE_DATE,
-    MODEL_SHELLYPLUG_ID: MIN_FIRMWARE_DATE,
+    MODEL_SHELLYPLUG_ID: MIN_PLUG_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_S_ID: MIN_FIRMWARE_DATE,
     MODEL_SHELLYPLUG_US_ID: MIN_FIRMWARE_DATE,
     MODEL_SHELLYRGBW2_ID: MIN_FIRMWARE_DATE,
@@ -2012,10 +2016,7 @@ if (
         SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
         SENSOR_IP: OPTIONS_SENSOR_IP,
     }
-    buttons = {
-        BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE,
-        BUTTON_RESTART: OPTIONS_BUTTON_RESTART,
-    }
+    buttons = {BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE}
 
 if model_id == MODEL_SHELLYPLUG_US_ID or dev_id_prefix == MODEL_SHELLYPLUG_US_PREFIX:
     model = MODEL_SHELLYPLUG_US
@@ -2699,10 +2700,11 @@ if model_id == MODEL_SHELLYVALVE_ID:
     battery_powered = True
 
     climate_entity_option = {
-        KEY_MIN_TEMP: 4,
         KEY_MAX_TEMP: 31,
+        KEY_MIN_TEMP: 4,
         KEY_MODES: ["heat"],
         KEY_PRECISION: 0.1,
+        KEY_TEMP_STEP: 0.5,
     }
     sensors = {
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
@@ -2931,6 +2933,7 @@ if climate_entity_option:
         KEY_TEMPERATURE_STATE_TEMPLATE: TPL_TARGET_TEMPERATURE,
         KEY_TEMPERATURE_COMMAND_TOPIC: temperature_command_topic,
         KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
+        KEY_TEMP_STEP: climate_entity_option[KEY_TEMP_STEP],
         KEY_MODE_STATE_TOPIC: TOPIC_INFO,
         KEY_MODE_STATE_TEMPLATE: "heat",
         KEY_UNIQUE_ID: f"{dev_id}".lower(),
