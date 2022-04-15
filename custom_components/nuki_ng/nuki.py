@@ -124,29 +124,47 @@ class NukiInterface:
             )
         )
 
-    async def bridge_check_callback(self, callback: str, add: bool = True):
+    async def bridge_remove_callback(self, callback: str):
+        callbacks = await self.async_json(
+            lambda r: r.get(self.bridge_url("/callback/list"))
+        )
+        _LOGGER.debug(f"bridge_remove_callback: {callbacks}, {callback}")
+        callbacks_list = callbacks.get("callbacks", [])
+        for item in callbacks_list:
+            if item["url"] == callback:
+                result = await self.async_json(
+                    lambda r: r.get(
+                        self.bridge_url("/callback/remove", {"id": item["id"]})
+                    )
+                )
+                if not result.get("success", True):
+                    raise ConnectionError(result.get("message"))
+                return True
+        return False
+
+    async def bridge_check_callback(self, callback: str):
         callbacks = await self.async_json(
             lambda r: r.get(self.bridge_url("/callback/list"))
         )
         _LOGGER.debug(f"bridge_check_callback: {callbacks}, {callback}")
         result = dict()
         callbacks_list = callbacks.get("callbacks", [])
+        if len(callbacks_list) and callbacks_list[0]["url"] == callback:
+            _LOGGER.debug("Callback is set")
+            return
+        add_callbacks = [callback]
         for item in callbacks.get("callbacks", []):
-            if item["url"] == callback:
-                if add:
-                    return callbacks_list
-                result = await self.async_json(
-                    lambda r: r.get(
-                        self.bridge_url("/callback/remove", {"id": item["id"]})
-                    )
-                )
-        if add:
+            if item["url"] != callback:
+                add_callbacks.append(item["url"])
+            await self.bridge_remove_callback(item["url"])
+        for callback_url in add_callbacks[:3]:
             result = await self.async_json(
-                lambda r: r.get(self.bridge_url("/callback/add", {"url": callback}))
+                lambda r: r.get(self.bridge_url("/callback/add", {"url": callback_url}))
             )
-        if not result.get("success", True):
-            raise ConnectionError(result.get("message"))
-        return callbacks_list
+            if not result.get("success", True):
+                raise ConnectionError(result.get("message"))
+        _LOGGER.debug("Callback is set - re-added")
+        return
 
     def web_url(self, path):
         return f"https://api.nuki.io{path}"
@@ -360,9 +378,7 @@ class NukiCoordinator(DataUpdateCoordinator):
     async def unload(self):
         try:
             if self.api.can_bridge():
-                result = await self.api.bridge_check_callback(
-                    self.bridge_hook, add=False
-                )
+                result = await self.api.bridge_remove_callback(self.bridge_hook)
                 _LOGGER.debug(f"unload: {result} {self.bridge_hook}")
         except Exception:
             _LOGGER.exception(f"Failed to remove callback")
@@ -393,7 +409,7 @@ class NukiCoordinator(DataUpdateCoordinator):
 
     async def do_delete_callback(self, callback):
         if self.api.can_bridge():
-            await self.api.bridge_check_callback(callback, add=False)
+            await self.api.bridge_remove_callback(callback)
         else:
             raise ConnectionError("Not supported")
 
