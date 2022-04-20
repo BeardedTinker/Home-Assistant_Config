@@ -35,6 +35,6 @@ logbook:
       - zone
       - automation
     entities:
-      - sensor.last_boot
+#      - sensor.last_boot
       - sensor.date
-      - sensor.darksky
+#      - sensor.darksky

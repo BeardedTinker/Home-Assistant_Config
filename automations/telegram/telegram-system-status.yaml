@@ -23,15 +23,15 @@ action:
 
       ------------------------------------------------
 
-      *CPU Usage*:   {{ states('sensor.synology_cpu_load_total') }} %
+      *CPU Usage*:   {{ states('sensor.ebroz920_cpu_utilization_total') }} %
 
-      *Memory usage*:   {{ states('sensor.synology_memory_usage_real') }} %
+      *Memory usage*:   {{ states('sensor.ebroz920_memory_usage_real') }} %
 
-      *HDD Temp*:   {{ states('sensor.synology_temperature_sda') }} °C
+      *HDD Temp*:   {{ states('sensor.ebroz920_drive_1_temperature') }} °C
 
-      *Network DL*:   {{ states('sensor.synology_network_down') }} kB/s
+      *Network DL*:   {{ states('sensor.ebroz920_network_down') }} kB/s
 
-      *Network UL*:   {{ states('sensor.synology_network_up') }} kB/s
+      *Network UL*:   {{ states('sensor.ebroz920_network_up') }} kB/s
 
 
     data:

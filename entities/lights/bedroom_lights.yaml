@@ -5,4 +5,4 @@
 platform: group
 name: Bedroom Lights
 entities:
-  - light.bedroom_light
+  - light.bedroom

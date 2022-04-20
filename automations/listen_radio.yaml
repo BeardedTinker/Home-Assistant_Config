@@ -10,4 +10,4 @@ trigger:
     entity_id: input_select.radio_station
 
 action:
-  - service: script.radio
+  - service: script.radio_play
