@@ -189,7 +189,11 @@ class BlitzortungCoordinator:
             self.geohash_overlap,
         )
 
-        self.mqtt_client = MQTT(hass, "blitzortung.ha.sed.pl", 1883,)
+        self.mqtt_client = MQTT(
+            hass,
+            "blitzortung.ha.sed.pl",
+            1883,
+        )
 
         self._disconnect_callbacks.append(
             async_dispatcher_connect(
