@@ -187,17 +187,147 @@ sensor:
     filters:
       - multiply: 0.048 #1.492mph per rotation so 1 / 25 (update_fq) / 2 * 2.4
 
-### NOT TESTED/IMPLEMENTED
+### Testing Wind Direction
 
-# TX20 sensor is used for tracking wind speed and direction
+# Another ADC platform to track wind direction
+  - platform: adc
+    id: wind_direction
+    pin: GPIO35
+    name: ADC wind
+    attenuation: 11db
+#    internal: true
+    update_interval: ${update_fq}
 
-#  - platform: tx20
-#    wind_speed:
-#      name: "Wind speed"
-#    wind_direction_degrees:
-#      name: "Wind direction degrees"
-#    pin:
-#      number: GPIO14
+  - platform: resistance
+    sensor: wind_direction
+    id: resistance_sensor
+    configuration: DOWNSTREAM
+    resistor: 10kOhm
+#    internal: true
+    name: Resistance Sensor
+    reference_voltage: 3.3V
+    accuracy_decimals: 1
+#    filters:
+#      - median:
+#          window_size: 7
+#          send_every: 4
+#          send_first_at: 3
+      #- heartbeat: 30s
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 15000
+              below: 15500
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "N"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 0.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 5000
+              below: 5500
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "NE"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 45.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 350
+              below: 450
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "E"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 90.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 1200
+              below: 1400
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "SE"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 135.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 2400
+              below: 2500
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "S"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 180.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 8900
+              below: 9200
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "SW"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 225.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 37500
+              below: 38500
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "W"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 270.0
+      - if:
+          condition:
+            sensor.in_range:
+              id: resistance_sensor
+              above: 24400
+              below: 25000
+          then:
+            - text_sensor.template.publish:
+                id: wind_dir_card
+                state: "NW"
+            - sensor.template.publish:
+                id: wind_heading
+                state: 315.0
+
+  - platform: template
+    name: "${display_name} wind heading"
+    id: wind_heading
+    unit_of_measurement: "°"
+
+text_sensor:
+  - platform: template
+    name: "Wind Cardinal Direction"
+    id: wind_dir_card
 
 # Define length of Deep sleep
 deep_sleep:
