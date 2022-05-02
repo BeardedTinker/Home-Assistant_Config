@@ -13,4 +13,3 @@ http:
   login_attempts_threshold: 5
   use_x_forwarded_for: true
   trusted_proxies: !secret proxy_list
-
