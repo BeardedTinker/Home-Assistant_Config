@@ -4,5 +4,6 @@
 
 platform: group
 name: Bedroom Lights
+unique_id: 4e9c2053-a14d-474c-a83e-c5cafe164f78
 entities:
   - light.bedroom

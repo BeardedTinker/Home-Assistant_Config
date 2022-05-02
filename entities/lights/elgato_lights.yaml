@@ -4,6 +4,7 @@
 
 platform: group
 name: Elgato lights
+unique_id: 544ac692-975e-4511-b9f8-1525bda3ef29
 entities:
   - light.elgato_key_light_air_left
   - light.elgato_key_light_air_right

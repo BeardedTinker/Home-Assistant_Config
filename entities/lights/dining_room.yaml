@@ -5,6 +5,7 @@
 
 platform: group
 name: Dining Room Lights
+unique_id: 57862612-42a5-452e-9ce6-0a1207242ce0
 entities:
   - light.left
   - light.right

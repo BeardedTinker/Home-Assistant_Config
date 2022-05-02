@@ -4,6 +4,7 @@
 
 platform: group
 name: Ceiling Lights
+unique_id: adab6cb0-7e5d-49ea-a9a5-727f4b9cc255
 entities:
   - light.ceiling_one
   - light.ceiling_two

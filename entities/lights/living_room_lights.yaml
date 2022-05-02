@@ -4,6 +4,7 @@
 
 platform: group
 name: Living room Lights
+unique_id: 08c312e7-aeb1-417e-a0bc-22a497cd5f04
 entities:
   - light.corner
   - light.entrance
