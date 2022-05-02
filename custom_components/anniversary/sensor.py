@@ -101,20 +101,16 @@ class AnniversarySensor(Entity):
     @property
     def extra_state_attributes(self):
         attr = {}
-        first_anni = 367
-        first_event_in = 0
-        first_event_name = ""
+        attr["events"] = []
+        events_sorted = {}
+        events_sorted["events"] = []
         event_anniversary = ""
-        event_icon = ""
         event_on = ""
-        events_list = ""
-        first_event_on = ""
-        first_event_anniversary = None
         today = datetime.today().strftime(self._date_format)
         today_p = datetime.strptime(today,self._date_format)
-        attr_ext = {}
 
         for i in range(len(self._anniversaries)):
+            attr_ext1 = {}
             if 'date' in self._anniversaries[i]:
                 next_year = False
                 anni_date_p = _get_anniversary_date(self, i, today_p.year)
@@ -131,7 +127,7 @@ class AnniversarySensor(Entity):
                         event_on = str(today_p.year + 1) + "-" + str(anni_date_p.month) + "-" + str(anni_date_p.day)
                     else:
                         event_on = this_year
-                    event_on = datetime.strptime(event_on,"%Y-%m-%d").strftime(self._date_format)
+                    attr_ext1["event_on"] = datetime.strptime(event_on,"%Y-%m-%d").strftime(self._date_format)
 
                     m = re.search('(^\d{1,2}.\d{1,2}$)',self._anniversaries[i]['date'])
                     if m is None: # date contains year as well
@@ -142,50 +138,32 @@ class AnniversarySensor(Entity):
                     else:
                         event_anniversary = None
 
-                    if ddiff < first_anni:
-                        first_anni = ddiff
-                        if 'event' in self._anniversaries[i]:
-                            first_event_name = self._anniversaries[i]['event']
+                    if 'icon' in self._anniversaries[i]:
+                        attr_ext1["icon"] = self._anniversaries[i]['icon']
+                    else:
+                        attr_ext1["icon"] = DEFAULT_ICON
 
-                        first_event_on = event_on
+                    if 'type' in self._anniversaries[i]:
+                        attr_ext1["type"] = str(self._anniversaries[i]['type'])
+                    else:
+                        attr_ext1["type"] = DEFAULT_TYPE
 
-                        first_event_anniversary = event_anniversary
-                    elif ddiff == first_anni and self._multiple:
-                        if 'event' in self._anniversaries[i]:
-                            first_event_name += "|" + self._anniversaries[i]['event']
+                    attr_ext1["event"] = self._anniversaries[i]['event']
+                    attr_ext1["event_in"] = str(ddiff)
+                    attr_ext1["anniversary"] = str(event_anniversary)
 
-                    if ddiff not in attr_ext and self._items > 0:
-                        if 'icon' in self._anniversaries[i]:
-                            event_icon = self._anniversaries[i]['icon']
-                        else:
-                            event_icon = DEFAULT_ICON
+                    attr["events"].append(attr_ext1)
 
-                        if 'type' in self._anniversaries[i]:
-                            event_type = self._anniversaries[i]['type']
-                        else:
-                            event_type = DEFAULT_TYPE
-
-                        attr_ext[ddiff] = "{ \"event\":\"" + self._anniversaries[i]['event'] + \
-                            "\", \"event_in\":\"" + str(ddiff) + \
-                            "\", \"event_on\":\"" + event_on + \
-                            "\", \"anniversary\":\"" + str(event_anniversary) + \
-                            "\", \"type\":\"" + event_type + \
-                            "\", \"icon\":\"" + event_icon + "\"}"
+        events_sorted['events'] = sorted(attr["events"], key=lambda k: int(k['event_in']), reverse=False)
+        attr["events"] = events_sorted['events']
 
         if self._unit != "":
             attr["unit_of_measurement"] = self._unit
-        attr["first_event_name"] = first_event_name
-        attr["first_event_in"] = first_anni
-        attr["first_event_on"] = first_event_on
-        if first_event_anniversary is not None:
-            attr["anniversary"] = first_event_anniversary
-
-        if self._items > 0:
-            events_list = "["
-            for key,value in sorted(attr_ext.items())[:self._items]:
-                events_list = events_list + value + ","
-            events_list = events_list[:-1] + "]"
-            attr["events"] = json.loads(events_list)
+        attr["first_event_name"] = attr["events"][0]["event"]
+        attr["first_event_in"] = attr["events"][0]["event_in"]
+        attr["first_event_on"] = attr["events"][0]["event_on"]
+        if 'anniversary' in attr["events"][0]:
+            attr["anniversary"] = attr["events"][0]["anniversary"]
 
         return attr
 
