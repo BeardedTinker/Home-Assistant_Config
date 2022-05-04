@@ -3235,9 +3235,9 @@ for sensor, sensor_options in sensors.items():
         payload[KEY_VALUE_TEMPLATE] = sensor_options[KEY_VALUE_TEMPLATE]
     if sensor_options.get(ATTR_ICON):
         payload[KEY_ICON] = sensor_options[ATTR_ICON]
-    if battery_powered:
+    if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
         payload[KEY_EXPIRE_AFTER] = expire_after
-    else:
+    elif not battery_powered:
         payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
@@ -3413,9 +3413,9 @@ for sensor, sensor_options in binary_sensors.items():
     else:
         payload[KEY_PAYLOAD_ON] = sensor_options[KEY_PAYLOAD_ON]
         payload[KEY_PAYLOAD_OFF] = sensor_options[KEY_PAYLOAD_OFF]
-    if battery_powered:
+    if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
         payload[KEY_EXPIRE_AFTER] = expire_after
-    else:
+    elif not battery_powered:
         payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
         payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
         payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
