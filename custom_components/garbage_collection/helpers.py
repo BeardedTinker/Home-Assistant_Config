@@ -1,6 +1,8 @@
 """Set of functions to handle date and text conversion."""
+from __future__ import annotations
+
 from datetime import date, datetime
-from typing import Any, List, Optional
+from typing import Any
 
 import voluptuous as vol
 from dateutil.parser import ParserError, parse
@@ -20,7 +22,7 @@ def to_date(day: Any) -> date:
     return date.fromisoformat(day)
 
 
-def parse_datetime(text: str) -> Optional[datetime]:
+def parse_datetime(text: str) -> datetime | None:
     """Parse text to datetime object."""
     try:
         return parse(text)
@@ -28,9 +30,9 @@ def parse_datetime(text: str) -> Optional[datetime]:
         return None
 
 
-def dates_to_texts(dates: List[date]) -> List[str]:
+def dates_to_texts(dates: list[date]) -> list[str]:
     """Convert list of dates to texts."""
-    converted: List[str] = []
+    converted: list[str] = []
     for record in dates:
         try:
             converted.append(record.isoformat())
@@ -59,7 +61,7 @@ def time_text(value: Any) -> str:
         raise vol.Invalid(f"Invalid date: {value}") from error
 
 
-def string_to_list(string) -> List:
+def string_to_list(string) -> list:
     """Convert comma separated text to list."""
     if isinstance(string, list):
         return string  # Already list
@@ -89,7 +91,7 @@ def is_date(record: str) -> bool:
         return False
 
 
-def is_dates(dates: List) -> bool:
+def is_dates(dates: list) -> bool:
     """Validate list of dates (yyyy-mm-dd, yyyy-mm-dd)."""
     if not dates:
         return True

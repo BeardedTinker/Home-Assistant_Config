@@ -1,9 +1,9 @@
 """Garbage collection calendar."""
+from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 
-from homeassistant.components.calendar import CalendarEventDevice
+from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
 from homeassistant.util import Throttle
 
@@ -14,48 +14,48 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 
 async def async_setup_platform(
     hass, config, async_add_entities, discovery_info=None
-):  # pylint: disable=unused-argument
+) -> None:  # pylint: disable=unused-argument
     """Add calendar entities to HA, of there are calendar instances."""
     # Only single instance allowed
     if not GarbageCollectionCalendar.instances:
         async_add_entities([GarbageCollectionCalendar()], True)
 
 
-class GarbageCollectionCalendar(CalendarEventDevice):
+class GarbageCollectionCalendar(CalendarEntity):
     """The garbage collection calendar class."""
 
     instances = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Create empty calendar."""
-        self._cal_data: Dict = {}
+        self._cal_data: dict = {}
         self._name = CALENDAR_NAME
         GarbageCollectionCalendar.instances = True
 
     @property
-    def event(self):
+    def event(self) -> CalendarEvent | None:
         """Return the next upcoming event."""
         return self.hass.data[DOMAIN][CALENDAR_PLATFORM].event
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the entity."""
         return self._name
 
-    async def async_update(self):
+    async def async_update(self) -> None:
         """Update all calendars."""
         await self.hass.data[DOMAIN][CALENDAR_PLATFORM].async_update()
 
     async def async_get_events(
         self, hass: HomeAssistant, start_date: datetime, end_date: datetime
-    ):
+    ) -> list[CalendarEvent]:
         """Get all events in a specific time frame."""
         return await self.hass.data[DOMAIN][CALENDAR_PLATFORM].async_get_events(
             hass, start_date, end_date
         )
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict | None:
         """Return the device state attributes."""
         if self.hass.data[DOMAIN][CALENDAR_PLATFORM].event is None:
             # No tasks, we don't need to show anything.
@@ -66,11 +66,11 @@ class GarbageCollectionCalendar(CalendarEventDevice):
 class EntitiesCalendarData:
     """Class used by the Entities Calendar class to hold all entity events."""
 
-    def __init__(self, hass: HomeAssistant):
+    def __init__(self, hass: HomeAssistant) -> None:
         """Initialize an Entities Calendar Data."""
-        self.event: Optional[Dict] = None
+        self.event: CalendarEvent | None = None
         self._hass = hass
-        self.entities: List[str] = []
+        self.entities: list[str] = []
 
     def add_entity(self, entity_id: str) -> None:
         """Append entity ID to the calendar."""
@@ -84,9 +84,9 @@ class EntitiesCalendarData:
 
     async def async_get_events(
         self, hass: HomeAssistant, start_datetime: datetime, end_datetime: datetime
-    ) -> List[Dict]:
+    ) -> list[CalendarEvent]:
         """Get all tasks in a specific time frame."""
-        events: List[Dict] = []
+        events: list[CalendarEvent] = []
         if SENSOR_PLATFORM not in hass.data[DOMAIN]:
             return events
         start_date = start_datetime.date()
@@ -105,29 +105,17 @@ class EntitiesCalendarData:
                 except TypeError:
                     end = start
                 if garbage_collection.expire_after is None:
-                    event = {
-                        "uid": entity,
-                        "summary": garbage_collection.name,
-                        "start": {"date": start.strftime("%Y-%m-%d")},
-                        "end": {"date": end.strftime("%Y-%m-%d")},
-                        "allDay": True,
-                    }
+                    event = CalendarEvent(
+                        summary=garbage_collection.name,
+                        start=start,
+                        end=end,
+                    )
                 else:
-                    event = {
-                        "uid": entity,
-                        "summary": garbage_collection.name,
-                        "start": {
-                            "date": datetime.combine(
-                                start, garbage_collection.expire_after
-                            ).strftime("%Y-%m-%d %H:%M")
-                        },
-                        "end": {
-                            "date": datetime.combine(
-                                start, garbage_collection.expire_after
-                            ).strftime("%Y-%m-%d %H:%M")
-                        },
-                        "allDay": False,
-                    }
+                    event = CalendarEvent(
+                        summary=garbage_collection.name,
+                        start=datetime.combine(start, datetime.min.time()),
+                        end=datetime.combine(start, garbage_collection.expire_after),
+                    )
                 events.append(event)
                 start = await garbage_collection.async_next_date(
                     start + timedelta(days=1), True
@@ -135,7 +123,7 @@ class EntitiesCalendarData:
         return events
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
-    async def async_update(self):
+    async def async_update(self) -> None:
         """Get the latest data."""
         next_dates = {}
         for entity in self.entities:
@@ -148,10 +136,8 @@ class EntitiesCalendarData:
             start = next_dates[entity_id]
             end = start + timedelta(days=1)
             name = self._hass.data[DOMAIN][SENSOR_PLATFORM][entity_id].name
-            self.event = {
-                "uid": entity_id,
-                "summary": name,
-                "start": {"date": start.strftime("%Y-%m-%d")},
-                "end": {"date": end.strftime("%Y-%m-%d")},
-                "allDay": True,
-            }
+            self.event = CalendarEvent(
+                summary=name,
+                start=start,
+                end=end,
+            )
