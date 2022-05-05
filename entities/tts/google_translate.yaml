@@ -7,6 +7,6 @@ platform: google_translate
 #cache: true
 #cache_dir: /config/tts
 #time_memory: 300
-base_url: !secret my_full_url_int
+#base_url: !secret my_full_url_int
 #service_name: google_say
 language: "en"
