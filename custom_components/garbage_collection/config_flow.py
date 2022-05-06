@@ -150,15 +150,20 @@ class GarbageCollectionShared:
             self.data_schema[self.required(const.CONF_DATE, user_input)] = str
         elif self._data[const.CONF_FREQUENCY] in const.GROUP_FREQUENCY:
             # "group"
-            entities = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM]
-            entity_ids = {
-                entity: entity
-                for entity in entities
-                if entities[entity].unique_id != self._data["unique_id"]
-            }
-            self.data_schema[
-                self.required(CONF_ENTITIES, user_input)
-            ] = cv.multi_select(entity_ids)
+            if self.hass is None:
+                _LOGGER.error(
+                    "Cannot get list of garbage_collection entities for the group."
+                )
+            else:
+                entities = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM]
+                entity_ids = {
+                    entity: entity
+                    for entity in entities
+                    if entities[entity].unique_id != self._data["unique_id"]
+                }
+                self.data_schema[
+                    self.required(CONF_ENTITIES, user_input)
+                ] = cv.multi_select(entity_ids)
         elif self._data[const.CONF_FREQUENCY] not in const.BLANK_FREQUENCY:
             # everything else except "blank" and every-n-days
             if self._data[const.CONF_FREQUENCY] not in const.DAILY_FREQUENCY:

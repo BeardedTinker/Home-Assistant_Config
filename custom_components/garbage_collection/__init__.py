@@ -1,4 +1,5 @@
 """Component to integrate with garbage_colection."""
+from __future__ import annotations
 
 import logging
 from datetime import timedelta
@@ -151,7 +152,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
             _LOGGER.error("offset_date - missing Entity ID.")
             return
-        if offset := call.data.get(const.CONF_OFFSET) is None:
+        if (offset := call.data.get(const.CONF_OFFSET)) is None:
             _LOGGER.error("offset_date - missing offset.")
             return
         if (collection_date := call.data.get(const.CONF_DATE)) is None:
