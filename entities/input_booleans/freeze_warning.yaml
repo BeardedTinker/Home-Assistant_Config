@@ -1,0 +1,11 @@
+#####
+# This is an input boolean to use with automations
+# If it's freezeing outside, toggle it.
+#
+# https://www.home-assistant.io/components/input_boolean/
+#####
+
+freeze_warning:
+  name: Freeze warning
+  initial: false
+  icon: mdi:snowflake-alert
