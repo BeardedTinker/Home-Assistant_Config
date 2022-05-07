@@ -34,7 +34,8 @@ condition:
   - condition: state
     entity_id: binary_sensor.workday_today
     state: 'on'
-  - condition: state
+  - enabled: false
+    condition: state
     entity_id: sensor.current_week
     state: 'Week B'
 
