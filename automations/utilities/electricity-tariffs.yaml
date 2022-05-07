@@ -9,15 +9,31 @@ id: bbbc9885-74b9-4895-9fca-0ce2c3879bf0
 trigger:
 - platform: time
   at: '07:00:00'
+  variables:
+    tariff: "peak"
 - platform: time
-  at: '21:00:00'
+  at: '21:00:00'      
+  variables:
+    tariff: "offpeak"
 
 action:
-- service: utility_meter.next_tariff
-  entity_id: utility_meter.daily_energy
-- service: utility_meter.next_tariff
-  entity_id: utility_meter.monthly_energy
-- service: utility_meter.next_tariff
-  entity_id: utility_meter.quarterly_energy
-- service: utility_meter.next_tariff
-  entity_id: utility_meter.yearly_energy
+- service: select.select_option
+  target:
+    entity_id: select.daily_energy
+  data:
+    option: "{{ tariff }}"
+- service: select.select_option
+  target:
+    entity_id: select.monthly_energy
+  data:
+    option: "{{ tariff }}"
+- service: select.select_option
+  target:
+    entity_id: select.quaterly_energy
+  data:
+    option: "{{ tariff }}"
+- service: select.select_option
+  target:
+    entity_id: select.yearly_energy
+  data:
+    option: "{{ tariff }}"
