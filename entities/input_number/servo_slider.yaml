@@ -1,0 +1,12 @@
+#####
+# Testing servo
+#
+####
+
+servo_control:
+  name: Servo Control
+  initial: 0
+  min: -100
+  max: 100
+  step: 1
+  mode: slider

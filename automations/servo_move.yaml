@@ -1,0 +1,21 @@
+#####
+# Will move servo based on slider
+#
+#####
+
+alias: 'Test servo'
+id: 6f3724ad-b2a5-49b3-b26c-e35e942f13bd
+description: 'Test servo to see if it is working'
+
+trigger:
+  - platform: state
+    entity_id: input_number.servo_control
+
+condition: []
+
+action:
+- data_template:
+    level: '{{ trigger.to_state.state | int }}'
+  service: esphome.servo_control_servo
+
+mode: single
