@@ -1,0 +1,12 @@
+#####
+# Track how much time Zita was on phone this week
+#
+#####
+
+platform: history_stats
+name: Zita's Phone use this week
+entity_id: binary_sensor.fig_lx1_interactive
+state: 'on'
+type: time
+start: '{{ as_timestamp( now().replace(hour=0, minute=0, second=0) ) - now().weekday() * 86400 }}'
+end: '{{ now() }}'
