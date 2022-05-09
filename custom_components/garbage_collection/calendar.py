@@ -14,8 +14,9 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 
 async def async_setup_platform(
     hass, config, async_add_entities, discovery_info=None
-) -> None:  # pylint: disable=unused-argument
+) -> None:
     """Add calendar entities to HA, of there are calendar instances."""
+    # pylint: disable=unused-argument
     # Only single instance allowed
     if not GarbageCollectionCalendar.instances:
         async_add_entities([GarbageCollectionCalendar()], True)
@@ -66,10 +67,12 @@ class GarbageCollectionCalendar(CalendarEntity):
 class EntitiesCalendarData:
     """Class used by the Entities Calendar class to hold all entity events."""
 
+    __slots__ = "_hass", "event", "entities", "_throttle"
+
     def __init__(self, hass: HomeAssistant) -> None:
         """Initialize an Entities Calendar Data."""
-        self.event: CalendarEvent | None = None
         self._hass = hass
+        self.event: CalendarEvent | None = None
         self.entities: list[str] = []
 
     def add_entity(self, entity_id: str) -> None:

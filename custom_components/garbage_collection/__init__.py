@@ -1,6 +1,7 @@
 """Component to integrate with garbage_colection."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import timedelta
 from types import MappingProxyType
@@ -168,8 +169,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             try:
                 new_date = collection_date + relativedelta(days=offset)
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
-                await entity.remove_date(collection_date)
-                await entity.add_date(new_date)
+                await asyncio.gather(
+                    entity.remove_date(collection_date), entity.add_date(new_date)
+                )
             except (TypeError, KeyError) as err:
                 _LOGGER.error("Failed ofsetting date for %s - %s", entity_id, err)
                 break
@@ -236,9 +238,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # We get here if the integration is set up using config flow
         return True
 
-    platform_config = config[const.DOMAIN].get(const.CONF_SENSORS, {})
     # If platform is not enabled, skip.
-    if not platform_config:
+    if not (platform_config := config[const.DOMAIN].get(const.CONF_SENSORS, {})):
         return False
 
     for entry in hass.config_entries.async_entries(const.DOMAIN):
