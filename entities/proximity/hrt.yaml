@@ -13,6 +13,6 @@ hrt:
     - office
   devices:
     - person.andrej
-    - person.luka
+    - person.zita
   tolerance: 50
   unit_of_measurement: m
