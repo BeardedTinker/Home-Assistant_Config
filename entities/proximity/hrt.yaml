@@ -1,0 +1,18 @@
+#####
+# Proximity for HRT zone 
+# This is zone for 1 person
+#####
+
+hrt:
+  zone: hrt
+  ignored_zones:
+    - home
+    - parents
+    - school
+    - high_school
+    - office
+  devices:
+    - person.andrej
+    - person.luka
+  tolerance: 50
+  unit_of_measurement: m

@@ -1,0 +1,13 @@
+#####
+# Proximity for Office zone 
+# This is my work zone
+#####
+
+office:
+  zone: office
+  ignored_zones:
+    - home
+  devices:
+    - person.andrej
+  tolerance: 50
+  unit_of_measurement: m

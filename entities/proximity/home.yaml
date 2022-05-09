@@ -1,0 +1,15 @@
+#####
+# Proximity for Home zone 
+# This is default zone
+#####
+
+home:
+  ignored_zones:
+    - office
+  devices:
+    - person.andrej
+    - person.mirta
+    - person.luka
+    - person.zita
+  tolerance: 50
+  unit_of_measurement: m

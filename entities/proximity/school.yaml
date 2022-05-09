@@ -1,0 +1,16 @@
+#####
+# Proximity for Elementary school zone 
+# This is zone for 1 person
+#####
+
+school:
+  zone: school
+  ignored_zones:
+    - home
+    - parents
+    - office
+    - school
+  devices:
+    - person.zita
+  tolerance: 50
+  unit_of_measurement: m

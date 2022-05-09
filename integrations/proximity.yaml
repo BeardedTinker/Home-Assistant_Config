@@ -1,0 +1,6 @@
+####
+# Proximity integration. Used to track distance and direction from Zones
+# https://www.home-assistant.io/integrations/proximity
+#####
+
+proximity: !include_dir_merge_named ../entities/proximity
