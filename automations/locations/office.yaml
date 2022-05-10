@@ -1,0 +1,46 @@
+#####
+# Notification when I leave office 
+#
+#####
+
+alias: Leaving Office
+id: 3ac6f2e9-2a37-48cf-97fb-723e51b68107
+
+description: 'Notify when I leave offive'
+
+trigger:
+- platform: numeric_state
+  entity_id:
+  - proximity.office
+  above: '100'
+
+condition:  
+  condition: template
+  value_template: '{{ states.proximity.office.attributes.dir_of_travel == "away_from" }}'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '🚗 Leaving office'
+    value1: "Looks like '{{ states.proximity.office.attributes.nearest }}' has left the office"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+- service: media_player.volume_set
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    volume_level: 0.3
+- service: tts.google_translate_say
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    message: "Hey you! Looks like '{{ states.proximity.office.attributes.nearest }}' has left the office"
+
+mode: single

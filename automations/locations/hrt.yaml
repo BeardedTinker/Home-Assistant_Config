@@ -1,0 +1,27 @@
+#####
+# Notification when someone is close to HRT zone
+#
+#####
+
+alias: Arriving at HRT
+id: 499a4572-2609-49fc-8998-af70fdc28c95
+
+description: 'Check if and who arrived at HRT by using proximity sensor'
+
+trigger:
+- platform: numeric_state
+  entity_id:
+  - proximity.hrt
+  below: '200'
+
+condition:  
+  condition: template
+  value_template: '{{ states.proximity.hrt.attributes.dir_of_travel == "towards" }}'
+
+action:
+- service: notify.ebroz_bot
+  data:
+    message: Looks like '{{ states.proximity.hrt.attributes.nearest }}' is arriving at HRT
+    title: Proximity to HRT
+
+mode: single

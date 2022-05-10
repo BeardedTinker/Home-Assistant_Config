@@ -1,0 +1,46 @@
+#####
+# Notification when someone is close to home
+#
+#####
+
+alias: Arriving home
+id: 9009b11d-5c31-4602-92e9-859f546e5566
+
+description: 'Notify is anyone is getting close to home'
+
+trigger:
+- platform: numeric_state
+  entity_id:
+  - proximity.home
+  below: '200'
+
+condition:  
+  condition: template
+  value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
+
+action:
+  - service: script.notify_engine
+    data:
+      who: 'family'
+      title: '🏠 Arriving home'
+      value1: "Looks like '{{ states.proximity.home.attributes.nearest }}' is arriving home"
+      target_id: !secret telegram_bot_chat_id
+      group: information
+      tag_id: 'information'
+      importance_id: default
+      color: 'green'
+  
+  - service: media_player.volume_set
+    data:
+      entity_id:
+        - media_player.display_me
+        - media_player.clock_me
+      volume_level: 0.3
+  - service: tts.google_translate_say
+    data:
+      entity_id:
+        - media_player.display_me
+        - media_player.clock_me
+      message: "Hey there! Looks like '{{ states.proximity.home.attributes.nearest }}' is almost home"
+
+mode: single

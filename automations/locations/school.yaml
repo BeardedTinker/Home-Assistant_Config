@@ -1,0 +1,46 @@
+#####
+# Notification when kid leaves school
+#
+#####
+
+alias: Leaving School
+id: e13f2fcf-21ed-4581-a032-9346094396c2
+
+description: 'Notify when kid leaves school'
+
+trigger:
+- platform: numeric_state
+  entity_id:
+  - proximity.school
+  above: '100'
+
+condition:  
+  condition: template
+  value_template: '{{ states.proximity.school.attributes.dir_of_travel == "away_from" }}'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '🏫 Leaving school'
+    value1: "Looks like '{{ states.proximity.school.attributes.nearest }}' has left the school"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+- service: media_player.volume_set
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    volume_level: 0.3
+- service: tts.google_translate_say
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    message: "Hey you! Looks like '{{ states.proximity.school.attributes.nearest }}' has left the school"
+
+mode: single
