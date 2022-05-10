@@ -12,9 +12,9 @@ trigger:
 - platform: numeric_state
   entity_id:
   - proximity.home
-  below: '200'
+  below: '300'
 
-condition:  
+condition:
   condition: template
   value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
 

@@ -14,7 +14,7 @@ trigger:
   - proximity.office
   above: '100'
 
-condition:  
+condition:
   condition: template
   value_template: '{{ states.proximity.office.attributes.dir_of_travel == "away_from" }}'
 
