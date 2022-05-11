@@ -1,0 +1,10 @@
+#####
+# Time for Zita school wakeup alarm
+# Used to trigger automation
+#####
+
+zita_school_wakeup:
+  name: Zita School WakeUp Time
+  has_date: false
+  has_time: true
+  icon: mdi:alarm-bell

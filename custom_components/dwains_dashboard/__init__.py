@@ -52,25 +52,30 @@ async def async_setup(hass, config):
     websocket_api.async_register_command(hass, ws_handle_edit_entity_popup)
     websocket_api.async_register_command(hass, ws_handle_edit_entity_favorite)
     websocket_api.async_register_command(hass, ws_handle_edit_entity_bool_value)
+    websocket_api.async_register_command(hass, ws_handle_edit_entities_bool_value)
     websocket_api.async_register_command(hass, ws_handle_edit_device_button)
     websocket_api.async_register_command(hass, ws_handle_edit_device_card)
     websocket_api.async_register_command(hass, ws_handle_edit_device_popup)
+    websocket_api.async_register_command(hass, ws_handle_edit_device_bool_value)
     websocket_api.async_register_command(hass, ws_handle_remove_device_card)
     websocket_api.async_register_command(hass, ws_handle_remove_device_popup)
     websocket_api.async_register_command(hass, ws_handle_remove_entity_card)
     websocket_api.async_register_command(hass, ws_handle_remove_entity_popup)
 
-    websocket_api.async_register_command(hass, ws_handle_edit_area_button)
+    websocket_api.async_register_command(hass, ws_handle_edit_area_button)    
+    websocket_api.async_register_command(hass, ws_handle_edit_area_bool_value)
 
     websocket_api.async_register_command(hass, ws_handle_edit_homepage_header)
 
     websocket_api.async_register_command(hass, ws_handle_edit_more_page_button)
     websocket_api.async_register_command(hass, ws_handle_edit_more_page)
     websocket_api.async_register_command(hass, ws_handle_remove_more_page)
+    websocket_api.async_register_command(hass, ws_handle_add_more_page_to_navbar)
 
     websocket_api.async_register_command(hass, ws_handle_sort_area_button)
     websocket_api.async_register_command(hass, ws_handle_sort_device_button)
     websocket_api.async_register_command(hass, ws_handle_sort_entity)
+    websocket_api.async_register_command(hass, ws_handle_sort_more_page)
 
     load_plugins(hass, DOMAIN)
 
@@ -273,6 +278,15 @@ async def ws_handle_install_blueprint(
 
         filecontent.pop("button_card_templates")
 
+    if filecontent.get("apexcharts_card_templates"):
+        if not os.path.exists(hass.config.path("dwains-dashboard/apexcharts_card_templates/blueprints")):
+            os.makedirs(hass.config.path("dwains-dashboard/apexcharts_card_templates/blueprints"))
+        
+        with open(hass.config.path("dwains-dashboard/apexcharts_card_templates/blueprints/"+filename), 'w') as f:
+            yaml.safe_dump(filecontent.get("apexcharts_card_templates"), f, default_flow_style=False)
+
+        filecontent.pop("apexcharts_card_templates")
+
     if not os.path.exists(hass.config.path("dwains-dashboard/blueprints")):
         os.makedirs(hass.config.path("dwains-dashboard/blueprints"))
     
@@ -325,6 +339,7 @@ async def ws_handle_delete_blueprint(
         vol.Optional("icon"): str,
         vol.Optional("areaId"): str,
         vol.Optional("floor"): str,
+        vol.Optional("disableArea"): bool,
     }
 )
 @websocket_api.async_response
@@ -347,7 +362,8 @@ async def ws_handle_edit_area_button(
 
         areas[msg["areaId"]].update({
             "icon": msg["icon"],
-            "floor": msg["floor"]
+            "floor": msg["floor"],
+            "disabled": msg["disableArea"],
         })
 
         if not os.path.exists(hass.config.path("dwains-dashboard/configs")):
@@ -366,6 +382,53 @@ async def ws_handle_edit_area_button(
     )
 
 
+ 
+#edit_area_bool_value
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dwains_dashboard/edit_area_bool_value",
+        vol.Required("areaId"): str,
+        vol.Optional("key"): str,
+        vol.Optional("value"): bool,
+    }
+)
+@websocket_api.async_response
+async def ws_handle_edit_area_bool_value(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+) -> None:
+    """Handle edit area bool value command."""
+
+    if os.path.exists(hass.config.path("dwains-dashboard/configs/areas.yaml")):
+        with open(hass.config.path("dwains-dashboard/configs/areas.yaml")) as f:
+            areas = yaml.safe_load(f)
+    else:
+        areas = OrderedDict()
+
+    area = areas.get(msg["areaId"])
+
+    if not area:
+        areas[msg["areaId"]] = OrderedDict()
+
+    areas[msg["areaId"]].update({
+            msg["key"]: msg["value"]
+        })
+
+    if not os.path.exists(hass.config.path("dwains-dashboard/configs")):
+        os.makedirs(hass.config.path("dwains-dashboard/configs"))
+
+    with open(hass.config.path("dwains-dashboard/configs/areas.yaml"), 'w') as f:
+        yaml.safe_dump(areas, f, default_flow_style=False)
+
+
+    hass.bus.async_fire("dwains_dashboard_homepage_card_reload")
+    hass.bus.async_fire("dwains_dashboard_devicespage_card_reload")
+
+    connection.send_result(
+        msg["id"],
+        {
+            "succesfull": "Area bool value set succesfully"
+        },
+    )
 
 
 
@@ -376,6 +439,7 @@ async def ws_handle_edit_area_button(
         vol.Required("type"): "dwains_dashboard/edit_homepage_header",
         vol.Optional("disableClock"): bool,
         vol.Optional("disableWelcomeMessage"): bool,
+        vol.Optional("v2Mode"): bool,
         vol.Optional("weatherEntity"): str,
         vol.Optional("alarmEntity"): str,
 
@@ -396,6 +460,7 @@ async def ws_handle_edit_homepage_header(
     homepage_header.update({
         "disable_clock": msg["disableClock"],
         "disable_welcome_message": msg["disableWelcomeMessage"],
+        "v2_mode": msg["v2Mode"],
         "weather_entity": msg["weatherEntity"],
         "alarm_entity": msg["alarmEntity"],
     })
@@ -662,6 +727,7 @@ async def ws_handle_remove_entity_popup(
         vol.Optional("friendlyName"): str,
         vol.Optional("disableEntity"): bool,
         vol.Optional("hideEntity"): bool,
+        vol.Optional("excludeEntity"): bool,
         vol.Optional("rowSpan"): str,
         vol.Optional("colSpan"): str,
         vol.Optional("rowSpanLg"): str,
@@ -691,6 +757,7 @@ async def ws_handle_edit_entity(
 
     entities[msg["entity"]].update({
             "hidden": msg["hideEntity"],
+            "excluded": msg["excludeEntity"],
             "disabled": msg["disableEntity"],
             "friendly_name": msg["friendlyName"],
             "col_span": msg["colSpan"],
@@ -931,6 +998,59 @@ async def ws_handle_edit_entity_bool_value(
 
 
 
+#edit_entities_bool_value
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dwains_dashboard/edit_entities_bool_value",
+        vol.Required("entities"): str,
+        vol.Optional("key"): str,
+        vol.Optional("value"): bool,
+    }
+)
+@websocket_api.async_response
+async def ws_handle_edit_entities_bool_value(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+) -> None:
+    """Handle edit entities bool value command."""
+
+    if os.path.exists(hass.config.path("dwains-dashboard/configs/entities.yaml")):
+        with open(hass.config.path("dwains-dashboard/configs/entities.yaml")) as f:
+            entities = yaml.safe_load(f)
+    else:
+        entities = OrderedDict()
+
+    entitiesInput = json.loads(msg["entities"])
+
+    _LOGGER.warning(entitiesInput)
+
+    for num, entityId in enumerate(entitiesInput, start=1):
+        entity = entities.get(entityId)
+
+        if not entity:
+            entities[entityId] = OrderedDict()
+
+        entities[entityId].update({
+            msg["key"]: msg["value"]
+        })
+
+    _LOGGER.warning(entities)
+
+    if not os.path.exists(hass.config.path("dwains-dashboard/configs")):
+        os.makedirs(hass.config.path("dwains-dashboard/configs"))
+
+    with open(hass.config.path("dwains-dashboard/configs/entities.yaml"), 'w') as f:
+        yaml.safe_dump(entities, f, default_flow_style=False)
+
+    hass.bus.async_fire("dwains_dashboard_homepage_card_reload")
+    hass.bus.async_fire("dwains_dashboard_devicespage_card_reload")
+
+    connection.send_result(
+        msg["id"],
+        {
+            "succesfull": "Entities bool value set succesfully"
+        },
+    )
+
 #add_card
 @websocket_api.websocket_command(
     {
@@ -1016,7 +1136,11 @@ async def ws_handle_remove_card(
 ) -> None:
     """Handle remove card command."""
 
-    path = "dwains-dashboard/configs/cards/areas/"+msg['area_id']
+    if(msg["domain"]):
+        path = "dwains-dashboard/configs/cards/devices/"+msg['domain']
+    else:
+        path = "dwains-dashboard/configs/cards/areas/"+msg['area_id']
+
     filename = hass.config.path(path+"/"+msg["filename"]+".yaml")
 
     if os.path.exists(filename):
@@ -1174,6 +1298,47 @@ async def ws_handle_remove_more_page(
     )
 
 
+
+#add_more_page_to_navbar
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dwains_dashboard/add_more_page_to_navbar",
+        vol.Required("more_page"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_handle_add_more_page_to_navbar(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+) -> None:
+    """Handle add more page to navbar command."""
+
+    # if os.path.exists(hass.config.path("dwains-dashboard/configs/more_pages/"+msg["more_page"]+"/config.yaml")):
+    #     with open(hass.config.path("dwains-dashboard/configs/more_pages/"+msg["more_page"]+"/config.yaml")) as f:
+    #         configFile = yaml.safe_load(f)
+    #     else:
+    #         configFile = OrderedDict()
+
+    #     configFile.update({
+    #         "show_in_navbar": "True"
+    #     })
+
+    #     with open(hass.config.path("dwains-dashboard/configs/more_pages/"+msg["more_page"]+"/config.yaml"), 'w') as f:
+    #         yaml.safe_dump(configFile, f, default_flow_style=False)
+
+    #call reload config to rebuild the yaml for pages too
+    hass.bus.async_fire("dwains_dashboard_reload")
+    hass.bus.async_fire("dwains_dashboard_navigation_card_reload")
+
+    reload_configuration(hass)
+
+    connection.send_result(
+        msg["id"],
+        {
+            "succesfull": "More page removed succesfully"
+        },
+    )
+
+
 #sort_area_button
 @websocket_api.websocket_command(
     {
@@ -1218,6 +1383,54 @@ async def ws_handle_sort_area_button(
         msg["id"],
         {
             "succesfull": "Area buttons sorted succesfully"
+        },
+    )
+
+
+
+
+#edit_device_bool_value
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dwains_dashboard/edit_device_bool_value",
+        vol.Required("device"): str,
+        vol.Optional("key"): str,
+        vol.Optional("value"): bool,
+    }
+)
+@websocket_api.async_response
+async def ws_handle_edit_device_bool_value(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+) -> None:
+    """Handle edit device bool value command."""
+
+    if os.path.exists(hass.config.path("dwains-dashboard/configs/devices.yaml")):
+        with open(hass.config.path("dwains-dashboard/configs/devices.yaml")) as f:
+            devices = yaml.safe_load(f)
+    else:
+        devices = OrderedDict()
+
+    entity = devices.get(msg["device"])
+
+    if not entity:
+        devices[msg["device"]] = OrderedDict()
+
+    devices[msg["device"]].update({
+            msg["key"]: msg["value"]
+        })
+
+    if not os.path.exists(hass.config.path("dwains-dashboard/configs")):
+        os.makedirs(hass.config.path("dwains-dashboard/configs"))
+
+    with open(hass.config.path("dwains-dashboard/configs/devices.yaml"), 'w') as f:
+        yaml.safe_dump(devices, f, default_flow_style=False)
+
+    hass.bus.async_fire("dwains_dashboard_devicespage_card_reload")
+
+    connection.send_result(
+        msg["id"],
+        {
+            "succesfull": "Device bool value set succesfully"
         },
     )
 
@@ -1313,6 +1526,45 @@ async def ws_handle_sort_entity(
             "succesfull": "Entity cards sorted succesfully"
         },
     )
+
+
+
+#sort_more_page
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "dwains_dashboard/sort_more_page",
+        vol.Required("sortData"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_handle_sort_more_page(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict
+) -> None:
+    """Handle sort more pages command."""
+
+    sortData = json.loads(msg["sortData"])
+
+    for num, more_page in enumerate(sortData, start=1):
+        if os.path.exists(hass.config.path("dwains-dashboard/configs/more_pages/"+more_page+"/config.yaml")):
+            with open(hass.config.path("dwains-dashboard/configs/more_pages/"+more_page+"/config.yaml")) as f:
+                configFile = yaml.safe_load(f)
+        else:
+            configFile = OrderedDict()
+
+        configFile.update({
+            "sort_order": num,
+        })
+
+        with open(hass.config.path("dwains-dashboard/configs/more_pages/"+more_page+"/config.yaml"), 'w') as f:
+            yaml.safe_dump(configFile, f, default_flow_style=False)
+
+    connection.send_result(
+        msg["id"],
+        {
+            "succesfull": "More pages sorted succesfully"
+        },
+    )
+
 
 async def async_setup_entry(hass, config_entry):
     process_yaml(hass, config_entry)
