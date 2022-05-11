@@ -218,8 +218,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 15000
-              below: 15500
+              above: 30500 #15000
+              below: 33900 #15500
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -231,8 +231,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 5000
-              below: 5500
+              above: 8000 #5000
+              below: 8400 #5500
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -244,8 +244,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 350
-              below: 450
+              above: 88000 #350
+              below: 115000 #450
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -257,8 +257,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 1200
-              below: 1400
+              above: 2000 #1200
+              below: 2500 #1400
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -270,8 +270,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 2400
-              below: 2500
+              above: 3500 #2400
+              below: 4000 #2500
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -283,8 +283,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 8900
-              below: 9200
+              above: 15800 #8900
+              below: 16600 #9200
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -296,8 +296,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 37500
-              below: 38500
+              above: 850 #37500
+              below: 1050 #38500
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
@@ -309,8 +309,8 @@ sensor:
           condition:
             sensor.in_range:
               id: resistance_sensor
-              above: 24400
-              below: 25000
+              above: 55000 #24400
+              below: 63000 #25000
           then:
             - text_sensor.template.publish:
                 id: wind_dir_card
