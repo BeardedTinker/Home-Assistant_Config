@@ -15,7 +15,7 @@ trigger:
     %}
       true
     {% 
-      elif states('sensor.time') == "06:40" 
+      elif states('sensor.time') == "06:50" 
       and is_state('input_boolean.zita_school_online','off') 
     %}
       true
