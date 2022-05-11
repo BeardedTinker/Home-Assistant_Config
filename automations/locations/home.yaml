@@ -14,9 +14,9 @@ trigger:
   - proximity.home
   below: '300'
 
-condition:
-  condition: template
-  value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
+#condition:
+#  condition: template
+#  value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
 
 action:
   - service: script.notify_engine

@@ -14,9 +14,9 @@ trigger:
   - proximity.hrt
   below: '300'
 
-condition:
-  condition: template
-  value_template: '{{ states.proximity.hrt.attributes.dir_of_travel == "towards" }}'
+#condition:
+#  condition: template
+#  value_template: '{{ states.proximity.hrt.attributes.dir_of_travel == "towards" }}'
 
 action:
 - service: notify.ebroz_bot
