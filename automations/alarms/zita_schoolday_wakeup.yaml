@@ -15,7 +15,7 @@ trigger:
     %}
       true
     {% 
-      elif states('sensor.time') == "06:50" 
+      elif states('sensor.time') == (state_attr('input_datetime.zita_school_wakeup', 'timestamp') | int | timestamp_custom('%H:%M', False)) 
       and is_state('input_boolean.zita_school_online','off') 
     %}
       true
