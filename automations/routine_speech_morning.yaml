@@ -17,7 +17,7 @@ trigger:
 
 condition:
   - condition: time
-    after: '07:00:00'
+    after: input_datetime.zita_school_wakeup
     before: '09:30:00'
   - condition: state
     entity_id: input_boolean.morning_report_done
