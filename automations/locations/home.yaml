@@ -19,28 +19,28 @@ trigger:
 #  value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
 
 action:
-  - service: script.notify_engine
-    data:
-      who: 'family'
-      title: '🏠 Arriving home'
-      value1: "Looks like '{{ states.proximity.home.attributes.nearest }}' is arriving home"
-      target_id: !secret telegram_bot_chat_id
-      group: information
-      tag_id: 'information'
-      importance_id: default
-      color: 'green'
-  
-  - service: media_player.volume_set
-    data:
-      entity_id:
-        - media_player.display_me
-        - media_player.clock_me
-      volume_level: 0.3
-  - service: tts.google_translate_say
-    data:
-      entity_id:
-        - media_player.display_me
-        - media_player.clock_me
-      message: "Hey there! Looks like '{{ states.proximity.home.attributes.nearest }}' is almost home"
+- service: script.notify_engine
+  data:
+    who: 'family'
+    title: '🏠 Arriving home'
+    value1: "Looks like '{{ states.proximity.home.attributes.nearest }}' is arriving home"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+- service: media_player.volume_set
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    volume_level: 0.3
+- service: tts.google_translate_say
+  data:
+    entity_id:
+      - media_player.display_me
+      - media_player.clock_me
+    message: "Hey there! Looks like '{{ states.proximity.home.attributes.nearest }}' is almost home"
 
 mode: single
