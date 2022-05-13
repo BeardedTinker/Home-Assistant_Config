@@ -126,7 +126,7 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry):
     await add_event_handlers(hass)
     if hass.is_running:
         # integration reloaded or options changed via UI
-        parse_config(hass, "changes in watchman configuration")
+        parse_config(hass, reason="changes in watchman configuration")
         await refresh_states(hass)
     else:
         # first run, home assistant is loading
@@ -204,7 +204,7 @@ async def add_services(hass: HomeAssistant):
             await async_notification(hass, "Watchman error", message, error=True)
 
         if call.data.get(CONF_PARSE_CONFIG, False):
-            parse_config(hass, "service call")
+            parse_config(hass, reason="service call")
 
         if send_notification:
             chunk_size = call.data.get(CONF_CHUNK_SIZE, config.get(CONF_CHUNK_SIZE))
@@ -215,7 +215,8 @@ async def add_services(hass: HomeAssistant):
                 await async_notification(
                     hass,
                     "Watchman error",
-                    "Missing `service` parameter. The `data` parameter can only be used in conjunction with `service` parameter.",
+                    "Missing `service` parameter. The `data` parameter can only be used "
+                    "in conjunction with `service` parameter.",
                     error=True,
                 )
 
@@ -234,7 +235,15 @@ async def add_services(hass: HomeAssistant):
                 )
 
         if create_file:
-            await async_report_to_file(hass, path, test_mode=test_mode)
+            try:
+                await async_report_to_file(hass, path, test_mode=test_mode)
+            except OSError as exception:
+                await async_notification(
+                    hass,
+                    "Watchman error",
+                    f"Unable to write report: {exception}",
+                    error=True,
+                )
 
     hass.services.async_register(DOMAIN, "report", async_handle_report)
 
@@ -267,11 +276,11 @@ async def add_event_handlers(hass: HomeAssistant):
                 "reload_core_config",
                 "reload",
             ]:
-                parse_config(hass, "configuration changes")
+                parse_config(hass, reason="configuration changes")
                 await refresh_states(hass)
 
         elif typ in [EVENT_AUTOMATION_RELOADED, EVENT_SCENE_RELOADED]:
-            parse_config(hass, "configuration changes")
+            parse_config(hass, reason="configuration changes")
             await refresh_states(hass)
 
     async def async_on_service_changed(event):
@@ -367,7 +376,7 @@ async def async_report_to_file(hass, path, test_mode):
     """save report to a file"""
     await refresh_states(hass)
     report_chunks = report(hass, table_renderer, chunk_size=0, test_mode=test_mode)
-
+    # OSError exception is handled in async_handle_report
     with open(path, "w", encoding="utf-8") as report_file:
         for chunk in report_chunks:
             report_file.write(chunk)
