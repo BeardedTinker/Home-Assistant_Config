@@ -24,7 +24,7 @@ class GarbageCollectionShared:
         """Create class attributes and set initial values."""
         self._data = data.copy()
         self.hass: HomeAssistant | None = None
-        self.name: str | None = None
+        self.name: str
         self.errors: dict = {}
         self.data_schema: OrderedDict = OrderedDict()
         self._defaults = {
@@ -77,7 +77,7 @@ class GarbageCollectionShared:
             return vol.Optional(key)
         return vol.Optional(key, description={"suggested_value": suggested_value})
 
-    def step1_frequency(self, user_input: dict, options: bool = False) -> bool:
+    def step1_frequency(self, user_input: dict | None, options: bool = False) -> bool:
         """Step 1 - choose frequency and common parameters."""
         self.errors.clear()
         if user_input is not None:
@@ -231,7 +231,7 @@ class GarbageCollectionShared:
 class GarbageCollectionFlowHandler(config_entries.ConfigFlow):
     """Config flow for garbage_collection."""
 
-    VERSION = const.VERSION
+    VERSION = const.CONFIG_VERSION
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     def __init__(self):

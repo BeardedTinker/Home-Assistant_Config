@@ -101,7 +101,7 @@ class EntitiesCalendarData:
             ):
                 continue
             garbage_collection = hass.data[DOMAIN][SENSOR_PLATFORM][entity]
-            start = await garbage_collection.async_next_date(start_date, True)
+            start = garbage_collection.get_next_date(start_date, True)
             while start is not None and start >= start_date and start <= end_date:
                 try:
                     end = start + timedelta(days=1)
@@ -120,7 +120,7 @@ class EntitiesCalendarData:
                         end=datetime.combine(start, garbage_collection.expire_after),
                     )
                 events.append(event)
-                start = await garbage_collection.async_next_date(
+                start = garbage_collection.get_next_date(
                     start + timedelta(days=1), True
                 )
         return events

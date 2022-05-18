@@ -22,7 +22,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.typing import ConfigType
 
-from . import const, helpers
+from . import const, helpers, sensor
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
@@ -185,7 +185,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             _LOGGER.debug("called update_state for %s", entity_id)
             try:
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
-                await entity.async_update_state()
+                entity.update_state()
             except KeyError as err:
                 _LOGGER.error("Failed updating state for %s - %s", entity_id, err)
 
@@ -194,13 +194,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
             _LOGGER.error("collect_garbage - missing Entity ID.")
             return
-        last_collection = call.data.get(const.ATTR_LAST_COLLECTION, dt_util.now())
+        last_collection = call.data.get(const.ATTR_LAST_COLLECTION, sensor.now())
         for entity_id in entity_ids:
             _LOGGER.debug("called collect_garbage for %s", entity_id)
             try:
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
                 entity.last_collection = dt_util.as_local(last_collection)
-                await entity.async_update_state()
+                entity.update_state()
             except KeyError as err:
                 _LOGGER.error(
                     "Failed setting last collection for %s - %s", entity_id, err
@@ -358,7 +358,7 @@ async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
             new_options[const.CONF_WEEKDAY_ORDER_NUMBER] = list(
                 map(str, new_options[const.CONF_WEEKDAY_ORDER_NUMBER])
             )
-    config_entry.version = const.VERSION
+    config_entry.version = const.CONFIG_VERSION
     config_entry.data = MappingProxyType({**new_data})
     config_entry.options = MappingProxyType({**new_options})
     if removed_data:

@@ -385,9 +385,7 @@ class GarbageCollection(RestoreEntity):
                 self.name,
             )
 
-    async def async_next_date(
-        self, first_date: date, ignore_today=False
-    ) -> date | None:
+    def get_next_date(self, first_date: date, ignore_today=False) -> date | None:
         """Get next date from self._collection_dates."""
         current_date_time = now()
         for d in self._collection_dates:  # pylint: disable=invalid-name
@@ -424,14 +422,14 @@ class GarbageCollection(RestoreEntity):
         }
         self.hass.bus.async_fire("garbage_collection_loaded", event_data)
         if not self._manual:
-            await self.async_update_state()
+            self.update_state()
 
-    async def async_update_state(self) -> None:
+    def update_state(self) -> None:
         """Pick the first event from collection dates, update attributes."""
         _LOGGER.debug("(%s) Looking for next collection", self._name)
         self._last_updated = now()
         today = self._last_updated.date()
-        self._next_date = await self.async_next_date(today)
+        self._next_date = self.get_next_date(today)
         if self._next_date is not None:
             _LOGGER.debug(
                 "(%s) next_date (%s), today (%s)", self._name, self._next_date, today
@@ -704,7 +702,7 @@ class GroupCollection(GarbageCollection):
         try:
             for entity_id in self._entities:
                 entity = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
-                next_date = await entity.async_next_date(day1)
+                next_date = entity.get_next_date(day1)
                 if next_date is not None and (
                     candidate_date is None or next_date < candidate_date
                 ):
@@ -729,6 +727,11 @@ class GroupCollection(GarbageCollection):
             ready_for_update = True
         members_ready = True
         for entity_id in self._entities:
+            try:
+                entity = self.hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
+                await entity.async_update()
+            except KeyError:
+                pass
             state_object = self.hass.states.get(entity_id)
             if state_object is None:
                 members_ready = False
@@ -743,7 +746,7 @@ class GroupCollection(GarbageCollection):
                 members_ready = False
                 break
             # A member got updated after the group update
-            if last_updated > self._last_updated:
+            if self._last_updated is None or last_updated > self._last_updated:
                 ready_for_update = True
         if ready_for_update and not members_ready:
             ready_for_update = False
