@@ -1,0 +1,35 @@
+#####
+# YouTube video notification
+# Send notification when new video is released
+#####
+
+alias: YouTube Video notification
+description: 'Notification on new video release'
+id: 7a972a3a-e6b2-46ab-a062-31739a3e8eec
+
+trigger:
+- platform: state
+  entity_id:
+    - sensor.automate_your_life
+    - sensor.beardedtinker
+    - sensor.make_it_work
+    - sensor.mark_watt_tech
+    - sensor.mostlychris
+    - sensor.slackerlabs
+    - sensor.smart_home_makers
+    - sensor.intermittech
+  attribute: url
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '👀 Streaming'
+    value1: "Looks like '{{ trigger.state.attributes.friendly_name }}' released video '{{trigger.platform}}'"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+    mode: queued

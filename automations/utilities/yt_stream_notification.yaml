@@ -1,0 +1,44 @@
+#####
+# YouTube stream notification
+# Send notification when channel goes live
+#####
+
+alias: YouTube Live notification
+description: 'Notification when YT channel goes live'
+id: 24b93dc0-54d8-4e0a-b129-b59f4b1ff400
+
+trigger:
+- platform: state
+  entity_id:
+    - sensor.automate_your_life
+    - sensor.beardedtinker
+    - sensor.make_it_work
+    - sensor.mark_watt_tech
+    - sensor.mostlychris
+    - sensor.slackerlabs
+    - sensor.smart_home_makers
+    - sensor.intermittech
+#  attribute: live
+#  to: true
+#  for:
+#    hours: 0
+#    minutes: 0
+#    seconds: 1
+
+condition: 
+  condition: template
+  value_template: '{{ trigger.to_state.attributes.live == true }}'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '🗣 Streaming'
+    value1: "Looks like '{{ trigger.state.attributes.friendly_name }}' is streaming {{trigger.platform}}"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+    mode: queued

@@ -1,0 +1,7 @@
+#####
+# Get latest video from IntermitTech channel
+# HACS integration
+#####
+
+platform: youtube
+channel_id: UCv7UOhZ2XuPwm9SN5oJsCjA
