@@ -16,15 +16,16 @@ Each commit is automaticlly verified with <a href="https://github.com/BeardedTin
 
 Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
+Where every I could I listed original authors of the code or parts of the code I used.
 
 
 ## Want to get more info?
 
-A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more then 200 videos as of Today, with at least 100 of them being Home Assistant How To's. 
+A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more then 250 videos as of Today, with at least 100 of them being Home Assistant How To's. 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6). 
 
-Also, if you have time you can try and join me while streaming and there should be at lest one stream each month!
+Also, if you have time you can try and join me while streaming and there should be at 1 or 2 streams each month!
 
 
 ### Hardware
@@ -36,8 +37,8 @@ Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/
 From other devices I use, here is a list:
 
 ##### IKEA DEVICES
-  - IKEA TRADFRI Gateway - NOT used anymore
-  - IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore
+~~  - IKEA TRADFRI Gateway - NOT used anymore~~
+~~  - IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore~~
   - IKEA TRADFRI remote control (E1524/E1810)
   - IKEA TRADFRI ON/OFF switch (E1743)
   - IKEA TRADFRI control outlet (E1603/E1702)
@@ -62,7 +63,7 @@ From other devices I use, here is a list:
   - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
   - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
   - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
-  - [Shelly Door & Window 2](https://shelly.cloud/products/shelly-door-window-2-smart-home-automation-sensor/) sensor
+~~  - [Shelly Door & Window 2](https://shelly.cloud/products/shelly-door-window-2-smart-home-automation-sensor/) sensor~~
 
   Plus some Shelly devices that are waiting installation and/or testing:
   - Shelly 1 
@@ -87,7 +88,7 @@ From other devices I use, here is a list:
   - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
   
 ##### CAMERAS
-  - Reolink RLC-410-5MP PoE camera
+~~  - Reolink RLC-410-5MP PoE camera - DIED~~
   - various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
@@ -101,7 +102,7 @@ From other devices I use, here is a list:
   - [SwitchBot Humidifier](https://switchbot.vip/3FtfULt)
   - [SwitchBot Meter](https://switchbot.vip/3HEb284)
   - [SwitchBot Mini Hub](https://switchbot.vip/3oIgL49)
-  - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper) -TBD
+  - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper)
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
   - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer
@@ -112,12 +113,12 @@ From other devices I use, here is a list:
 As I'm running this on Synology, I have mix of Docker containers and Home Assistant add-ons. Here is a list:
 
 Add-ons:
-  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED
+~~  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED~~
   - ESPHome - [link](https://esphome.io/) 
   - Samba share - [link](https://github.com/home-assistant/hassio-addons/tree/master/samba)
   - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
+  - Studio Code Server - [link](https://github.com/hassio-addons/addon-vscode)
   - Terminal & SSH - [link](https://github.com/home-assistant/hassio-addons/tree/master/ssh)
-  - Visual Studio Code - [link](https://github.com/hassio-addons/addon-vscode)
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
@@ -132,6 +133,7 @@ Containers:
   - Smokeping - tracking network device activity
   - Storagenode - Storj node for renting free space
   - Storj Exporter - exports statistics from node to Prometheus
+  - UniFi controller - configuration and management of UniFi devices
 
 ### Integrations
 
@@ -154,12 +156,16 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Certificate Expiry
   - CO2Signal
   - COVID-19
+  - Discord
   - DLNA server
+  - Dwains Dashboard
   - Elgato Key Light
   - EPSHome
   - Garbage collection
+  - Generic camera
   - GitHub
   - GDACS
+  - Google Calendar
   - Google Cast
   - HACS
   - Home Assistant Supervisor
@@ -171,6 +177,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Minecraft Server
   - MJPEG IP Camera
   - Mobile App
+  - Moon
   - MQTT
   - Network UPS Tool
   - Nuki
@@ -178,16 +185,20 @@ Following is a list of active Integrations that are visible at Configuration->In
   - OpenUV
   - Radio Browser
   - Reolink
+  - Season
   - Sensor Community
   - Shelly
   - Shopping List
   - SpaceX
   - SpeedTest
+  - Sun
   - Synology DSM
   - Tado
   - Tile
   - Ubiquity UniFi
+  - Uptime
   - Version
+  - Watchan
   - Withings
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
   - Xiaomi Miio
@@ -206,35 +217,35 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   165 |
-| Binary sensors       |   249 |
+| Automations          |   173 |
+| Binary sensors       |   250 |
 | Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     4 |
 | Device trackers      |    58 |
-| Entities             |  2361 |
+| Entities             |  2311 |
 | Groups               |    17 |
 | Image Processing     |     1 |
-| Input Boolean        |    18 |
-| Input Date/Time      |    25 |
-| Input Number         |     7 |
+| Input Boolean        |    19 |
+| Input Date/Time      |    27 |
+| Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
 | Lights               |    40 |
-| Lines of code (YAML) | 26495 |
+| Lines of code (YAML) | 27266 |
 | Locks                |     2 |
-| Media players        |    17 |
+| Media players        |    18 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    21 |
-| Sensors              |  1362 |
-| Switches             |    98 |
+| Sensors              |  1364 |
+| Switches             |    97 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 24.04.2022 10:00 PM
+* Updated: 22.05.2022 8:00 PM
 
 ### Missing files
 
