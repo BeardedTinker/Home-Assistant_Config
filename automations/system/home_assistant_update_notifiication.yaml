@@ -7,8 +7,8 @@ id: c57b0367-ca6f-4e7b-8e18-307c4b44cf8b
 alias: Home Assistant Update Notification
 
 trigger:
-  - platform: homeassistant
-    event: start
+#  - platform: homeassistant
+#    event: start
   - platform: state
     entity_id: sensor.latest_version
 
