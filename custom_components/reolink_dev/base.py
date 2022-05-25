@@ -374,7 +374,7 @@ class ReolinkPush:
             except NoURLAvailableError as ex:
                 # If we can't get a URL for external or internal, we will still mark the camara as available
                 await self.set_available(True)
-                return True
+                return False
 
         self._sman = Manager(self._host, self._port, self._username, self._password)
         if await self._sman.subscribe(self._webhook_url):
@@ -411,6 +411,12 @@ class ReolinkPush:
 
     async def renew(self):
         """Renew the subscription of the motion events (lease time is set to 15 minutes)."""
+
+        # _sman is available only if subscription was able to find an Internal/External URL, we can retry in case user has
+        # fixed it after HASS config change
+        if self._sman is None:
+            return await self.subscribe(self._event_id)
+
         if self._sman.renewtimer <= SESSION_RENEW_THRESHOLD:
             if not await self._sman.renew():
                 _LOGGER.error(
