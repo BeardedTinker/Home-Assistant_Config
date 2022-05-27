@@ -34,3 +34,5 @@ action:
           entity_id: counter.homeassistant_errors
 
 mode: queued
+max: 20
+max_exceeded: silent
