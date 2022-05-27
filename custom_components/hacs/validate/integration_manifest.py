@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-from ..enums import RepositoryFile
+from voluptuous.error import Invalid
+
+from ..enums import HacsCategory, RepositoryFile
 from ..repositories.base import HacsRepository
+from ..repositories.integration import HacsIntegrationRepository
+from ..utils.validate import INTEGRATION_MANIFEST_JSON_SCHEMA
 from .base import ActionValidationBase, ValidationException
 
 
@@ -13,7 +17,9 @@ async def async_setup_validator(repository: HacsRepository) -> Validator:
 class Validator(ActionValidationBase):
     """Validate the repository."""
 
-    category = "integration"
+    repository: HacsIntegrationRepository
+    more_info = "https://hacs.xyz/docs/publish/include#check-manifest"
+    categories = [HacsCategory.INTEGRATION]
 
     async def async_validate(self):
         """Validate the repository."""
@@ -21,3 +27,9 @@ class Validator(ActionValidationBase):
             raise ValidationException(
                 f"The repository has no '{RepositoryFile.MAINIFEST_JSON}' file"
             )
+
+        content = await self.repository.async_get_integration_manifest(self.repository.ref)
+        try:
+            INTEGRATION_MANIFEST_JSON_SCHEMA(content)
+        except Invalid as exception:
+            raise ValidationException(exception) from exception
