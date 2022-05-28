@@ -9,5 +9,5 @@ office:
     - home
   devices:
     - person.andrej
-  tolerance: 50
+  tolerance: 75
   unit_of_measurement: m

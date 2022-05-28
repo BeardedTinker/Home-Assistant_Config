@@ -6,5 +6,5 @@
 name: High school
 latitude: !secret highscool_lat
 longitude: !secret highscool_long
-radius: 70
+radius: 75
 icon: mdi:school

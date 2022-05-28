@@ -12,7 +12,7 @@ trigger:
 - platform: numeric_state
   entity_id:
   - proximity.office
-  above: '100'
+  above: '150'
 
 condition:
   condition: template
@@ -35,7 +35,7 @@ action:
     entity_id:
       - media_player.display_me
       - media_player.clock_me
-    volume_level: 0.3
+    volume_level: 0.5
 - service: tts.google_translate_say
   data:
     entity_id:
