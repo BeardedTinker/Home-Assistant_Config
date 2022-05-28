@@ -29,7 +29,7 @@ action:
     option: "{{ tariff }}"
 - service: select.select_option
   target:
-    entity_id: select.quaterly_energy
+    entity_id: select.quarterly_energy
   data:
     option: "{{ tariff }}"
 - service: select.select_option
