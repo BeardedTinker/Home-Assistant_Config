@@ -58,6 +58,11 @@ ota:
 
 api:
 
+mqtt:
+  broker: !secret mqtt_ip
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+
 logger:
 
 i2c:
@@ -156,18 +161,18 @@ sensor:
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery"
-    attenuation: 11db
+    attenuation: 6db
     unit_of_measurement: "V"
     icon: "mdi:battery-high"
     device_class: "voltage"
     state_class: "measurement"
     accuracy_decimals: 3
-#    filters:
+    filters:
 #      # Map 0.0 (from sensor) to 0.0 (true value)
-#      - calibrate_linear:
-#          - 0.0 -> 0.0
-#          - 2.06 -> 1.89
-#      - lambda: return x * 2.0;
+      - calibrate_linear:
+          - 0.0 -> 0.0
+          - 2.06 -> 1.89
+      - lambda: return x * 2.0;
     id: ${devicename}_voltage
     update_interval: ${update_interval}
 
@@ -178,7 +183,7 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) / 0.379 * 100.00);  
+          return ((id(${devicename}_voltage).state - 2.76) * 100 / 0.664);  
     # (current - minimum) / difference between max & mix * 100
     update_interval: ${update_interval}
 

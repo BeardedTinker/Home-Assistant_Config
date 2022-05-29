@@ -59,9 +59,9 @@ ota:
 api:
 
 mqtt:
-  broker: mqtt_ip
-  username: mqtt_user
-  password: mqtt_password
+  broker: !secret mqtt_ip
+  username: !secret mqtt_user
+  password: !secret mqtt_password
 
 logger:
 
