@@ -1,7 +1,6 @@
 """Base class for validation."""
 from __future__ import annotations
 
-from time import monotonic
 from typing import TYPE_CHECKING
 
 from ..enums import HacsCategory
@@ -19,6 +18,7 @@ class ActionValidationBase:
     """Base class for action validation."""
 
     categories: list[HacsCategory] = []
+    allow_fork: bool = True
     more_info: str = "https://hacs.xyz/docs/publish/action"
 
     def __init__(self, repository: HacsRepository) -> None:
@@ -36,9 +36,6 @@ class ActionValidationBase:
 
     async def execute_validation(self, *_, **__) -> None:
         """Execute the task defined in subclass."""
-        self.hacs.log.info("<Validation %s> Starting validation", self.slug)
-
-        start_time = monotonic()
         self.failed = False
 
         try:
@@ -46,13 +43,11 @@ class ActionValidationBase:
         except ValidationException as exception:
             self.failed = True
             self.hacs.log.error(
-                "<Validation %s> failed:  %s (More info: %s)",
+                "<Validation %s> failed:  %s (More info: %s )",
                 self.slug,
                 exception,
                 self.more_info,
             )
 
         else:
-            self.hacs.log.info(
-                "<Validation %s> took %.3f seconds to complete", self.slug, monotonic() - start_time
-            )
+            self.hacs.log.info("<Validation %s> completed", self.slug)

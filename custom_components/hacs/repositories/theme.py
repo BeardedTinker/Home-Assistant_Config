@@ -69,6 +69,9 @@ class HacsThemeRepository(HacsRepository):
         self.update_filenames()
         self.content.path.local = self.localpath
 
+        if self.hacs.system.action:
+            await self.hacs.validation.async_run_repository_checks(self)
+
     @concurrent(concurrenttasks=10, backoff_time=5)
     async def update_repository(self, ignore_issues=False, force=False):
         """Update."""

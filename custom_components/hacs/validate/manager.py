@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.hacs.repositories.base import HacsRepository
-
+from ..enums import HacsGitHubRepo
+from ..repositories.base import HacsRepository
 from .base import ActionValidationBase
 
 if TYPE_CHECKING:
@@ -55,22 +55,28 @@ class ValidationManager:
 
         await self.async_load(repository)
 
-        validators = [
+        is_pull_from_fork = (
+            not os.getenv("INPUT_REPOSITORY")
+            and os.getenv("GITHUB_REPOSITORY") != repository.data.full_name
+        )
+
+        validatiors = [
             validator
             for validator in self.validatiors or []
             if (
                 (not validator.categories or repository.data.category in validator.categories)
                 and validator.slug not in os.getenv("INPUT_IGNORE", "").split(" ")
+                and (not is_pull_from_fork or validator.allow_fork)
             )
         ]
 
-        await asyncio.gather(*[validator.execute_validation() for validator in validators])
+        await asyncio.gather(*[validator.execute_validation() for validator in validatiors])
 
-        total = len(self.validatiors)
-        failed = len([x for x in self.validatiors if x.failed])
+        total = len(validatiors)
+        failed = len([x for x in validatiors if x.failed])
 
         if failed != 0:
             repository.logger.error("%s %s/%s checks failed", repository.string, failed, total)
             exit(1)
         else:
-            repository.logger.debug("%s All (%s) checks passed", repository.string, total)
+            repository.logger.info("%s All (%s) checks passed", repository.string, total)
