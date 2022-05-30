@@ -183,7 +183,7 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) * 100 / 0.624);  
+          return ((id(${devicename}_voltage).state - 2.76) * 100 / 0.704);  
     # (current - minimum) / difference between max & mix * 100
     update_interval: ${update_interval}
 
