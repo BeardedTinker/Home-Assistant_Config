@@ -12,7 +12,7 @@ switches:
       service: media_player.volume_down
       data_template:
         entity_id: >
-          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv_2
+          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv
           {% elif is_state("input_select.radio_speaker", "Loft TV") %} media_player.loft_tv
           {% elif is_state("input_select.radio_speaker", "Display me") %} media_player.display_me
           {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me
@@ -23,7 +23,7 @@ switches:
       service: media_player.volume_down
       data_template:
         entity_id: >
-          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv_2
+          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv
           {% elif is_state("input_select.radio_speaker", "Loft TV") %} media_player.loft_tv
           {% elif is_state("input_select.radio_speaker", "Display me") %} media_player.display_me
           {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me

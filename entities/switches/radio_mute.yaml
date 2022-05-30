@@ -8,7 +8,7 @@ switches:
   radio_mute:
     icon_template: '{% if states("switch.radio_mute") %}mdi:volume-off{% else %}mdi:volume-high{% endif %}'
     value_template: >
-      {% if is_state("input_select.radio_speaker", "Living room") %} {% if state_attr("media_player.living_room_tv_2","is_volume_muted") %}on{% else %}off{% endif %}
+      {% if is_state("input_select.radio_speaker", "Living room") %} {% if state_attr("media_player.living_room_tv","is_volume_muted") %}on{% else %}off{% endif %}
       {% elif is_state("input_select.radio_speaker", "Loft TV") %} {% if state_attr("media_player.loft_tv","is_volume_muted") %}on{% else %}off{% endif %}
       {% elif is_state("input_select.radio_speaker", "Display me") %} {% if state_attr("media_player.display_me","is_volume_muted") %}on{% else %}off{% endif %}
       {% elif is_state("input_select.radio_speaker", "Mini me") %} {% if state_attr("media_player.mini_me","is_volume_muted") %}on{% else %}off{% endif %}
@@ -20,7 +20,7 @@ switches:
       service: media_player.volume_mute
       data_template:
         entity_id: >
-          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv_2
+          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv
           {% elif is_state("input_select.radio_speaker", "Loft TV") %} media_player.loft_tv
           {% elif is_state("input_select.radio_speaker", "Display me") %} media_player.display_me
           {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me
@@ -32,7 +32,7 @@ switches:
       service: media_player.volume_mute
       data_template:
         entity_id: >
-          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv_2
+          {% if is_state("input_select.radio_speaker", "Living room") %} media_player.living_room_tv
           {% elif is_state("input_select.radio_speaker", "Loft TV") %} media_player.loft_tv
           {% elif is_state("input_select.radio_speaker", "Display me") %} media_player.display_me
           {% elif is_state("input_select.radio_speaker", "Mini me") %} media_player.mini_me
