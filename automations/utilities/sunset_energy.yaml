@@ -11,8 +11,13 @@ trigger:
   event: sunset
 
 action:
-- service: utility_meter.select_tariff    # Tariff change to night
+#- service: utility_meter.select_tariff    # Tariff change to night
+#  data:
+#    entity_id:
+#    - utility_meter.sun_energy
+#    tariff: night
+- service: select.select_option
+  target:
+    entity_id: select.sun_energy
   data:
-    entity_id:
-    - utility_meter.sun_energy
-    tariff: night
+    option: night
