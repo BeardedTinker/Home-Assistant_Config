@@ -1,7 +1,7 @@
 #####
 # Google Calendar - pull data from calendar
 # https://www.home-assistant.io/integrations/calendar.google/
-
+# Moved to UI 
 #####
 
 google:
