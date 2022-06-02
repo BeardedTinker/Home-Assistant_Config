@@ -4,6 +4,6 @@
 #####
 
 google:
-  client_id: !secret google_calendar_id
-  client_secret: !secret google_calendar
+#  client_id: !secret google_calendar_id
+#  client_secret: !secret google_calendar
   track_new_calendar: true
