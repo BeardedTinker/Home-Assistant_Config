@@ -188,7 +188,7 @@ MIN_4PRO_FIRMWARE_DATE = 20200408
 MIN_PLUG_FIRMWARE_DATE = 20210115
 
 # Firmware 1.1.0 release date
-MIN_MOTION_FIRMWARE_DATE = 20210226
+MIN_MOTION_FIRMWARE_DATE = 20220517
 
 # Firmware 2.1.4-rc1 release date
 MIN_MOTION2_FIRMWARE_DATE = 20220301
@@ -540,7 +540,7 @@ TPL_GAS_TO_JSON = "{{{^status^:value}|tojson}}"
 TPL_HUMIDITY = "{%if is_number(value) and 0<value|int<999%}{{value|round(1)}}{%else%}unknown{%endif%}"
 TPL_HUMIDITY_EXT = "{%if is_number(value) and 0<value|int<999%}{{value|float|round(1)}}{%else%}unknown{%endif%}"
 TPL_ILLUMINATION = "{{value_json.lux}}"
-TPL_ILLUMINATION_MOTION2 = "{{value_json.lux.value}}"
+TPL_ILLUMINATION_MOTION = "{{value_json.lux.value}}"
 TPL_ILLUMINATION_TO_JSON = "{{{^illumination^:value}|tojson}}"
 TPL_IP = "{{value_json.ip}}"
 TPL_IP_FROM_INFO = "{{value_json.wifi_sta.ip}}"
@@ -548,7 +548,7 @@ TPL_LONGPUSH = "{%if value_json.event==^L^%}ON{%else%}OFF{%endif%}"
 TPL_LONGPUSH_SHORTPUSH = "{%if value_json.event==^LS^%}ON{%else%}OFF{%endif%}"
 TPL_LUX = "{{value|float|round}}"
 TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
-TPL_MOTION_MOTION2 = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
+TPL_MOTION_MOTION = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
@@ -572,7 +572,7 @@ TPL_SHORTPUSH_LONGPUSH = "{%if value_json.event==^SL^%}ON{%else%}OFF{%endif%}"
 TPL_SSID = "{{value_json.wifi_sta.ssid}}"
 TPL_TARGET_TEMPERATURE = "{{value_json.thermostats.0.target_t.value}}"
 TPL_TEMPERATURE = "{%if is_number(value) and -100<value|int<900%}{{value|round(1)}}{%else%}unknown{%endif%}"
-TPL_TEMPERATURE_MOTION2 = "{{value_json.tmp.value}}"
+TPL_TEMPERATURE_MOTION = "{{value_json.tmp.value}}"
 TPL_TEMPERATURE_EXT = "{%if is_number(value) and -100<value|int<999%}{{value|float|round(1)}}{%else%}unknown{%endif%}"
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
 TPL_TILT = "{{value|float}}"
@@ -580,7 +580,7 @@ TPL_TRIPLE_SHORTPUSH = "{%if value_json.event==^SSS^%}ON{%else%}OFF{%endif%}"
 TPL_UPDATE_TO_JSON = "{{value_json[^update^]|tojson}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.uptime)|timestamp_l" "ocal}}"
 TPL_VIBRATION = "{%if value_json.vibration==true%}ON{%else%}OFF{%endif%}"
-TPL_VIBRATION_MOTION2 = "{%if value_json.sensor.vibration==true%}ON{%else%}OFF{%endif%}"
+TPL_VIBRATION_MOTION = "{%if value_json.sensor.vibration==true%}ON{%else%}OFF{%endif%}"
 TPL_VOLTAGE = "{{value|float|round(1)}}"
 
 UNIT_AMPERE = "A"
@@ -1046,13 +1046,13 @@ OPTIONS_SENSOR_TEMPERATURE = {
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE,
 }
-OPTIONS_SENSOR_TEMPERATURE_MOTION2 = {
+OPTIONS_SENSOR_TEMPERATURE_MOTION = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_UNIT: UNIT_CELSIUS,
-    KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_MOTION2,
+    KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_MOTION,
 }
 OPTIONS_SENSOR_TEMPERATURE_STATUS = {
     KEY_ENABLED_BY_DEFAULT: False,
@@ -1123,15 +1123,6 @@ OPTIONS_SENSOR_BATTERY_MOTION = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
-    KEY_STATE_TOPIC: TOPIC_STATUS,
-    KEY_UNIT: UNIT_PERCENT,
-    KEY_VALUE_TEMPLATE: TPL_BATTERY_FROM_JSON,
-}
-OPTIONS_SENSOR_BATTERY_MOTION2 = {
-    KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY,
-    KEY_ENABLED_BY_DEFAULT: True,
-    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
-    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_BATTERY_FROM_INFO,
@@ -1157,17 +1148,9 @@ OPTIONS_SENSOR_LUX_MOTION = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_ILLUMINANCE,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
-    KEY_STATE_TOPIC: TOPIC_STATUS,
-    KEY_UNIT: UNIT_LUX,
-    KEY_VALUE_TEMPLATE: TPL_ILLUMINATION,
-}
-OPTIONS_SENSOR_LUX_MOTION2 = {
-    KEY_DEVICE_CLASS: DEVICE_CLASS_ILLUMINANCE,
-    KEY_ENABLED_BY_DEFAULT: True,
-    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_UNIT: UNIT_LUX,
-    KEY_VALUE_TEMPLATE: TPL_ILLUMINATION_MOTION2,
+    KEY_VALUE_TEMPLATE: TPL_ILLUMINATION_MOTION,
 }
 OPTIONS_SENSOR_OPERATION = {
     KEY_ENABLED_BY_DEFAULT: True,
@@ -1446,23 +1429,17 @@ OPTIONS_SENSOR_MOTION = {
     KEY_STATE_TOPIC: TOPIC_STATUS,
     KEY_VALUE_TEMPLATE: TPL_MOTION,
 }
-OPTIONS_SENSOR_MOTION_MOTION2 = {
+OPTIONS_SENSOR_MOTION_MOTION = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_MOTION,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_STATE_TOPIC: TOPIC_INFO,
-    KEY_VALUE_TEMPLATE: TPL_MOTION_MOTION2,
+    KEY_VALUE_TEMPLATE: TPL_MOTION_MOTION,
 }
-OPTIONS_SENSOR_VIBRATION = {
-    KEY_DEVICE_CLASS: DEVICE_CLASS_VIBRATION,
-    KEY_ENABLED_BY_DEFAULT: True,
-    KEY_STATE_TOPIC: TOPIC_STATUS,
-    KEY_VALUE_TEMPLATE: TPL_VIBRATION,
-}
-OPTIONS_SENSOR_VIBRATION_MOTION2 = {
+OPTIONS_SENSOR_VIBRATION_MOTION = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_VIBRATION,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_STATE_TOPIC: TOPIC_INFO,
-    KEY_VALUE_TEMPLATE: TPL_VIBRATION_MOTION2,
+    KEY_VALUE_TEMPLATE: TPL_VIBRATION_MOTION,
 }
 OPTIONS_SENSOR_VIBRATION_DW = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_VIBRATION,
@@ -2142,8 +2119,8 @@ if model_id == MODEL_SHELLYMOTION_ID or dev_id_prefix == MODEL_SHELLYMOTION_PREF
     }
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        SENSOR_MOTION: OPTIONS_SENSOR_MOTION,
-        SENSOR_VIBRATION: OPTIONS_SENSOR_VIBRATION,
+        SENSOR_MOTION: OPTIONS_SENSOR_MOTION_MOTION,
+        SENSOR_VIBRATION: OPTIONS_SENSOR_VIBRATION_MOTION,
         SENSOR_CHARGER: OPTIONS_SENSOR_CHARGER,
         SENSOR_CLOUD: OPTIONS_SENSOR_CLOUD,
     }
@@ -2156,18 +2133,18 @@ if model_id == MODEL_SHELLYMOTION2_ID or dev_id_prefix == MODEL_SHELLYMOTION2_PR
         BUTTON_UPDATE_FIRMWARE: OPTIONS_BUTTON_UPDATE_FIRMWARE,
     }
     sensors = {
-        SENSOR_BATTERY: OPTIONS_SENSOR_BATTERY_MOTION2,
+        SENSOR_BATTERY: OPTIONS_SENSOR_BATTERY_MOTION,
         SENSOR_IP: OPTIONS_SENSOR_IP,
-        SENSOR_LUX: OPTIONS_SENSOR_LUX_MOTION2,
+        SENSOR_LUX: OPTIONS_SENSOR_LUX_MOTION,
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
         SENSOR_SSID: OPTIONS_SENSOR_SSID,
-        SENSOR_TEMPERATURE: OPTIONS_SENSOR_TEMPERATURE_MOTION2,
+        SENSOR_TEMPERATURE: OPTIONS_SENSOR_TEMPERATURE_MOTION,
         SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
     }
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        SENSOR_MOTION: OPTIONS_SENSOR_MOTION_MOTION2,
-        SENSOR_VIBRATION: OPTIONS_SENSOR_VIBRATION_MOTION2,
+        SENSOR_MOTION: OPTIONS_SENSOR_MOTION_MOTION,
+        SENSOR_VIBRATION: OPTIONS_SENSOR_VIBRATION_MOTION,
         SENSOR_CHARGER: OPTIONS_SENSOR_CHARGER,
         SENSOR_CLOUD: OPTIONS_SENSOR_CLOUD,
     }
@@ -3489,7 +3466,7 @@ for light_id in range(rgbw_lights):
             '"pl_avail":"true",'
             '"pl_not_avail":"false",'
             '"fx_list":["Off", "Meteor Shower", "Gradual Change", "Flash"],'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"gain\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if red is defined and green is defined and blue is defined%},\\"red\\":{{red}},\\"green\\":{{green}},\\"blue\\":{{blue}}{%endif%}{%if white_value is defined%},\\"white\\":{{white_value}}{%endif%}{%if effect is defined%}{%if effect==\\"Meteor Shower\\"%}\\"effect\\":1{%elif effect==\\"Gradual Change\\"%}\\"effect\\":2{%elif effect==\\"Flash\\"%}\\"effect\\":3{%else%}\\"effect\\":0{%endif%}{%else%}\\"effect\\":0{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
+            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"gain\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if red is defined and green is defined and blue is defined%},\\"red\\":{{red}},\\"green\\":{{green}},\\"blue\\":{{blue}}{%endif%}{%if effect is defined%}{%if effect==\\"Meteor Shower\\"%}\\"effect\\":1{%elif effect==\\"Gradual Change\\"%}\\"effect\\":2{%elif effect==\\"Flash\\"%}\\"effect\\":3{%else%}\\"effect\\":0{%endif%}{%else%}\\"effect\\":0{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
             + str(MAX_TRANSITION)
             + ')}}{%endif%}}",'
             '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
@@ -3500,7 +3477,6 @@ for light_id in range(rgbw_lights):
             '"r_tpl":"{{value_json.red}}",'
             '"g_tpl":"{{value_json.green}}",'
             '"b_tpl":"{{value_json.blue}}",'
-            '"whit_val_tpl":"{{value_json.white}}",'
             '"fx_tpl":"{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Flash{%else%}Off{%endif%}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
@@ -3521,7 +3497,7 @@ for light_id in range(rgbw_lights):
             '"pl_avail":"true",'
             '"pl_not_avail":"false",'
             '"fx_list":["Off", "Meteor Shower", "Gradual Change", "Breath", "Flash", "On/Off Gradual", "Red/Green Change"],'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\",\\"mode\\":\\"color\\",{%if red is defined and green is defined and blue is defined%}\\"red\\":{{red}},\\"green\\":{{green}},\\"blue\\":{{blue}},{%endif%}{%if white_value is defined%}\\"white\\":{{white_value}},{%endif%}{%if brightness is defined%}\\"gain\\":{{brightness|float|multiply(0.3922)|round}},{%endif%}{%if effect is defined%}{%if effect == \\"Meteor Shower\\"%}\\"effect\\":1{%elif effect == \\"Gradual Change\\"%}\\"effect\\":2{%elif effect == \\"Breath\\"%}\\"effect\\":3{%elif effect == \\"Flash\\"%}\\"effect\\":4{%elif effect == \\"On/Off Gradual\\"%}\\"effect\\":5{%elif effect == \\"Red/Green Change\\"%}\\"effect\\":6{%else%}\\"effect\\":0{%endif%}{%else%}\\"effect\\":0{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
+            '"cmd_on_tpl":"{\\"turn\\":\\"on\\",\\"mode\\":\\"color\\",{%if red is defined and green is defined and blue is defined%}\\"red\\":{{red}},\\"green\\":{{green}},\\"blue\\":{{blue}},{%endif%}{%if brightness is defined%}\\"gain\\":{{brightness|float|multiply(0.3922)|round}},{%endif%}{%if effect is defined%}{%if effect == \\"Meteor Shower\\"%}\\"effect\\":1{%elif effect == \\"Gradual Change\\"%}\\"effect\\":2{%elif effect == \\"Breath\\"%}\\"effect\\":3{%elif effect == \\"Flash\\"%}\\"effect\\":4{%elif effect == \\"On/Off Gradual\\"%}\\"effect\\":5{%elif effect == \\"Red/Green Change\\"%}\\"effect\\":6{%else%}\\"effect\\":0{%endif%}{%else%}\\"effect\\":0{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
             + str(MAX_TRANSITION)
             + ')}}{%endif%}}",'
             '"cmd_off_tpl":"{\\"turn\\":\\"off\\",\\"mode\\":\\"color\\",\\"effect\\": 0{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
@@ -3532,7 +3508,6 @@ for light_id in range(rgbw_lights):
             '"r_tpl":"{{value_json.red}}",'
             '"g_tpl":"{{value_json.green}}",'
             '"b_tpl":"{{value_json.blue}}",'
-            '"whit_val_tpl":"{{value_json.white}}",'
             '"fx_tpl":"{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Breath{%elif value_json.effect==4%}Flash{%elif value_json.effect==5%}On/Off Gradual{%elif value_json.effect==6%}Red/Green Change{%else%}Off{%endif%}",'
             '"uniq_id":"' + unique_id + '",'
             '"qos":"' + str(qos) + '",'
