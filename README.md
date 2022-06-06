@@ -88,7 +88,8 @@ From other devices I use, here is a list:
   - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
   
 ##### CAMERAS
-~~  - Reolink RLC-410-5MP PoE camera - DIED~~
+~~  - Reolink RLC-410-5MP PoE camera~
+  - Reolink RLC-811A 8MP PoE camera
   - various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
@@ -218,12 +219,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   173 |
-| Binary sensors       |   250 |
+| Binary sensors       |   258 |
 | Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     4 |
 | Device trackers      |    58 |
-| Entities             |  2311 |
+| Entities             |  2356 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    19 |
@@ -232,20 +233,20 @@ Up-to-date count of various things in Home Assistant
 | Input Select         |     8 |
 | Input Text           |     7 |
 | Lights               |    40 |
-| Lines of code (YAML) | 27266 |
+| Lines of code (YAML) | 27397 |
 | Locks                |     2 |
 | Media players        |    18 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
 | Scripts              |    21 |
-| Sensors              |  1364 |
-| Switches             |    97 |
+| Sensors              |  1396 |
+| Switches             |    99 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 22.05.2022 8:00 PM
+* Updated: 06.06.2022 10:00 AM
 
 ### Missing files
 
