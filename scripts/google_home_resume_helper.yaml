@@ -1,0 +1,250 @@
+# GOOGLE HOME RESUME HELPER
+
+google_home_resume_helper:
+  alias: "00 🔊 Google Home Resume - Helper Script"
+  description: Helper script for the Google Home Resume script
+  icon: mdi:cast-audio
+  mode: parallel
+  max: 30
+  sequence:
+    - if: "{{ action_type == 'resume' }}"
+      then:
+        - alias: "State changed since script started?"
+          wait_template: >
+            {{
+              event_script or ytube_resume or
+              (
+                (states[player.entity_id].last_changed > as_datetime(start_time))
+                and expand([player.entity_id] + player.members)
+                      | selectattr('state', 'eq', 'playing')
+                      | list | count > 0
+              )
+            }}
+          timeout: "00:00:30"
+        - variables:
+            state_changed: "{{ wait.completed }}"
+        - alias: "Add entity to the restore active group"
+          service: group.set
+          data:
+            object_id: resume_active_ghresume_{{ context.id | lower }}
+            name: "Entities which will be resumed by the Google Home Resume script"
+            icon: mdi:autorenew
+            entities: >
+              {%- set g = 'group.resume_active_ghresume_' ~ context.id | lower %}
+              {%- set current = state_attr(g, 'entity_id') %}
+              {%- set current = [] if current == none else current | list %}
+              {{ ( current + [ player.entity_id ] ) | unique | list }}
+        - alias: "Wait until player is idle again, and all other scripts are finished"
+          wait_template: >
+            {%- set current = expand(states.group
+                                | selectattr('entity_id', 'search', 'group.resume_script_target_')
+                                | rejectattr('entity_id', 'search', context)
+                                | map(attribute='entity_id')
+                                | list) | map(attribute='entity_id') | list
+            %}
+            {%- set checklist = [player.entity_id] + player.members %}
+            {{
+              expand(checklist) | rejectattr('state', 'in', ['idle', 'off']) | list | count == 0
+              and current | select('eq', player.entity_id) | list | count == 0
+            }}
+        - alias: "Restore volume in case volume has changed"
+          if: >
+            {{ player.volume_level | round(2, default=0) != state_attr(player.entity_id, 'volume_level') | round(2, default=0) }}
+          then:
+            - alias: "Restore volume"
+              repeat:
+                for_each: "{{ player.members if player.type == 'group' else [ player.entity_id ] }}"
+                sequence:
+                  - alias: "Set volume back to old state"
+                    service: media_player.volume_set
+                    target:
+                      entity_id: "{{ repeat.item }}"
+                    data:
+                      volume_level: >
+                        {%- if player.type == 'group' %}
+                          {{ member_data | selectattr('entity_id', 'eq', repeat.item) | map(attribute='volume_level') | join }}
+                        {%- else %}
+                          {{ player.volume_level }}
+                        {%- endif %}
+        - alias: "Google Home with screen back to idle screen"
+          if: "{{ player.type == 'screen' and not resume }}"
+          then:
+            - alias: "Turn Google Home off to return to idle mode (photo display)"
+              service: media_player.turn_off
+              target:
+                entity_id: "{{ player.entity_id }}"
+        - alias: "Resume needed?"
+          if: "{{ ytube_resume or (state_changed and resume) }}"
+          then:
+            - alias: "Set variables"
+              variables:
+                ytube_music: >
+                  {{ ytube_music_data | selectattr('target', 'eq', player.entity_id) | list | count > 0 }}
+                spotify: >
+                  {{ player.app_name == 'Spotify' }}
+                youtube: >
+                  {{ player.app_name in ['YouTube', 'YouTube Music'] }}
+                stream: >
+                  {%- set y = ytube_music_data
+                              | rejectattr('target', 'in', players_to_resume)
+                              | map(attribute='target')
+                              | list
+                  %}
+                  {{
+                    player.media_content_id is defined
+                    and player.media_content_id.startswith('http')
+                    and not player.entity_id in y
+                  }}
+            - alias: "Resume playing"
+              choose:
+                - alias: "Ytube Music?"
+                  conditions: "{{ ytube_music }}"
+                  sequence:
+                    - variables:
+                        player_ytube: "{{ ytube_music_data | selectattr('target', 'eq', player.entity_id) | join }}"
+                    - service: ytube_music_player.call_method
+                      data:
+                        entity_id: "{{ player_ytube.player }}"
+                        command: interrupt_resume
+                    - alias: "Wait until song is playing"
+                      wait_template: >
+                        {{ iif(state_attr(player_ytube.player, '_media_id')) and iif(state_attr(player_ytube.player, 'media_position')) }}
+                    - alias: "Seek"
+                      service: media_player.media_seek
+                      target:
+                        entity_id: "{{ player_ytube.player }}"
+                      data:
+                        seek_position: "{{ player_ytube.position }}"
+                - alias: "YouTube?"
+                  conditions: "{{ player.type == 'screen' and youtube }}"
+                  sequence:
+                    - alias: "Play video"
+                      service: media_player.play_media
+                      target:
+                        entity_id: "{{ player.entity_id }}"
+                      data:
+                        media_content_type: cast
+                        media_content_id: '
+                          {
+                          "app_name": "youtube",
+                          "media_id": "{{ player.media_content_id }}"
+                          }'
+                    - alias: "Wait until video is playing"
+                      wait_template: >
+                        {{
+                          is_state_attr(player.entity_id, 'media_content_id', player.media_content_id)
+                          and iif(state_attr(player.entity_id, 'media_position'))
+                        }}
+                    - alias: "Seek"
+                      service: media_player.media_seek
+                      target:
+                        entity_id: "{{ player.entity_id }}"
+                      data:
+                        seek_position: >
+                          {{ [0, player.media_position - 3] | max }}
+                - alias: "Spotify?"
+                  conditions: "{{ spotify }}"
+                  sequence:
+                    - variables:
+                        service_data:
+                          entity_id: "{{ player.entity_id }}"
+                          force_playback: true
+                        account_data:
+                          account: "{{ player.spotcast }}"
+                    - alias: "Resume spotify"
+                      service: spotcast.start
+                      data: >
+                        {{ service_data if player.spotcast == 'primary_account' else dict(service_data, **account_data) }}
+                    - alias: "Wait until song is playing"
+                      wait_template: >
+                        {{ is_state_attr(player.entity_id, 'app_name', 'Spotify') and iif(state_attr(player.entity_id, 'media_position')) }}
+                    - alias: "Seek"
+                      service: media_player.media_seek
+                      target:
+                        entity_id: "{{ player.entity_id }}"
+                      data:
+                        seek_position: "{{ player.media_position }}"
+                - alias: "Stream?"
+                  conditions: "{{ stream }}"
+                  sequence:
+                    - variables:
+                        picture_url: "{{ player.fixed_picture if player.fixed_picture is defined else player.entity_picture }}"
+                        metadata:
+                          metadataType: 3
+                          title: "{{ player.media_title }}"
+                          artist: "{{ player.media_artist }}"
+                        picture:
+                          images:
+                            - url: "{{ picture_url }}"
+                    - alias: "Resume stream"
+                      service: media_player.play_media
+                      target:
+                        entity_id: "{{ player.entity_id }}"
+                      data:
+                        media_content_id: "{{ player.media_content_id }}"
+                        media_content_type: "{{ player.media_content_type }}"
+                        extra:
+                          metadata: >
+                            {{ medadata if picture_url == 'no pic' else dict(metadata, **picture) }}
+                    - alias: "Wait until media_content_id is available"
+                      wait_template: "{{ is_state_attr(player.entity_id, 'media_content_id', player.media_content_id) }}"
+                    - alias: "Play (avoids long delay)"
+                      service: media_player.media_play
+                      target:
+                        entity_id: "{{ player.entity_id }}"
+        - alias: "Check if resume_action_false group exists"
+          if: >
+            {{ integration_entities('group') | select('search', 'resume_action_false_ghresume_' ~ context.id | lower) | list | count > 0 }}
+          then:
+            - alias: "Remove entity from group"
+              service: group.set
+              data:
+                object_id: resume_action_false_ghresume_{{ context.id | lower }}
+                name: "Entities with actions which should not be resumed"
+                icon: mdi:alert-octagon
+                entities: >
+                  {%- set current = state_attr('group.resume_action_false_ghresume' ~ context.id | lower, 'entity_id') %}
+                  {{ iif(current == none, [], current) | reject('eq', player.entity_id) | list }}
+        - alias: "Remove entity from group"
+          service: group.set
+          data:
+            object_id: resume_active_ghresume_{{ context.id | lower }}
+            name: "Entities currently active with Google Home Resume script"
+            icon: mdi:autorenew
+            entities: >
+              {%- set g = 'group.resume_active_ghresume_' ~ context.id | lower %}
+              {%- set current = state_attr(g, 'entity_id') %}
+              {{ iif(current == none, [], current) | reject('eq', player.entity_id) | list }}
+        - alias: "Remove entity from group"
+          service: group.set
+          data:
+            object_id: resume_script_active_ghresume_{{ context.id | lower }}
+            name: "Entities currently active with Google Home Resume script"
+            icon: mdi:play-box
+            entities: >
+              {%- set g = 'group.resume_script_active_ghresume_' ~ context.id | lower %}
+              {%- set current = state_attr(g, 'entity_id') %}
+              {{ iif(current == none, [], current) | reject('eq', player.entity_id) | list }}
+      else:
+        - wait_for_trigger:
+            - platform: event
+              event_type: call_service
+              event_data:
+                domain: media_player
+                service: play_media
+                service_data:
+                  media_content_type: music
+                  entity_id: "{{ [ dummy_player ] }}"
+        - alias: "Send TTS message with picture"
+          service: media_player.play_media
+          target: "{{ target }}"
+          data:
+            media_content_id: "{{ wait.trigger.event.data.service_data.media_content_id }}"
+            media_content_type: "music"
+            extra:
+              metadata:
+                metadataType: 3
+                title: "{{ large_text }}"
+                artist: "{{ small_text }}"
+                images:
+                  - url: "{{ picture_url }}"
