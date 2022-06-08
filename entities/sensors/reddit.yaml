@@ -11,3 +11,4 @@ client_secret: !secret reddit_client_secret
 subreddits:
   - VORONDesign
   - homeassistant
+sort_by: new
