@@ -30,7 +30,7 @@ action:
     entity_id:
       - media_player.display_me
       - media_player.clock_me
-    volume_level: 0.5
+    volume_level: 0.6
   service: media_player.volume_set
 - data:
     entity_id:

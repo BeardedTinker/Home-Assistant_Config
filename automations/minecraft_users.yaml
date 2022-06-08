@@ -18,7 +18,7 @@ condition:
       state: '0'
     - condition: state
       entity_id: input_boolean.audio_notifications
-      state: 'on'  
+      state: 'on'
 
 action:
 - service: script.notify_engine
@@ -32,14 +32,33 @@ action:
     color: 'green'
     sticky: 'false'
     timeout: 300
-- service: media_player.volume_set
+#- service: media_player.volume_set
+#  target:
+#    entity_id: 
+#      - media_player.whatever_me
+#      - media_player.mini_me
+#  data:
+#    volume_level: 0.3
+#- service: tts.google_translate_say
+#  target:
+#    entity_id: 
+#      - media_player.whatever_me
+#      - media_player.mini_me
+#  data:
+#    message: 'Currently, {{states("sensor.skyblock_players_online")}} players are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
+- service: script.turn_on
   target:
-    entity_id: media_player.whatever_me
+    entity_id: script.google_home_resume
   data:
-    volume_level: 0.3
- 
-- service: tts.google_translate_say
-  target:
-    entity_id: media_player.whatever_me
-  data:
-    message: 'Currently, {{states("sensor.skyblock_players_online")}} players are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
+    variables:
+      action:
+        - alias: "Send TTS message"
+          service: tts.google_translate_say
+          target:
+            entity_id: 
+              - media_player.whatever_me
+              - media_player.mini_me
+          data:
+            message: 'Currently, {{states("sensor.skyblock_players_online")}} players are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
+          extra:
+            volume: 0.4

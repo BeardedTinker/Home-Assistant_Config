@@ -32,17 +32,35 @@ action:
     sticky: 'false'
 #    timeout: ''
 
-- service: media_player.volume_set
+#- service: media_player.volume_set
+#  data:
+#    entity_id: 
+#      - media_player.display_me
+#      - media_player.whatever_me
+#      - media_player.mini_me
+#    volume_level: 0.5
+#- service: tts.google_translate_say
+#  entity_id: 
+#    - media_player.display_me
+#    - media_player.whatever_me
+#    - media_player.mini_me
+#  data:  
+#    message: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks...'
+
+- service: script.turn_on
+  target:
+    entity_id: script.google_home_resume
   data:
-    entity_id: 
-      - media_player.display_me
-      - media_player.whatever_me
-      - media_player.mini_me
-    volume_level: 0.5
-- service: tts.google_translate_say
-  entity_id: 
-    - media_player.display_me
-    - media_player.whatever_me
-    - media_player.mini_me
-  data:  
-    message: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks...'
+    variables:
+      action:
+        - alias: "Send TTS message"
+          service: tts.google_translate_say
+          target:
+            entity_id: 
+              - media_player.display_me
+              - media_player.whatever_me
+              - media_player.mini_me
+          data:
+            message: "Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks..."
+          extra:
+            volume: 0.5
