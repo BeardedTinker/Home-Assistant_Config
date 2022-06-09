@@ -5,28 +5,48 @@
 
 schoolnight_bedtime_luka:
   sequence:
-  - service: media_player.volume_set
-    data:
-      entity_id:
-        - media_player.display_me
-        - media_player.whatever_me
-        - media_player.clock_me
-      volume_level: 0.5
-  - delay: 00:00:01
-  - service: tts.google_translate_say
-    entity_id: media_player.display_me
-    data:
-      message: >
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id:
+  #       - media_player.display_me
+  #       - media_player.whatever_me
+  #       - media_player.clock_me
+  #     volume_level: 0.5
+  # - delay: 00:00:01
+  # - service: tts.google_translate_say
+  #   entity_id: media_player.display_me
+  #   data:
+  #     message: >
 
-        {{ [
-        "Luka, it's bed time!",
-        "10 o'clock, get ready for bed Luka.",
-        "Luka, let's go to bathroom and bed.",
-        "It's getting late Luka. Get ready for bed.",
-        "Luka! Tomorrow is school day, get ready for sleep.",
-        ] | random }}
-#       "Zita, vrijeme je za spavanje!",
-#       "9 sati je, spremi se za krpe Zita.",
-#       "Zitice, ajmo kupaonica i krpe.",
-#       "Kasno je Zita, kreni se spremati",
-#       "Zita! Sutra je škola, kreni se spremati?",
+  #       {{ [
+  #       "Luka, it's bed time!",
+  #       "10 o'clock, get ready for bed Luka.",
+  #       "Luka, let's go to bathroom and bed.",
+  #       "It's getting late Luka. Get ready for bed.",
+  #       "Luka! Tomorrow is school day, get ready for sleep.",
+  #       ] | random }}
+  - alias: "Luka bedtime"
+    service: script.turn_on
+    target:
+      entity_id: script.google_home_resume
+    data:
+      variables:
+        action:
+          - alias: "Send TTS message"
+            service: tts.google_translate_say
+            target:
+              entity_id:
+                - media_player.display_me
+                - media_player.whatever_me
+                - media_player.clock_me
+            data:
+              message: >
+                {{ [
+                "Luka, it's bed time!",
+                "10 o'clock, get ready for bed Luka.",
+                "Luka, let's go to bathroom and bed.",
+                "It's getting late Luka. Get ready for bed.",
+                "Luka! Tomorrow is school day, get ready for sleep.",
+                ] | random }}
+            extra:
+              volume: 0.5

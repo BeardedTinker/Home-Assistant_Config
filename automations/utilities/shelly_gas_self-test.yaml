@@ -27,11 +27,26 @@ action:
     importance_id: default
     color: 'yellow'
     sticky: 'false'
-- data:
-    entity_id: media_player.display_me
-    volume_level: 0.5
-  service: media_player.volume_set
-- data:
-    entity_id: media_player.display_me
-    message: 'Shelly gas sensors needs self-test. Press button on it to start it.'
-  service: tts.google_translate_say
+# - data:
+#     entity_id: media_player.display_me
+#     volume_level: 0.5
+#   service: media_player.volume_set
+# - data:
+#     entity_id: media_player.display_me
+#     message: 'Shelly gas sensors needs self-test. Press button on it to start it.'
+#   service: tts.google_translate_say
+- service: script.turn_on
+  target:
+    entity_id: script.google_home_resume
+  data:
+    variables:
+      action:
+        - alias: "Send TTS message"
+          service: tts.google_translate_say
+          target:
+            entity_id: 
+              - media_player.display_me
+              - media_player.clock_me
+          data:
+            message: 'Shelly gas sensors needs self-test. Press button on it to start it.'
+            volume: 0.5

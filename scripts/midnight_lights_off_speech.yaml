@@ -5,19 +5,41 @@
 
 midnightlightsoffspeech:
   sequence:
-  - service: media_player.volume_set
+  # - service: media_player.volume_set
+  #   data:
+  #     entity_id: media_player.display_me
+  #     volume_level: 0.2
+  # - delay: 00:00:02
+  # - service: tts.google_translate_say
+  #   entity_id: media_player.display_me
+  #   data:
+  #     message: >
+  #      {{ [
+  #      "Lights out, nighty night!",
+  #      "Let's get to bed. Lightf off!",
+  #      "Sweet dreams, lights are out",
+  #      "Let there be night! Have a rest",
+  #      "Go to bed, I'm going!",
+  #      ] | random }}
+  - alias: "Midnight lights out"
+    service: script.turn_on
+    target:
+      entity_id: script.google_home_resume
     data:
-      entity_id: media_player.display_me
-      volume_level: 0.2
-  - delay: 00:00:02
-  - service: tts.google_translate_say
-    entity_id: media_player.display_me
-    data:
-      message: >
-       {{ [
-       "Lights out, nighty night!",
-       "Let's get to bed. Lightf off!",
-       "Sweet dreams, lights are out",
-       "Let there be night! Have a rest",
-       "Go to bed, I'm going!",
-       ] | random }}
+      variables:
+        action:
+          - alias: "Send TTS message"
+            service: tts.google_translate_say
+            target:
+              entity_id: media_player.display_me
+            data:
+              message: >
+                {{ [
+                "Lights out, nighty night!",
+                "Let's get to bed. Lightf off!",
+                "Sweet dreams, lights are out",
+                "Let there be night! Have a rest",
+                "Go to bed, I'm going!",
+                ] | random }}
+            extra:
+              volume: 0.3
