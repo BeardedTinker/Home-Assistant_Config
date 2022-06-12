@@ -54,4 +54,5 @@ action:
               - media_player.clock_me
           data:
             message: 'Gas leak alert ends. Current level of gas is  {{ states("sensor.shelly_gas_10521cef4a01_concentration") }} PPM and normal value should be 0.'
+          extra:
             volume: 0.5

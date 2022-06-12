@@ -49,4 +49,5 @@ action:
               - media_player.clock_me
           data:
             message: 'Shelly gas sensors needs self-test. Press button on it to start it.'
+          extra:
             volume: 0.5

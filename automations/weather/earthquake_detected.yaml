@@ -50,4 +50,5 @@ action:
               - media_player.clock_me
           data:
             message: 'Earthquake detected! Stay calm!'
+          extra:
             volume: 0.5

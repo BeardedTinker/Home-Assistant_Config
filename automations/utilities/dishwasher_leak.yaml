@@ -26,7 +26,7 @@ action:
     tag_id: 'emergency'
     color: 'red'
     sticky: 'true'
-- data:
+#- data:
 #     entity_id:
 #       - media_player.display_me
 #       - media_player.clock_me
@@ -52,4 +52,5 @@ action:
               - media_player.clock_me
           data:
             message: 'Water leak detected. Check under dishwasher now!'
+          extra:
             volume: 0.6
