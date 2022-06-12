@@ -1,6 +1,9 @@
 "definition of constants"
+from homeassistant.const import Platform
+
 DOMAIN = "watchman"
 DOMAIN_DATA = "watchman_data"
+VERSION = "0.6.0"
 
 DEFAULT_REPORT_FILENAME = "watchman_report.txt"
 DEFAULT_HEADER = "-== WATCHMAN REPORT ==- "
@@ -24,21 +27,23 @@ CONF_COLUMNS_WIDTH = "columns_width"
 CONF_STARTUP_DELAY = "startup_delay"
 CONF_FRIENDLY_NAMES = "friendly_names"
 CONF_TEST_MODE = "test_mode"
-#configuration parameters allowed in watchman.report service data
-CONF_ALLOWED_SERVICE_PARAMS = [CONF_SERVICE_NAME,
-                                CONF_CHUNK_SIZE,
-                                CONF_CREATE_FILE,
-                                CONF_SEND_NOTIFICATION,
-                                CONF_PARSE_CONFIG,
-                                CONF_SERVICE_DATA,
-                                CONF_TEST_MODE]
+# configuration parameters allowed in watchman.report service data
+CONF_ALLOWED_SERVICE_PARAMS = [
+    CONF_SERVICE_NAME,
+    CONF_CHUNK_SIZE,
+    CONF_CREATE_FILE,
+    CONF_SEND_NOTIFICATION,
+    CONF_PARSE_CONFIG,
+    CONF_SERVICE_DATA,
+    CONF_TEST_MODE,
+]
 
 EVENT_AUTOMATION_RELOADED = "automation_reloaded"
 EVENT_SCENE_RELOADED = "scene_reloaded"
 
-SENSOR_LAST_UPDATE = "sensor.watchman_last_updated"
-SENSOR_MISSING_ENTITIES = "sensor.watchman_missing_entities"
-SENSOR_MISSING_SERVICES = "sensor.watchman_missing_services"
+SENSOR_LAST_UPDATE = "watchman_last_updated"
+SENSOR_MISSING_ENTITIES = "watchman_missing_entities"
+SENSOR_MISSING_SERVICES = "watchman_missing_services"
 MONITORED_STATES = ["unavailable", "unknown", "missing"]
 
 TRACKED_EVENT_DOMAINS = [
@@ -62,3 +67,6 @@ BUNDLED_IGNORED_ITEMS = [
     "timer.restarted",
     "timer.paused",
 ]
+
+# Platforms
+PLATFORMS = [Platform.SENSOR]
