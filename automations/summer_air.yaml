@@ -15,7 +15,7 @@ trigger:
   id: lower_out
 - platform: numeric_state
   entity_id: sensor.loggia_temperature
-  above: sensor.dining_room_temperature
+  above: sensor.living_room_temperature
   for:
     minutes: 10
   id: higher_out
@@ -125,7 +125,7 @@ action:
       #   target:
       #     entity_id: media_player.display_me
       #   data:
-      #     message: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.!'
+      #     message: 'Close windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.diningroom_temperature")|int}}° cooler than outside.'
       - service: script.turn_on
         target:
           entity_id: script.google_home_resume
@@ -137,6 +137,6 @@ action:
                 target:
                   entity_id: media_player.display_me
                 data:
-                  message: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.!'
+                  message: 'Close windows - inside temperature is {{ states("sensor.living_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.living_room_temperature")|int}}° cooler than outside.'
                 extra:
                   volume: 0.6
