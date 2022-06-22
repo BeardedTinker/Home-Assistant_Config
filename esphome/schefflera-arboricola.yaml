@@ -62,6 +62,7 @@ mqtt:
   broker: !secret mqtt_ip
   username: !secret mqtt_user
   password: !secret mqtt_password
+  discovery: true
 
 logger:
 
