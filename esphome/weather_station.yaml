@@ -156,21 +156,21 @@ sensor:
 #          return ((id(voltage).state - ${battery_empty}) / ${battery_diff} * 100.00);  
     update_interval: ${update_fq}
 
-# Rain gauge with pulse counter 
-  - platform: pulse_counter
-    pin:
-      number: GPIO25
-      inverted: True
-      mode: INPUT_PULLUP    
-    name: 'Rainfall'
-    unit_of_measurement: 'mm'
-    count_mode:
-      rising_edge: DISABLE
-      falling_edge: INCREMENT
-#    internal_filter: 14ms          
-    filters:
-      - multiply: 0.367
-    update_interval: ${update_fq}
+## Rain gauge with pulse counter 
+#  - platform: pulse_counter
+#    pin:
+#      number: GPIO25
+#      inverted: True
+#      mode: INPUT_PULLUP    
+#    name: 'Rainfall'
+#    unit_of_measurement: 'mm'
+#    count_mode:
+#      rising_edge: DISABLE
+#      falling_edge: INCREMENT
+##    internal_filter: 14ms          
+#    filters:
+#      - multiply: 0.367
+#    update_interval: ${update_fq}
 
 # Wind speed sensor with pulse counter
   - platform: pulse_counter
@@ -333,11 +333,11 @@ text_sensor:
 deep_sleep:
   id: deep_sleep_control
   sleep_duration: ${sleep_duration}
-  run_duration:
-    default: ${awake_duration}
-    gpio_wakeup_reason: 2s
-  wakeup_pin: GPIO25
-  wakeup_pin_mode: INVERT_WAKEUP
+#  run_duration:
+#    default: ${awake_duration}
+#    gpio_wakeup_reason: 2s
+#  wakeup_pin: GPIO25
+#  wakeup_pin_mode: INVERT_WAKEUP
 
 # Deep sleep script if/then/else
 script:
