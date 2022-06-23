@@ -1,0 +1,9 @@
+#####
+# Uptime Kuma panel
+# Monitoring AddOn for Home Assistant
+#####
+
+grafana:
+  title: 'Uptime Kuma'
+  icon: mdi:monitor-account
+  url: !secret url_uptime_kuma
