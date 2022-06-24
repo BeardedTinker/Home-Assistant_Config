@@ -1,0 +1,83 @@
+call_method:
+  description: Call a custom command.
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    command:
+      description: Command to pass to LyTube music player.
+      example: "rate_track"
+    parameters:
+      description: Array of additional parameters, optional and depends on command.
+      example: "thumb_up"
+
+search:
+  description: Search for music / album / etc on Ytube Music
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    query:
+      description: The search query
+      example: "2pm tetris"
+    filter:
+      description: filter for query, values can be 'albums', 'playlists','artists' or 'songs'. Leave this out to get all types.
+    limit:
+      description: Limits the amount of resuls
+      example: "20"
+
+add_to_playlist:
+  description: Adds a song to a playlist
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    song_id:
+      description: The id of the song, optional. By default the current song id is used. Only provide an argument to override this behavior.
+      example: ""
+    playlist_id:
+      description: The id of the playlist, optional. By default the current playlist is used. Only provide an argument to override this behavior.
+      example: ""
+
+remove_from_playlist:
+  description: Removes a song from a playlist
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    song_id:
+      description: The id of the song, optional. By default the current song id is used. Only provide an argument to override this behavior.
+      example: ""
+    playlist_id:
+      description: The id of the playlist, optional. By default the current playlist is used. Only provide an argument to override this behavior.
+      example: ""
+
+rate_track:
+  description: Rates a song
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    rating:
+      description: The rating of the song, can be 'thumb_up' / 'thumb_down' / 'thumb_middle' / 'thumb_toggle_up_middle'.
+      example: "thumb_up"
+    song_id:
+      description: The id of the song, optional. By default the current song id is used. Only provide an argument to override this behavior.
+      example: ""
+
+limit_count:
+  description: Limits the count of loaded tracks
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the custom command.
+      example: "media_player.ytube_music_player"
+    limit:
+      description: The amount of tracks, loaded per call
+      example: "20"
+
+start_radio:
+  description: Creates a radio of the current track
+  fields:
+    entity_id:
+      description: Name(s) of the yTube music player entity where to run the command.
+      example: "media_player.ytube_music_player"
