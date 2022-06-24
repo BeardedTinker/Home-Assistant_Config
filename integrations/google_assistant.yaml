@@ -12,10 +12,10 @@ google_assistant:
   exposed_domains:
     - switch
     - light
-    - group
+#    - group
     - vacuum
     - camera
     - lock
-  entity_config:
-    group.all_automations:
-      expose: false
+#  entity_config:
+#    group.all_automations:
+#      expose: false
