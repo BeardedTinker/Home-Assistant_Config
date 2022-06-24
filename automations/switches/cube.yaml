@@ -82,10 +82,10 @@ action:
       - condition: trigger
         id: rotateright
       sequence:
-        - service: homeassistant.toggle
+        - service: light.toggle
           target:
             entity_id:
-              - switch.radio_play
+              - light.kitchen_countertop
     - conditions:
       - condition: trigger
         id: slide
@@ -102,14 +102,14 @@ action:
           target:
             entity_id:
               - switch.tree
-    - conditions:
-      - condition: trigger
-        id: wakeup
-      sequence:
-        - service: light.toggle
-          target:
-            entity_id:
-              - light.kitchen_countertop
+#    - conditions:
+#      - condition: trigger
+#        id: wakeup
+#      sequence:
+#        - service: light.toggle
+#          target:
+#            entity_id:
+#              - switch.radio_play
     - conditions:
       - condition: trigger
         id: shake
