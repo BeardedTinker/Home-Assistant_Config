@@ -14,7 +14,7 @@ condition:
   condition: not
   conditions:
     - condition: state
-      entity_id: sensor.minecraft_server_players_online
+      entity_id: sensor.skyblock_players_online
       state: '0'
     - condition: state
       entity_id: input_boolean.audio_notifications
