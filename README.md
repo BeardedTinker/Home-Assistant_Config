@@ -37,8 +37,6 @@ Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/
 From other devices I use, here is a list:
 
 ##### IKEA DEVICES
-~~  - IKEA TRADFRI Gateway - NOT used anymore~~
-~~  - IKEA TRADFRI wireless dimmer (ICTC-G-1) - NOT used anymore~~
   - IKEA TRADFRI remote control (E1524/E1810)
   - IKEA TRADFRI ON/OFF switch (E1743)
   - IKEA TRADFRI control outlet (E1603/E1702)
@@ -63,7 +61,7 @@ From other devices I use, here is a list:
   - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
   - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
   - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
-~~  - [Shelly Door & Window 2](https://shelly.cloud/products/shelly-door-window-2-smart-home-automation-sensor/) sensor~~
+- - [Shelly Plus 2PM](https://shelly.cloud/shelly-plus-2pm/)
 
   Plus some Shelly devices that are waiting installation and/or testing:
   - Shelly 1 
@@ -71,7 +69,6 @@ From other devices I use, here is a list:
   - Shelly UV light
   - Shelly Plus 1 
   - Shelly Plus 1PM 
-  - Shelly Plus 2PM
 
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
@@ -88,8 +85,9 @@ From other devices I use, here is a list:
   - tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
   
 ##### CAMERAS
-~~  - Reolink RLC-410-5MP PoE camera~
-  - Reolink RLC-811A 8MP PoE camera
+  - [Reolink RLC-811A 8MP PoE camera](https://bit.ly/3xu9sBx )
+  - [SwitchBot Indor Cam](https://switchbot.vip/3QOpBue)
+  - [SwitchBot Pan/Tilt Cam](https://switchbot.vip/3NiAJN1)
   - various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
@@ -114,12 +112,12 @@ From other devices I use, here is a list:
 As I'm running this on Synology, I have mix of Docker containers and Home Assistant add-ons. Here is a list:
 
 Add-ons:
-~~  - Assistant Relay - [link](https://github.com/Apipa169/Assistant-Relay-for-Hassio) - TO BE REMOVED~~
   - ESPHome - [link](https://esphome.io/) 
   - Samba share - [link](https://github.com/home-assistant/hassio-addons/tree/master/samba)
   - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
   - Studio Code Server - [link](https://github.com/hassio-addons/addon-vscode)
   - Terminal & SSH - [link](https://github.com/home-assistant/hassio-addons/tree/master/ssh)
+  - Uptime Kuma - [link]()
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
@@ -219,12 +217,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   173 |
-| Binary sensors       |   258 |
+| Binary sensors       |   275 |
 | Cameras              |    12 |
 | Climates             |     4 |
 | Counters             |     4 |
 | Device trackers      |    58 |
-| Entities             |  2356 |
+| Entities             |  2418 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    19 |
@@ -232,21 +230,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
-| Lights               |    40 |
-| Lines of code (YAML) | 27397 |
+| Lights               |    41 |
+| Lines of code (YAML) | 29253 |
 | Locks                |     2 |
-| Media players        |    18 |
+| Media players        |    19 |
 | Persons              |     6 |
 | Plants               |     7 |
 | Rest commands        |    13 |
-| Scripts              |    21 |
-| Sensors              |  1396 |
-| Switches             |    99 |
+| Scripts              |    23 |
+| Sensors              |  1428 |
+| Switches             |   101 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 06.06.2022 10:00 AM
+* Updated: 24.06.2022 10:00 PM
 
 ### Missing files
 
