@@ -1,0 +1,11 @@
+#####
+# Notification group "Kids"
+# Luka and Zita
+#####
+
+platform: group
+name: kids
+services:
+  - service: iphone
+  - service: fig_lx1
+  - service: ebroz_bot

@@ -23,7 +23,7 @@ condition:
 action:
 - service: script.notify_engine
   data:
-    who: 'luka'
+    who: 'kids'
     title: '🎮*Someone is playing minecraft*'
     value1: 'Currently, {{states("sensor.skyblock_players_online")}} player(s) is/are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
     group: system
