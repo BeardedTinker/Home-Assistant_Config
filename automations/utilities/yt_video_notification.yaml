@@ -17,7 +17,7 @@ trigger:
     - sensor.mostlychris
     - sensor.slackerlabs
     - sensor.smart_home_makers
-    - sensor.intermittech
+    - sensor.intermit_tech
   attribute: url
 
 action:
