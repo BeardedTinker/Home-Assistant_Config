@@ -7,7 +7,7 @@ alias: Minecrft server
 id: 86034f45-36b5-44c7-b34f-980680eca9c4
 
 trigger:
-  entity_id: sensor.minecraft_server_players_online
+  entity_id: sensor.skyblock_players_online
   platform: state
 
 condition:
