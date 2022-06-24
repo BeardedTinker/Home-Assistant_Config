@@ -8,7 +8,9 @@ alias: Restock mosquito tablets
 
 trigger:
   platform: numeric_state
-  entity_id: sensor.wx08zm_mosquito_tablet
+  entity_id: 
+    - sensor.luka_mosquito_tablet
+    - sensor.zita_mosquito_tablet
   below: 45
 
 action:
