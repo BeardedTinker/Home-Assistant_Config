@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_entities:
     friendly_name: 'Number of Entities'
+    unique_id: 00796e1c-aa58-4cd8-bdd8-03ff6a76fd60
     value_template: >
       {{ states | length }}

@@ -7,6 +7,7 @@ platform: template
 switches:
   radio_play:
     icon_template: 'mdi:play'
+    unique_id: e8561fff-0ac2-49fd-a6c4-b8ddd01ebd1a
     value_template: 'on'
     turn_on:
       service: script.turn_on

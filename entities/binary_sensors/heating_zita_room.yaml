@@ -8,3 +8,4 @@ sensors:
   zita_room_heating:
     friendly_name: "Heating in Zita Room"
     value_template: '{{ state_attr("climate.zita_room","hvac_action") == "heating" }}'
+    unique_id: 8c7b43be-e2e7-47a5-b648-fb5259e0ee6c

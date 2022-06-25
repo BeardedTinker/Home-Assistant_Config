@@ -6,9 +6,8 @@
 platform: template
 sensors:
   current_week:
-    #    entity_id: sensor.date
-        friendly_name: "School week"
-        value_template: >-
-          {% set week_number = now().isocalendar()[1] %}
-          Week {{'A' if week_number % 2 == 0 else 'B'}}
-    #      Week {{'A' if week_number % 2 == 0 else 'B'}} (#{{week_number}})
+    friendly_name: "School week"
+    unique_id: d803386b-91ec-4185-9c9a-34171c556f31
+    value_template: >-
+      {% set week_number = now().isocalendar()[1] %}
+      Week {{'A' if week_number % 2 == 0 else 'B'}}

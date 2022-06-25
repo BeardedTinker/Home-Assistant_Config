@@ -6,6 +6,7 @@
 platform: template
 sensors:
   people_home:
+    unique_id: c2d22ff5-eede-4d79-bdcc-11dd5d90c47f
     value_template: >-
       {{ is_state('person.andrej', 'home')
          or is_state('person.luka', 'home')

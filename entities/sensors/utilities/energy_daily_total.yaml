@@ -1,5 +1,6 @@
 #####
 # Sensor Template - Energy use Daily Peak and Offpeak Total
+#
 #####
 
 platform: template
@@ -8,3 +9,4 @@ sensors:
     friendly_name: 'Daily Peak and Offpeak Total'
     value_template: "{{ ((states('sensor.daily_energy_peak')|float + states('sensor.daily_energy_offpeak')|float) )|round(3) }}"
     unit_of_measurement: "kWh"
+    unique_id: 83471b5c-34f6-4ce8-9c87-8f374f299cb8

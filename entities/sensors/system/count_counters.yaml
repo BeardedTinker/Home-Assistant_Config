@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_counter:
     friendly_name: 'Number of Counters'
+    unique_id: 03f3eb44-6a34-4114-8a48-91c793dc2533
     value_template: >-
       {{ states.counter | list | count }}

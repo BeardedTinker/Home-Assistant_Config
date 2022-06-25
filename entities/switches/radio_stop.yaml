@@ -7,6 +7,7 @@ platform: template
 switches:
   radio_stop:
     icon_template: 'mdi:stop'
+    unique_id: da5d7e64-032c-439a-b662-a8c8256098f9
     value_template: 'on'
     turn_on:
       service: script.turn_on

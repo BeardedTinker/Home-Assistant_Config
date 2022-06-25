@@ -8,3 +8,4 @@ sensors:
   meteoalarm_severity:
     friendly_name: "Severity"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'severity') }}"
+    unique_id: e209d706-2777-45eb-9629-be39f91ee6b3

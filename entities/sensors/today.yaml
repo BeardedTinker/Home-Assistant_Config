@@ -8,7 +8,7 @@ platform: template
 sensors: 
   today_is:
     friendly_name: 'Today is'
-#    value_template: "{{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}" 
+    unique_id: 15d74a0f-e4b8-49f8-a0e9-f223d6b1c540
     value_template: >
       {% set w = strptime(states('sensor.date'), '%Y-%m-%d').strftime('%w') | int %}
       {{['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][w]}}

@@ -12,3 +12,4 @@ sensors:
     icon_template: mdi:ab-testing
     # entity_id: sensor.date
     value_template: "{{ 'Odd' if now().strftime('%j')|int % 2 else 'Even' }}"
+    unique_id: 1c51d921-88a3-404c-8f70-e92546c4c1c5

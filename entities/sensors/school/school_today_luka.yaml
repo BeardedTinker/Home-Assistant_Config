@@ -7,6 +7,7 @@ platform: template
 sensors:
   luka_school_today:
     friendly_name: 'Luka School Today'
+    unique_id: cb8563b3-d520-48d7-a020-1c8a98533328
     value_template: >-
       {%- set tempt=as_timestamp(now()) | timestamp_custom("%Y-%m-%d",true) %}
       {% if state_attr('calendar.luka_school', 'start_time') == tempt + " 08:00:00" %}

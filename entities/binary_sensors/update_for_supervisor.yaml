@@ -11,3 +11,4 @@ sensors:
     device_class: problem
     value_template: "{{ state_attr('sensor.supervisor_updates', 'update_available') }}"
     availability_template: "{{ states('sensor.supervisor_updates') | int(-1) > -1 }}"
+    unique_id: db308b74-cb49-4e81-bdde-11a38e1fc010

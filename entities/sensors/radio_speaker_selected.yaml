@@ -9,3 +9,4 @@ sensors:
     value_template: '{{ states("input_select.radio_speaker") }}'
     friendly_name: 'Speaker Selected'
     icon_template: mdi:speaker-wireless
+    unique_id: f7750841-14c5-4cde-8cc9-3b95dbb0d2c7

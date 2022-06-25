@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_switch:
     friendly_name: 'Number of Switches'
+    unique_id: d94a1560-e216-4972-af02-e661608d192b
     value_template: >-
       {{ states.switch | list | count }}

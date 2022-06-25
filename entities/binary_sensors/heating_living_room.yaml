@@ -8,3 +8,4 @@ sensors:
   living_room_heating:
     friendly_name: "Heating in Living Room"
     value_template: '{{ state_attr("climate.living_room","hvac_action") == "heating" }}'
+    unique_id: 0c4e3cd0-11d9-4821-b94b-470b285042e1

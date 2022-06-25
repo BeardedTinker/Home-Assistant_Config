@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_alert:
     friendly_name: 'Number of Alerts'
+    unique_id: d61291a5-fe75-4211-b73d-c3c6e7f36a39
     value_template: >-
       {{ states.alert | list | count }}

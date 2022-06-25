@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_person:
     friendly_name: 'Number of Persons'
+    unique_id: bed6b7c2-3475-4850-bb65-58f8a4bacdaa
     value_template: >-
       {{ states.person | list | count }}

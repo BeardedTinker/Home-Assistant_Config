@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_lights:
     friendly_name: 'Number of Lights'
+    unique_id: df6d887d-2aac-4dc0-9008-da27d232d97e
     value_template: >
       {{ states.light | list | count }}

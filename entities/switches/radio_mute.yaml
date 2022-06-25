@@ -7,6 +7,7 @@ platform: template
 switches:
   radio_mute:
     icon_template: '{% if states("switch.radio_mute") %}mdi:volume-off{% else %}mdi:volume-high{% endif %}'
+    unique_id: 7c9c473e-c385-48c4-b69a-79845224e9e8
     value_template: >
       {% if is_state("input_select.radio_speaker", "Living room") %} {% if state_attr("media_player.living_room_tv","is_volume_muted") %}on{% else %}off{% endif %}
       {% elif is_state("input_select.radio_speaker", "Loft TV") %} {% if state_attr("media_player.loft_tv","is_volume_muted") %}on{% else %}off{% endif %}

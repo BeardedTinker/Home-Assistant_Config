@@ -8,3 +8,4 @@ sensors:
   school_start_days_luka:
     value_template: "{{ (((state_attr('input_datetime.school_first_day_luka', 'timestamp'))-as_timestamp(now())) | int /60/1440) | round(0) }}"
     unit_of_measurement: 'Days'
+    unique_id: f06372e3-9d67-4ee8-bba5-8005f21fddeb

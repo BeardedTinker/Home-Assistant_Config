@@ -7,6 +7,7 @@ platform: template
 switches: 
   radio_volume_up:
     icon_template: 'mdi:volume-plus'
+    unique_id: 130dcca0-652c-4b6b-94b4-859168c651a9
     value_template: 'on'
     turn_on:
       service: media_player.volume_up

@@ -8,5 +8,6 @@ sensors:
   v24_nozzle_temp:
     friendly_name: Hotend Temperature
     icon_template: mdi:thermometer
+    unique_id: 9ff5f1ea-2f26-4b4f-a463-c899d417401d
     value_template: >-
       {{ [(states.sensor.voron_24_sensor.attributes['extruder']['temperature'] | float | round(1) | string), " / ", (states.sensor.voron_24_sensor.attributes['extruder']['target'] | float | round(1) | string)] | join if is_state('sensor.voron_24_sensor', 'OK') else None }}

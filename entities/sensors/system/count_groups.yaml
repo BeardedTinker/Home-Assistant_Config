@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_groups:
     friendly_name: 'Number of Groups'
+    unique_id: 694b1c72-4c36-4d4c-b5e6-e79c68a907de
     value_template: >-
       {{ states.group | list | count }}

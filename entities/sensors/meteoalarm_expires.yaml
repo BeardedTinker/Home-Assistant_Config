@@ -8,3 +8,4 @@ sensors:
   meteoalarm_expires:
     friendly_name: "Expires"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'expires') }}"
+    unique_id: 302b8209-2ba6-4a91-8b58-c4088b698e9f

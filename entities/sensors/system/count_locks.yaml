@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_locks:
     friendly_name: 'Number of Locks'
+    unique_id: 32f16162-a6d1-4cc7-82b6-b600c24f0c4f
     value_template: >-
       {{ states.lock | list | count }}

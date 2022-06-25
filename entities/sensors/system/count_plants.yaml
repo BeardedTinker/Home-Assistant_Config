@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_plants:
     friendly_name: 'Number of Plants'
+    unique_id: 7cac118d-4d17-43c7-8f5c-522d40e94213
     value_template: >-
       {{ states.plant | list | count }}

@@ -7,4 +7,5 @@ platform: template
 sensors:
   heating_zita_room_action:
     friendly_name: 'Zita room action'
+    unique_id: 442c1fb0-ac34-4538-92f9-354da66b07d2
     value_template: "{{state_attr('climate.zita_room', 'hvac_action') }}"

@@ -8,5 +8,6 @@ sensors:
   v24_print_time:
     friendly_name: Print Time
     icon_template: mdi:clock-start
+    unique_id: f75671a4-4282-489b-ab74-c12e59545b09
     value_template: >-
       {{ states.sensor.voron_24_sensor.attributes['print_stats']['print_duration'] | timestamp_custom("%H:%M:%S", 0) if is_state('sensor.voron_24_sensor', 'OK') else None }}

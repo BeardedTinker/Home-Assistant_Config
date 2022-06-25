@@ -8,3 +8,4 @@ sensors:
   dining_room_heating:
     friendly_name: "Heating in Dining Room"
     value_template: '{{ state_attr("climate.dining_room","hvac_action") == "heating" }}'
+    unique_id: a83f5877-7cd9-4316-bd45-3ffb086b731a

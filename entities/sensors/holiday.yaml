@@ -8,6 +8,7 @@ platform: template
 sensors:
   holiday:
     friendly_name: 'Holiday'
+    unique_id: f23663c3-b845-4671-bb2f-d287530ab655
     value_template: >-
         {% if states('calendar.holidays_in_croatia') == 'on' %}
           {{ state_attr('calendar.holidays_in_croatia', 'message') }}

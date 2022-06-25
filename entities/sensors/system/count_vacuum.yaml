@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_vacuum:
     friendly_name: 'Number of Vacuums'
+    unique_id: eb9f6c23-4483-43cd-bffe-4215ab9a84f7
     value_template: >-
       {{ states.vacuum | list | count }}

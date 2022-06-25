@@ -1,5 +1,6 @@
 #####
 # Sensor Template - Energy use Yearly Peak and OffPeak total
+#
 #####
 
 platform: template
@@ -8,3 +9,4 @@ sensors:
     friendly_name: 'Yearly Peak and Offpeak Total'
     value_template: "{{ ((states('sensor.yearly_energy_peak')|float + states('sensor.yearly_energy_offpeak')|float) )|round(3) }}"
     unit_of_measurement: "kWh"
+    unique_id: fb4cc8f0-dde6-408c-99e7-0f44d03b3a3f

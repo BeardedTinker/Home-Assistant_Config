@@ -8,14 +8,18 @@ sensors:
   switchbot_humidifier_childlock:
     friendly_name: "Humidifier Child Lock"
     value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["childLock"] }}'
+    unique_id: 2db3a199-3228-464b-98b8-3f7c03827709
   switchbot_humidifier_sound:
     friendly_name: "Humidifier Sound"
     value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["sound"] }}'
+    unique_id: d2734d50-f3a4-4aa6-84cc-87e8bb1ab28a
   switchbot_humidifier_power:
     friendly_name: "Humidifier Power"
     value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["power"] }}'
     device_class: "power"
+    unique_id: 4e68b800-2f5b-4b24-87a6-94a408732919
   switchbot_humidifier_water:
     friendly_name: "Humidifier Water"
     value_template: '{{ states.sensor.switchbot_humidifier_json.attributes["lackWater"] }}'
     device_class: "problem"
+    unique_id: 87b81a75-4aa1-41d9-bb4d-a0d10ac7278c

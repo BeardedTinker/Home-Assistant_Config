@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_camera:
     friendly_name: 'Number of online Cameras'
+    unique_id: 22c70e97-a27c-4176-b9a4-c2ff4d3675fc
     value_template: >
       {{ states.camera | list | count }}

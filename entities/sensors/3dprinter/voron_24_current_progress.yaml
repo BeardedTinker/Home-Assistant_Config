@@ -9,5 +9,6 @@ sensors:
     friendly_name: Current Progress
     unit_of_measurement: '%'
     icon_template: mdi:file-percent
+    unique_id: c166bb5d-45ae-4f7d-b5a2-982c6ce4c8dd
     value_template: >-
       {{ (states.sensor.voron_24_sensor.attributes['display_status']['progress'] * 100) | round(1) if is_state('sensor.voron_24_sensor', 'OK') else None }}

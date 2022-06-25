@@ -7,6 +7,7 @@ platform: template
 sensors: 
   z2m_health:
     friendly_name: 'Z2M Mesh health'
+    unique_id: 26da7ced-8818-4dca-824f-68e70d2e7d39
     value_template: >-
       {%- macro CheckDroppedZigbee() -%}
       {% for state in states.sensor -%}

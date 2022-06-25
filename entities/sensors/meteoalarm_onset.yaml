@@ -8,3 +8,4 @@ sensors:
   meteoalarm_onset:
     friendly_name: "Onset"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'onset') }}"
+    unique_id: 70e5681f-b7be-4ab6-873e-6e25e3ffff88

@@ -8,6 +8,7 @@ platform: template
 sensors:
   zita_school_tomorrow:
     friendly_name: 'Zita School Tomorrow'
+    unique_id: 39a1cf99-d1a9-4aa4-9865-19ec44f499c6
     value_template: >-
       {%- set tempt=(as_timestamp(now())+ (86400)) | timestamp_custom("%Y-%m-%d",true) %}
       {% if state_attr('calendar.zita_school', 'start_time') == tempt + " 08:00:00" %}

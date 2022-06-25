@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_boolean:
     friendly_name: 'Number of Input Booleans'
+    unique_id: dfef933e-cdd6-4b85-81ff-60f848b546bb
     value_template: >-
       {{ states.input_boolean | list | count }}

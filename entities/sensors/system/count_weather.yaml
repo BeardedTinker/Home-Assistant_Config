@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_weather:
     friendly_name: 'Number of Weather'
+    unique_id: 5ccd8289-3a1e-4377-9aee-81e3e730054d
     value_template: >-
       {{ states.weather | list | count }}

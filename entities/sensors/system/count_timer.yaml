@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_timer:
     friendly_name: 'Number of Timers'
+    unique_id: c3078979-283e-48d6-be83-8135c85df12c
     value_template: >-
       {{ states.timer | list | count }}

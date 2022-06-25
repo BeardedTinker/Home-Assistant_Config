@@ -10,8 +10,10 @@ sensors:
     value_template: '{{ states.sensor.switchbot_meter_json.attributes["temperature"] }}'
     unit_of_measurement: "°C"
     device_class: "temperature"
+    unique_id: 9c1b7aca-6084-4d8f-85e0-9165d490eff5
   switchbot_meter_humidity:
     friendly_name: "Meter Humidity"
     value_template: '{{ states.sensor.switchbot_meter_json.attributes["humidity"] }}'
     unit_of_measurement: "%"
     device_class: "humidity"
+    unique_id: a364df97-3327-4fec-a893-b37323bab2bd

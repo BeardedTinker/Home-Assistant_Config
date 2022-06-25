@@ -7,4 +7,5 @@ platform: template
 sensors:
   heating_living_room_action:
     friendly_name: 'Living room action'
+    unique_id: 6f7469a7-ea18-4548-9fc8-4532483edd86
     value_template: "{{state_attr('climate.living_room', 'hvac_action') }}"

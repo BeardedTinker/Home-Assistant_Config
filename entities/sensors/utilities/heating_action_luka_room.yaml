@@ -7,4 +7,5 @@ platform: template
 sensors:
   heating_luka_room_action:
     friendly_name: 'Luka room action'
+    unique_id: e71f5c42-47d4-46dd-80ba-01cf6026695a
     value_template: "{{state_attr('climate.luka_room', 'hvac_action') }}"

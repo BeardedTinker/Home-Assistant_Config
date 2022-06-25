@@ -7,6 +7,7 @@ platform: template
 switches:
   radio_volume_down:
     icon_template: 'mdi:volume-minus'
+    unique_id: f7d2f201-c13c-4c1d-a330-7bd36b2be383
     value_template: 'on'
     turn_on:
       service: media_player.volume_down

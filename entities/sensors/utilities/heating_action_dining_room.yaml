@@ -7,4 +7,6 @@ platform: template
 sensors:
   heating_dining_room_action:
     friendly_name: 'Dining room action'
+    unique_id: c851ba8c-94f7-488e-b0fd-8b922e15dfdd
     value_template: "{{state_attr('climate.dining_room', 'hvac_action') }}"
+

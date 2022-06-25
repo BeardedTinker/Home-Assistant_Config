@@ -8,3 +8,4 @@ sensors:
   meteoalarm_instruction:
     friendly_name: "Instruction"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'instruction') }}"
+    unique_id: 081ca01a-82ca-4bcb-a2eb-9e4b92b498ca

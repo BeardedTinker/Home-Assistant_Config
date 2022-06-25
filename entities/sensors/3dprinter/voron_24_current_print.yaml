@@ -7,5 +7,6 @@ platform: template
 sensors:
   v24_current_print:
     friendly_name: Current print
+    unique_id: 6cf09f65-236b-4f51-bbae-65fe8b2ec7cf
     value_template: >-
       {{ states.sensor.voron_24_sensor.attributes['print_stats']['filename'] if is_state('sensor.voron_24_sensor', 'OK') else None }}

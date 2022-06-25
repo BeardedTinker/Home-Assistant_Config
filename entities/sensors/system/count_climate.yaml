@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_climate:
     friendly_name: 'Number of Climates'
+    unique_id: 3d361b5b-7d5a-448c-aeee-dbebef2b70e5
     value_template: >-
       {{ states.climate | list | count }}

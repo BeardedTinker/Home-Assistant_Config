@@ -8,3 +8,4 @@ sensors:
   luka_room_heating:
     friendly_name: "Heating in Luka Room"
     value_template: '{{ state_attr("climate.luka_room","hvac_action") == "heating" }}'
+    unique_id: 7abcf64d-e5f9-4b64-af3b-4ad4b8fbf0e4

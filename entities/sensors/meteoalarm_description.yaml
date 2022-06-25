@@ -8,3 +8,4 @@ sensors:
   meteoalarm_description:
     friendly_name: "Description"
     value_template: "{{ state_attr('binary_sensor.meteoalarm', 'description') }}"
+    unique_id: 1e538cec-f4b2-4c57-af0e-8ce51d75df62

@@ -7,5 +7,6 @@ platform: template
 sensors:
   count_automations:
     friendly_name: 'Number of Automations'
+    unique_id: 69c9d938-2ca7-4da2-8d94-56dc74d8d081
     value_template: >-
       {{ states.automation | list | count }}
