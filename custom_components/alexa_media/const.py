@@ -8,7 +8,7 @@ https://community.home-assistant.io/t/echo-devices-alexa-as-media-player-testers
 """
 from datetime import timedelta
 
-__version__ = "4.0.2"
+__version__ = "4.0.3"
 PROJECT_URL = "https://github.com/custom-components/alexa_media_player/"
 ISSUE_URL = f"{PROJECT_URL}issues"
 
@@ -69,6 +69,15 @@ RECURRING_PATTERN = {
     "XXXX-WXX-7": "Every Sunday",
 }
 
+RECURRING_DAY = {
+    "MO": 1,
+    "TU": 2,
+    "WE": 3,
+    "TH": 4,
+    "FR": 5,
+    "SA": 6,
+    "SU": 7,
+}
 RECURRING_PATTERN_ISO_SET = {
     None: {},
     "P1D": {1, 2, 3, 4, 5, 6, 7},
