@@ -49,7 +49,7 @@ class NukiInterface:
                 return bridges[0]["ip"]
         except Exception as err:
             _LOGGER.exception(f"Failed to discover bridge:", err)
-        return None
+        return ""
 
     def bridge_url(self, path: str, extra=None) -> str:
         extra_str = "&%s" % (urlencode(extra)) if extra else ""
