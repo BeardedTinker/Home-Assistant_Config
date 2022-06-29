@@ -19,7 +19,7 @@ condition:
 #    above: 0
   - condition: numeric_state
     entity_id: sensor.blitzortung_lightning_distance
-    below: 10
+    below: 5
 
 action:
 - service: script.notify_engine
