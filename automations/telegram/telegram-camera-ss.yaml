@@ -15,4 +15,7 @@ action:
 - service: notify.ebroz_bot
   data:
     message: 'Balcony camere snapshot'
-- service: script.camera_snapshot
+- service: camera.snapshot
+  data:
+    entity_id: camera.ebroz920_terasa2
+    filename: /config/tmp/balcony.jpg
