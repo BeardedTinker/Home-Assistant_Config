@@ -8,7 +8,13 @@ id: ab612ffe-5607-463a-ad84-2ba70cc49c79
 description: 'Triggered when GiHub workflow failes'
 
 trigger:
-- entity_id: sensor.beardedtinker_home_assistant_config_last_build_state
+- entity_id: 
+    - sensor.github_checkrun_remarklint
+    - sensor.github_checkrun_yamllint
+    - sensor.github_checkrun_home_assistant_current
+    - sensor.github_checkrun_home_assistant_stable
+    - sensor.github_checkrun_home_assistant_beta
+    -  sensor.github_checkrun_home_assistant_dev
   platform: state
   to: errored
 
@@ -19,7 +25,7 @@ action:
   data:
     who: 'discord'
     title: '*GitHub workflow failed!*'
-    value1: 'At {{ states("sensor.beardedtinker_home_assistant_config_last_build_finished_at") }} after {{states("sensor.beardedtinker_home_assistant_config_last_build_duration")}} seconds, while building {{ states("sensor.beardedtinker_home_assistant_config_last_build_id") }} '
+    value1: 'At {{ trigger.to_state.attributes.completed_at  }}, while building {{ trigger.to_state.attributes.friendly_name }} '
     target_id: !secret discord_github_id
     group: system
     tag_id: 'warning'
