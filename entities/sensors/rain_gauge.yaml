@@ -1,0 +1,12 @@
+#####
+# Rain gauge sensor with Aqara door/window conversion
+# Using hitsory stats platform for counts
+#####
+
+platform: history_stats
+name: Rain gauge  
+entity_id: binary_sensor.rain_gauge_contact 
+state: 'off'
+type: count
+start: '{{ now().replace(hour=0, minute=0, second=0) }}'
+end: '{{ now() }}'

@@ -1,0 +1,17 @@
+#####
+# Calculate todays rainfall based on history data from rain gauge
+# https://community.home-assistant.io/t/diy-zigbee-rain-gauge/255379
+#####
+
+- sensor:
+  - name: Rainfall today
+    unit_of_measurement: mm
+    state_class: total_increasing
+    unique_id: rainfall_today
+    state: >-
+      {% set count = states('sensor.rain_gauge') | int(0) %}
+      {% set mm = count * 0.30303 %}
+      {% if count >= 0 %}
+        {{ mm|round(1, 'floor') }}
+      {% endif %}
+    availability: "{{ (states('sensor.rain_gauge') not in ('unknown', 'unavailable')) }}"
