@@ -1,14 +1,12 @@
-"""UptimeKuma binary_sensor platform."""
+"""UptimeKuma sensor platform."""
 from __future__ import annotations
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
-    BinarySensorEntity,
-    BinarySensorEntityDescription,
-)
+from typing import TypedDict
+
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityDescription
+from homeassistant.helpers.entity import EntityCategory, EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pyuptimekuma import UptimeKumaMonitor
 
@@ -18,20 +16,34 @@ from .entity import UptimeKumaEntity
 from .utils import format_entity_name
 
 
+class StatusValue(TypedDict):
+    """Sensor details."""
+
+    value: str
+    icon: str
+
+
+SENSORS_INFO = {
+    0.0: StatusValue(value="down", icon="mdi:television-off"),
+    1.0: StatusValue(value="up", icon="mdi:television-shimmer"),
+}
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the UptimeKuma binary_sensors."""
+    """Set up the UptimeKuma sensors."""
     coordinator: UptimeKumaDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        UptimeKumaBinarySensor(
+        UptimeKumaSensor(
             coordinator,
-            BinarySensorEntityDescription(
+            SensorEntityDescription(
                 key=str(monitor.monitor_name),
                 name=monitor.monitor_name,
-                device_class=BinarySensorDeviceClass.CONNECTIVITY,
+                entity_category=EntityCategory.DIAGNOSTIC,
+                device_class="uptimekuma__monitor_status",
             ),
             monitor=monitor,
         )
@@ -39,8 +51,8 @@ async def async_setup_entry(
     )
 
 
-class UptimeKumaBinarySensor(UptimeKumaEntity, BinarySensorEntity):
-    """Representation of a UptimeKuma binary sensor."""
+class UptimeKumaSensor(UptimeKumaEntity, SensorEntity):
+    """Representation of a UptimeKuma sensor."""
 
     def __init__(
         self,
@@ -51,10 +63,15 @@ class UptimeKumaBinarySensor(UptimeKumaEntity, BinarySensorEntity):
         """Set entity ID."""
         super().__init__(coordinator, description, monitor)
         self.entity_id = (
-            f"binary_sensor.uptimekuma_{format_entity_name(self.monitor.monitor_name)}"
+            f"sensor.uptimekuma_{format_entity_name(self.monitor.monitor_name)}"
         )
 
     @property
-    def is_on(self) -> bool:
-        """Return True if the entity is on."""
-        return self.monitor_available
+    def native_value(self) -> str:
+        """Return the status of the monitor."""
+        return SENSORS_INFO[self.monitor.monitor_status]["value"]
+
+    @property
+    def icon(self) -> str:
+        """Return the status of the monitor."""
+        return SENSORS_INFO[self.monitor.monitor_status]["icon"]

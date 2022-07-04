@@ -1,8 +1,12 @@
-"""Config flow to configure the Uptime Kuma integration."""
-from uptime_kuma_monitor import UptimeKumaError, UptimeKumaMonitor
+"""Config flow for Uptime Kuma integration."""
+from __future__ import annotations
+
+from typing import Any
+
+from pyuptimekuma import UptimeKuma, UptimeKumaException
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow
+from homeassistant import config_entries
 from homeassistant.const import (
     CONF_HOST,
     CONF_PASSWORD,
@@ -11,8 +15,9 @@ from homeassistant.const import (
     CONF_VERIFY_SSL,
 )
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -25,54 +30,58 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
-class UptimeKumaFlowHandler(ConfigFlow, domain=DOMAIN):
-    """Handle an Uptime Kuma config flow."""
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Uptime Kuma."""
 
     VERSION = 1
 
-    async def _show_setup_form(self, errors: dict = None) -> FlowResult:
-        """Show the setup form to the user."""
+    async def _validate_input(
+        self, data: dict[str, Any]
+    ) -> tuple[dict[str, str], None]:
+        """Validate the user input allows us to connect."""
+        errors: dict[str, str] = {}
+        host: str = data[CONF_HOST]
+        port: int = data[CONF_PORT]
+        username: str = data[CONF_USERNAME]
+        password: str = data[CONF_PASSWORD]
+        verify_ssl: bool = data[CONF_VERIFY_SSL]
 
-        return self.async_show_form(
-            step_id="user",
-            data_schema=STEP_USER_DATA_SCHEMA,
-            errors=errors or {},
-        )
-
-    async def async_step_user(self, user_input: dict = None) -> FlowResult:
-        """Handle a flow initiated by the user."""
-        if user_input is None:
-            return await self._show_setup_form(user_input)
-
-        self._async_abort_entries_match(
-            {CONF_HOST: user_input[CONF_HOST], CONF_PORT: user_input[CONF_PORT]}
-        )
-
-        errors = {}
-
-        username = user_input.get(CONF_USERNAME)
-        password = user_input.get(CONF_PASSWORD)
-        utkm = await self.hass.async_add_executor_job(
-            UptimeKumaMonitor,
-            f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}",
+        uptime_robot_api = UptimeKuma(
+            async_get_clientsession(self.hass),
+            f"{host}:{port}",
             username,
             password,
-            user_input[CONF_VERIFY_SSL],
+            verify_ssl,
         )
 
         try:
-            await self.hass.async_add_executor_job(utkm.update)
-        except UptimeKumaError:
+            await uptime_robot_api.async_get_monitors()
+        except UptimeKumaException as exception:
+            LOGGER.error(exception)
             errors["base"] = "cannot_connect"
-            return await self._show_setup_form(errors)
+        except Exception as exception:  # pylint: disable=broad-except
+            LOGGER.exception(exception)
+            errors["base"] = "unknown"
+            # return await self._show_setup_form(errors)
 
-        return self.async_create_entry(
-            title=user_input[CONF_HOST],
-            data={
-                CONF_HOST: user_input[CONF_HOST],
-                CONF_PASSWORD: user_input[CONF_PASSWORD],
-                CONF_PORT: user_input[CONF_PORT],
-                CONF_USERNAME: user_input[CONF_USERNAME],
-                CONF_VERIFY_SSL: user_input[CONF_VERIFY_SSL],
-            },
+        return errors
+
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
+            )
+
+        errors = await self._validate_input(user_input)
+        if not errors:
+            unique_id = f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}"
+            await self.async_set_unique_id(unique_id)
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title=unique_id, data=user_input)
+
+        return self.async_show_form(
+            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
