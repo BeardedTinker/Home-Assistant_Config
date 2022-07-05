@@ -1,0 +1,21 @@
+{
+    "after_dependencies": [
+        "integration",
+        "utility_meter"
+    ],
+    "codeowners": [
+        "@bramstroker"
+    ],
+    "dependencies": [
+        "select"
+    ],
+    "documentation": "https://github.com/bramstroker/homeassistant-powercalc",
+    "domain": "powercalc",
+    "iot_class": "local_polling",
+    "issue_tracker": "https://github.com/bramstroker/homeassistant-powercalc/issues",
+    "name": "Powercalc",
+    "requirements": [
+        "numpy>=1.21.1"
+    ],
+    "version": "v0.22.1"
+}
