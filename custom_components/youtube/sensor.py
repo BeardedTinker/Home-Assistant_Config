@@ -14,6 +14,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
 from dateutil.parser import parse
 import re
+import html
 
 CONF_CHANNEL_ID = 'channel_id'
 
@@ -90,7 +91,7 @@ class YoutubeSensor(Entity):
             self.published = info.split('<published>')[2].split('</')[0]
             thumbnail_url = info.split(
                 '<media:thumbnail url="')[1].split('"')[0]
-            self._state = title
+            self._state = html.unescape(title)
             self._image = thumbnail_url
             self.stars = info.split('<media:starRating count="')[1].split('"')[0]
             self.views = info.split('<media:statistics views="')[1].split('"')[0]
@@ -113,6 +114,11 @@ class YoutubeSensor(Entity):
     def state(self):
         """State."""
         return self._state
+
+    @property
+    def unique_id(self):
+        """Return unique ID for this sensor."""
+        return self.channel_id
 
     @property
     def icon(self):
