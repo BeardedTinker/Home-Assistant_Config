@@ -37,13 +37,16 @@ async def async_setup_platform(
     session = async_create_clientsession(hass)
     try:
         url = BASE_URL.format(channel_id)
-        async with async_timeout.timeout(10):
+        async with async_timeout.timeout(30):
+            _LOGGER.debug("Getting channel id: %s", channel_id)
             response = await session.get(url)
             info = await response.text()
         name = info.split('<title>')[1].split('</')[0]
     except Exception as error:  # pylint: disable=broad-except
-        _LOGGER.debug('Unable to set up - %s', error)
+        _LOGGER.error('Unable to set up - (%s) %s', type(error), error)
         name = None
+    else:
+        _LOGGER.debug("Channel found: %s", name)
 
     if name is not None:
         async_add_entities([YoutubeSensor(channel_id, name, session)], True)
@@ -70,7 +73,7 @@ class YoutubeSensor(Entity):
 
     async def async_update(self):
         """Update sensor."""
-        _LOGGER.debug('%s - Running update', self._name)
+        _LOGGER.debug('Updating channel %s', self._name)
         try:
             url = BASE_URL.format(self.channel_id)
             async with async_timeout.timeout(10):
@@ -85,7 +88,7 @@ class YoutubeSensor(Entity):
             if self.live or url != self.url:
                 self.stream, self.live, self.stream_start = await is_live(url, self._name, self.hass, self.session)
             else:
-                _LOGGER.debug('%s - Skipping live check', self._name)
+                _LOGGER.debug('Skip live check for %s', self._name)
             self.url = url
             self.content_id = url.split('?v=')[1]
             self.published = info.split('<published>')[2].split('</')[0]
@@ -98,7 +101,7 @@ class YoutubeSensor(Entity):
             url = CHANNEL_LIVE_URL.format(self.channel_id)
             self.channel_live, self.channel_image = await is_channel_live(url, self.name, self.hass, self.session)
         except Exception as error:  # pylint: disable=broad-except
-            _LOGGER.debug('%s - Could not update - %s', self._name, error)
+            _LOGGER.debug('Update error for %s - %s', self._name, error)
 
     @property
     def name(self):
