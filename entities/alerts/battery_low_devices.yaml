@@ -7,7 +7,7 @@ low_battery_devices:
   name: Devices have low battery
   entity_id: binary_sensor.devices_with_low_battery
   title: "{{ states('sensor.devices_with_low_battery') }} devices in house with low battery"
-  message: "Devices all have 10% or less battery, you should change them"
+  message: "Devices all have 20% or less battery, you should replace them"
   state: 'on'
   can_acknowledge: true
   repeat: 720

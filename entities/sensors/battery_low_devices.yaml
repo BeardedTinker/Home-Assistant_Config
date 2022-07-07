@@ -11,10 +11,10 @@ sensors:
     unique_id: 1786bfbb-2ed1-4c7e-9dec-ce96b5f8dd2c
     value_template: >-
       {{ states.sensor
+          | rejectattr('attributes.device_class', 'undefined')
           | selectattr('attributes.device_class', 'eq', 'battery')
           | map(attribute='state')
-          | reject('in', ['unknown', 'unavailable', 'Ok'])
-          | map('int', -1) | select('le', 10)
+          | map('int', -1) | select('le', 20)
           | list | count
       }}
     icon_template: >-
