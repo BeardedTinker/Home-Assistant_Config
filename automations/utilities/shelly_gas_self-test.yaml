@@ -18,7 +18,7 @@ condition:
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'andrej'
     title: '☠ *Gas needs Self-test*'
     value1: 'Gas sensor needs self-test. Press button to start it.'
     target_id: !secret telegram_bot_chat_id

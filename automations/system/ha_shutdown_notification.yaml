@@ -12,7 +12,7 @@ trigger:
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'andrej'
     title: '*HA shutdown*'
     value1: 'Home Assistant shutting down at {{ states("sensor.time") }}'
     group: ha

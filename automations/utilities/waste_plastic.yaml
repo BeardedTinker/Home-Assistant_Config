@@ -19,7 +19,7 @@ condition:
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'family'
     title: '♻ *Garbage day*'
     value1: 'Take out plastic for recycling.'
     target_id: !secret telegram_bot_chat_id
