@@ -1,0 +1,47 @@
+#####
+# Notify me on zone change
+# Thanks to alexy for this one: 
+# https://github.com/alphasixtyfive/home-assistant-configs/blob/main/zone_change.yaml
+#####
+
+alias: Notify on family members zone change
+id: 7f0db7e7-8503-4c79-a372-3335adff074e
+
+trigger:
+  - platform: state
+    entity_id:
+      - person.andrej
+      - person.zita
+      - person.luka
+      - person.mirta
+    to: ~
+    for:
+      minutes: 1
+
+condition: "{{ trigger.to_state.state != trigger.from_state.state }}"
+
+action:
+  - variables:
+      state_from: "{{ trigger.from_state.state }}"
+      state_to: "{{ trigger.to_state.state }}"
+      person: "{{ state_attr(trigger.entity_id, 'friendly_name') }}"
+      event: >-
+        {%- if state_from == 'not_home' -%}
+          {{ 'arrived' if state_to == 'home' else 'arrived at' }}
+        {%- else -%}
+          left
+        {%- endif -%}
+      zone: "{{ state_to if state_from == 'not_home' else state_from }}"
+      emoji: "{{ '🏠' if zone == 'home' else '📍' }}"
+
+  - service: script.notify_engine
+    data:
+      who: 'andrej'
+      title: '{{ emoji }} {{ person }}'
+      value1: >-
+        {{ emoji }} {{ person }} has {{ event }} {{ zone }}
+      target_id: !secret telegram_bot_chat_id
+      group: information
+      tag_id: 'information'
+      importance_id: default
+      color: 'green'
