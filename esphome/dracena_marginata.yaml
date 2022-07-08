@@ -19,7 +19,7 @@
 substitutions:
   devicename: "dracena_marginata"
   upper_devicename: Dracena Marginata
-  awake_duration: 6s      # set how long to stay awake - NOT less then 10sec
+  awake_duration: 7s      # set how long to stay awake - NOT less then 10sec
   sleep_duration: 90min    # set how long to sleep in minutes
   update_interval: 5s
   fixed_ip: 192.168.2.55
@@ -37,7 +37,7 @@ wifi:
     static_ip: ${fixed_ip}
     gateway: 192.168.1.1
     subnet: 255.255.252.0
-#  fast_connect: enable
+  fast_connect: enable
 
 esphome:
   name: "${devicename}"
@@ -184,9 +184,9 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) * 100.00 / 0.39);  
+          return ((id(${devicename}_voltage).state - 2.76) / 0.74658 * 100);  
     # 2.76v = minimum
-    # 3.150v = maximum       
+    # 3.50659v = maximum       
     # (current - minimum) * 100 / difference between max & mix 
     update_interval: ${update_interval}
 

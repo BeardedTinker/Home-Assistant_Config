@@ -23,7 +23,7 @@ substitutions:
   sleep_duration: 90min    # set how long to sleep in minutes
   update_interval: 5s
   fixed_ip: 192.168.2.50
-
+  max_voltage: 3.46439
 #############################################
 ##### Nothing to change after this line #####
 ##### Except for calibration data if    #####
@@ -184,7 +184,7 @@ sensor:
     unit_of_measurement: '%'
     filters:
       - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) * 100 / 0.704);  
+          return ((id(${devicename}_voltage).state - 2.76) / 0.70439 * 100);  
     # (current - minimum) / difference between max & mix * 100
     update_interval: ${update_interval}
 
