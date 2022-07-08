@@ -1,0 +1,68 @@
+#####
+# PowerCal groups for easier power tracking
+# https://github.com/bramstroker/homeassistant-powercalc
+#####
+
+platform: powercalc
+create_group: All lights
+entities:
+#  - entity_id: light.a
+#  - entity_id: light.b
+  - create_group: Downstairs lights
+    entities:
+#      - entity_id: light.c
+      - create_group: Balcony lights
+        entities:
+          - entity_id: switch.balcony_light
+      - create_group: Coridor lights
+        entities:
+          - entity_id: light.corridor_light
+#      - create_group: Hall lights
+#        entities:
+#          - entity_id: light.d
+      - create_group: Kitchen lights
+        entities:
+          - entity_id: light.sink
+          - entity_id: light.oven
+          - entity_id: light.fridge
+          - entity_id: light.kitchen_countertop
+      - create_group: Dining room lights
+        entities:
+          - entity_id: light.left
+          - entity_id: light.right
+      - create_group: Living room lights
+        entities:
+          - entity_id: light.corner
+          - entity_id: light.standing
+          - entity_id: light.tv
+          - entity_id: light.entrance
+          - entity_id: light.rice_lights
+          - entity_id: light.stairs
+  - create_group: Upstairs lights
+    entities:
+#      - entity_id: light.c
+      - create_group: Loft lights
+        entities:
+          - entity_id: light.elgato_key_light_air_left
+          - entity_id: light.elgato_key_light_air_right
+          - entity_id: light.stream_desk
+      - create_group: Bedroom lights
+        entities:
+          - entity_id: light.bedroom
+#      - create_group: Bathroom lights
+#        entities:
+#          - entity_id: light.d
+      - create_group: Luka room lights
+        entities:
+          - entity_id: light.luka_ceiling_light
+          - entity_id: light.luka_floor_light
+          - entity_id: light.luka_table_light
+      - create_group: Zita room lights
+        entities:
+          - entity_id: light.zita_ceiling
+          - entity_id: light.zita_desk_lights
+          - entity_id: light.zita_table_light
+          - entity_id: light.zita_tabletop
+      - create_group: Ledge lights
+        entities:
+          - entity_id: light.ledge
