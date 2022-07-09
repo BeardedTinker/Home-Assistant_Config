@@ -587,7 +587,10 @@ class SpaceXSensor(CoordinatorEntity):
             self._state = latest_launch_data["rocket"]["name"]
             
         elif self._kind == "spacex_latest_launch_payload":
-            self._state = latest_launch_data["payloads_detail"][0]["name"]
+            if latest_launch_data["payloads_detail"]:
+                self._state = latest_launch_data["payloads_detail"][0]["name"]
+            else:
+                self._state = ""
             
         elif self._kind == "spacex_starman_speed":
             self._state = int(starman_data["speed_kph"])

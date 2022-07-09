@@ -5,6 +5,7 @@ import re
 
 import datetime as dt
 from typing import Optional
+import ssl
 
 from urllib.parse import quote_plus
 from dateutil.relativedelta import relativedelta
@@ -19,7 +20,7 @@ from homeassistant.const import (
 from homeassistant.core import Context, HomeAssistant
 from homeassistant.helpers.network import get_url, NoURLAvailableError
 from homeassistant.helpers.storage import STORAGE_DIR
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 import homeassistant.util.dt as dt_util
 
 from reolink.camera_api import Api
@@ -548,5 +549,11 @@ def callback_get_iohttp_session():
     global last_known_hass
     if last_known_hass is None:
         raise Exception("No Home Assistant instance found")
-    session = async_get_clientsession(last_known_hass, verify_ssl=False)
+        
+    context = ssl.create_default_context()
+    context.set_ciphers("DEFAULT")
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    session = async_create_clientsession(last_known_hass, verify_ssl=False)
+    session.connector._ssl = context
     return session
