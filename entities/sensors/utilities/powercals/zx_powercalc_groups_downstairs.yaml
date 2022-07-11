@@ -1,0 +1,36 @@
+#####
+# PowerCal groups for easier power tracking
+# https://github.com/bramstroker/homeassistant-powercalc
+#####
+
+platform: powercalc
+create_group: Downstairs lights
+entities:
+#  - entity_id: light.c
+  - create_group: Balcony lights PM
+    entities:
+      - entity_id: light.balcony_light
+  - create_group: Corridor lights PM
+    entities:
+      - entity_id: light.corridor_light
+#  - create_group: Hall lights
+#    entities:
+#      - entity_id: light.d
+  - create_group: Kitchen lights PM
+    entities:
+      - entity_id: light.sink
+      - entity_id: light.oven
+      - entity_id: light.fridge
+      - entity_id: light.kitchen_countertop
+  - create_group: Dining room lights PM
+    entities:
+      - entity_id: light.left
+      - entity_id: light.right
+  - create_group: Living room lights PM
+    entities:
+      - entity_id: light.corner
+      - entity_id: light.standing
+      - entity_id: light.tv
+      - entity_id: light.entrance
+      - entity_id: light.rice_lights
+      - entity_id: light.stairs

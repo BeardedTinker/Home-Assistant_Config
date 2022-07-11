@@ -1,0 +1,10 @@
+#####
+# Manual Corridor light setup
+#
+#####
+
+platform: powercalc
+entity_id: light.corridor_light
+linear:
+  min_power: 0.5
+  max_power: 22

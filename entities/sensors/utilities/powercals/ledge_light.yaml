@@ -1,0 +1,9 @@
+#####
+# WLED for PowerCals
+#
+#####
+
+platform: powercalc
+entity_id: light.ledge
+wled:
+  voltage: 5

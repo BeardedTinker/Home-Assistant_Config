@@ -1,0 +1,9 @@
+#####
+# WLED for PowerCals
+#
+#####
+
+platform: powercalc
+entity_id: light.zita_desk_lights
+wled:
+  voltage: 5

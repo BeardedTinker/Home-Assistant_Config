@@ -1,0 +1,9 @@
+#####
+# WLED for PowerCals
+#
+#####
+
+platform: powercalc
+entity_id: light.stairs
+wled:
+  voltage: 5

@@ -1,0 +1,9 @@
+#####
+# WLED for PowerCals
+#
+#####
+
+platform: powercalc
+entity_id: light.stream_desk
+wled:
+  voltage: 5

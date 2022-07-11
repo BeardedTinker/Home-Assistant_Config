@@ -1,0 +1,10 @@
+#####
+# Manual Balcony light setup
+#
+#####
+
+platform: powercalc
+entity_id: light.balcony_light
+linear:
+  min_power: 0.5
+  max_power: 11

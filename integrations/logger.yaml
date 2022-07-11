@@ -9,3 +9,4 @@ logger:
 #    homeassistant.components.cast: debug
 #    homeassistant.components.cast.media_player: debug
     custom_components.youtube: debug
+    custom_components.powercalc: debug
