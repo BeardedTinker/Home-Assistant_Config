@@ -68,4 +68,6 @@ class UptimeKumaEntity(CoordinatorEntity[UptimeKumaDataUpdateCoordinator]):
     @property
     def monitor_available(self) -> bool:
         """Returtn if the monitor is available."""
-        return bool(self.monitor.monitor_status == 1.0)
+        return bool(
+            self.monitor.monitor_status == 1.0 or self.monitor.monitor_status == 2.0
+        )

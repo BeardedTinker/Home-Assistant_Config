@@ -26,6 +26,7 @@ class StatusValue(TypedDict):
 SENSORS_INFO = {
     0.0: StatusValue(value="down", icon="mdi:television-off"),
     1.0: StatusValue(value="up", icon="mdi:television-shimmer"),
+    2.0: StatusValue(value="pending", icon="mdi:sync"),
 }
 
 
