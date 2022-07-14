@@ -1,9 +1,9 @@
 
 try {
-  new Function("import('/hacsfiles/frontend/main-a0d7432d.js')")();
+  new Function("import('/hacsfiles/frontend/main-7bc9a818.js')")();
 } catch (err) {
   var el = document.createElement('script');
-  el.src = '/hacsfiles/frontend/main-a0d7432d.js';
+  el.src = '/hacsfiles/frontend/main-7bc9a818.js';
   el.type = 'module';
   document.body.appendChild(el);
 }
