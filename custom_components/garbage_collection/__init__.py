@@ -5,24 +5,18 @@ import asyncio
 import logging
 from datetime import timedelta
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Dict
 
 import homeassistant.helpers.config_validation as cv
 import homeassistant.util.dt as dt_util
 import voluptuous as vol
 from dateutil.relativedelta import relativedelta
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import (
-    ATTR_HIDDEN,
-    CONF_ENTITIES,
-    CONF_ENTITY_ID,
-    CONF_NAME,
-    WEEKDAYS,
-)
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_HIDDEN, CONF_ENTITIES, CONF_ENTITY_ID, WEEKDAYS
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.typing import ConfigType
 
-from . import const, helpers, sensor
+from . import const, helpers
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
@@ -104,17 +98,13 @@ OFFSET_DATE_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup(hass: HomeAssistant, _: ConfigType) -> bool:
     """Set up this component using YAML."""
 
     async def handle_add_date(call: ServiceCall) -> None:
         """Handle the add_date service call."""
-        if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
-            _LOGGER.error("add_date - missing Entity ID.")
-            return
-        if (collection_date := call.data.get(const.CONF_DATE)) is None:
-            _LOGGER.error("add_date - missing collection date.")
-            return
+        entity_ids = call.data.get(CONF_ENTITY_ID, [])
+        collection_date = call.data.get(const.CONF_DATE)
         for entity_id in entity_ids:
             _LOGGER.debug("called add_date %s from %s", collection_date, entity_id)
             try:
@@ -122,17 +112,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 await entity.add_date(collection_date)
             except KeyError as err:
                 _LOGGER.error(
-                    "Failed adding date %s to %s (%s)", collection_date, entity_id, err
+                    "Failed adding date %s to %s (%s)",
+                    collection_date,
+                    entity_id,
+                    err,
                 )
 
     async def handle_remove_date(call: ServiceCall) -> None:
         """Handle the remove_date service call."""
-        if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
-            _LOGGER.error("remove_date - missing Entity ID.")
-            return
-        if (collection_date := call.data.get(const.CONF_DATE)) is None:
-            _LOGGER.error("remove_date - missing collection date.")
-            return
+        entity_ids = call.data.get(CONF_ENTITY_ID, [])
+        collection_date = call.data.get(const.CONF_DATE)
         for entity_id in entity_ids:
             _LOGGER.debug("called remove_date %s from %s", collection_date, entity_id)
             try:
@@ -140,9 +129,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 await entity.remove_date(collection_date)
             except KeyError as err:
                 _LOGGER.error(
-                    "Failed removing date %s from %s. Most likely, "
-                    "it was removed by competing automation runing in parallel. "
-                    "(%s)",
+                    "Failed removing date %s from %s (%s)",
                     collection_date,
                     entity_id,
                     err,
@@ -150,15 +137,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def handle_offset_date(call: ServiceCall) -> None:
         """Handle the offset_date service call."""
-        if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
-            _LOGGER.error("offset_date - missing Entity ID.")
-            return
-        if (offset := call.data.get(const.CONF_OFFSET)) is None:
-            _LOGGER.error("offset_date - missing offset.")
-            return
-        if (collection_date := call.data.get(const.CONF_DATE)) is None:
-            _LOGGER.error("offset_date - missing collection date.")
-            return
+        entity_ids = call.data.get(CONF_ENTITY_ID, [])
+        offset = call.data.get(const.CONF_OFFSET)
+        collection_date = call.data.get(const.CONF_DATE)
         for entity_id in entity_ids:
             _LOGGER.debug(
                 "called offset_date %s by %d days for %s",
@@ -167,7 +148,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 entity_id,
             )
             try:
-                new_date = collection_date + relativedelta(days=offset)
+                new_date = collection_date + relativedelta(
+                    days=offset
+                )  # pyright: reportOptionalOperand=false
                 entity = hass.data[const.DOMAIN][const.SENSOR_PLATFORM][entity_id]
                 await asyncio.gather(
                     entity.remove_date(collection_date), entity.add_date(new_date)
@@ -178,9 +161,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def handle_update_state(call: ServiceCall) -> None:
         """Handle the update_state service call."""
-        if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
-            _LOGGER.error("update_state - missing Entity ID.")
-            return
+        entity_ids = call.data.get(CONF_ENTITY_ID, [])
         for entity_id in entity_ids:
             _LOGGER.debug("called update_state for %s", entity_id)
             try:
@@ -191,10 +172,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def handle_collect_garbage(call: ServiceCall) -> None:
         """Handle the collect_garbage service call."""
-        if not (entity_ids := call.data.get(CONF_ENTITY_ID, [])):
-            _LOGGER.error("collect_garbage - missing Entity ID.")
-            return
-        last_collection = call.data.get(const.ATTR_LAST_COLLECTION, sensor.now())
+        entity_ids = call.data.get(CONF_ENTITY_ID, [])
+        last_collection = call.data.get(const.ATTR_LAST_COLLECTION, helpers.now())
         for entity_id in entity_ids:
             _LOGGER.debug("called collect_garbage for %s", entity_id)
             try:
@@ -206,63 +185,32 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     "Failed setting last collection for %s - %s", entity_id, err
                 )
 
-    if const.DOMAIN not in hass.services.async_services():
-        hass.services.async_register(
-            const.DOMAIN,
-            "collect_garbage",
-            handle_collect_garbage,
-            schema=COLLECT_NOW_SCHEMA,
-        )
-        hass.services.async_register(
-            const.DOMAIN,
-            "update_state",
-            handle_update_state,
-            schema=UPDATE_STATE_SCHEMA,
-        )
-        hass.services.async_register(
-            const.DOMAIN, "add_date", handle_add_date, schema=ADD_REMOVE_DATE_SCHEMA
-        )
-        hass.services.async_register(
-            const.DOMAIN,
-            "remove_date",
-            handle_remove_date,
-            schema=ADD_REMOVE_DATE_SCHEMA,
-        )
-        hass.services.async_register(
-            const.DOMAIN, "offset_date", handle_offset_date, schema=OFFSET_DATE_SCHEMA
-        )
-    else:
-        _LOGGER.debug("Services already registered")
-
-    if config.get(const.DOMAIN) is None:
-        # We get here if the integration is set up using config flow
-        return True
-
-    # If platform is not enabled, skip.
-    if not (platform_config := config[const.DOMAIN].get(const.CONF_SENSORS, {})):
-        return False
-
-    for entry in hass.config_entries.async_entries(const.DOMAIN):
-        if entry.source == SOURCE_IMPORT:
-            _LOGGER.error(
-                "garbage_collection already imported. "
-                "Remove it from configuration.yaml now!"
-            )
-            return True
-    for entry in platform_config:
-        _LOGGER.debug(
-            "Importing %s(%s) from YAML configuration",
-            entry[CONF_NAME],
-            entry[const.CONF_FREQUENCY],
-        )
-        # Import YAML to ConfigFlow
-        hass.async_create_task(
-            hass.config_entries.flow.async_init(
-                const.DOMAIN,
-                context={"source": SOURCE_IMPORT},
-                data=entry,
-            )
-        )
+    hass.data.setdefault(const.DOMAIN, {})
+    hass.data[const.DOMAIN].setdefault(const.SENSOR_PLATFORM, {})
+    hass.services.async_register(
+        const.DOMAIN,
+        "collect_garbage",
+        handle_collect_garbage,
+        schema=COLLECT_NOW_SCHEMA,
+    )
+    hass.services.async_register(
+        const.DOMAIN,
+        "update_state",
+        handle_update_state,
+        schema=UPDATE_STATE_SCHEMA,
+    )
+    hass.services.async_register(
+        const.DOMAIN, "add_date", handle_add_date, schema=ADD_REMOVE_DATE_SCHEMA
+    )
+    hass.services.async_register(
+        const.DOMAIN,
+        "remove_date",
+        handle_remove_date,
+        schema=ADD_REMOVE_DATE_SCHEMA,
+    )
+    hass.services.async_register(
+        const.DOMAIN, "offset_date", handle_offset_date, schema=OFFSET_DATE_SCHEMA
+    )
     return True
 
 
@@ -271,10 +219,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     _LOGGER.debug(
         "Setting %s (%s) from ConfigFlow",
         config_entry.title,
-        config_entry.data[const.CONF_FREQUENCY],
+        config_entry.options[const.CONF_FREQUENCY],
     )
-    # Backward compatibility - clean-up (can be removed later?)
-    config_entry.options = MappingProxyType({})
     config_entry.add_update_listener(update_listener)
     # Add sensor
     hass.async_create_task(
@@ -298,15 +244,15 @@ async def async_remove_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         pass
 
 
-async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
+async def async_migrate_entry(_: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate old entry."""
     _LOGGER.info(
         "Migrating %s from version %s", config_entry.title, config_entry.version
     )
-    new_data = {**config_entry.data}
-    new_options = {**config_entry.options}
-    removed_data: dict[str, Any] = {}
-    removed_options: dict[str, Any] = {}
+    new_data: Dict[str, Any] = {**config_entry.data}
+    new_options: Dict[str, Any] = {**config_entry.options}
+    removed_data: Dict[str, Any] = {}
+    removed_options: Dict[str, Any] = {}
     _LOGGER.debug("new_data %s", new_data)
     _LOGGER.debug("new_options %s", new_options)
     if config_entry.version == 1:
@@ -358,6 +304,40 @@ async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
             new_options[const.CONF_WEEKDAY_ORDER_NUMBER] = list(
                 map(str, new_options[const.CONF_WEEKDAY_ORDER_NUMBER])
             )
+    if config_entry.version <= 5:
+        for conf in [
+            const.CONF_FREQUENCY,
+            const.CONF_ICON_NORMAL,
+            const.CONF_ICON_TODAY,
+            const.CONF_ICON_TOMORROW,
+            const.CONF_MANUAL,
+            const.CONF_OFFSET,
+            const.CONF_EXPIRE_AFTER,
+            const.CONF_VERBOSE_STATE,
+            const.CONF_FIRST_MONTH,
+            const.CONF_LAST_MONTH,
+            const.CONF_COLLECTION_DAYS,
+            const.CONF_WEEKDAY_ORDER_NUMBER,
+            const.CONF_FORCE_WEEK_NUMBERS,
+            const.CONF_WEEK_ORDER_NUMBER,
+            const.CONF_DATE,
+            const.CONF_PERIOD,
+            const.CONF_FIRST_WEEK,
+            const.CONF_FIRST_DATE,
+            const.CONF_SENSORS,
+            const.CONF_VERBOSE_FORMAT,
+            const.CONF_DATE_FORMAT,
+        ]:
+            if conf in new_data:
+                new_options[conf] = new_data.get(conf)
+                del new_data[conf]
+        if (
+            const.CONF_EXPIRE_AFTER in new_options
+            and len(new_options[const.CONF_EXPIRE_AFTER]) == 5
+        ):
+            new_options[const.CONF_EXPIRE_AFTER] = (
+                new_options[const.CONF_EXPIRE_AFTER] + ":00"
+            )
     config_entry.version = const.CONFIG_VERSION
     config_entry.data = MappingProxyType({**new_data})
     config_entry.options = MappingProxyType({**new_options})
@@ -381,13 +361,8 @@ async def async_migrate_entry(_, config_entry: ConfigEntry) -> bool:
     return True
 
 
-async def update_listener(hass, entry):
-    """Update listener."""
-    # The OptionsFlow saves data to options.
-    # Move them back to data and clean options (dirty, but not sure how else to do that)
-    if len(entry.options) > 0:
-        entry.data = entry.options
-        entry.options = {}
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Update listener - to re-create device after options update."""
     await hass.config_entries.async_forward_entry_unload(entry, const.SENSOR_PLATFORM)
     hass.async_add_job(
         hass.config_entries.async_forward_entry_setup(entry, const.SENSOR_PLATFORM)
