@@ -10,9 +10,9 @@ ficus_benjamin_natasya:
     temperature: sensor.ficus_benjamina_natasja_temperature
     conductivity: sensor.ficus_benjamina_natasja_fertilizer
     brightness: sensor.ficus_benjamina_natasja_lux
-  min_moisture: 30
-  max_moisture: 75
-  min_battery: 10
+  min_moisture: 35
+  max_moisture: 80
+  min_battery: 50
   min_conductivity: 1
   min_temperature: 19
   min_brightness: 500

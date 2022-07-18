@@ -1,0 +1,211 @@
+###################################################
+# LilyGo HiGrow board code for ESPHome            #
+###################################################
+# Slapped together by BeardedTinker April 2022    #
+# YouTube: https://www.youtube.com/BeardedTinker  #
+# GitHub:  https://github.com/BeardedTinker/      #
+# Twitter: https://twitter.com/BeardedTinker      #
+#                                                 #
+# This version is for DHT version of board witout #
+# additional DS18B50 sensor                       #  
+###################################################
+
+#
+# This is used to set sensor name (device name) and friendly name for each sensor board
+# Using _ in device name will result in warning!
+# setup_priority needs to be specified for some components to work
+
+
+substitutions:
+  devicename: "test_plant"
+  upper_devicename: Test plant
+  awake_duration: 7s      # set how long to stay awake - NOT less then 10sec
+  sleep_duration: 90min    # set how long to sleep in minutes
+  update_interval: 5s
+  fixed_ip: 192.168.2.56
+
+#############################################
+##### Nothing to change after this line #####
+##### Except for calibration data if    #####
+##### want to do it!                    #####
+#############################################
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+  manual_ip:
+    static_ip: ${fixed_ip}
+    gateway: 192.168.1.1
+    subnet: 255.255.252.0
+  fast_connect: enable
+
+esphome:
+  name: "${devicename}"
+  platform: ESP32
+  board: esp32dev
+  on_boot:
+    then:
+      - script.execute: consider_deep_sleep
+
+ota:
+  on_end:
+    then:
+      - logger.log: 'OTA successful - flipping switch'
+      - homeassistant.service: 
+          service: input_boolean.turn_off
+          data:
+            entity_id: input_boolean.${devicename}_prevent_deep_sleep
+
+api:
+
+mqtt:
+  broker: !secret mqtt_ip
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+  discovery: true
+
+logger:
+
+i2c:
+  - id: bus_a
+    sda: 25
+    scl: 26
+    scan: true
+    setup_priority: -200
+  
+# Power switch
+switch:
+  - platform: gpio
+    pin: GPIO4
+    name: "${upper_devicename} Power Sensors"
+    id: spower
+    restore_mode: ALWAYS_ON
+    internal: true
+    setup_priority: 1000
+
+### Sensors section
+binary_sensor:
+  - platform: homeassistant
+    id: ${devicename}_prevent_deep_sleep
+    name: 'Prevent sensor Deep Sleep'
+    entity_id: input_boolean.${devicename}_prevent_deep_sleep
+
+sensor:
+
+# Temperature and humidity
+
+  - platform: dht
+    pin: 16
+    model: dht11
+    temperature:
+      name: "${upper_devicename} Temperature"
+      unit_of_measurement: "°C"
+      icon: "mdi:thermometer"
+      device_class: "temperature"
+      state_class: "measurement"
+      accuracy_decimals: 1            
+    humidity:
+      name: "${upper_devicename} Humidity"
+      unit_of_measurement: "%"
+      icon: "mdi:thermometer"
+      device_class: "humidity"
+      state_class: "measurement"      
+    update_interval: ${update_interval}
+    setup_priority: -100
+
+## Soil humidity raw data - needed just for calibration
+#  - platform: adc
+#    pin: 32
+#    name: "${upper_devicename} Soil Moisture raw"
+#    attenuation: 11db
+#    unit_of_measurement: 'V'
+
+# Soil humidity %
+  - platform: adc
+    pin: 32
+    name: "${upper_devicename} Soil Moisture"
+    attenuation: 11db
+    unit_of_measurement: '%'
+    filters:
+      # 1.410v = in water
+      # 2.834v = dry
+      lambda: |-
+        return (2.834 - x) * 100.0 / (2.834 - 1.410);
+    update_interval: ${update_interval}
+    
+# Lux sensor
+  - platform: bh1750
+    i2c_id: bus_a
+    name: "${upper_devicename} Lux"
+    address: 0x23
+    unit_of_measurement: "lx"
+    icon: "mdi:white-balance-sunny"
+    device_class: "illuminance"
+    state_class: "measurement"
+    setup_priority: -300
+    update_interval: ${update_interval}
+  
+# Fertilizer sensor
+  - platform: adc
+    pin: GPIO34
+    name: "${upper_devicename} Salt"
+    unit_of_measurement: '%'
+    accuracy_decimals: 4
+    filters:
+      # Map 0.0 (from sensor) to 0.0 (true value)
+      - calibrate_linear:
+          - 0.0 -> 0.0
+          - 1.1 -> 100.0  
+    update_interval: ${update_interval}
+    
+# Battery V
+  - platform: adc
+    pin: 33
+    name: "${upper_devicename} Battery"
+    attenuation: 6db
+    unit_of_measurement: "V"
+    icon: "mdi:battery-high"
+    device_class: "voltage"
+    state_class: "measurement"
+    accuracy_decimals: 3
+    filters:
+#      # Map 0.0 (from sensor) to 0.0 (true value)
+      - calibrate_linear:
+          - 0.0 -> 0.0
+          - 2.06 -> 1.89
+      - lambda: return x * 2.0;
+    id: ${devicename}_voltage
+    update_interval: ${update_interval}
+
+# Battery %
+  - platform: adc
+    pin: 33
+    name: "${upper_devicename} Battery %"
+    unit_of_measurement: '%'
+    filters:
+      - lambda: |-
+          return ((id(${devicename}_voltage).state - 2.76) / 0.74658 * 100);  
+    # 2.76v = minimum
+    # 3.50659v = maximum       
+    # (current - minimum) * 100 / difference between max & mix 
+    update_interval: ${update_interval}
+
+# Deep sleep section
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: ${sleep_duration}
+
+# Script section
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - delay: ${awake_duration}
+      - if:
+          condition:
+            binary_sensor.is_on: ${devicename}_prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+          else:
+            - deep_sleep.enter: deep_sleep_control
+      - script.execute: consider_deep_sleep
