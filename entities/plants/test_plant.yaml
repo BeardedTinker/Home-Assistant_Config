@@ -1,0 +1,19 @@
+#####
+# Plant monitor integration. Using LilyGO HiGrow board with ESPHome firmware
+# https://www.home-assistant.io/integrations/plant
+#####
+
+test_plant:
+  sensors:
+    moisture: sensor.test_plant_soil_moisture_2
+    battery: sensor.test_plant_battery_4
+    temperature: sensor.test_plant_temperature_2
+    conductivity: sensor.test_plant_salt_2
+    brightness: sensor.test_plant_lux_2
+  min_moisture: 30
+  max_moisture: 75
+  min_battery: 10
+  min_conductivity: 1
+  min_temperature: 19
+  min_brightness: 500
+  check_days: 3
