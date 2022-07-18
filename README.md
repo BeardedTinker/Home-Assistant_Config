@@ -11,15 +11,28 @@
 Each commit is automaticlly verified with <a href="https://github.com/BeardedTinker/Home-Assistant_Config/actions">GitHub CI</a> - where it's tested against Current installed version, Latest, Dev and Beta release. RemarkLint and YAML is also checked.
   </h4>
 
+Contents
+========
 
-# BeardedTinker's Home Assistant configuration
+ * [Intro](#why)
+ * [YouTube Channel](#youtube-channel)
+ * [Hardware](#hardware)
+ * [AddOns](#addons)
+ * [Integrations](#integrations)
+ * [Configuration](#configuration)
+ * [Folder and files](#folder-and-files)
+ * [Coutners](#counters)
+ * [Missing files?](#missing-files)
+
+
+### Intro
 
 Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
 Where every I could I listed original authors of the code or parts of the code I used.
 
 
-## Want to get more info?
+## YouTube Channel?
 
 A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more then 250 videos as of Today, with at least 100 of them being Home Assistant How To's. 
 
@@ -37,38 +50,38 @@ Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/
 From other devices I use, here is a list:
 
 ##### IKEA DEVICES
-  - IKEA TRADFRI remote control (E1524/E1810)
-  - IKEA TRADFRI ON/OFF switch (E1743)
-  - IKEA TRADFRI control outlet (E1603/E1702)
-  - IKEA TRADFRI various bulbs of all sizes and shapes (LED1545G12, LED1623G12, LED1650R5, LED1536G5, LED1649C5, LED1736G9)
+  + IKEA TRADFRI remote control (E1524/E1810)
+  + IKEA TRADFRI ON/OFF switch (E1743)
+  + IKEA TRADFRI control outlet (E1603/E1702)
+  + IKEA TRADFRI various bulbs of all sizes and shapes (LED1545G12, LED1623G12, LED1650R5, LED1536G5, LED1649C5, LED1736G9)
 
 ##### XIAOMI DEVICES
-  - Xiaomi MiJia wireless switch [WXKG01LM](https://www.zigbee2mqtt.io/devices/WXKG01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dW7ZKDA)
-  - Xiaomi MiJia temperature & humidity sensors [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
-  - Xiaomi Aqara human body movement and illuminance sensors [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
-  - Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
-  - NEW Aqara Door and Window contact sensor
-  - Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
-  - Xiaomi Aqara Vibration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
-  - Xiaomi Water sensor [SJCGQ11LM](https://www.zigbee2mqtt.io/devices/SJCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/4001249406915.html)
-  - Xiaomi Mosquitto Repellents [ESPHome](https://youtu.be/XMFn8fKhUFA) - [AliExpress link](https://www.aliexpress.com/item/4000195100873.html)
+  + Xiaomi MiJia wireless switch [WXKG01LM](https://www.zigbee2mqtt.io/devices/WXKG01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dW7ZKDA)
+  + Xiaomi MiJia temperature & humidity sensors [WSDCGQ01LM](https://www.zigbee2mqtt.io/devices/WSDCGQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dUNSKG8)
+  + Xiaomi Aqara human body movement and illuminance sensors [RTCGQ11LM](https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dTTUIzm)
+  + Xiaomi Aqara door & window contact sensor [MCCGQ11LM](https://www.zigbee2mqtt.io/devices/MCCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/32967550225.html)
+  + NEW Aqara Door and Window contact sensor
+  + Xiaomi Mi/Aqara smart home cube [MFKZQ01LM](https://www.zigbee2mqtt.io/devices/MFKZQ01LM.html) - [AliExpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+  + Xiaomi Aqara Vibration sensor [DJT11LM](https://www.zigbee2mqtt.io/devices/DJT11LM.html)- [Aliexpress link](https://s.click.aliexpress.com/e/_dYCODwy)
+  + Xiaomi Water sensor [SJCGQ11LM](https://www.zigbee2mqtt.io/devices/SJCGQ11LM.html) - [AliExpress link](https://www.aliexpress.com/item/4001249406915.html)
+  + Xiaomi Mosquitto Repellents [ESPHome](https://youtu.be/XMFn8fKhUFA) - [AliExpress link](https://www.aliexpress.com/item/4000195100873.html)
 
 ##### SHELLY DEVICES
-  - [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
-  - [Shelly Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
-  - [Shelly Gas CNG sensor](https://shelly.cloud/products/shelly-gas-smart-home-automation-sensor/) 
-  - [Shelly Motion sensor](https://shelly.cloud/shelly-motion-smart-home-automation-sensor/)
-  - [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
-  - [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
-  - [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
-- - [Shelly Plus 2PM](https://shelly.cloud/shelly-plus-2pm/)
+  + [Shelly EM](https://shelly.cloud/products/shelly-em-smart-home-automation-device/) energy meter with 50A clamp
+  + [Shelly Plug S](https://shelly.cloud/products/shelly-plug-s-smart-home-automation-device/) smart Plugs
+  + [Shelly Gas CNG sensor](https://shelly.cloud/products/shelly-gas-smart-home-automation-sensor/) 
+  + [Shelly Motion sensor](https://shelly.cloud/shelly-motion-smart-home-automation-sensor/)
+  + [Shelly Button 2.0](https://shelly.cloud/products/shelly-button-1-smart-home-automation-device/)
+  + [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
+  + [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
+  + [Shelly Plus 2PM](https://shelly.cloud/shelly-plus-2pm/)
 
   Plus some Shelly devices that are waiting installation and/or testing:
-  - Shelly 1 
-  - Shelly Uno 
-  - Shelly UV light
-  - Shelly Plus 1 
-  - Shelly Plus 1PM 
+  + Shelly 1 
+  + Shelly Uno 
+  + Shelly UV light
+  + Shelly Plus 1 
+  + Shelly Plus 1PM 
 
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
@@ -107,7 +120,7 @@ From other devices I use, here is a list:
   - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer
   - Gledopto GL-SD-002 Zigbee Smart switch
 
-### Containers and add-ons
+### AddOns
 
 As I'm running this on Synology, I have mix of Docker containers and Home Assistant add-ons. Here is a list:
 
@@ -203,7 +216,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Xiaomi Miio
 
 
-## Folder structure and files
+## Folder and files
 
 Insipred by [Franck](https://github.com/frenck/home-assistant-config) I've broken my configuration in various files.
 
@@ -255,6 +268,10 @@ Here is a list of them sorted:
   - www/community
 
 #### Missing files
+
+> **Warning**
+> Even if you don't make your configuration private - please use secrets.yaml file to store all your application credentials if needed for Home Assistant.
+
 Most of the missing files now have sample version. This is edited version with "fake" information, so you are able to reuse code.
 
   - ip_bans.yaml - could contain IP addresses  - added SAMPLE
