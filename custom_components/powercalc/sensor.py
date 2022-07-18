@@ -58,7 +58,7 @@ from homeassistant.helpers.typing import (
     HomeAssistantType,
 )
 
-from .common import create_source_entity, validate_name_pattern
+from .common import SourceEntity, create_source_entity, validate_name_pattern
 from .const import (
     CALCULATION_MODES,
     CONF_AREA,
@@ -74,6 +74,7 @@ from .const import (
     CONF_ENERGY_SENSOR_CATEGORY,
     CONF_ENERGY_SENSOR_ID,
     CONF_ENERGY_SENSOR_NAMING,
+    CONF_ENERGY_SENSOR_UNIT_PREFIX,
     CONF_FIXED,
     CONF_GROUP,
     CONF_IGNORE_UNAVAILABLE_STATE,
@@ -96,6 +97,7 @@ from .const import (
     DATA_CONFIGURED_ENTITIES,
     DATA_DISCOVERED_ENTITIES,
     DATA_DOMAIN_ENTITIES,
+    DATA_USED_UNIQUE_IDS,
     DISCOVERY_SOURCE_ENTITY,
     DOMAIN,
     DOMAIN_CONFIG,
@@ -103,6 +105,7 @@ from .const import (
     ENERGY_INTEGRATION_METHODS,
     ENTITY_CATEGORIES,
     SERVICE_RESET_ENERGY,
+    UnitPrefix,
 )
 from .errors import (
     PowercalcSetupError,
@@ -177,6 +180,9 @@ SENSOR_CONFIG = {
     vol.Optional(CONF_ENERGY_SENSOR_NAMING): validate_name_pattern,
     vol.Optional(CONF_ENERGY_SENSOR_CATEGORY): vol.In(ENTITY_CATEGORIES),
     vol.Optional(CONF_ENERGY_INTEGRATION_METHOD): vol.In(ENERGY_INTEGRATION_METHODS),
+    vol.Optional(CONF_ENERGY_SENSOR_UNIT_PREFIX): vol.In(
+        [cls.value for cls in UnitPrefix]
+    ),
     vol.Optional(CONF_CREATE_GROUP): cv.string,
     vol.Optional(CONF_INCLUDE, default={}): vol.Schema(
         {
@@ -317,9 +323,14 @@ async def create_sensors(
         for entity_config in config[CONF_ENTITIES]:
             # When there are nested entities, combine these with the current entities, resursively
             if CONF_ENTITIES in entity_config or CONF_CREATE_GROUP in entity_config:
-                (child_new_sensors, child_existing_sensors) = await create_sensors(
-                    hass, entity_config
-                )
+                try:
+                    (child_new_sensors, child_existing_sensors) = await create_sensors(
+                        hass, entity_config
+                    )
+                except SensorConfigurationError as err:
+                    _LOGGER.error(err)
+                    continue
+
                 new_sensors.extend(child_new_sensors)
                 existing_sensors.extend(child_existing_sensors)
                 continue
@@ -345,8 +356,6 @@ async def create_sensors(
             new_sensors.extend(
                 await create_individual_sensors(hass, merged_sensor_config)
             )
-        except SensorAlreadyConfiguredError as error:
-            existing_sensors.extend(error.get_existing_entities())
         except SensorConfigurationError as error:
             _LOGGER.error(error)
 
@@ -385,24 +394,20 @@ async def create_individual_sensors(
     """Create entities (power, energy, utility_meters) which track the appliance."""
 
     if discovery_info:
-        source_entity = discovery_info.get(DISCOVERY_SOURCE_ENTITY)
+        source_entity: SourceEntity = discovery_info.get(DISCOVERY_SOURCE_ENTITY)
     else:
         source_entity = await create_source_entity(sensor_config[CONF_ENTITY_ID], hass)
 
-    if (
-        source_entity.entity_id in hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES]
-        and source_entity.entity_id != DUMMY_ENTITY_ID
-    ):
-        # Display an error when a power sensor was already configured for the same entity by the user
-        # No log entry will be shown when the entity was auto discovered, we can silently continue
-        if not discovery_info:
-            existing_entities = hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES].get(
-                source_entity.entity_id
-            )
-            raise SensorAlreadyConfiguredError(
-                source_entity.entity_id, existing_entities
-            )
-        return []
+    if (used_unique_ids := hass.data.get(DATA_USED_UNIQUE_IDS)) is None:
+        used_unique_ids = hass.data[DATA_USED_UNIQUE_IDS] = []
+    try:
+        check_entity_not_already_configured(
+            sensor_config, source_entity, hass, used_unique_ids
+        )
+    except SensorAlreadyConfiguredError as error:
+        if discovery_info:
+            return []
+        raise error
 
     entities_to_add = []
 
@@ -438,13 +443,6 @@ async def create_individual_sensors(
             await create_utility_meters(hass, energy_sensor, sensor_config)
         )
 
-    if discovery_info:
-        hass.data[DOMAIN][DATA_DISCOVERED_ENTITIES].append(source_entity.entity_id)
-    else:
-        hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES].update(
-            {source_entity.entity_id: entities_to_add}
-        )
-
     if source_entity.entity_entry and source_entity.device_entry:
         hass.bus.async_listen_once(
             EVENT_HOMEASSISTANT_STARTED,
@@ -457,6 +455,14 @@ async def create_individual_sensors(
             ),
         )
 
+    # Update several registries
+    if discovery_info:
+        hass.data[DOMAIN][DATA_DISCOVERED_ENTITIES].append(source_entity.entity_id)
+    else:
+        hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES].update(
+            {source_entity.entity_id: entities_to_add}
+        )
+
     if not source_entity.domain in hass.data[DOMAIN][DATA_DOMAIN_ENTITIES]:
         hass.data[DOMAIN][DATA_DOMAIN_ENTITIES][source_entity.domain] = []
 
@@ -464,7 +470,32 @@ async def create_individual_sensors(
         entities_to_add
     )
 
+    # Keep track for which unique_id's we generated sensors already
+    unique_id = sensor_config.get(CONF_UNIQUE_ID) or source_entity.unique_id
+    if unique_id:
+        used_unique_ids.append(unique_id)
+
     return entities_to_add
+
+
+def check_entity_not_already_configured(
+    sensor_config: dict,
+    source_entity: SourceEntity,
+    hass: HomeAssistantType,
+    used_unique_ids: list[str],
+):
+    if source_entity.entity_id == DUMMY_ENTITY_ID:
+        return
+
+    unique_id = sensor_config.get(CONF_UNIQUE_ID) or source_entity.unique_id
+    if unique_id and unique_id in used_unique_ids:
+        raise SensorAlreadyConfiguredError(source_entity.entity_id)
+
+    if (
+        unique_id is None
+        and source_entity.entity_id in hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES]
+    ):
+        raise SensorAlreadyConfiguredError(source_entity.entity_id)
 
 
 def bind_entities_to_devices(hass: HomeAssistantType, entities, device_id: str):
