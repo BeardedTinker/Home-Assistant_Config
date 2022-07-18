@@ -145,7 +145,7 @@ def detail_config_schema(
         if options[const.CONF_FREQUENCY] in const.WEEKLY_DAILY_MONTHLY:
             # "every-n-weeks", "every-n-days", "monthly"
             options_schema[required(const.CONF_PERIOD, options)] = vol.All(
-                vol.Coerce(int), vol.Range(min=1, max=365)
+                vol.Coerce(int), vol.Range(min=1, max=1000)
             )
         if options[const.CONF_FREQUENCY] in const.WEEKLY_FREQUENCY_X:
             # every-n-weeks

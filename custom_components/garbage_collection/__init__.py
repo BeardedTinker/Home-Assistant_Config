@@ -46,7 +46,7 @@ SENSOR_SCHEMA = vol.Schema(
             cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=1, max=5))]
         ),
         vol.Optional(const.CONF_PERIOD): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=365)
+            vol.Coerce(int), vol.Range(min=1, max=1000)
         ),
         vol.Optional(const.CONF_FIRST_WEEK): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=52)
@@ -99,7 +99,7 @@ OFFSET_DATE_SCHEMA = vol.Schema(
 
 
 async def async_setup(hass: HomeAssistant, _: ConfigType) -> bool:
-    """Set up this component using YAML."""
+    """Set up platform - register services, inicialize data structure."""
 
     async def handle_add_date(call: ServiceCall) -> None:
         """Handle the add_date service call."""

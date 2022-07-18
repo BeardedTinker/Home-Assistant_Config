@@ -16,6 +16,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -138,11 +139,11 @@ class GarbageCollection(RestoreEntity):
 
         # Restore stored state
         if (state := await self.async_get_last_state()) is not None:
-            # TBD - This will prevent update when options change
-            # self._attr_state = state.state
-            # self._days = state.attributes[const.ATTR_DAYS]
-            # next_date = helpers.parse_datetime(state.attributes[const.ATTR_NEXT_DATE])
-            # self._next_date = None if next_date is None else next_date.date()
+            self._last_updated = None  # Unblock update - after options change
+            self._attr_state = state.state
+            self._days = state.attributes[const.ATTR_DAYS]
+            next_date = helpers.parse_datetime(state.attributes[const.ATTR_NEXT_DATE])
+            self._next_date = None if next_date is None else next_date.date()
             self.last_collection = helpers.parse_datetime(
                 state.attributes[const.ATTR_LAST_COLLECTION]
             )
@@ -171,12 +172,6 @@ class GarbageCollection(RestoreEntity):
                 self.entity_id
             )
 
-    def clear_state(self) -> None:
-        """Erase the stored state (called when configuration change)."""
-        self._attr_state = ""
-        self._days = None
-        self._next_date = None
-
     async def async_will_remove_from_hass(self) -> None:
         """When sensor is added to hassio, remove it."""
         await super().async_will_remove_from_hass()
@@ -193,7 +188,7 @@ class GarbageCollection(RestoreEntity):
         return self.config_entry.entry_id
 
     @property
-    def device_info(self) -> Dict[str, Any]:
+    def device_info(self) -> DeviceInfo | None:
         """Return device info."""
         return {
             "identifiers": {(const.DOMAIN, self.unique_id)},
@@ -286,7 +281,7 @@ class GarbageCollection(RestoreEntity):
         try:
             ready_for_update = bool(self._last_updated.date() != today)  # type: ignore
         except AttributeError:
-            ready_for_update = True
+            return True
         try:
             if self._next_date == today and (
                 (
@@ -298,7 +293,7 @@ class GarbageCollection(RestoreEntity):
                     and self.last_collection.date() == today
                 )
             ):
-                ready_for_update = True
+                return True
         except (AttributeError, TypeError):
             pass
         return ready_for_update
