@@ -10,7 +10,21 @@ trigger:
 - platform: sun
   event: sunset
   offset: '+00:30:00'
-- platform: numeric_state
+#- platform: numeric_state
+#entity_id: 
+#  - sensor.dracena_marginata_soil_moisture
+#  - sensor.dypsis_lutescenes_soil_moisture
+#  - sensor.ficus_benjamina_natasja_soil
+#  - sensor.ficus_benjamina_soil_moisture
+#  - sensor.parthenocissus_small_soil_moisture
+#  - sensor.parthenocissus_soil_moisture
+#  - sensor.schefflera_arboricola_soil_moisture
+#  - sensor.test_plant_soil_moisture_2
+#below: 40
+
+condition:
+  alias: Soil humidity under 40%
+  condition: numeric_state
   entity_id: 
     - sensor.dracena_marginata_soil_moisture
     - sensor.dypsis_lutescenes_soil_moisture
@@ -47,6 +61,6 @@ action:
               - media_player.display_me
               - media_player.clock_me
           data:
-            message: '{{ trigger.entity_id.name }} needs watering'
+            message: '{{ trigger.to_state.attributes.friendly_name }} needs watering'
           extra:
             volume: 0.5
