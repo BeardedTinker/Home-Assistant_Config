@@ -34,6 +34,7 @@ CONF_IGNORED_DEVICES = "ignored_devices"
 CONF_MAC = "mac"
 CONF_MODE = "mode"
 CONF_MODEL_ID = "model"
+CONF_OPTIMISTIC = "optimistic"
 CONF_POSITION_TEMPLATE = "position_template"
 CONF_POWERED = "powered"
 CONF_PUSH_OFF_DELAY = "push_off_delay"
@@ -1653,6 +1654,10 @@ try:
 except ValueError:
     logger.error("Not valid qos value, the default value 0 was used")  # noqa: F821
 
+optimistic = data.get(CONF_OPTIMISTIC, False)  # noqa: F821
+if not isinstance(optimistic, bool):
+    optimistic = False
+
 disc_prefix = data.get(CONF_DISCOVERY_PREFIX, DEFAULT_DISC_PREFIX)  # noqa: F821
 
 ignore_device_model = data.get(CONF_IGNORE_DEVICE_MODEL, False)  # noqa: F821
@@ -2968,7 +2973,7 @@ for roller_id in range(rollers):
             KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
             KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
             KEY_UNIQUE_ID: f"{dev_id}-roller-{roller_id}".lower(),
-            KEY_OPTIMISTIC: VALUE_FALSE,
+            KEY_OPTIMISTIC: str(optimistic).lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
             "~": default_topic,
