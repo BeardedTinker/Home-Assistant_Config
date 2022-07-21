@@ -14,7 +14,7 @@ trigger:
 
 condition:
   - condition: numeric_state
-    entity_id: sensor.kitchen_motion_lux
+    entity_id: sensor.kitchen_motion_luminosity
     below: 320  
 
 action:
