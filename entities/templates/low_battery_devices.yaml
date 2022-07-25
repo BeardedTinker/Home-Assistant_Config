@@ -1,0 +1,20 @@
+#####
+# Low battery binary sensor with attributes
+# https://github.com/alphasixtyfive/home-assistant-configs/blob/main/battery_low.yaml
+#####
+
+- binary_sensor:
+  - name: Battery low
+    state: >-
+      {% set threshold = 20 %}
+      {{ states | selectattr('attributes.device_class', 'eq', 'battery') | rejectattr('object_id', 'search', 'iphone') | map(attribute='state') | map('int') | select('le', threshold) | list | count > 0 }}
+    attributes:
+      devices: >-
+        {% set threshold = 20 %}
+        {% set ns = namespace(devices = []) %}
+        {%- for item in states | selectattr('attributes.device_class', 'eq', 'battery') | rejectattr('object_id', 'search', 'iphone') -%}
+          {%- if item.state | int < threshold -%}
+            {% set ns.devices = ns.devices + [item.attributes.friendly_name | regex_replace('\sbattery(\s\w+)?', '', true) ~ ' (' ~ item.state ~ '%)'] %}
+          {%- endif -%}
+        {%- endfor -%}
+        {{ ns.devices }}
