@@ -6,6 +6,7 @@
     "codeowners": [
         "@bramstroker"
     ],
+    "config_flow": true,
     "dependencies": [
         "light",
         "group",
@@ -21,5 +22,5 @@
     "requirements": [
         "numpy>=1.21.1"
     ],
-    "version": "v0.23.2"
+    "version": "v0.24.2"
 }

@@ -11,12 +11,11 @@ from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import CONF_NAME, ENERGY_KILO_WATT_HOUR, TIME_HOURS
 from homeassistant.const import __version__ as HA_VERSION
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.typing import HomeAssistantType
 
-from custom_components.powercalc.common import SourceEntity
-from custom_components.powercalc.const import (
+from ..common import SourceEntity
+from ..const import (
     ATTR_SOURCE_DOMAIN,
     ATTR_SOURCE_ENTITY,
     CONF_ENERGY_INTEGRATION_METHOD,
@@ -28,10 +27,9 @@ from custom_components.powercalc.const import (
     DEFAULT_ENERGY_INTEGRATION_METHOD,
     UnitPrefix,
 )
-from custom_components.powercalc.migrate import async_migrate_entity_id
-from custom_components.powercalc.sensors.power import PowerSensor, RealPowerSensor
-
+from ..migrate import async_migrate_entity_id
 from .abstract import generate_energy_sensor_entity_id, generate_energy_sensor_name
+from .power import PowerSensor, RealPowerSensor
 
 ENERGY_ICON = "mdi:lightning-bolt"
 ENTITY_ID_FORMAT = SENSOR_DOMAIN + ".{}"
@@ -40,7 +38,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def create_energy_sensor(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     sensor_config: dict,
     power_sensor: PowerSensor,
     source_entity: SourceEntity,
@@ -105,7 +103,7 @@ async def create_energy_sensor(
 
 @callback
 def find_related_real_energy_sensor(
-    hass: HomeAssistantType, power_sensor: RealPowerSensor
+    hass: HomeAssistant, power_sensor: RealPowerSensor
 ) -> Optional[RealEnergySensor]:
     """See if a corresponding energy sensor exists in the HA installation for the power sensor"""
 

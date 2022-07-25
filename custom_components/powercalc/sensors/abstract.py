@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Any
 
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
@@ -6,8 +7,8 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import async_generate_entity_id
 
-from custom_components.powercalc.common import SourceEntity
-from custom_components.powercalc.const import (
+from ..common import SourceEntity
+from ..const import (
     CONF_ENERGY_SENSOR_FRIENDLY_NAMING,
     CONF_ENERGY_SENSOR_NAMING,
     CONF_POWER_SENSOR_FRIENDLY_NAMING,
