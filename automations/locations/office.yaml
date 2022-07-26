@@ -13,6 +13,8 @@ trigger:
   entity_id:
   - proximity.office
   above: '150'
+  for:
+    minutes: 5
 
 condition:
   condition: template
