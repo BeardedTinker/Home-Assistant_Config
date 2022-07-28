@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, cast
 
 import homeassistant.helpers.entity_registry as er
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
@@ -29,7 +29,7 @@ from homeassistant.helpers.event import (
     async_track_time_interval,
 )
 from homeassistant.helpers.template import Template
-from homeassistant.helpers.typing import DiscoveryInfoType
+from homeassistant.helpers.typing import DiscoveryInfoType, StateType
 
 from ..common import SourceEntity
 from ..const import (
@@ -123,6 +123,10 @@ async def create_virtual_power_sensor(
                     hass, sensor_config, source_entity.entity_entry
                 )
             if mode is None and light_model:
+                if not light_model.supported_modes:
+                    raise UnsupportedMode(
+                        f"Power profile has no supported_modes in model.json. manufacturer: {light_model.manufacturer}, model: {light_model.model}"
+                    )
                 mode = light_model.supported_modes[0]
         except (ModelNotSupported) as err:
             if not is_fully_configured(sensor_config):
@@ -460,17 +464,17 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         return self._source_entity
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._name
 
     @property
-    def state(self):
+    def native_value(self) -> StateType:
         """Return the state of the sensor."""
-        return self._power
+        return cast(StateType, self._power)
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """Return True if entity is available."""
         return self._power is not None
 
