@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 from typing import Optional, cast
 
 import homeassistant.helpers.entity_registry as er
@@ -13,7 +13,6 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import (
     CONF_NAME,
-    CONF_SCAN_INTERVAL,
     CONF_UNIQUE_ID,
     POWER_WATT,
     STATE_ON,
@@ -21,6 +20,7 @@ from homeassistant.const import (
     STATE_UNKNOWN,
 )
 from homeassistant.core import HomeAssistant, State, callback
+from homeassistant.helpers import start
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.event import (
     TrackTemplate,
@@ -41,6 +41,7 @@ from ..const import (
     CONF_CALCULATION_ENABLED_CONDITION,
     CONF_DISABLE_STANDBY_POWER,
     CONF_FIXED,
+    CONF_FORCE_UPDATE_FREQUENCY,
     CONF_IGNORE_UNAVAILABLE_STATE,
     CONF_LINEAR,
     CONF_MODE,
@@ -199,7 +200,7 @@ async def create_virtual_power_sensor(
         unique_id=unique_id,
         standby_power=standby_power,
         standby_power_on=standby_power_on,
-        scan_interval=sensor_config.get(CONF_SCAN_INTERVAL),
+        update_frequency=sensor_config.get(CONF_FORCE_UPDATE_FREQUENCY),
         multiply_factor=sensor_config.get(CONF_MULTIPLY_FACTOR),
         multiply_factor_standby=sensor_config.get(CONF_MULTIPLY_FACTOR_STANDBY),
         ignore_unavailable_state=sensor_config.get(CONF_IGNORE_UNAVAILABLE_STATE),
@@ -282,7 +283,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         unique_id: str,
         standby_power: Decimal,
         standby_power_on: Decimal,
-        scan_interval,
+        update_frequency,
         multiply_factor: float | None,
         multiply_factor_standby: bool,
         ignore_unavailable_state: bool,
@@ -300,13 +301,14 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         self._standby_power_on = standby_power_on
         self._attr_force_update = True
         self._attr_unique_id = unique_id
-        self._scan_interval = scan_interval
+        self._update_frequency = update_frequency
         self._multiply_factor = multiply_factor
         self._multiply_factor_standby = multiply_factor_standby
         self._ignore_unavailable_state = ignore_unavailable_state
         self._rounding_digits = rounding_digits
         self.entity_id = entity_id
         self._sensor_config = sensor_config
+        self._track_entities: list = []
         if entity_category:
             self._attr_entity_category = EntityCategory(entity_category)
         self._attr_extra_state_attributes = {
@@ -329,7 +331,12 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
             state = self.hass.states.get(self._source_entity)
             await self._update_power_sensor(self._source_entity, state)
 
-        # async def home_assistant_startup(event):
+        async def initial_update(event):
+            for entity_id in self._track_entities:
+                new_state = self.hass.states.get(entity_id)
+
+                await self._update_power_sensor(entity_id, new_state)
+
         """Add listeners and get initial state."""
         entities_to_track = self._power_calculator.get_entities_to_track()
 
@@ -338,6 +345,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         ]
         if not track_entities:
             track_entities = [self._source_entity]
+        self._track_entities = track_entities
 
         async_track_state_change_event(
             self.hass, track_entities, appliance_state_listener
@@ -355,17 +363,14 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
                 action=template_change_listener,
             )
 
-        for entity_id in track_entities:
-            new_state = self.hass.states.get(entity_id)
-
-            await self._update_power_sensor(entity_id, new_state)
+        self.async_on_remove(start.async_at_start(self.hass, initial_update))
 
         @callback
         def async_update(event_time=None):
             """Update the entity."""
             self.async_schedule_update_ha_state(True)
 
-        async_track_time_interval(self.hass, async_update, self._scan_interval)
+        async_track_time_interval(self.hass, async_update, self._update_frequency)
 
     async def _update_power_sensor(
         self, trigger_entity_id: str, state: State | None
@@ -444,7 +449,13 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
                 standby_power *= Decimal(self._multiply_factor)
             power += standby_power
 
-        return Decimal(power)
+        try:
+            return Decimal(power)
+        except DecimalException:
+            _LOGGER.error(
+                f"{state.entity_id}: Could not convert value '{power}' to decimal"
+            )
+            return None
 
     async def is_calculation_enabled(self) -> bool:
         if CONF_CALCULATION_ENABLED_CONDITION not in self._sensor_config:
