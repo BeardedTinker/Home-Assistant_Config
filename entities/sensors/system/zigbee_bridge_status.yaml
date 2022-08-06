@@ -1,9 +1,0 @@
-#####
-# Status of Zigbee2MQTT bridge
-#
-#####
-
-platform: mqtt
-name: Zigbee2MQTT Bridge state
-state_topic: "zigbee2mqtt/bridge/state"
-icon: mdi:router-wireless

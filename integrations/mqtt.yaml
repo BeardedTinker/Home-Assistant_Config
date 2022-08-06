@@ -1,0 +1,46 @@
+#####
+# Converting old MQTT sensors to new format
+# https://www.home-assistant.io/integrations/sensor.mqtt/#new_format
+####
+
+mqtt:
+  binary_sensor:
+  - name: Thermal printer paper
+    state_topic: "printer/thermal_papercheck"
+    payload_on: 'off'
+    payload_off: 'om'
+    availability_mode: latest
+  sensor:
+  - name: github_checkrun_home_assistant_beta
+    state_topic: github_checkrun/home_assistant_beta
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/home_assistant_beta
+    icon: mdi:github
+  - name: github_checkrun_home_assistant_current
+    state_topic: github_checkrun/home_assistant_current
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/home_assistant_current
+    icon: mdi:github
+  - name: github_checkrun_home_assistant_dev
+    state_topic: github_checkrun/home_assistant_dev
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/home_assistant_dev
+    icon: mdi:github
+  - name: github_checkrun_home_assistant_stable
+    state_topic: github_checkrun/home_assistant_stable
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/home_assistant_stable
+    icon: mdi:github
+  - name: github_checkrun_remarklint
+    state_topic: github_checkrun/remarklint
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/remarklint
+    icon: mdi:github
+  - name: github_checkrun_yamllint
+    state_topic: github_checkrun/yamllint
+    value_template: "{{ value_json.status }}"
+    json_attributes_topic: github_checkrun/yamllint
+    icon: mdi:github
+  - name: Zigbee2MQTT Bridge state
+    state_topic: "zigbee2mqtt/bridge/state"
+    icon: mdi:router-wireless
