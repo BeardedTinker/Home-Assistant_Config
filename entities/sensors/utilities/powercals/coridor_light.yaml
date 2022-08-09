@@ -5,8 +5,8 @@
 
 platform: powercalc
 entity_id: light.corridor_light
-energy_sensor_id: sensor.corridor_light_energy
+energy_sensor_id: sensor.corridor_light_energy_3
 power_sensor_id: sensor.corridor_light_power
-linear:
-  min_power: 0.5
-  max_power: 22
+#linear:
+#  min_power: 0.5
+#  max_power: 22

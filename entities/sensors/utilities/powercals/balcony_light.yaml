@@ -5,8 +5,8 @@
 
 platform: powercalc
 entity_id: light.balcony_light
-energy_sensor_id: sensor.balcony_light_energy
+energy_sensor_id: sensor.balcony_light_energy_3
 power_sensor_id: sensor.balcony_light_power
-linear:
-  min_power: 0.5
-  max_power: 11
+#linear:
+#  min_power: 0.5
+#  max_power: 11
