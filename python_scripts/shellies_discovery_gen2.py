@@ -119,6 +119,7 @@ MODEL_PRO_1 = "shellypro1"
 MODEL_PRO_1PM = "shellypro1pm"
 MODEL_PRO_2 = "shellypro2"
 MODEL_PRO_2PM = "shellypro2pm"
+MODEL_PRO_3 = "shellypro3"
 MODEL_PRO_4PM = "shellypro4pm"
 
 SENSOR_BATTERY = "battery"
@@ -824,6 +825,31 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20220308,
     },
+    MODEL_PRO_3: {
+        ATTR_NAME: "Shelly Pro 3",
+        ATTR_BINARY_SENSORS: {
+            SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
+            SENSOR_FIRMWARE: DESCRIPTION_SENSOR_FIRMWARE,
+        },
+        ATTR_BUTTONS: {
+            BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART,
+            BUTTON_UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+        },
+        ATTR_INPUTS: 3,
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [EVENT_SINGLE_PUSH, EVENT_DOUBLE_PUSH, EVENT_LONG_PUSH],
+        ATTR_RELAYS: 3,
+        ATTR_RELAY_BINARY_SENSORS: {SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP},
+        ATTR_RELAY_SENSORS: {SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_TEMPERATURE},
+        ATTR_SENSORS: {
+            SENSOR_ETH_IP: DESCRIPTION_SENSOR_ETH_IP,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20220308,
+    },
     MODEL_PRO_4PM: {
         ATTR_NAME: "Shelly Pro 4PM",
         ATTR_BINARY_SENSORS: {
@@ -870,7 +896,7 @@ def get_consumption_type(consumption_list, relay_id):
     except IndexError:
         return ATTR_SWITCH
 
-    return ATTR_LIGHT if "light" in consumption_type else ATTR_SWITCH
+    return ATTR_LIGHT if "light" in consumption_type.lower() else ATTR_SWITCH
 
 
 def mqtt_publish(topic, payload):
