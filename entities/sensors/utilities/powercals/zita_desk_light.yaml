@@ -5,5 +5,6 @@
 
 platform: powercalc
 entity_id: light.zita_desk_lights
+unique_id: e695ae6a-96e5-4742-abd1-863d670291fc
 wled:
   voltage: 5

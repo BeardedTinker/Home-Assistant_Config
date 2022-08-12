@@ -1,0 +1,17 @@
+#####
+# Roborock PowerCalc setup
+#
+#####
+
+platform: powercalc
+entity_id: vacuum.roborock_s5_max
+calculation_enabled_condition: "{{ is_state('vacuum.roborock_s5_max', 'docked') }}"
+unique_id: 3b53c912-c9fd-4823-a0c8-48e17af1153d
+linear:
+  attribute: battery_level
+  calibrate:
+      - 1 -> 20
+      - 79 -> 20
+      - 80 -> 15
+      - 99 -> 8
+      - 100 -> 1.5
