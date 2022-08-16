@@ -9,6 +9,10 @@ id: 8c045beb-9ca4-4e20-8306-5ed08989f8fa
 trigger:
 - platform: state
   entity_id: vacuum.roborock_s5_max
+  from:
+    - docked
+    - returning
+    - idle
   not_to:
     - "unavailable"
     - "unknown"
