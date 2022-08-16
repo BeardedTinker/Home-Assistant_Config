@@ -13,8 +13,8 @@ from mac_vendor_lookup import AsyncMacLookup
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers import entity_registry
 from homeassistant.util.dt import utcnow
-from homeassistant.components.device_tracker import DOMAIN as DEVICE_TRACKER_DOMAIN
 
 from homeassistant.const import (
     CONF_NAME,
@@ -41,6 +41,8 @@ from .const import (
     DEFAULT_SENSOR_PORT_TRAFFIC,
     CONF_SENSOR_CLIENT_TRAFFIC,
     DEFAULT_SENSOR_CLIENT_TRAFFIC,
+    CONF_SENSOR_CLIENT_CAPTIVE,
+    DEFAULT_SENSOR_CLIENT_CAPTIVE,
     CONF_SENSOR_SIMPLE_QUEUES,
     DEFAULT_SENSOR_SIMPLE_QUEUES,
     CONF_SENSOR_NAT,
@@ -106,7 +108,6 @@ class MikrotikControllerData:
         self.data = {
             "routerboard": {},
             "resource": {},
-            "route": {},
             "health": {},
             "health7": {},
             "interface": {},
@@ -124,14 +125,18 @@ class MikrotikControllerData:
             "queue": {},
             "dns": {},
             "dhcp-server": {},
+            "dhcp-client": {},
             "dhcp-network": {},
             "dhcp": {},
             "capsman_hosts": {},
             "wireless_hosts": {},
             "host": {},
             "host_hass": {},
+            "hostspot_host": {},
             "client_traffic": {},
             "environment": {},
+            "ups": {},
+            "gps": {},
         }
 
         self.notified_flags = []
@@ -170,6 +175,8 @@ class MikrotikControllerData:
         self.support_wireless = False
         self.support_wifiwave2 = False
         self.support_ppp = False
+        self.support_ups = False
+        self.support_gps = False
 
         self.major_fw_version = 0
 
@@ -229,6 +236,16 @@ class MikrotikControllerData:
         """Config entry option to not track ARP."""
         return self.config_entry.options.get(
             CONF_SENSOR_CLIENT_TRAFFIC, DEFAULT_SENSOR_CLIENT_TRAFFIC
+        )
+
+    # ---------------------------
+    #   option_sensor_client_captive
+    # ---------------------------
+    @property
+    def option_sensor_client_captive(self):
+        """Config entry option to not track ARP."""
+        return self.config_entry.options.get(
+            CONF_SENSOR_CLIENT_CAPTIVE, DEFAULT_SENSOR_CLIENT_CAPTIVE
         )
 
     # ---------------------------
@@ -363,7 +380,7 @@ class MikrotikControllerData:
     # ---------------------------
     def set_value(self, path, param, value, mod_param, mod_value):
         """Change value using Mikrotik API"""
-        return self.api.update(path, param, value, mod_param, mod_value)
+        return self.api.set_value(path, param, value, mod_param, mod_value)
 
     # ---------------------------
     #   execute
@@ -401,7 +418,7 @@ class MikrotikControllerData:
         """Update Mikrotik data"""
         packages = parse_api(
             data={},
-            source=self.api.path("/system/package"),
+            source=self.api.query("/system/package"),
             key="name",
             vals=[
                 {"name": "name"},
@@ -435,20 +452,24 @@ class MikrotikControllerData:
                 self.support_wifiwave2 = False
                 self.support_capsman = True
 
+        if "ups" in packages and packages["ups"]["enabled"]:
+            self.support_ups = True
+
+        if "gps" in packages and packages["gps"]["enabled"]:
+            self.support_gps = True
+
     # ---------------------------
     #   async_get_host_hass
     # ---------------------------
     async def async_get_host_hass(self):
         """Get host data from HA entity registry"""
-        registry = await self.hass.helpers.entity_registry.async_get_registry()
+        registry = entity_registry.async_get(self.hass)
         for entity in registry.entities.values():
             if (
                 entity.config_entry_id == self.config_entry.entry_id
-                and entity.domain == DEVICE_TRACKER_DOMAIN
-                and "-host-" in entity.unique_id
+                and entity.entity_id.startswith("device_tracker.")
             ):
-                _, mac = entity.unique_id.split("-host-", 2)
-                self.data["host_hass"][mac] = entity.original_name
+                self.data["host_hass"][entity.unique_id.upper()] = entity.original_name
 
     # ---------------------------
     #   async_hwinfo_update
@@ -457,7 +478,7 @@ class MikrotikControllerData:
         """Update Mikrotik hardware info"""
         try:
             await asyncio.wait_for(self.lock.acquire(), timeout=30)
-        except:
+        except Exception:
             return
 
         await self.hass.async_add_executor_job(self.get_firmware_update)
@@ -509,7 +530,7 @@ class MikrotikControllerData:
 
         try:
             await asyncio.wait_for(self.lock_ping.acquire(), timeout=3)
-        except:
+        except Exception:
             return
 
         for uid in list(self.data["host"]):
@@ -532,8 +553,8 @@ class MikrotikControllerData:
             # Check host availability
             if (
                 self.data["host"][uid]["source"] not in ["capsman", "wireless"]
-                and self.data["host"][uid]["address"] != "unknown"
-                and self.data["host"][uid]["interface"] != "unknown"
+                and self.data["host"][uid]["address"] not in ["unknown", ""]
+                and self.data["host"][uid]["interface"] not in ["unknown", ""]
             ):
                 tmp_interface = self.data["host"][uid]["interface"]
                 if uid in self.data["arp"] and self.data["arp"][uid]["bridge"] != "":
@@ -574,20 +595,19 @@ class MikrotikControllerData:
 
         try:
             await asyncio.wait_for(self.lock.acquire(), timeout=10)
-        except:
+        except Exception:
             return
+
+        await self.hass.async_add_executor_job(self.get_system_resource)
 
         if self.api.connected() and "available" not in self.data["fw-update"]:
             await self.async_fwupdate_check()
 
         if self.api.connected():
-            await self.hass.async_add_executor_job(self.get_system_resource)
-
-        if self.api.connected():
             await self.hass.async_add_executor_job(self.get_system_health)
 
         if self.api.connected():
-            await self.hass.async_add_executor_job(self.get_route)
+            await self.hass.async_add_executor_job(self.get_dhcp_client)
 
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_interface)
@@ -637,11 +657,20 @@ class MikrotikControllerData:
             elif 0 < self.major_fw_version >= 7:
                 await self.hass.async_add_executor_job(self.process_kid_control_devices)
 
+        if self.api.connected() and self.option_sensor_client_captive:
+            await self.hass.async_add_executor_job(self.get_captive)
+
         if self.api.connected() and self.option_sensor_simple_queues:
             await self.hass.async_add_executor_job(self.get_queue)
 
         if self.api.connected() and self.option_sensor_environment:
             await self.hass.async_add_executor_job(self.get_environment)
+
+        if self.api.connected() and self.support_ups:
+            await self.hass.async_add_executor_job(self.get_ups)
+
+        if self.api.connected() and self.support_gps:
+            await self.hass.async_add_executor_job(self.get_gps)
 
         async_dispatcher_send(self.hass, self.signal_update)
         self.lock.release()
@@ -653,7 +682,7 @@ class MikrotikControllerData:
         """Get all interfaces data from Mikrotik"""
         self.data["interface"] = parse_api(
             data=self.data["interface"],
-            source=self.api.path("/interface"),
+            source=self.api.query("/interface"),
             key="default-name",
             key_secondary="name",
             vals=[
@@ -686,6 +715,8 @@ class MikrotikControllerData:
                 {"name": "tx-previous", "default": 0.0},
                 {"name": "rx", "default": 0.0},
                 {"name": "tx", "default": 0.0},
+                {"name": "rx-total", "default": 0.0},
+                {"name": "tx-total", "default": 0.0},
             ],
             skip=[
                 {"name": "type", "value": "bridge"},
@@ -726,9 +757,12 @@ class MikrotikControllerData:
                 )
                 self.data["interface"][uid]["rx-previous"] = current_rx
 
+                self.data["interface"][uid]["tx-total"] = current_tx
+                self.data["interface"][uid]["rx-total"] = current_rx
+
         self.data["interface"] = parse_api(
             data=self.data["interface"],
-            source=self.api.path("/interface/ethernet"),
+            source=self.api.query("/interface/ethernet"),
             key="default-name",
             key_secondary="name",
             vals=[
@@ -750,6 +784,10 @@ class MikrotikControllerData:
 
         # Udpate virtual interfaces
         for uid, vals in self.data["interface"].items():
+            self.data["interface"][uid]["comment"] = str(
+                self.data["interface"][uid]["comment"]
+            )
+
             if vals["default-name"] == "":
                 self.data["interface"][uid]["default-name"] = vals["name"]
                 self.data["interface"][uid][
@@ -763,7 +801,11 @@ class MikrotikControllerData:
                 ):
                     self.data["interface"] = parse_api(
                         data=self.data["interface"],
-                        source=self.api.get_sfp(vals[".id"]),
+                        source=self.api.query(
+                            "/interface/ethernet",
+                            command="monitor",
+                            args={".id": vals[".id"], "once": True},
+                        ),
                         key_search="name",
                         vals=[
                             {"name": "status", "default": "unknown"},
@@ -791,7 +833,11 @@ class MikrotikControllerData:
                 else:
                     self.data["interface"] = parse_api(
                         data=self.data["interface"],
-                        source=self.api.get_sfp(vals[".id"]),
+                        source=self.api.query(
+                            "/interface/ethernet",
+                            command="monitor",
+                            args={".id": vals[".id"], "once": True},
+                        ),
                         key_search="name",
                         vals=[
                             {"name": "status", "default": "unknown"},
@@ -802,35 +848,13 @@ class MikrotikControllerData:
                     )
 
     # ---------------------------
-    #   get_route
-    # ---------------------------
-    def get_route(self):
-        """Get system resources data from Mikrotik"""
-        self.data["route"] = parse_api(
-            data={},
-            source=self.api.path("/ip/route"),
-            key="dst-address",
-            vals=[
-                {"name": "dst-address"},
-                {"name": "gateway", "default": "unknown"},
-                {"name": "vrf-interface", "default": "unknown"},
-                {
-                    "name": "enabled",
-                    "source": "disabled",
-                    "type": "bool",
-                    "reverse": True,
-                },
-            ],
-        )
-
-    # ---------------------------
     #   get_bridge
     # ---------------------------
     def get_bridge(self):
         """Get system resources data from Mikrotik"""
         self.data["bridge_host"] = parse_api(
             data=self.data["bridge_host"],
-            source=self.api.path("/interface/bridge/host"),
+            source=self.api.query("/interface/bridge/host"),
             key="mac-address",
             vals=[
                 {"name": "mac-address"},
@@ -894,7 +918,7 @@ class MikrotikControllerData:
         """Get NAT data from Mikrotik"""
         self.data["nat"] = parse_api(
             data=self.data["nat"],
-            source=self.api.path("/ip/firewall/nat"),
+            source=self.api.query("/ip/firewall/nat"),
             key=".id",
             vals=[
                 {"name": ".id"},
@@ -949,6 +973,8 @@ class MikrotikControllerData:
         nat_uniq = {}
         nat_del = {}
         for uid in self.data["nat"]:
+            self.data["nat"][uid]["comment"] = str(self.data["nat"][uid]["comment"])
+
             tmp_name = self.data["nat"][uid]["uniq-id"]
             if tmp_name not in nat_uniq:
                 nat_uniq[tmp_name] = uid
@@ -974,7 +1000,7 @@ class MikrotikControllerData:
         """Get Mangle data from Mikrotik"""
         self.data["mangle"] = parse_api(
             data=self.data["mangle"],
-            source=self.api.path("/ip/firewall/mangle"),
+            source=self.api.query("/ip/firewall/mangle"),
             key=".id",
             vals=[
                 {"name": ".id"},
@@ -1039,6 +1065,10 @@ class MikrotikControllerData:
         mangle_uniq = {}
         mangle_del = {}
         for uid in self.data["mangle"]:
+            self.data["mangle"][uid]["comment"] = str(
+                self.data["mangle"][uid]["comment"]
+            )
+
             tmp_name = self.data["mangle"][uid]["uniq-id"]
             if tmp_name not in mangle_uniq:
                 mangle_uniq[tmp_name] = uid
@@ -1064,7 +1094,7 @@ class MikrotikControllerData:
         """Get Filter data from Mikrotik"""
         self.data["filter"] = parse_api(
             data=self.data["filter"],
-            source=self.api.path("/ip/firewall/filter"),
+            source=self.api.query("/ip/firewall/filter"),
             key=".id",
             vals=[
                 {"name": ".id"},
@@ -1146,6 +1176,10 @@ class MikrotikControllerData:
         filter_uniq = {}
         filter_del = {}
         for uid in self.data["filter"]:
+            self.data["filter"][uid]["comment"] = str(
+                self.data["filter"][uid]["comment"]
+            )
+
             tmp_name = self.data["filter"][uid]["uniq-id"]
             if tmp_name not in filter_uniq:
                 filter_uniq[tmp_name] = uid
@@ -1157,9 +1191,10 @@ class MikrotikControllerData:
             if self.data["filter"][uid]["uniq-id"] not in self.filter_removed:
                 self.filter_removed[self.data["filter"][uid]["uniq-id"]] = 1
                 _LOGGER.error(
-                    "Mikrotik %s duplicate Filter rule %s, entity will be unavailable.",
+                    "Mikrotik %s duplicate Filter rule %s (ID %s), entity will be unavailable.",
                     self.host,
                     self.data["filter"][uid]["name"],
+                    self.data["filter"][uid][".id"],
                 )
 
             del self.data["filter"][uid]
@@ -1171,7 +1206,7 @@ class MikrotikControllerData:
         """Get Kid-control data from Mikrotik"""
         self.data["kid-control"] = parse_api(
             data=self.data["kid-control"],
-            source=self.api.path("/ip/kid-control"),
+            source=self.api.query("/ip/kid-control"),
             key="name",
             vals=[
                 {"name": "name"},
@@ -1194,6 +1229,11 @@ class MikrotikControllerData:
             ],
         )
 
+        for uid in self.data["kid-control"]:
+            self.data["kid-control"][uid]["comment"] = str(
+                self.data["kid-control"][uid]["comment"]
+            )
+
     # ---------------------------
     #   get_ppp
     # ---------------------------
@@ -1201,7 +1241,7 @@ class MikrotikControllerData:
         """Get PPP data from Mikrotik"""
         self.data["ppp_secret"] = parse_api(
             data=self.data["ppp_secret"],
-            source=self.api.path("/ppp/secret"),
+            source=self.api.query("/ppp/secret"),
             key="name",
             vals=[
                 {"name": "name"},
@@ -1217,6 +1257,7 @@ class MikrotikControllerData:
             ],
             ensure_vals=[
                 {"name": "caller-id", "default": ""},
+                {"name": "address", "default": ""},
                 {"name": "encoding", "default": ""},
                 {"name": "connected", "default": False},
             ],
@@ -1224,28 +1265,37 @@ class MikrotikControllerData:
 
         self.data["ppp_active"] = parse_api(
             data={},
-            source=self.api.path("/ppp/active"),
+            source=self.api.query("/ppp/active"),
             key="name",
             vals=[
                 {"name": "name"},
                 {"name": "service"},
                 {"name": "caller-id"},
+                {"name": "address"},
                 {"name": "encoding"},
             ],
         )
 
         for uid in self.data["ppp_secret"]:
+            self.data["ppp_secret"][uid]["comment"] = str(
+                self.data["ppp_secret"][uid]["comment"]
+            )
+
             if self.data["ppp_secret"][uid]["name"] in self.data["ppp_active"]:
                 self.data["ppp_secret"][uid]["connected"] = True
                 self.data["ppp_secret"][uid]["caller-id"] = self.data["ppp_active"][
                     uid
                 ]["caller-id"]
+                self.data["ppp_secret"][uid]["address"] = self.data["ppp_active"][uid][
+                    "address"
+                ]
                 self.data["ppp_secret"][uid]["encoding"] = self.data["ppp_active"][uid][
                     "encoding"
                 ]
             else:
                 self.data["ppp_secret"][uid]["connected"] = False
                 self.data["ppp_secret"][uid]["caller-id"] = "not connected"
+                self.data["ppp_secret"][uid]["address"] = "not connected"
                 self.data["ppp_secret"][uid]["encoding"] = "not connected"
 
     # ---------------------------
@@ -1253,23 +1303,20 @@ class MikrotikControllerData:
     # ---------------------------
     def get_system_routerboard(self):
         """Get routerboard data from Mikrotik"""
-        if self.data["resource"]["board-name"] == "x86":
+        if self.data["resource"]["board-name"] in ("x86", "CHR"):
             self.data["routerboard"]["routerboard"] = False
-            self.data["routerboard"]["model"] = "x86"
+            self.data["routerboard"]["model"] = self.data["resource"]["board-name"]
             self.data["routerboard"]["serial-number"] = "N/A"
         else:
             self.data["routerboard"] = parse_api(
                 data=self.data["routerboard"],
-                source=self.api.path("/system/routerboard"),
+                source=self.api.query("/system/routerboard"),
                 vals=[
                     {"name": "routerboard", "type": "bool"},
                     {"name": "model", "default": "unknown"},
                     {"name": "serial-number", "default": "unknown"},
-                    {
-                        "name": "firmware",
-                        "source": "current-firmware",
-                        "default": "unknown",
-                    },
+                    {"name": "current-firmware", "default": "unknown"},
+                    {"name": "upgrade-firmware", "default": "unknown"},
                 ],
             )
 
@@ -1281,7 +1328,7 @@ class MikrotikControllerData:
         if 0 < self.major_fw_version < 7:
             self.data["health"] = parse_api(
                 data=self.data["health"],
-                source=self.api.path("/system/health"),
+                source=self.api.query("/system/health"),
                 vals=[
                     {"name": "temperature", "default": "unknown"},
                     {"name": "voltage", "default": "unknown"},
@@ -1295,7 +1342,7 @@ class MikrotikControllerData:
         elif 0 < self.major_fw_version >= 7:
             self.data["health7"] = parse_api(
                 data=self.data["health7"],
-                source=self.api.path("/system/health"),
+                source=self.api.query("/system/health"),
                 key="name",
                 vals=[
                     {"name": "value", "default": "unknown"},
@@ -1315,7 +1362,7 @@ class MikrotikControllerData:
 
         self.data["resource"] = parse_api(
             data=self.data["resource"],
-            source=self.api.path("/system/resource"),
+            source=self.api.query("/system/resource"),
             vals=[
                 {"name": "platform", "default": "unknown"},
                 {"name": "board-name", "default": "unknown"},
@@ -1332,6 +1379,7 @@ class MikrotikControllerData:
                 {"name": "uptime_epoch", "default": 0},
                 {"name": "clients_wired", "default": 0},
                 {"name": "clients_wireless", "default": 0},
+                {"name": "captive_authorized", "default": 0},
             ],
         )
 
@@ -1398,18 +1446,21 @@ class MikrotikControllerData:
         else:
             self.data["resource"]["hdd-usage"] = "unknown"
 
-        if "uptime_epoch" in self.data["resource"]:
-            if 0 < tmp_rebootcheck < self.data["resource"]["uptime_epoch"]:
-                self.get_firmware_update()
+        if (
+            "uptime_epoch" in self.data["resource"]
+            and 0 < tmp_rebootcheck < self.data["resource"]["uptime_epoch"]
+        ):
+            self.get_firmware_update()
 
     # ---------------------------
     #   get_firmware_update
     # ---------------------------
     def get_firmware_update(self):
         """Check for firmware update on Mikrotik"""
+        self.execute("/system/package/update", "check-for-updates", None, None)
         self.data["fw-update"] = parse_api(
             data=self.data["fw-update"],
-            source=self.api.path("/system/package/update"),
+            source=self.api.query("/system/package/update"),
             vals=[
                 {"name": "status"},
                 {"name": "channel", "default": "unknown"},
@@ -1420,10 +1471,9 @@ class MikrotikControllerData:
 
         if "status" in self.data["fw-update"]:
             self.data["fw-update"]["available"] = (
-                True
-                if self.data["fw-update"]["status"] == "New version is available"
-                else False
+                self.data["fw-update"]["status"] == "New version is available"
             )
+
         else:
             self.data["fw-update"]["available"] = False
 
@@ -1432,12 +1482,92 @@ class MikrotikControllerData:
                 self.major_fw_version = int(
                     self.data["fw-update"].get("installed-version").split(".")[0]
                 )
-            except:
+            except Exception:
                 _LOGGER.error(
                     "Mikrotik %s unable to determine major FW version (%s).",
                     self.host,
                     self.data["fw-update"].get("installed-version"),
                 )
+
+    # ---------------------------
+    #   get_ups
+    # ---------------------------
+    def get_ups(self):
+        """Get UPS info from Mikrotik"""
+        self.data["ups"] = parse_api(
+            data=self.data["ups"],
+            source=self.api.query("/system/ups"),
+            vals=[
+                {"name": "name", "default": "unknown"},
+                {"name": "offline-time", "default": "unknown"},
+                {"name": "min-runtime", "default": "unknown"},
+                {"name": "alarm-setting", "default": "unknown"},
+                {"name": "model", "default": "unknown"},
+                {"name": "serial", "default": "unknown"},
+                {"name": "manufacture-date", "default": "unknown"},
+                {"name": "nominal-battery-voltage", "default": "unknown"},
+                {
+                    "name": "enabled",
+                    "source": "disabled",
+                    "type": "bool",
+                    "reverse": True,
+                },
+            ],
+            ensure_vals=[
+                {"name": "on-line", "type": "bool"},
+                {"name": "runtime-left", "default": "unknown"},
+                {"name": "battery-charge", "default": 0},
+                {"name": "battery-voltage", "default": 0.0},
+                {"name": "line-voltage", "default": 0},
+                {"name": "load", "default": 0},
+                {"name": "hid-self-test", "default": "unknown"},
+            ],
+        )
+        if self.data["ups"]["enabled"]:
+            self.data["ups"] = parse_api(
+                data=self.data["ups"],
+                source=self.api.query(
+                    "/system/ups",
+                    command="monitor",
+                    args={".id": 0, "once": True},
+                ),
+                vals=[
+                    {"name": "on-line", "type": "bool"},
+                    {"name": "runtime-left", "default": 0},
+                    {"name": "battery-charge", "default": 0},
+                    {"name": "battery-voltage", "default": 0.0},
+                    {"name": "line-voltage", "default": 0},
+                    {"name": "load", "default": 0},
+                    {"name": "hid-self-test", "default": "unknown"},
+                ],
+            )
+
+    # ---------------------------
+    #   get_gps
+    # ---------------------------
+    def get_gps(self):
+        """Get GPS data from Mikrotik"""
+        self.data["gps"] = parse_api(
+            data=self.data["gps"],
+            source=self.api.query(
+                "/system/gps",
+                command="monitor",
+                args={"once": True},
+            ),
+            vals=[
+                {"name": "valid", "type": "bool"},
+                {"name": "latitude", "default": "unknown"},
+                {"name": "longitude", "default": "unknown"},
+                {"name": "altitude", "default": "unknown"},
+                {"name": "speed", "default": "unknown"},
+                {"name": "destination-bearing", "default": "unknown"},
+                {"name": "true-bearing", "default": "unknown"},
+                {"name": "magnetic-bearing", "default": "unknown"},
+                {"name": "satellites", "default": 0},
+                {"name": "fix-quality", "default": 0},
+                {"name": "horizontal-dilution", "default": "unknown"},
+            ],
+        )
 
     # ---------------------------
     #   get_script
@@ -1446,7 +1576,7 @@ class MikrotikControllerData:
         """Get list of all scripts from Mikrotik"""
         self.data["script"] = parse_api(
             data=self.data["script"],
-            source=self.api.path("/system/script"),
+            source=self.api.query("/system/script"),
             key="name",
             vals=[
                 {"name": "name"},
@@ -1462,7 +1592,7 @@ class MikrotikControllerData:
         """Get list of all environment variables from Mikrotik"""
         self.data["environment"] = parse_api(
             data=self.data["environment"],
-            source=self.api.path("/system/script/environment"),
+            source=self.api.query("/system/script/environment"),
             key="name",
             vals=[
                 {"name": "name"},
@@ -1471,13 +1601,36 @@ class MikrotikControllerData:
         )
 
     # ---------------------------
+    #   get_captive
+    # ---------------------------
+    def get_captive(self):
+        """Get list of all environment variables from Mikrotik"""
+        self.data["hostspot_host"] = parse_api(
+            data={},
+            source=self.api.query("/ip/hotspot/host"),
+            key="mac-address",
+            vals=[
+                {"name": "mac-address"},
+                {"name": "authorized", "type": "bool"},
+                {"name": "bypassed", "type": "bool"},
+            ],
+        )
+
+        auth_hosts = sum(
+            1
+            for uid in self.data["hostspot_host"]
+            if self.data["hostspot_host"][uid]["authorized"]
+        )
+        self.data["resource"]["captive_authorized"] = auth_hosts
+
+    # ---------------------------
     #   get_queue
     # ---------------------------
     def get_queue(self):
         """Get Queue data from Mikrotik"""
         self.data["queue"] = parse_api(
             data=self.data["queue"],
-            source=self.api.path("/queue/simple"),
+            source=self.api.query("/queue/simple"),
             key="name",
             vals=[
                 {"name": ".id"},
@@ -1503,6 +1656,8 @@ class MikrotikControllerData:
 
         uom_type, uom_div = self._get_unit_of_measurement()
         for uid, vals in self.data["queue"].items():
+            self.data["queue"][uid]["comment"] = str(self.data["queue"][uid]["comment"])
+
             upload_max_limit_bps, download_max_limit_bps = [
                 int(x) for x in vals["max-limit"].split("/")
             ]
@@ -1564,18 +1719,11 @@ class MikrotikControllerData:
         """Get ARP data from Mikrotik"""
         self.data["arp"] = parse_api(
             data=self.data["arp"],
-            source=self.api.path("/ip/arp"),
+            source=self.api.query("/ip/arp"),
             key="mac-address",
             vals=[{"name": "mac-address"}, {"name": "address"}, {"name": "interface"}],
             ensure_vals=[{"name": "bridge", "default": ""}],
         )
-
-        default_gateway = ""
-        if (
-            "0.0.0.0/0" in self.data["route"]
-            and self.data["route"]["0.0.0.0/0"]["vrf-interface"]
-        ):
-            default_gateway = self.data["route"]["0.0.0.0/0"]["vrf-interface"]
 
         for uid, vals in self.data["arp"].items():
             if (
@@ -1587,11 +1735,12 @@ class MikrotikControllerData:
                     "interface"
                 ]
 
-        if default_gateway:
-            to_remove = []
-            for uid, vals in self.data["arp"].items():
-                if vals["interface"] == default_gateway:
-                    to_remove.append(uid)
+        if self.data["dhcp-client"]:
+            to_remove = [
+                uid
+                for uid, vals in self.data["arp"].items()
+                if vals["interface"] in self.data["dhcp-client"]
+            ]
 
             for uid in to_remove:
                 self.data["arp"].pop(uid)
@@ -1603,10 +1752,13 @@ class MikrotikControllerData:
         """Get static DNS data from Mikrotik"""
         self.data["dns"] = parse_api(
             data=self.data["dns"],
-            source=self.api.path("/ip/dns/static"),
+            source=self.api.query("/ip/dns/static"),
             key="name",
             vals=[{"name": "name"}, {"name": "address"}, {"name": "comment"}],
         )
+
+        for uid, vals in self.data["dns"].items():
+            self.data["dns"][uid]["comment"] = str(self.data["dns"][uid]["comment"])
 
     # ---------------------------
     #   get_dhcp
@@ -1615,7 +1767,7 @@ class MikrotikControllerData:
         """Get DHCP data from Mikrotik"""
         self.data["dhcp"] = parse_api(
             data=self.data["dhcp"],
-            source=self.api.path("/ip/dhcp-server/lease"),
+            source=self.api.query("/ip/dhcp-server/lease"),
             key="mac-address",
             vals=[
                 {"name": "mac-address"},
@@ -1633,16 +1785,17 @@ class MikrotikControllerData:
 
         dhcpserver_query = False
         for uid in self.data["dhcp"]:
+            self.data["dhcp"][uid]["comment"] = str(self.data["dhcp"][uid]["comment"])
+
             # is_valid_ip
             if self.data["dhcp"][uid]["address"] != "unknown":
                 if not is_valid_ip(self.data["dhcp"][uid]["address"]):
                     self.data["dhcp"][uid]["address"] = "unknown"
 
-                if (
-                    self.data["dhcp"][uid]["active-address"]
-                    != self.data["dhcp"][uid]["address"]
-                    and self.data["dhcp"][uid]["active-address"] != "unknown"
-                ):
+                if self.data["dhcp"][uid]["active-address"] not in [
+                    self.data["dhcp"][uid]["address"],
+                    "unknown",
+                ]:
                     self.data["dhcp"][uid]["address"] = self.data["dhcp"][uid][
                         "active-address"
                     ]
@@ -1650,7 +1803,7 @@ class MikrotikControllerData:
                 if (
                     self.data["dhcp"][uid]["mac-address"]
                     != self.data["dhcp"][uid]["active-mac-address"]
-                    and self.data["dhcp"][uid]["active-mac-address"] != "unknown"
+                    != "unknown"
                 ):
                     self.data["dhcp"][uid]["mac-address"] = self.data["dhcp"][uid][
                         "active-mac-address"
@@ -1684,9 +1837,27 @@ class MikrotikControllerData:
         """Get DHCP server data from Mikrotik"""
         self.data["dhcp-server"] = parse_api(
             data=self.data["dhcp-server"],
-            source=self.api.path("/ip/dhcp-server"),
+            source=self.api.query("/ip/dhcp-server"),
             key="name",
-            vals=[{"name": "name"}, {"name": "interface", "default": "unknown"}],
+            vals=[
+                {"name": "name"},
+                {"name": "interface", "default": "unknown"},
+            ],
+        )
+
+    # ---------------------------
+    #   get_dhcp_client
+    # ---------------------------
+    def get_dhcp_client(self):
+        """Get DHCP client data from Mikrotik"""
+        self.data["dhcp-client"] = parse_api(
+            data=self.data["dhcp-client"],
+            source=self.api.query("/ip/dhcp-client"),
+            key="interface",
+            vals=[
+                {"name": "interface", "default": "unknown"},
+                {"name": "status", "default": "unknown"},
+            ],
         )
 
     # ---------------------------
@@ -1696,7 +1867,7 @@ class MikrotikControllerData:
         """Get DHCP network data from Mikrotik"""
         self.data["dhcp-network"] = parse_api(
             data=self.data["dhcp-network"],
-            source=self.api.path("/ip/dhcp-server/network"),
+            source=self.api.query("/ip/dhcp-server/network"),
             key="address",
             vals=[
                 {"name": "address"},
@@ -1721,7 +1892,7 @@ class MikrotikControllerData:
         """Get CAPS-MAN hosts data from Mikrotik"""
         self.data["capsman_hosts"] = parse_api(
             data={},
-            source=self.api.path("/caps-man/registration-table"),
+            source=self.api.query("/caps-man/registration-table"),
             key="mac-address",
             vals=[
                 {"name": "mac-address"},
@@ -1735,12 +1906,10 @@ class MikrotikControllerData:
     # ---------------------------
     def get_wireless_hosts(self):
         """Get wireless hosts data from Mikrotik"""
-        wifimodule = "wireless"
-        if self.support_wifiwave2:
-            wifimodule = "wifiwave2"
+        wifimodule = "wifiwave2" if self.support_wifiwave2 else "wireless"
         self.data["wireless_hosts"] = parse_api(
             data={},
-            source=self.api.path(f"/interface/{wifimodule}/registration-table"),
+            source=self.api.query(f"/interface/{wifimodule}/registration-table"),
             key="mac-address",
             vals=[
                 {"name": "mac-address"},
@@ -1760,18 +1929,15 @@ class MikrotikControllerData:
         if self.support_capsman:
             for uid, vals in self.data["capsman_hosts"].items():
                 if uid not in self.data["host"]:
-                    self.data["host"][uid] = {}
+                    self.data["host"][uid] = {"source": "capsman"}
+                elif self.data["host"][uid]["source"] != "capsman":
+                    continue
 
-                self.data["host"][uid]["source"] = "capsman"
                 capsman_detected[uid] = True
                 self.data["host"][uid]["available"] = True
                 self.data["host"][uid]["last-seen"] = utcnow()
                 for key in ["mac-address", "interface"]:
-                    if (
-                        key not in self.data["host"][uid]
-                        or self.data["host"][uid][key] == "unknown"
-                    ):
-                        self.data["host"][uid][key] = vals[key]
+                    self.data["host"][uid][key] = vals[key]
 
         # Add hosts from wireless
         wireless_detected = {}
@@ -1781,50 +1947,42 @@ class MikrotikControllerData:
                     continue
 
                 if uid not in self.data["host"]:
-                    self.data["host"][uid] = {}
+                    self.data["host"][uid] = {"source": "wireless"}
+                elif self.data["host"][uid]["source"] != "wireless":
+                    continue
 
-                self.data["host"][uid]["source"] = "wireless"
                 wireless_detected[uid] = True
                 self.data["host"][uid]["available"] = True
                 self.data["host"][uid]["last-seen"] = utcnow()
                 for key in ["mac-address", "interface"]:
-                    if (
-                        key not in self.data["host"][uid]
-                        or self.data["host"][uid][key] == "unknown"
-                    ):
-                        self.data["host"][uid][key] = vals[key]
+                    self.data["host"][uid][key] = vals[key]
 
         # Add hosts from DHCP
         for uid, vals in self.data["dhcp"].items():
             if uid not in self.data["host"]:
-                self.data["host"][uid] = {}
-                self.data["host"][uid]["source"] = "dhcp"
-                for key in ["address", "mac-address", "interface"]:
-                    if (
-                        key not in self.data["host"][uid]
-                        or self.data["host"][uid][key] == "unknown"
-                    ):
-                        self.data["host"][uid][key] = vals[key]
+                self.data["host"][uid] = {"source": "dhcp"}
+            elif self.data["host"][uid]["source"] != "dhcp":
+                continue
+
+            for key in ["address", "mac-address", "interface"]:
+                self.data["host"][uid][key] = vals[key]
 
         # Add hosts from ARP
         for uid, vals in self.data["arp"].items():
             if uid not in self.data["host"]:
-                self.data["host"][uid] = {}
-                self.data["host"][uid]["source"] = "arp"
-                for key in ["address", "mac-address", "interface"]:
-                    if (
-                        key not in self.data["host"][uid]
-                        or self.data["host"][uid][key] == "unknown"
-                    ):
-                        self.data["host"][uid][key] = vals[key]
+                self.data["host"][uid] = {"source": "arp"}
+            elif self.data["host"][uid]["source"] != "arp":
+                continue
+
+            for key in ["address", "mac-address", "interface"]:
+                self.data["host"][uid][key] = vals[key]
 
         # Add restored hosts from hass registry
         if not self.host_hass_recovered:
             self.host_hass_recovered = True
             for uid in self.data["host_hass"]:
                 if uid not in self.data["host"]:
-                    self.data["host"][uid] = {}
-                    self.data["host"][uid]["source"] = "restored"
+                    self.data["host"][uid] = {"source": "restored"}
                     self.data["host"][uid]["mac-address"] = uid
                     self.data["host"][uid]["host-name"] = self.data["host_hass"][uid]
 
@@ -1852,6 +2010,20 @@ class MikrotikControllerData:
         self.data["resource"]["clients_wired"] = 0
         self.data["resource"]["clients_wireless"] = 0
         for uid, vals in self.data["host"].items():
+            # Captive portal data
+            if self.option_sensor_client_captive:
+                if uid in self.data["hostspot_host"]:
+                    self.data["host"][uid]["authorized"] = self.data["hostspot_host"][
+                        uid
+                    ]["authorized"]
+                    self.data["host"][uid]["bypassed"] = self.data["hostspot_host"][
+                        uid
+                    ]["bypassed"]
+                else:
+                    if "authorized" in self.data["host"][uid]:
+                        del self.data["host"][uid]["authorized"]
+                        del self.data["host"][uid]["bypassed"]
+
             # CAPS-MAN availability
             if vals["source"] == "capsman" and uid not in capsman_detected:
                 self.data["host"][uid]["available"] = False
@@ -1940,7 +2112,7 @@ class MikrotikControllerData:
                     self.data["host"][uid][
                         "manufacturer"
                     ] = await self.async_mac_lookup.lookup(vals["mac-address"])
-                except:
+                except Exception:
                     self.data["host"][uid]["manufacturer"] = ""
 
             if vals["manufacturer"] == "detect":
@@ -1982,20 +2154,21 @@ class MikrotikControllerData:
         )
 
         # Build temp accounting values dict with ip address as key
-        tmp_accounting_values = {}
-        for uid, vals in self.data["client_traffic"].items():
-            tmp_accounting_values[vals["address"]] = {
+        tmp_accounting_values = {
+            vals["address"]: {
                 "wan-tx": 0,
                 "wan-rx": 0,
                 "lan-tx": 0,
                 "lan-rx": 0,
             }
+            for uid, vals in self.data["client_traffic"].items()
+        }
 
         time_diff = self.api.take_client_traffic_snapshot(True)
         if time_diff:
             accounting_data = parse_api(
                 data={},
-                source=self.api.path("/ip/accounting/snapshot"),
+                source=self.api.query("/ip/accounting/snapshot"),
                 key=".id",
                 vals=[
                     {"name": ".id"},
@@ -2005,10 +2178,10 @@ class MikrotikControllerData:
                 ],
             )
 
-            threshold = self.api.path("/ip/accounting")[0].get("threshold")
+            threshold = self.api.query("/ip/accounting")[0].get("threshold")
             entry_count = len(accounting_data)
 
-            if entry_count is threshold:
+            if entry_count == threshold:
                 _LOGGER.warning(
                     f"Accounting entries count reached the threshold of {threshold}!"
                     " Some entries were not saved by Mikrotik so accounting calculation won't be correct."
@@ -2175,7 +2348,7 @@ class MikrotikControllerData:
 
         kid_control_devices_data = parse_api(
             data={},
-            source=self.api.path("/ip/kid-control/device"),
+            source=self.api.query("/ip/kid-control/device"),
             key="mac-address",
             vals=[
                 {"name": "mac-address"},

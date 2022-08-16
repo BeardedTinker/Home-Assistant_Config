@@ -1,8 +1,7 @@
-"""Definitions for Mikrotik Router sensor entities."""
+"""Definitions for Mikrotik Router switch entities."""
 from dataclasses import dataclass, field
 from typing import List
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.components.switch import (
     SwitchDeviceClass,
     SwitchEntityDescription,
@@ -147,7 +146,7 @@ class MikrotikSwitchEntityDescription(SwitchEntityDescription):
     ha_connection: str = ""
     ha_connection_value: str = ""
     data_path: str = ""
-    data_is_on: str = "enabled"
+    data_attribute: str = "enabled"
     data_switch_path: str = ""
     data_switch_parameter: str = "disabled"
     data_name: str = ""
@@ -155,9 +154,10 @@ class MikrotikSwitchEntityDescription(SwitchEntityDescription):
     data_uid: str = ""
     data_reference: str = ""
     data_attributes_list: List = field(default_factory=lambda: [])
+    func: str = "MikrotikSwitch"
 
 
-SWITCH_TYPES = {
+SENSOR_TYPES = {
     "interface": MikrotikSwitchEntityDescription(
         key="interface",
         name="port",
@@ -173,6 +173,7 @@ SWITCH_TYPES = {
         data_uid="name",
         data_reference="default-name",
         data_attributes_list=DEVICE_ATTRIBUTES_IFACE,
+        func="MikrotikPortSwitch",
     ),
     "nat": MikrotikSwitchEntityDescription(
         key="nat",
@@ -190,6 +191,7 @@ SWITCH_TYPES = {
         data_uid="uniq-id",
         data_reference="uniq-id",
         data_attributes_list=DEVICE_ATTRIBUTES_NAT,
+        func="MikrotikNATSwitch",
     ),
     "mangle": MikrotikSwitchEntityDescription(
         key="mangle",
@@ -207,6 +209,7 @@ SWITCH_TYPES = {
         data_uid="uniq-id",
         data_reference="uniq-id",
         data_attributes_list=DEVICE_ATTRIBUTES_MANGLE,
+        func="MikrotikMangleSwitch",
     ),
     "filter": MikrotikSwitchEntityDescription(
         key="filter",
@@ -224,6 +227,7 @@ SWITCH_TYPES = {
         data_uid="uniq-id",
         data_reference="uniq-id",
         data_attributes_list=DEVICE_ATTRIBUTES_FILTER,
+        func="MikrotikFilterSwitch",
     ),
     "ppp_secret": MikrotikSwitchEntityDescription(
         key="ppp_secret",
@@ -256,6 +260,7 @@ SWITCH_TYPES = {
         data_uid="name",
         data_reference="name",
         data_attributes_list=DEVICE_ATTRIBUTES_QUEUE,
+        func="MikrotikQueueSwitch",
     ),
     "kidcontrol_enable": MikrotikSwitchEntityDescription(
         key="kidcontrol_enable",
@@ -283,11 +288,14 @@ SWITCH_TYPES = {
         ha_connection=DOMAIN,
         ha_connection_value="Kidcontrol",
         data_path="kid-control",
-        data_is_on="paused",
+        data_attribute="paused",
         data_switch_path="/ip/kid-control",
         data_name="name",
         data_uid="name",
         data_reference="name",
         data_attributes_list=DEVICE_ATTRIBUTES_KIDCONTROL,
+        func="MikrotikKidcontrolPauseSwitch",
     ),
 }
+
+SENSOR_SERVICES = {}

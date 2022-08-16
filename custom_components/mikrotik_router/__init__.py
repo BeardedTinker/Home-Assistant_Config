@@ -3,6 +3,8 @@
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers import device_registry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import (
@@ -42,7 +44,7 @@ async def async_setup_entry(hass, config_entry) -> bool:
     controller = MikrotikControllerData(hass, config_entry)
     await controller.async_hwinfo_update()
     if not controller.connected():
-        raise ConfigEntryNotReady(f"Cannot connect to host")
+        raise ConfigEntryNotReady("Cannot connect to host")
 
     await controller.async_update()
 
@@ -77,3 +79,13 @@ async def async_unload_entry(hass, config_entry) -> bool:
         hass.data[DOMAIN].pop(config_entry.entry_id)
 
     return unload_ok
+
+
+# ---------------------------
+#   async_remove_config_entry_device
+# ---------------------------
+async def async_remove_config_entry_device(
+    hass, config_entry: ConfigEntry, device_entry: device_registry.DeviceEntry
+) -> bool:
+    """Remove a config entry from a device."""
+    return True

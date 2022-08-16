@@ -9,6 +9,8 @@ from homeassistant.components.switch import (
 DEVICE_ATTRIBUTES_HOST = [
     "interface",
     "source",
+    "authorized",
+    "bypassed",
     "last-seen",
 ]
 
@@ -26,11 +28,12 @@ class MikrotikDeviceTrackerEntityDescription(SwitchEntityDescription):
     ha_connection: str = ""
     ha_connection_value: str = ""
     data_path: str = ""
-    data_is_on: str = "available"
+    data_attribute: str = "available"
     data_name: str = ""
     data_uid: str = ""
     data_reference: str = ""
     data_attributes_list: List = field(default_factory=lambda: [])
+    func: str = "MikrotikDeviceTracker"
 
 
 SENSOR_TYPES = {
@@ -47,5 +50,8 @@ SENSOR_TYPES = {
         data_uid="mac-address",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_HOST,
+        func="MikrotikHostDeviceTracker",
     ),
 }
+
+SENSOR_SERVICES = {}

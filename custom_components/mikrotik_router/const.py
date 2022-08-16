@@ -7,7 +7,9 @@ PLATFORMS = [
     Platform.DEVICE_TRACKER,
     Platform.SWITCH,
     Platform.BUTTON,
+    Platform.UPDATE,
 ]
+
 DOMAIN = "mikrotik_router"
 DEFAULT_NAME = "Mikrotik Router"
 ATTRIBUTION = "Data provided by Mikrotik"
@@ -19,7 +21,6 @@ DEFAULT_LOGIN_METHOD = "plain"
 
 DEFAULT_HOST = "10.0.0.1"
 DEFAULT_USERNAME = "admin"
-DEFAULT_PASSWORD = ""
 DEFAULT_PORT = 0
 DEFAULT_DEVICE_NAME = "Mikrotik"
 DEFAULT_SSL = False
@@ -41,6 +42,8 @@ CONF_SENSOR_PORT_TRAFFIC = "sensor_port_traffic"
 DEFAULT_SENSOR_PORT_TRAFFIC = False
 CONF_SENSOR_CLIENT_TRAFFIC = "sensor_client_traffic"
 DEFAULT_SENSOR_CLIENT_TRAFFIC = False
+CONF_SENSOR_CLIENT_CAPTIVE = "sensor_client_captive"
+DEFAULT_SENSOR_CLIENT_CAPTIVE = False
 CONF_SENSOR_SIMPLE_QUEUES = "sensor_simple_queues"
 DEFAULT_SENSOR_SIMPLE_QUEUES = False
 CONF_SENSOR_NAT = "sensor_nat"
@@ -57,3 +60,35 @@ CONF_SENSOR_SCRIPTS = "sensor_scripts"
 DEFAULT_SENSOR_SCRIPTS = False
 CONF_SENSOR_ENVIRONMENT = "sensor_environment"
 DEFAULT_SENSOR_ENVIRONMENT = False
+
+TO_REDACT = {
+    "ip-address",
+    "client-ip-address",
+    "address",
+    "active-address",
+    "mac-address",
+    "active-mac-address",
+    "orig-mac-address",
+    "port-mac-address",
+    "client-mac-address",
+    "client-id",
+    "active-client-id",
+    "eeprom",
+    "sfp-vendor-serial",
+    "gateway",
+    "dns-server",
+    "wins-server",
+    "ntp-server",
+    "caps-manager",
+    "serial-number",
+    "source",
+    "from-addresses",
+    "to-addresses",
+    "src-address",
+    "dst-address",
+    "username",
+    "password",
+    "caller-id",
+    "target",
+    "ssid",
+}

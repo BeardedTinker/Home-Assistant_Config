@@ -1,77 +1,79 @@
-"""API parser functions for Mikrotik Router."""
-
-import logging
-
+"""API parser for JSON APIs"""
+from pytz import utc
+from logging import getLogger
+from datetime import datetime
 from voluptuous import Optional
 from homeassistant.components.diagnostics import async_redact_data
+from .const import TO_REDACT
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 
-TO_REDACT = {
-    "ip-address",
-    "client-ip-address",
-    "address",
-    "active-address",
-    "mac-address",
-    "active-mac-address",
-    "orig-mac-address",
-    "port-mac-address",
-    "client-mac-address",
-    "client-id",
-    "active-client-id",
-    "eeprom",
-    "sfp-vendor-serial",
-    "gateway",
-    "dns-server",
-    "wins-server",
-    "ntp-server",
-    "caps-manager",
-    "serial-number",
-    "source",
-    "from-addresses",
-    "to-addresses",
-    "src-address",
-    "dst-address",
-    "username",
-    "password",
-    "caller-id",
-    "target",
-    "ssid",
-}
+
+# ---------------------------
+#   utc_from_timestamp
+# ---------------------------
+def utc_from_timestamp(timestamp: float) -> datetime:
+    """Return a UTC time from a timestamp"""
+    return utc.localize(datetime.utcfromtimestamp(timestamp))
 
 
 # ---------------------------
 #   from_entry
 # ---------------------------
 def from_entry(entry, param, default="") -> str:
-    """Validate and return str value from Mikrotik API dict"""
-    if param not in entry:
+    """Validate and return str value an API dict"""
+    if "/" in param:
+        for tmp_param in param.split("/"):
+            if isinstance(entry, dict) and tmp_param in entry:
+                entry = entry[tmp_param]
+            else:
+                return default
+
+        ret = entry
+    elif param in entry:
+        ret = entry[param]
+    else:
         return default
 
-    return (
-        entry[param][:255]
-        if isinstance(entry[param], str) and len(entry[param]) > 255
-        else entry[param]
-    )
+    if default != "":
+        if isinstance(ret, str):
+            ret = str(ret)
+        elif isinstance(ret, int):
+            ret = int(ret)
+        elif isinstance(ret, float):
+            ret = round(float(ret), 2)
+
+    return ret[:255] if isinstance(ret, str) and len(ret) > 255 else ret
 
 
 # ---------------------------
 #   from_entry_bool
 # ---------------------------
 def from_entry_bool(entry, param, default=False, reverse=False) -> bool:
-    """Validate and return a bool value from a Mikrotik API dict"""
-    if param not in entry:
-        return default
+    """Validate and return a bool value from an API dict"""
+    if "/" in param:
+        for tmp_param in param.split("/"):
+            if isinstance(entry, dict) and tmp_param in entry:
+                entry = entry[tmp_param]
+            else:
+                return default
 
-    if not reverse:
+        ret = entry
+    elif param in entry:
         ret = entry[param]
     else:
-        if entry[param]:
-            ret = False
-        else:
-            ret = True
+        return default
 
-    return ret
+    if isinstance(ret, str):
+        if ret in ("on", "On", "ON", "yes", "Yes", "YES", "up", "Up", "UP"):
+            ret = True
+        elif ret in ("off", "Off", "OFF", "no", "No", "NO", "down", "Down", "DOWN"):
+            ret = False
+
+    if not isinstance(ret, bool):
+        ret = default
+
+    return not ret if reverse else ret
 
 
 # ---------------------------
@@ -90,14 +92,13 @@ def parse_api(
     skip=None,
 ) -> dict:
     """Get data from API"""
-    debug = False
-    if _LOGGER.getEffectiveLevel() == 10:
-        debug = True
+    debug = _LOGGER.getEffectiveLevel() == 10
 
     if not source:
         if not key and not key_search:
             data = fill_defaults(data, vals)
         return data
+
     if debug:
         _LOGGER.debug("Processing source %s", async_redact_data(source, TO_REDACT))
 
@@ -140,10 +141,7 @@ def get_uid(entry, key, key_secondary, key_search, keymap) -> Optional(str):
     """Get UID for data list"""
     uid = None
     if not key_search:
-        key_primary_found = True
-        if key not in entry:
-            key_primary_found = False
-
+        key_primary_found = key in entry
         if key_primary_found and key not in entry and not entry[key]:
             return None
 
@@ -157,13 +155,12 @@ def get_uid(entry, key, key_secondary, key_search, keymap) -> Optional(str):
                 return None
 
             uid = entry[key_secondary]
+    elif keymap and key_search in entry and entry[key_search] in keymap:
+        uid = keymap[entry[key_search]]
     else:
-        if keymap and key_search in entry and entry[key_search] in keymap:
-            uid = keymap[entry[key_search]]
-        else:
-            return None
+        return None
 
-    return uid if uid else None
+    return uid or None
 
 
 # ---------------------------
@@ -171,17 +168,11 @@ def get_uid(entry, key, key_secondary, key_search, keymap) -> Optional(str):
 # ---------------------------
 def generate_keymap(data, key_search) -> Optional(dict):
     """Generate keymap"""
-    if not key_search:
-        return None
-
-    keymap = {}
-    for uid in data:
-        if key_search not in data[uid]:
-            continue
-
-        keymap[data[uid][key_search]] = uid
-
-    return keymap
+    return (
+        {data[uid][key_search]: uid for uid in data if key_search in data[uid]}
+        if key_search
+        else None
+    )
 
 
 # ---------------------------
@@ -256,6 +247,7 @@ def fill_vals(data, entry, uid, vals) -> dict:
         _name = val["name"]
         _type = val["type"] if "type" in val else "str"
         _source = val["source"] if "source" in val else _name
+        _convert = val["convert"] if "convert" in val else None
 
         if _type == "str":
             _default = val["default"] if "default" in val else ""
@@ -280,6 +272,19 @@ def fill_vals(data, entry, uid, vals) -> dict:
                     entry, _source, default=_default, reverse=_reverse
                 )
 
+        if _convert == "utc_from_timestamp":
+            if uid:
+                if isinstance(data[uid][_name], int) and data[uid][_name] > 0:
+                    if data[uid][_name] > 100000000000:
+                        data[uid][_name] = data[uid][_name] / 1000
+
+                    data[uid][_name] = utc_from_timestamp(data[uid][_name])
+            elif isinstance(data[_name], int) and data[_name] > 0:
+                if data[_name] > 100000000000:
+                    data[_name] = data[_name] / 1000
+
+                data[_name] = utc_from_timestamp(data[_name])
+
     return data
 
 
@@ -293,10 +298,10 @@ def fill_ensure_vals(data, uid, ensure_vals) -> dict:
             if val["name"] not in data[uid]:
                 _default = val["default"] if "default" in val else ""
                 data[uid][val["name"]] = _default
-        else:
-            if val["name"] not in data:
-                _default = val["default"] if "default" in val else ""
-                data[val["name"]] = _default
+
+        elif val["name"] not in data:
+            _default = val["default"] if "default" in val else ""
+            data[val["name"]] = _default
 
     return data
 
@@ -326,17 +331,11 @@ def fill_vals_proc(data, uid, vals_proc) -> dict:
             if _action == "combine":
                 if "key" in val:
                     tmp = _data[val["key"]] if val["key"] in _data else "unknown"
-                    if not _value:
-                        _value = tmp
-                    else:
-                        _value = f"{_value}{tmp}"
+                    _value = f"{_value}{tmp}" if _value else tmp
 
                 if "text" in val:
                     tmp = val["text"]
-                    if not _value:
-                        _value = tmp
-                    else:
-                        _value = f"{_value}{tmp}"
+                    _value = f"{_value}{tmp}" if _value else tmp
 
         if _name and _value:
             if uid:
