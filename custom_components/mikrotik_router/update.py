@@ -122,7 +122,6 @@ class MikrotikRouterBoardFWUpdate(MikrotikEntity, UpdateEntity):
     ):
         """Set up device update entity."""
         super().__init__(inst, uid, mikrotik_controller, entity_description)
-        _LOGGER.error(self._data)
 
         self._attr_supported_features = UpdateEntityFeature.INSTALL
 

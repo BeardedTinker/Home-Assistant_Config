@@ -469,7 +469,17 @@ class MikrotikControllerData:
                 entity.config_entry_id == self.config_entry.entry_id
                 and entity.entity_id.startswith("device_tracker.")
             ):
-                self.data["host_hass"][entity.unique_id.upper()] = entity.original_name
+                tmp = entity.unique_id.split("-")
+                if tmp[0] != self.name.lower():
+                    continue
+
+                if tmp[1] != "host":
+                    continue
+
+                if ":" not in tmp[2]:
+                    continue
+
+                self.data["host_hass"][tmp[2].upper()] = entity.original_name
 
     # ---------------------------
     #   async_hwinfo_update
