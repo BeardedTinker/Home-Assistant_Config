@@ -1,0 +1,43 @@
+#####
+# Twitch stream notification
+# Send notification when channel goes live
+#####
+
+alias: Twitch Live notification
+description: 'Notification when Twitch channel goes live'
+id: f04afd0e-7fc3-44ad-a89c-58b1ecaaa366
+
+trigger:
+- platform: state
+  entity_id:
+    - sensor.beardedtinker_2
+    - sensor.markwatttech
+    - sensor.jessassin
+    - sensor.drzzs
+    - sensor.xisuma
+    - sensor.frenck
+    - ensor.tangotek
+#  attribute: live
+#  to: true
+#  for:
+#    hours: 0
+#    minutes: 0
+#    seconds: 1
+
+condition: 
+  condition: template
+  value_template: '{{ trigger.to_state.attributes.live == "streaming" }}'
+
+action:
+- service: script.notify_engine
+  data:
+    who: 'andrej'
+    title: '🗣 Streaming'
+    value1: "Looks like '{{ trigger.state.attributes.friendly_name }}' is streaming {{trigger.platform}}"
+    target_id: !secret telegram_bot_chat_id
+    group: information
+    tag_id: 'information'
+    importance_id: default
+    color: 'green'
+
+    mode: queued
