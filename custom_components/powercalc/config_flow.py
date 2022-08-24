@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import logging
+from audioop import mul
 from typing import Any
 
 import voluptuous as vol
@@ -21,7 +22,7 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowHandler, FlowResult
 from homeassistant.helpers import selector
 
 from .common import SourceEntity, create_source_entity
@@ -32,7 +33,9 @@ from .const import (
     CONF_DAILY_FIXED_ENERGY,
     CONF_FIXED,
     CONF_GAMMA_CURVE,
+    CONF_GROUP,
     CONF_GROUP_ENERGY_ENTITIES,
+    CONF_GROUP_MEMBER_SENSORS,
     CONF_GROUP_POWER_ENTITIES,
     CONF_HIDE_MEMBERS,
     CONF_LINEAR,
@@ -49,6 +52,7 @@ from .const import (
     CONF_START_TIME,
     CONF_STATES_POWER,
     CONF_SUB_GROUPS,
+    CONF_SUB_PROFILE,
     CONF_UPDATE_FREQUENCY,
     CONF_VALUE,
     CONF_VALUE_TEMPLATE,
@@ -57,10 +61,9 @@ from .const import (
     CalculationStrategy,
     SensorType,
 )
-from .errors import StrategyConfigurationError
-from .power_profile.library import ProfileLibrary
-from .power_profile.light_model import LightModel
-from .power_profile.model_discovery import autodiscover_model
+from .errors import ModelNotSupported, StrategyConfigurationError
+from .power_profile.library import ModelInfo, ProfileLibrary
+from .power_profile.model_discovery import get_power_profile
 from .sensors.daily_energy import DEFAULT_DAILY_UPDATE_FREQUENCY
 from .strategy.factory import PowerCalculatorStrategyFactory
 from .strategy.strategy_interface import PowerCalculationStrategyInterface
@@ -78,9 +81,7 @@ SENSOR_TYPE_MENU = {
 
 SCHEMA_DAILY_ENERGY_OPTIONS = vol.Schema(
     {
-        vol.Optional(CONF_VALUE): selector.NumberSelector(
-            selector.NumberSelectorConfig(min=1, mode=selector.NumberSelectorMode.BOX)
-        ),
+        vol.Optional(CONF_VALUE): vol.Coerce(float),
         vol.Optional(CONF_VALUE_TEMPLATE): selector.TemplateSelector(),
         vol.Optional(CONF_UNIT_OF_MEASUREMENT, default=ENERGY_KILO_WATT_HOUR): vol.In(
             [ENERGY_KILO_WATT_HOUR, POWER_WATT]
@@ -117,7 +118,7 @@ SCHEMA_POWER_OPTIONS = vol.Schema(
     }
 )
 
-SCHEMA_POWER = vol.Schema(
+SCHEMA_POWER_BASE = vol.Schema(
     {
         vol.Required(CONF_ENTITY_ID): selector.EntitySelector(),
         vol.Optional(CONF_NAME): selector.TextSelector(),
@@ -136,7 +137,7 @@ SCHEMA_POWER = vol.Schema(
             )
         ),
     }
-).extend(SCHEMA_POWER_OPTIONS.schema)
+)
 
 SCHEMA_POWER_FIXED = vol.Schema(
     {
@@ -159,35 +160,12 @@ SCHEMA_POWER_LUT_AUTODISCOVERED = vol.Schema(
     {vol.Optional(CONF_CONFIRM_AUTODISCOVERED_MODEL, default=True): bool}
 )
 
-SCHEMA_GROUP_OPTIONS = vol.Schema(
-    {
-        vol.Optional(CONF_GROUP_POWER_ENTITIES): selector.EntitySelector(
-            selector.EntitySelectorConfig(
-                domain=Platform.SENSOR,
-                device_class=SensorDeviceClass.POWER,
-                multiple=True,
-            )
-        ),
-        vol.Optional(CONF_GROUP_ENERGY_ENTITIES): selector.EntitySelector(
-            selector.EntitySelectorConfig(
-                domain=Platform.SENSOR,
-                device_class=SensorDeviceClass.ENERGY,
-                multiple=True,
-            )
-        ),
-        vol.Optional(
-            CONF_CREATE_UTILITY_METERS, default=False
-        ): selector.BooleanSelector(),
-        vol.Optional(CONF_HIDE_MEMBERS, default=False): selector.BooleanSelector(),
-    }
-)
-
 SCHEMA_GROUP = vol.Schema(
     {
         vol.Required(CONF_NAME): str,
         vol.Optional(CONF_UNIQUE_ID): selector.TextSelector(),
     }
-).extend(SCHEMA_GROUP_OPTIONS.schema)
+)
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -249,7 +227,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="virtual_power",
-            data_schema=SCHEMA_POWER,
+            data_schema=_create_virtual_power_schema(self.hass),
             errors={},
         )
 
@@ -286,9 +264,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 return self.create_config_entry()
 
+        group_schema = SCHEMA_GROUP.extend(
+            _create_group_options_schema(self.hass).schema
+        )
         return self.async_show_form(
             step_id="group",
-            data_schema=_create_group_schema(self.hass, SCHEMA_GROUP),
+            data_schema=group_schema,
             errors=errors,
         )
 
@@ -344,17 +325,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             return await self.async_step_lut_manufacturer()
 
-        model_info = None
+        power_profile = None
         if self.source_entity.entity_entry:
-            model_info = await autodiscover_model(
-                self.hass, self.source_entity.entity_entry
-            )
-        if model_info:
+            try:
+                power_profile = await get_power_profile(
+                    self.hass, {}, self.source_entity.entity_entry
+                )
+            except ModelNotSupported:
+                power_profile = None
+        if power_profile:
             return self.async_show_form(
                 step_id="lut",
                 description_placeholders={
-                    "manufacturer": model_info.manufacturer,
-                    "model": model_info.model,
+                    "manufacturer": power_profile.manufacturer,
+                    "model": power_profile.model,
                 },
                 data_schema=SCHEMA_POWER_LUT_AUTODISCOVERED,
                 errors={},
@@ -385,6 +369,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.sensor_config.update({CONF_MODEL: user_input.get(CONF_MODEL)})
+            library = ProfileLibrary(self.hass)
+            profile = await library.get_profile(
+                ModelInfo(
+                    self.sensor_config.get(CONF_MANUFACTURER),
+                    self.sensor_config.get(CONF_MODEL),
+                )
+            )
+            sub_profiles = await library.get_subprofile_listing(profile)
+            if sub_profiles:
+                return await self.async_step_lut_subprofile()
             errors = await self.validate_strategy_config()
             if not errors:
                 return self.create_config_entry()
@@ -394,12 +388,37 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=_create_lut_schema_model(
                 self.hass, self.sensor_config.get(CONF_MANUFACTURER)
             ),
+            description_placeholders={
+                "supported_models_link": "https://github.com/bramstroker/homeassistant-powercalc/blob/master/docs/supported_models.md"
+            },
+            errors=errors,
+        )
+
+    async def async_step_lut_subprofile(
+        self, user_input: dict[str, str] = None
+    ) -> FlowResult:
+        errors = {}
+        if user_input is not None:
+            # Append the sub profile to the model
+            model = f"{self.sensor_config.get(CONF_MODEL)}/{user_input.get(CONF_SUB_PROFILE)}"
+            self.sensor_config[CONF_MODEL] = model
+            errors = await self.validate_strategy_config()
+            if not errors:
+                return self.create_config_entry()
+
+        model_info = ModelInfo(
+            self.sensor_config.get(CONF_MANUFACTURER),
+            self.sensor_config.get(CONF_MODEL),
+        )
+        return self.async_show_form(
+            step_id="lut_subprofile",
+            data_schema=await _create_lut_schema_subprofile(self.hass, model_info),
             errors=errors,
         )
 
     async def validate_strategy_config(self) -> dict:
         strategy_name = self.sensor_config.get(CONF_MODE)
-        strategy = _create_strategy_object(
+        strategy = await _create_strategy_object(
             self.hass, strategy_name, self.sensor_config, self.source_entity
         )
         try:
@@ -487,7 +506,7 @@ class OptionsFlowHandler(OptionsFlow):
             if strategy != CalculationStrategy.LUT:
                 self.current_config.update({strategy: strategy_options})
 
-            strategy_object = _create_strategy_object(
+            strategy_object = await _create_strategy_object(
                 self.hass, strategy, self.current_config, self.source_entity
             )
             try:
@@ -508,10 +527,9 @@ class OptionsFlowHandler(OptionsFlow):
 
         strategy_options = {}
         if self.sensor_type == SensorType.VIRTUAL_POWER:
-            base_power_schema = SCHEMA_POWER_OPTIONS
             strategy: str = self.current_config.get(CONF_MODE)
             strategy_schema = _get_strategy_schema(strategy, self.source_entity_id)
-            data_schema = base_power_schema.extend(strategy_schema.schema)
+            data_schema = SCHEMA_POWER_OPTIONS.extend(strategy_schema.schema)
             strategy_options = self.current_config.get(strategy) or {}
 
         if self.sensor_type == SensorType.DAILY_ENERGY:
@@ -519,7 +537,7 @@ class OptionsFlowHandler(OptionsFlow):
             strategy_options = self.current_config[CONF_DAILY_FIXED_ENERGY]
 
         if self.sensor_type == SensorType.GROUP:
-            data_schema = _create_group_schema(self.hass, SCHEMA_GROUP_OPTIONS)
+            data_schema = _create_group_options_schema(self.hass)
 
         data_schema = _fill_schema_defaults(
             data_schema, self.current_config | strategy_options
@@ -527,17 +545,17 @@ class OptionsFlowHandler(OptionsFlow):
         return data_schema
 
 
-def _create_strategy_object(
+async def _create_strategy_object(
     hass: HomeAssistant, strategy: str, config: dict, source_entity: SourceEntity
 ) -> PowerCalculationStrategyInterface:
     """Create the calculation strategy object"""
     factory = PowerCalculatorStrategyFactory(hass)
-    light_model = None
+    power_profile = None
     if strategy == CalculationStrategy.LUT:
-        light_model = LightModel(
-            hass, config.get(CONF_MANUFACTURER), config.get(CONF_MODEL), None
+        power_profile = await ProfileLibrary.factory(hass).get_profile(
+            ModelInfo(config.get(CONF_MANUFACTURER), config.get(CONF_MODEL))
         )
-    return factory.create(config, strategy, light_model, source_entity)
+    return factory.create(config, strategy, power_profile, source_entity)
 
 
 def _get_strategy_schema(strategy: str, source_entity_id: str) -> vol.Schema:
@@ -552,9 +570,61 @@ def _get_strategy_schema(strategy: str, source_entity_id: str) -> vol.Schema:
         return vol.Schema({})
 
 
-def _create_group_schema(hass: HomeAssistant, base_schema: vol.Schema) -> vol.Schema:
+def _create_virtual_power_schema(hass: HomeAssistant) -> vol.Schema:
+    base_schema: vol.Schema = SCHEMA_POWER_BASE.extend(
+        {vol.Optional(CONF_GROUP): _create_group_selector(hass)}
+    )
+    return base_schema.extend(SCHEMA_POWER_OPTIONS.schema)
+
+
+def _create_group_options_schema(hass: HomeAssistant) -> vol.Schema:
     """Create config schema for groups"""
-    sub_groups = [
+    member_sensors = [
+        selector.SelectOptionDict(
+            value=config_entry.entry_id, label=config_entry.data.get(CONF_NAME)
+        )
+        for config_entry in hass.config_entries.async_entries(DOMAIN)
+        if config_entry.data.get(CONF_SENSOR_TYPE) == SensorType.VIRTUAL_POWER
+        and config_entry.unique_id is not None
+    ]
+    member_sensor_selector = selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=member_sensors,
+            multiple=True,
+            mode=selector.SelectSelectorMode.DROPDOWN,
+        )
+    )
+
+    return vol.Schema(
+        {
+            vol.Optional(CONF_GROUP_MEMBER_SENSORS): member_sensor_selector,
+            vol.Optional(CONF_GROUP_POWER_ENTITIES): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=Platform.SENSOR,
+                    device_class=SensorDeviceClass.POWER,
+                    multiple=True,
+                )
+            ),
+            vol.Optional(CONF_GROUP_ENERGY_ENTITIES): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=Platform.SENSOR,
+                    device_class=SensorDeviceClass.ENERGY,
+                    multiple=True,
+                )
+            ),
+            vol.Optional(CONF_SUB_GROUPS): _create_group_selector(hass, multiple=True),
+            vol.Optional(
+                CONF_CREATE_UTILITY_METERS, default=False
+            ): selector.BooleanSelector(),
+            vol.Optional(CONF_HIDE_MEMBERS, default=False): selector.BooleanSelector(),
+        }
+    )
+
+
+def _create_group_selector(
+    hass: HomeAssistant, multiple: bool = False
+) -> selector.SelectSelector:
+    options = [
         selector.SelectOptionDict(
             value=config_entry.entry_id, label=config_entry.data.get(CONF_NAME)
         )
@@ -562,12 +632,13 @@ def _create_group_schema(hass: HomeAssistant, base_schema: vol.Schema) -> vol.Sc
         if config_entry.data.get(CONF_SENSOR_TYPE) == SensorType.GROUP
     ]
 
-    sub_group_selector = selector.SelectSelector(
+    return selector.SelectSelector(
         selector.SelectSelectorConfig(
-            options=sub_groups, multiple=True, mode=selector.SelectSelectorMode.DROPDOWN
+            options=options,
+            multiple=multiple,
+            mode=selector.SelectSelectorMode.DROPDOWN,
         )
     )
-    return base_schema.extend({vol.Optional(CONF_SUB_GROUPS): sub_group_selector})
 
 
 def _validate_group_input(user_input: dict[str, str] = None) -> dict:
@@ -580,6 +651,7 @@ def _validate_group_input(user_input: dict[str, str] = None) -> dict:
         CONF_SUB_GROUPS not in user_input
         and CONF_GROUP_POWER_ENTITIES not in user_input
         and CONF_GROUP_ENERGY_ENTITIES not in user_input
+        and CONF_GROUP_MEMBER_SENSORS not in user_input
     ):
         errors["base"] = "group_mandatory"
 
@@ -627,6 +699,27 @@ def _create_lut_schema_model(hass: HomeAssistant, manufacturer: str) -> vol.Sche
             vol.Required(CONF_MODEL): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=models, mode=selector.SelectSelectorMode.DROPDOWN
+                )
+            )
+        }
+    )
+
+
+async def _create_lut_schema_subprofile(
+    hass: HomeAssistant, model_info: ModelInfo
+) -> vol.Schema:
+    """Create LUT schema"""
+    library = ProfileLibrary(hass)
+    profile = await library.get_profile(model_info)
+    sub_profiles = [
+        selector.SelectOptionDict(value=sub_profile, label=sub_profile)
+        for sub_profile in await library.get_subprofile_listing(profile)
+    ]
+    return vol.Schema(
+        {
+            vol.Required(CONF_SUB_PROFILE): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=sub_profiles, mode=selector.SelectSelectorMode.DROPDOWN
                 )
             )
         }

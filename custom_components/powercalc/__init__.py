@@ -59,7 +59,7 @@ from .const import (
     DEFAULT_POWER_SENSOR_PRECISION,
     DEFAULT_UPDATE_FREQUENCY,
     DEFAULT_UTILITY_METER_TYPES,
-    DISCOVERY_LIGHT_MODEL,
+    DISCOVERY_POWER_PROFILE,
     DISCOVERY_SOURCE_ENTITY,
     DOMAIN,
     DOMAIN_CONFIG,
@@ -70,10 +70,10 @@ from .const import (
 )
 from .errors import ModelNotSupported
 from .power_profile.model_discovery import (
-    get_light_model,
+    get_power_profile,
     has_manufacturer_and_model_information,
 )
-from .sensors.group import create_group_sensors
+from .sensors.group import create_group_sensors, update_associated_group_entry
 from .strategy.factory import PowerCalculatorStrategyFactory
 
 PLATFORMS = [Platform.SENSOR]
@@ -220,6 +220,12 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     )
 
     if unload_ok:
+        updated_group_entry = await update_associated_group_entry(
+            hass, config_entry, remove=True
+        )
+        if updated_group_entry:
+            await hass.config_entries.async_reload(updated_group_entry.entry_id)
+
         used_unique_ids: list[str] = hass.data[DOMAIN][DATA_USED_UNIQUE_IDS]
         try:
             used_unique_ids.remove(config_entry.unique_id)
@@ -255,13 +261,15 @@ async def autodiscover_entities(config: dict, domain_config: dict, hass: HomeAss
         if not await has_manufacturer_and_model_information(hass, entity_entry):
             continue
 
-        manual_configuration = get_manual_configuration(config, entity_entry.entity_id)
+        has_user_config = is_user_configured(config, entity_entry.entity_id)
 
         source_entity = await create_source_entity(entity_entry.entity_id, hass)
         try:
-            light_model = await get_light_model(hass, {}, source_entity.entity_entry)
-            if light_model.is_additional_configuration_required:
-                if not manual_configuration:
+            power_profile = await get_power_profile(
+                hass, {}, source_entity.entity_entry
+            )
+            if power_profile.is_additional_configuration_required:
+                if not has_user_config:
                     _LOGGER.warning(
                         f"{entity_entry.entity_id}: Model found in database, but needs additional manual configuration to be loaded"
                     )
@@ -273,16 +281,23 @@ async def autodiscover_entities(config: dict, domain_config: dict, hass: HomeAss
             )
             continue
 
-        if not light_model:
+        if has_user_config:
+            _LOGGER.debug(
+                "%s: Entity is manually configured, skipping auto configuration",
+                entity_entry.entity_id,
+            )
             continue
 
-        if not light_model.is_entity_domain_supported(source_entity.domain):
+        if not power_profile:
+            continue
+
+        if not power_profile.is_entity_domain_supported(source_entity.domain):
             continue
 
         discovery_info = {
             CONF_ENTITY_ID: entity_entry.entity_id,
             DISCOVERY_SOURCE_ENTITY: source_entity,
-            DISCOVERY_LIGHT_MODEL: light_model,
+            DISCOVERY_POWER_PROFILE: power_profile,
         }
         hass.async_create_task(
             discovery.async_load_platform(
@@ -293,12 +308,16 @@ async def autodiscover_entities(config: dict, domain_config: dict, hass: HomeAss
     _LOGGER.debug("Done auto discovering entities")
 
 
-def get_manual_configuration(config: dict, entity_id: str) -> dict | None:
+def is_user_configured(config: dict, entity_id: str) -> dict | None:
     if SENSOR_DOMAIN not in config:
         return None
     sensor_config = config.get(SENSOR_DOMAIN)
     for item in sensor_config:
-        if item.get(CONF_PLATFORM) == DOMAIN and item.get(CONF_ENTITY_ID) == entity_id:
+        if (
+            isinstance(item, dict)
+            and item.get(CONF_PLATFORM) == DOMAIN
+            and item.get(CONF_ENTITY_ID) == entity_id
+        ):
             return item
     return None
 

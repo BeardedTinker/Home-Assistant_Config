@@ -5,7 +5,6 @@ from decimal import Decimal, DecimalException
 from typing import Optional, cast
 
 import homeassistant.helpers.entity_registry as er
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -54,17 +53,22 @@ from ..const import (
     CONF_STANDBY_POWER,
     CONF_WLED,
     DATA_CALCULATOR_FACTORY,
-    DISCOVERY_LIGHT_MODEL,
+    DISCOVERY_POWER_PROFILE,
     DOMAIN,
     DUMMY_ENTITY_ID,
     OFF_STATES,
     CalculationStrategy,
 )
 from ..errors import ModelNotSupported, StrategyConfigurationError, UnsupportedMode
-from ..power_profile.model_discovery import get_light_model
+from ..power_profile.model_discovery import get_power_profile
+from ..power_profile.power_profile import PowerProfile
 from ..strategy.factory import PowerCalculatorStrategyFactory
 from ..strategy.strategy_interface import PowerCalculationStrategyInterface
-from .abstract import generate_power_sensor_entity_id, generate_power_sensor_name
+from .abstract import (
+    BaseEntity,
+    generate_power_sensor_entity_id,
+    generate_power_sensor_name,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -103,50 +107,42 @@ async def create_virtual_power_sensor(
     )
     entity_category = sensor_config.get(CONF_POWER_SENSOR_CATEGORY)
 
-    light_model = None
+    power_profile = None
     try:
-        mode = select_calculation_strategy(sensor_config)
-
         # When the user did not manually configured a model and a model was auto discovered we can load it.
         try:
             if (
                 discovery_info
                 and sensor_config.get(CONF_MODEL) is None
-                and discovery_info.get(DISCOVERY_LIGHT_MODEL)
+                and discovery_info.get(DISCOVERY_POWER_PROFILE)
             ):
-                light_model = discovery_info.get(DISCOVERY_LIGHT_MODEL)
+                power_profile = discovery_info.get(DISCOVERY_POWER_PROFILE)
             else:
-                light_model = await get_light_model(
+                power_profile = await get_power_profile(
                     hass, sensor_config, source_entity.entity_entry
                 )
-            if mode is None and light_model:
-                if not light_model.supported_modes:
-                    raise UnsupportedMode(
-                        f"Power profile has no supported_modes in model.json. manufacturer: {light_model.manufacturer}, model: {light_model.model}"
-                    )
-                mode = light_model.supported_modes[0]
-        except (ModelNotSupported) as err:
+        except ModelNotSupported as err:
             if not is_fully_configured(sensor_config):
                 _LOGGER.error(
-                    "Skipping sensor setup %s: %s", source_entity.entity_id, err
+                    "%s: Skipping sensor setup %s", source_entity.entity_id, err
                 )
                 raise err
 
-        if mode is None:
-            raise UnsupportedMode(
-                "Cannot select a mode (LINEAR, FIXED or LUT, WLED), supply it in the config"
+        strategy = select_calculation_strategy(sensor_config, power_profile)
+        if strategy is None:
+            error_message = "Cannot select a strategy (LINEAR, FIXED or LUT, WLED), supply it in the config. See the readme"
+            _LOGGER.error(
+                "%s: Skipping sensor setup: %s", source_entity.entity_id, error_message
             )
+            raise UnsupportedMode(error_message)
 
         calculation_strategy_factory: PowerCalculatorStrategyFactory = hass.data[
             DOMAIN
         ][DATA_CALCULATOR_FACTORY]
         calculation_strategy = calculation_strategy_factory.create(
-            sensor_config, mode, light_model, source_entity
+            sensor_config, strategy, power_profile, source_entity
         )
         await calculation_strategy.validate_config()
-    except (UnsupportedMode) as err:
-        _LOGGER.error("Skipping sensor setup %s: %s", source_entity.entity_id, err)
-        raise err
     except StrategyConfigurationError as err:
         _LOGGER.error(
             "%s: Error setting up calculation strategy: %s",
@@ -160,18 +156,18 @@ async def create_virtual_power_sensor(
     if not sensor_config.get(CONF_DISABLE_STANDBY_POWER):
         if sensor_config.get(CONF_STANDBY_POWER):
             standby_power = Decimal(sensor_config.get(CONF_STANDBY_POWER))
-        elif light_model is not None:
-            standby_power = Decimal(light_model.standby_power)
-            standby_power_on = Decimal(light_model.standby_power_on)
+        elif power_profile is not None:
+            standby_power = Decimal(power_profile.standby_power)
+            standby_power_on = Decimal(power_profile.standby_power_on)
 
     if (
         CONF_CALCULATION_ENABLED_CONDITION not in sensor_config
-        and light_model is not None
-        and light_model.calculation_enabled_condition
+        and power_profile is not None
+        and power_profile.calculation_enabled_condition
     ):
         sensor_config[
             CONF_CALCULATION_ENABLED_CONDITION
-        ] = light_model.calculation_enabled_condition
+        ] = power_profile.calculation_enabled_condition
 
     _LOGGER.debug(
         "Creating power sensor (entity_id=%s entity_category=%s, sensor_name=%s strategy=%s manufacturer=%s model=%s standby_power=%s unique_id=%s)",
@@ -179,15 +175,15 @@ async def create_virtual_power_sensor(
         entity_category,
         name,
         calculation_strategy.__class__.__name__,
-        light_model.manufacturer if light_model else "",
-        light_model.model if light_model else "",
+        power_profile.manufacturer if power_profile else "",
+        power_profile.model if power_profile else "",
         round(standby_power, 2),
         unique_id,
     )
 
     return VirtualPowerSensor(
         power_calculator=calculation_strategy,
-        calculation_mode=mode,
+        calculation_strategy=strategy,
         entity_id=entity_id,
         entity_category=entity_category,
         name=name,
@@ -225,7 +221,9 @@ async def create_real_power_sensor(
     )
 
 
-def select_calculation_strategy(config: dict) -> Optional[str]:
+def select_calculation_strategy(
+    config: dict, power_profile: PowerProfile | None
+) -> CalculationStrategy:
     """Select the calculation strategy"""
     config_mode = config.get(CONF_MODE)
     if config_mode:
@@ -239,6 +237,9 @@ def select_calculation_strategy(config: dict) -> Optional[str]:
 
     if config.get(CONF_WLED):
         return CalculationStrategy.WLED
+
+    if power_profile:
+        return power_profile.supported_modes[0]
 
     return None
 
@@ -259,7 +260,7 @@ class PowerSensor:
     pass
 
 
-class VirtualPowerSensor(SensorEntity, PowerSensor):
+class VirtualPowerSensor(SensorEntity, BaseEntity, PowerSensor):
     """Virtual power sensor"""
 
     _attr_device_class = SensorDeviceClass.POWER
@@ -270,7 +271,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
     def __init__(
         self,
         power_calculator: PowerCalculationStrategyInterface,
-        calculation_mode: str,
+        calculation_strategy: CalculationStrategy,
         entity_id: str,
         entity_category: str,
         name: str,
@@ -288,7 +289,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
     ):
         """Initialize the sensor."""
         self._power_calculator = power_calculator
-        self._calculation_mode = calculation_mode
+        self._calculation_mode = calculation_strategy
         self._source_entity = source_entity
         self._source_domain = source_domain
         self._name = name
@@ -308,7 +309,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         if entity_category:
             self._attr_entity_category = EntityCategory(entity_category)
         self._attr_extra_state_attributes = {
-            ATTR_CALCULATION_MODE: calculation_mode,
+            ATTR_CALCULATION_MODE: calculation_strategy,
             ATTR_INTEGRATION: DOMAIN,
             ATTR_SOURCE_ENTITY: source_entity,
             ATTR_SOURCE_DOMAIN: source_domain,
@@ -316,6 +317,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
 
     async def async_added_to_hass(self):
         """Register callbacks."""
+        await super().async_added_to_hass()
 
         async def appliance_state_listener(event):
             """Handle for state changes for dependent sensors."""
