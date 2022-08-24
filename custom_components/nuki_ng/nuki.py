@@ -34,9 +34,10 @@ class NukiInterface:
 
     async def async_json(self, cb):
         response = await self.hass.async_add_executor_job(lambda: cb(requests))
-        if response.status_code >= 300:
-            raise ConnectionError(f"Http response: {response.status_code}")
+        if not response.ok:
+            raise ConnectionError(f"Http response for {response.request.url}: {response.status_code} {response.reason}")
         if response.status_code > 200:
+            _LOGGER.debug(f"async_json: http status: {response.status_code} - {response.text}")
             return dict()
         json_resp = response.json()
         return json_resp
@@ -252,6 +253,8 @@ class NukiInterface:
                     "nukiId": item.get("smartlockId"),
                     "name": item.get("name"),
                     "firmwareVersion": str(item.get("firmwareVersion")),
+                    "advancedConfig": item.get("advancedConfig"),
+                    "openerAdvancedConfig": item.get("openerAdvancedConfig"),
                     "lastKnownState": {
                         "mode": state.get("mode"),
                         "state": state.get("state"),
@@ -276,6 +279,16 @@ class NukiInterface:
         await self.web_async_json(
             lambda r, h: r.post(
                 self.web_url(f"/smartlock/{dev_id}/auth/{auth_id}"),
+                headers=h,
+                json=changes,
+            )
+        )
+
+    async def web_update_config(self, dev_id: str, name: str, changes: dict):
+        mapping = {"config": "/config", "advancedConfig": "/advanced/config", "openerAdvancedConfig": "/advanced/openerconfig"}
+        await self.web_async_json(
+            lambda r, h: r.post(
+                self.web_url(f"/smartlock/{dev_id}" + mapping[name]),
                 headers=h,
                 json=changes,
             )
@@ -431,6 +444,14 @@ class NukiCoordinator(DataUpdateCoordinator):
     def device_supports(self, dev_id: str, feature: str) -> bool:
         return self.device_data(dev_id).get("lastKnownState", {}).get(feature) != None
 
+    def info_field(self, dev_id: str, default, *args):
+        data = self.device_data(dev_id)
+        for field in args:
+            data = data.get(field)
+            if data == None:
+                return default
+        return default if data == None else data
+
     async def update_web_auth(self, dev_id: str, auth: dict, changes: dict):
         if "id" not in auth:
             raise UpdateFailed("Invalid auth entry")
@@ -440,4 +461,13 @@ class NukiCoordinator(DataUpdateCoordinator):
             data.get(dev_id, {}).get("web_auth", {}).get(auth["id"], {})[key] = changes[
                 key
             ]
+        self.async_set_updated_data(data)
+    
+    async def update_config(self, dev_id: str, name: str, changes: dict):
+        data = self.data
+        obj = data["devices"].get(dev_id, {}).get(name)
+        for key in changes:
+            obj[key] = changes[key]
+        _LOGGER.debug(f"Updating config: {name}: {changes} = {obj}")
+        await self.api.web_update_config(dev_id, name, obj)
         self.async_set_updated_data(data)

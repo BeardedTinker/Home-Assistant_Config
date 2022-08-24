@@ -1,3 +1,4 @@
+from email.policy import default
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.helpers.entity import EntityCategory
 
@@ -21,6 +22,10 @@ async def async_setup_entry(
     for dev_id in coordinator.data.get("devices", {}):
         for auth_id in coordinator.device_data(dev_id).get("web_auth", {}):
             entities.append(AuthEntry(coordinator, dev_id, auth_id))
+        if coordinator.info_field(dev_id, None, "advancedConfig", "autoLock") != None:
+            entities.append(LockAutoLock(coordinator, dev_id))
+        if coordinator.info_field(dev_id, -1, "openerAdvancedConfig", "doorbellSuppression")  >= 0:
+            entities.append(OpenerRingSuppression(coordinator, dev_id))
     async_add_entities(entities)
     return True
 
@@ -88,3 +93,54 @@ class AuthEntry(NukiEntity, SwitchEntity):
     @property
     def entity_category(self):
         return EntityCategory.CONFIG
+
+class LockAutoLock(NukiEntity, SwitchEntity):
+
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("switch", "auto_lock")
+        self.set_name("Auto lock")
+        self._attr_icon = "mdi:lock-clock"
+
+    @property
+    def is_on(self):
+        return self.coordinator.info_field(self.device_id, False, "advancedConfig", "autoLock")
+
+    @property
+    def entity_category(self):
+        return EntityCategory.CONFIG
+
+    async def async_turn_on(self, **kwargs):
+        await self.coordinator.update_config(self.device_id, "advancedConfig", dict(autoLock=True))
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.update_config(self.device_id, "advancedConfig", dict(autoLock=False))
+
+
+class OpenerRingSuppression(NukiEntity, SwitchEntity):
+
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("switch", "ring_suppression")
+        self.set_name("Ring suppression")
+        self._attr_icon = "mdi:bell-cancel"
+
+    @property
+    def doorbellSuppression(self):
+        return self.coordinator.info_field(self.device_id, 0, "openerAdvancedConfig", "doorbellSuppression")
+
+    @property
+    def is_on(self):
+        return (self.doorbellSuppression & 1) != 0
+
+    @property
+    def entity_category(self):
+        return EntityCategory.CONFIG
+
+    async def async_turn_on(self, **kwargs):
+        new_value = self.doorbellSuppression | 1
+        await self.coordinator.update_config(self.device_id, "openerAdvancedConfig", dict(doorbellSuppression=new_value))
+
+    async def async_turn_off(self, **kwargs):
+        new_value = self.doorbellSuppression & (~1)
+        await self.coordinator.update_config(self.device_id, "openerAdvancedConfig", dict(doorbellSuppression=new_value))
