@@ -173,7 +173,7 @@ class NukiBridge(CoordinatorEntity):
     @property
     def device_info(self):
         model = (
-            "Hardware Bridge" if self.data.get("bridgeType", 1) else "Software Bridge"
+            "Hardware Bridge" if self.data.get("bridgeType", 1) == 1 else "Software Bridge"
         )
         versions = self.data.get("versions", {})
         return {
