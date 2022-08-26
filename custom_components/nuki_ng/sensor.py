@@ -2,6 +2,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity import EntityCategory
 
 import logging
+from datetime import datetime
 
 from . import NukiEntity, NukiBridge
 from .constants import DOMAIN
@@ -28,6 +29,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         if coordinator.device_supports(dev_id, "doorsensorStateName"):
             entities.append(DoorSensorState(coordinator, dev_id))
             entities.append(DoorSecurityState(coordinator, dev_id))
+        if coordinator.info_field(dev_id, None, "last_log"):
+            entities.append(LastUnlockUser(coordinator, dev_id))
+        
     async_add_entities(entities)
     return True
 
@@ -190,6 +194,32 @@ class LockVersion(NukiEntity, SensorEntity):
     @property
     def state(self):
         return self.data.get("firmwareVersion")
+
+    @property
+    def entity_category(self):
+        return EntityCategory.DIAGNOSTIC
+
+
+class LastUnlockUser(NukiEntity, SensorEntity):
+
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("sensor", "last_unlock_user")
+        self.set_name("Last Unlock user")
+        self._attr_icon = "mdi:account-lock-open"
+
+    @property
+    def state(self):
+        return self.coordinator.info_field(self.device_id, "Unknown", "last_log", "name")
+
+    @property
+    def extra_state_attributes(self):
+        timestamp = self.coordinator.info_field(self.device_id, None, "last_log", "timestamp")
+        action = self.coordinator.info_field(self.device_id, "unknown", "last_log", "action")
+        return {
+            "timestamp": datetime.fromisoformat(timestamp) if not None else None,
+            "action": action,
+        }
 
     @property
     def entity_category(self):
