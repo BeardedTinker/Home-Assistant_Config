@@ -150,6 +150,7 @@ sensor:
     name: '${display_name} Battery %'
     attenuation: 11db
     unit_of_measurement: '%'
+    state_class: "measurement"
     filters:
       - lambda: |-
           return ((id(voltage).state - 2.492) / 0.668 * 100.00);  
@@ -181,6 +182,7 @@ sensor:
     icon: 'mdi:weather-windy'
     id: wind_meter
     unit_of_measurement: 'km/h'
+    state_class: "measurement"
     accuracy_decimals: 1
     update_interval: ${update_fq}
 #    timeout: 5s
