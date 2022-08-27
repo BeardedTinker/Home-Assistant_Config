@@ -6,7 +6,7 @@
 
 recorder:
   # The number of days of history to keep in the recorder database
-  purge_keep_days: 10
+  purge_keep_days: 14
 
 # How often (in days) the purge task runs
 # UPDATE v0.109 - to be removed in future Home Assistant version - disabled!
