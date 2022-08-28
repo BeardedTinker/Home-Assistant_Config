@@ -1,5 +1,6 @@
 from hashlib import sha256
 from random import randint
+from socket import timeout
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -20,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 
 BRIDGE_DISCOVERY_API = "https://api.nuki.io/discover/bridges"
 BRIDGE_HOOK = "nuki_ng_bridge_hook"
-
+BRIDGE_TIMEOUT = 10
 
 class NukiInterface:
     def __init__(
@@ -67,20 +68,20 @@ class NukiInterface:
         return f"{url}{path}?token={self.token}{extra_str}"
 
     async def bridge_list(self):
-        data = await self.async_json(lambda r: r.get(self.bridge_url("/list")))
+        data = await self.async_json(lambda r: r.get(self.bridge_url("/list"), timeout=BRIDGE_TIMEOUT))
         result = dict()
         for item in data:
             result[item.get("nukiId")] = item
         return result
 
     async def bridge_info(self):
-        return await self.async_json(lambda r: r.get(self.bridge_url("/info")))
+        return await self.async_json(lambda r: r.get(self.bridge_url("/info"), timeout=BRIDGE_TIMEOUT))
 
     async def bridge_reboot(self):
-        return await self.async_json(lambda r: r.get(self.bridge_url("/reboot")))
+        return await self.async_json(lambda r: r.get(self.bridge_url("/reboot"), timeout=BRIDGE_TIMEOUT))
 
     async def bridge_fwupdate(self):
-        return await self.async_json(lambda r: r.get(self.bridge_url("/fwupdate")))
+        return await self.async_json(lambda r: r.get(self.bridge_url("/fwupdate"), timeout=BRIDGE_TIMEOUT))
 
     async def bridge_lock_action(self, dev_id: str, action: str, device_type):
         actions_map = {
@@ -104,7 +105,8 @@ class NukiInterface:
                         nukiId=dev_id,
                         deviceType=device_type,
                     ),
-                )
+                ),
+                timeout=BRIDGE_TIMEOUT
             )
         )
 
@@ -131,7 +133,7 @@ class NukiInterface:
 
     async def bridge_remove_callback(self, callback: str):
         callbacks = await self.async_json(
-            lambda r: r.get(self.bridge_url("/callback/list"))
+            lambda r: r.get(self.bridge_url("/callback/list"), timeout=BRIDGE_TIMEOUT)
         )
         _LOGGER.debug(f"bridge_remove_callback: {callbacks}, {callback}")
         callbacks_list = callbacks.get("callbacks", [])
@@ -139,7 +141,8 @@ class NukiInterface:
             if item["url"] == callback:
                 result = await self.async_json(
                     lambda r: r.get(
-                        self.bridge_url("/callback/remove", {"id": item["id"]})
+                        self.bridge_url("/callback/remove", {"id": item["id"]}),
+                        timeout=BRIDGE_TIMEOUT
                     )
                 )
                 if not result.get("success", True):
@@ -149,7 +152,7 @@ class NukiInterface:
 
     async def bridge_check_callback(self, callback: str):
         callbacks = await self.async_json(
-            lambda r: r.get(self.bridge_url("/callback/list"))
+            lambda r: r.get(self.bridge_url("/callback/list"), timeout=BRIDGE_TIMEOUT)
         )
         _LOGGER.debug(f"bridge_check_callback: {callbacks}, {callback}")
         result = dict()
@@ -164,13 +167,13 @@ class NukiInterface:
             await self.bridge_remove_callback(item["url"])
         for callback_url in add_callbacks[:3]:
             result = await self.async_json(
-                lambda r: r.get(self.bridge_url("/callback/add", {"url": callback_url}))
+                lambda r: r.get(self.bridge_url("/callback/add", {"url": callback_url}), timeout=BRIDGE_TIMEOUT)
             )
             if not result.get("success", True):
                 raise ConnectionError(result.get("message"))
         _LOGGER.debug("Callback is set - re-added")
         callbacks = await self.async_json(
-            lambda r: r.get(self.bridge_url("/callback/list"))
+            lambda r: r.get(self.bridge_url("/callback/list"), timeout=BRIDGE_TIMEOUT)
         )
         return callbacks.get("callbacks", [])
 
@@ -370,6 +373,16 @@ class NukiCoordinator(DataUpdateCoordinator):
             info_mapping = dict()
             device_list = None
             web_list = None
+            def web_id_for_item(item):
+                as_hex = "{0:x}".format(item["nukiId"])
+                deviceType = item.get("deviceType", 0)
+                if deviceType == 2:
+                    as_hex = f"2{as_hex}"
+                elif deviceType == 3:
+                    as_hex = f"3{as_hex}"
+                elif deviceType == 4:
+                    as_hex = f"4{as_hex}"
+                return int(as_hex, 16)
             if self.api.can_bridge():
                 try:
                     callbacks_list = await self.api.bridge_check_callback(
@@ -396,20 +409,22 @@ class NukiCoordinator(DataUpdateCoordinator):
             for key, item in device_list.items():
                 dev_id = item["nukiId"]
                 if self.api.can_web():
+                    web_id = web_id_for_item(item)
+                    item["webId"] = web_id
                     try:
-                        item["web_auth"] = await self.api.web_list_all_auths(dev_id)
+                        item["web_auth"] = await self.api.web_list_all_auths(web_id)
                     except ConnectionError:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
                         _LOGGER.exception("Error while fetching auth:")
                     try:
-                        item["last_log"] = await self.api.web_get_last_unlock_log(dev_id)
+                        item["last_log"] = await self.api.web_get_last_unlock_log(web_id)
                     except ConnectionError:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
                         _LOGGER.exception("Error while fetching last log entry")
                 if web_list:
-                    item["config"] = web_list.get(dev_id, {}).get("config")
-                    item["advancedConfig"] = web_list.get(dev_id, {}).get("advancedConfig")
-                    item["openerAdvancedConfig"] = web_list.get(dev_id, {}).get("openerAdvancedConfig")
+                    item["config"] = web_list.get(web_id, {}).get("config")
+                    item["advancedConfig"] = web_list.get(web_id, {}).get("advancedConfig")
+                    item["openerAdvancedConfig"] = web_list.get(web_id, {}).get("openerAdvancedConfig")
                 result["devices"][dev_id] = item
                 result["devices"][dev_id]["bridge_info"] = info_mapping.get(dev_id)
             _LOGGER.debug(f"_update: {json.dumps(result)}")
@@ -448,7 +463,7 @@ class NukiCoordinator(DataUpdateCoordinator):
                 await self.async_request_refresh()
             _LOGGER.debug(f"bridge action result: {result}, {action}")
         elif self.api.can_web():
-            await self.api.web_lock_action(dev_id, action)
+            await self.api.web_lock_action(self.web_id(dev_id), action)
             await self.async_request_refresh()
             _LOGGER.debug(f"web action result: {action}")
 
@@ -473,6 +488,9 @@ class NukiCoordinator(DataUpdateCoordinator):
     def device_data(self, dev_id: str):
         return self.data.get("devices", {}).get(dev_id, {})
 
+    def web_id(self, dev_id: str):
+        return self.device_data(dev_id).get("webId", dev_id)
+
     def info_data(self):
         return self.data.get("info", {})
 
@@ -496,7 +514,7 @@ class NukiCoordinator(DataUpdateCoordinator):
     async def update_web_auth(self, dev_id: str, auth: dict, changes: dict):
         if "id" not in auth:
             raise UpdateFailed("Invalid auth entry")
-        await self.api.web_update_auth(dev_id, auth["id"], changes)
+        await self.api.web_update_auth(self.web_id(dev_id), auth["id"], changes)
         data = self.data
         for key in changes:
             data.get(dev_id, {}).get("web_auth", {}).get(auth["id"], {})[key] = changes[
@@ -510,5 +528,5 @@ class NukiCoordinator(DataUpdateCoordinator):
         for key in changes:
             obj[key] = changes[key]
         _LOGGER.debug(f"Updating config: {name}: {changes} = {obj}")
-        await self.api.web_update_config(dev_id, name, obj)
+        await self.api.web_update_config(self.web_id(dev_id), name, obj)
         self.async_set_updated_data(data)
