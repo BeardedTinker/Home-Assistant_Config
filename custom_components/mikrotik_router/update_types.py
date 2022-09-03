@@ -11,6 +11,7 @@ class MikrotikUpdateEntityDescription(UpdateEntityDescription):
     ha_group: str = ""
     ha_connection: str = ""
     ha_connection_value: str = ""
+    title: str = ""
     data_path: str = ""
     data_attribute: str = "available"
     data_name: str = ""
@@ -26,6 +27,7 @@ SENSOR_TYPES = {
         key="system_rosupdate",
         name="RouterOS update",
         ha_group="System",
+        title="Mikrotik RouterOS",
         data_path="fw-update",
         data_name="",
         data_uid="",
@@ -34,8 +36,9 @@ SENSOR_TYPES = {
     ),
     "system_rbfwupdate": MikrotikUpdateEntityDescription(
         key="system_rbfwupdate",
-        name="RouterBoard firmware update",
+        name="RouterBOARD firmware update",
         ha_group="System",
+        title="Mikrotik RouterBOARD",
         data_path="routerboard",
         data_attribute="current-firmware",
         data_name="",

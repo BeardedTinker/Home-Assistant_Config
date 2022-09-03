@@ -56,6 +56,29 @@ DEVICE_ATTRIBUTES_IFACE_SFP = [
     "eeprom-checksum",
 ]
 
+DEVICE_ATTRIBUTES_IFACE_WIRELESS = [
+    "ssid",
+    "mode",
+    "radio-name",
+    "interface-type",
+    "country",
+    "installation",
+    "antenna-gain",
+    "frequency",
+    "band",
+    "channel-width",
+    "secondary-frequency",
+    "wireless-protocol",
+    "rate-set",
+    "distance",
+    "tx-power-mode",
+    "vlan-id",
+    "wds-mode",
+    "wds-default-bridge",
+    "bridge-mode",
+    "hide-ssid",
+]
+
 DEVICE_ATTRIBUTES_NAT = [
     "protocol",
     "dst-port",
@@ -160,7 +183,7 @@ class MikrotikSwitchEntityDescription(SwitchEntityDescription):
 SENSOR_TYPES = {
     "interface": MikrotikSwitchEntityDescription(
         key="interface",
-        name="port",
+        name="Port",
         icon_enabled="mdi:lan-connect",
         icon_disabled="mdi:lan-pending",
         entity_category=None,
@@ -169,7 +192,7 @@ SENSOR_TYPES = {
         ha_connection_value="data__port-mac-address",
         data_path="interface",
         data_switch_path="/interface",
-        data_name="name",
+        data_name="default-name",
         data_uid="name",
         data_reference="default-name",
         data_attributes_list=DEVICE_ATTRIBUTES_IFACE,
@@ -177,7 +200,7 @@ SENSOR_TYPES = {
     ),
     "nat": MikrotikSwitchEntityDescription(
         key="nat",
-        name="NAT",
+        name="",
         icon_enabled="mdi:network-outline",
         icon_disabled="mdi:network-off-outline",
         entity_category=None,
@@ -195,7 +218,7 @@ SENSOR_TYPES = {
     ),
     "mangle": MikrotikSwitchEntityDescription(
         key="mangle",
-        name="Mangle",
+        name="",
         icon_enabled="mdi:bookmark-outline",
         icon_disabled="mdi:bookmark-off-outline",
         entity_category=None,
@@ -213,7 +236,7 @@ SENSOR_TYPES = {
     ),
     "filter": MikrotikSwitchEntityDescription(
         key="filter",
-        name="Filter",
+        name="",
         icon_enabled="mdi:filter-variant",
         icon_disabled="mdi:filter-variant-remove",
         entity_category=None,
@@ -247,7 +270,7 @@ SENSOR_TYPES = {
     ),
     "queue": MikrotikSwitchEntityDescription(
         key="queue",
-        name="Queue",
+        name="",
         icon_enabled="mdi:leaf",
         icon_disabled="mdi:leaf-off",
         entity_category=None,
@@ -264,7 +287,7 @@ SENSOR_TYPES = {
     ),
     "kidcontrol_enable": MikrotikSwitchEntityDescription(
         key="kidcontrol_enable",
-        name="kidcontrol",
+        name="",
         icon_enabled="mdi:account",
         icon_disabled="mdi:account-off",
         entity_category=None,
@@ -280,7 +303,7 @@ SENSOR_TYPES = {
     ),
     "kidcontrol_pause": MikrotikSwitchEntityDescription(
         key="kidcontrol_paused",
-        name="kidcontrol paused",
+        name="paused",
         icon_enabled="mdi:account-outline",
         icon_disabled="mdi:account-off-outline",
         entity_category=None,

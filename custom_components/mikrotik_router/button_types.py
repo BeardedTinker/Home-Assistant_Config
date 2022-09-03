@@ -33,7 +33,7 @@ class MikrotikButtonEntityDescription(SensorEntityDescription):
 SENSOR_TYPES = {
     "script": MikrotikButtonEntityDescription(
         key="script",
-        name="script",
+        name="",
         icon="mdi:script-text-outline",
         device_class=None,
         entity_category=None,

@@ -11,6 +11,7 @@ from .sensor_types import (
     SENSOR_SERVICES,
     DEVICE_ATTRIBUTES_IFACE_ETHER,
     DEVICE_ATTRIBUTES_IFACE_SFP,
+    DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -86,6 +87,11 @@ class MikrotikInterfaceTrafficSensor(MikrotikSensor):
                     if variable in self._data:
                         attributes[format_attribute(variable)] = self._data[variable]
 
+        elif self._data["type"] == "wlan":
+            for variable in DEVICE_ATTRIBUTES_IFACE_WIRELESS:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
+
         return attributes
 
 
@@ -98,7 +104,7 @@ class MikrotikClientTrafficSensor(MikrotikSensor):
     @property
     def name(self) -> str:
         """Return the name."""
-        return f"{self._data[self.entity_description.data_name]} {self.entity_description.name}"
+        return f"{self.entity_description.name}"
 
     @property
     def available(self) -> bool:

@@ -12,6 +12,7 @@ from .switch_types import (
     SENSOR_SERVICES,
     DEVICE_ATTRIBUTES_IFACE_ETHER,
     DEVICE_ATTRIBUTES_IFACE_SFP,
+    DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,6 +71,9 @@ class MikrotikSwitch(MikrotikEntity, SwitchEntity, RestoreEntity):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
@@ -79,6 +83,9 @@ class MikrotikSwitch(MikrotikEntity, SwitchEntity, RestoreEntity):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
@@ -108,6 +115,11 @@ class MikrotikPortSwitch(MikrotikSwitch):
                     if variable in self._data:
                         attributes[format_attribute(variable)] = self._data[variable]
 
+        elif self._data["type"] == "wlan":
+            for variable in DEVICE_ATTRIBUTES_IFACE_WIRELESS:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
+
         return attributes
 
     @property
@@ -125,6 +137,9 @@ class MikrotikPortSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> Optional[str]:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         if self._data["about"] == "managed by CAPsMAN":
@@ -144,6 +159,9 @@ class MikrotikPortSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> Optional[str]:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         if self._data["about"] == "managed by CAPsMAN":
@@ -168,16 +186,11 @@ class MikrotikPortSwitch(MikrotikSwitch):
 class MikrotikNATSwitch(MikrotikSwitch):
     """Representation of a NAT switch."""
 
-    @property
-    def name(self) -> str:
-        """Return the name."""
-        if self._data["comment"]:
-            return f"{self._inst} NAT {self._data['comment']}"
-
-        return f"{self._inst} NAT {self._data['name']}"
-
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -195,6 +208,9 @@ class MikrotikNATSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -219,6 +235,9 @@ class MikrotikMangleSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -237,6 +256,9 @@ class MikrotikMangleSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -262,6 +284,9 @@ class MikrotikFilterSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -279,6 +304,9 @@ class MikrotikFilterSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -303,6 +331,9 @@ class MikrotikQueueSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -316,6 +347,9 @@ class MikrotikQueueSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
@@ -336,6 +370,9 @@ class MikrotikKidcontrolPauseSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
@@ -345,6 +382,9 @@ class MikrotikKidcontrolPauseSwitch(MikrotikSwitch):
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
+        if "write" not in self._ctrl.data["access"]:
+            return
+
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]

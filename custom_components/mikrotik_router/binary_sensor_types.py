@@ -66,6 +66,29 @@ DEVICE_ATTRIBUTES_IFACE_SFP = [
     "eeprom-checksum",
 ]
 
+DEVICE_ATTRIBUTES_IFACE_WIRELESS = [
+    "ssid",
+    "mode",
+    "radio-name",
+    "interface-type",
+    "country",
+    "installation",
+    "antenna-gain",
+    "frequency",
+    "band",
+    "channel-width",
+    "secondary-frequency",
+    "wireless-protocol",
+    "rate-set",
+    "distance",
+    "tx-power-mode",
+    "vlan-id",
+    "wds-mode",
+    "wds-default-bridge",
+    "bridge-mode",
+    "hide-ssid",
+]
+
 DEVICE_ATTRIBUTES_UPS = [
     "name",
     "offline-time",
@@ -137,7 +160,7 @@ SENSOR_TYPES = {
     ),
     "interface": MikrotikBinarySensorEntityDescription(
         key="interface",
-        name="",
+        name="Connection",
         icon_enabled="mdi:lan-connect",
         icon_disabled="mdi:lan-pending",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
@@ -146,7 +169,7 @@ SENSOR_TYPES = {
         ha_connection_value="data__port-mac-address",
         data_path="interface",
         data_attribute="running",
-        data_name="name",
+        data_name="default-name",
         data_uid="default-name",
         data_reference="default-name",
         data_attributes_list=DEVICE_ATTRIBUTES_IFACE,

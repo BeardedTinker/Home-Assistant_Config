@@ -6,7 +6,7 @@ from datetime import timedelta
 from homeassistant.components.device_tracker.config_entry import ScannerEntity
 from homeassistant.components.device_tracker.const import SOURCE_TYPE_ROUTER
 from homeassistant.const import STATE_NOT_HOME
-from homeassistant.util.dt import get_age, utcnow
+from homeassistant.util.dt import utcnow
 from .helper import format_attribute
 from .const import (
     CONF_TRACK_HOSTS,
@@ -97,9 +97,9 @@ class MikrotikHostDeviceTracker(MikrotikDeviceTracker):
         return timedelta(seconds=track_network_hosts_timeout)
 
     @property
-    def name(self) -> str:
+    def name(self) -> Any:
         """Return the name."""
-        return f"{self._data[self.entity_description.data_name]}"
+        return None
 
     @property
     def is_connected(self) -> bool:

@@ -43,9 +43,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class MikrotikRouterOSUpdate(MikrotikEntity, UpdateEntity):
     """Define an Mikrotik Controller Update entity."""
 
-    TYPE = DEVICE_UPDATE
-    _attr_device_class = UpdateDeviceClass.FIRMWARE
-
     def __init__(
         self,
         inst,
@@ -59,6 +56,7 @@ class MikrotikRouterOSUpdate(MikrotikEntity, UpdateEntity):
         self._attr_supported_features = UpdateEntityFeature.INSTALL
         self._attr_supported_features |= UpdateEntityFeature.BACKUP
         self._attr_supported_features |= UpdateEntityFeature.RELEASE_NOTES
+        self._attr_title = self.entity_description.title
 
     @property
     def is_on(self) -> bool:
@@ -113,6 +111,9 @@ class MikrotikRouterOSUpdate(MikrotikEntity, UpdateEntity):
 class MikrotikRouterBoardFWUpdate(MikrotikEntity, UpdateEntity):
     """Define an Mikrotik Controller Update entity."""
 
+    TYPE = DEVICE_UPDATE
+    _attr_device_class = UpdateDeviceClass.FIRMWARE
+
     def __init__(
         self,
         inst,
@@ -124,6 +125,7 @@ class MikrotikRouterBoardFWUpdate(MikrotikEntity, UpdateEntity):
         super().__init__(inst, uid, mikrotik_controller, entity_description)
 
         self._attr_supported_features = UpdateEntityFeature.INSTALL
+        self._attr_title = self.entity_description.title
 
     @property
     def is_on(self) -> bool:

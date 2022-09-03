@@ -19,6 +19,7 @@ from .binary_sensor_types import (
     SENSOR_SERVICES,
     DEVICE_ATTRIBUTES_IFACE_ETHER,
     DEVICE_ATTRIBUTES_IFACE_SFP,
+    DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -136,5 +137,10 @@ class MikrotikPortBinarySensor(MikrotikBinarySensor):
                 for variable in DEVICE_ATTRIBUTES_IFACE_SFP:
                     if variable in self._data:
                         attributes[format_attribute(variable)] = self._data[variable]
+
+        elif self._data["type"] == "wlan":
+            for variable in DEVICE_ATTRIBUTES_IFACE_WIRELESS:
+                if variable in self._data:
+                    attributes[format_attribute(variable)] = self._data[variable]
 
         return attributes
