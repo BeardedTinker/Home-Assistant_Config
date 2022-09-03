@@ -15,6 +15,7 @@ from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
 )
 from homeassistant.core import HomeAssistant, Event
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -72,8 +73,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     base = ReolinkBase(hass, entry.data, entry.options)
     base.sync_functions.append(entry.add_update_listener(update_listener))
 
-    if not await base.connect_api():
-        return False
+    try:
+        if not await base.connect_api():
+            raise ConfigEntryNotReady(f"Error while trying to setup {base.name}, API failed to provide required data")
+    except:
+        raise ConfigEntryNotReady(f"Error while trying to setup {base.name}, API had hard error")
+
     hass.data[DOMAIN][entry.entry_id] = {BASE: base}
 
     try:
