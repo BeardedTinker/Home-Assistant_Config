@@ -40,6 +40,9 @@ If you want to get in touch, you can always find me on Discord Server - [Bearded
 
 Also, if you have time you can try and join me while streaming and there should be at 1 or 2 streams each month!
 
+> **Note**
+> If you want to support me, you can do so by becoming my YouTube Channel member - just click [link here](https://www.youtube.com/channel/UCuqokNoK8ZFNQdXxvlE129g/join) and select one of the membership levels.
+
 
 ### Hardware
 
