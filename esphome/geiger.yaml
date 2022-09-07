@@ -36,6 +36,8 @@ ota:
 
 esp32_ble_tracker:
 
+bluetooth_proxy:
+
 switch:
   - platform: restart
     name: ${upper_devicename} Restart
