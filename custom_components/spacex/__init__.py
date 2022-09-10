@@ -28,7 +28,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up SpaceX from a config entry."""
-    polling_interval = 25
+    polling_interval = 120
     api = SpaceX()
 
     try:
