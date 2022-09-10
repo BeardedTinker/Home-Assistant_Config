@@ -118,6 +118,7 @@ KEY_ENABLED_BY_DEFAULT = "en"
 KEY_ENTITY_CATEGORY = "entity_category"
 KEY_EXPIRE_AFTER = "exp_aft"
 KEY_FORCE_UPDATE = "frc_upd"
+KEY_HW_VERSION = "hw"
 KEY_ICON = "icon"
 KEY_JSON_ATTRIBUTES_TEMPLATE = "json_attr_tpl"
 KEY_JSON_ATTRIBUTES_TOPIC = "json_attr_t"
@@ -2727,6 +2728,7 @@ device_info = {
     KEY_NAME: device_name,
     KEY_MODEL: model,
     KEY_SW_VERSION: fw_ver,
+    KEY_HW_VERSION: f"gen1 ({model_id})",
     KEY_MANUFACTURER: ATTR_MANUFACTURER,
     KEY_CONFIGURATION_URL: f"http://{host}/",
 }
