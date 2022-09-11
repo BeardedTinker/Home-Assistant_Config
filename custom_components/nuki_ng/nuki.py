@@ -276,6 +276,7 @@ class NukiInterface:
             result[item.get("smartlockId")] = {
                 "deviceType": item.get("type"),
                 "nukiId": item.get("smartlockId"),
+                "web": True,
                 "name": item.get("name"),
                 "firmwareVersion": str(item.get("firmwareVersion")),
                 "config": item.get("config"),
@@ -374,6 +375,8 @@ class NukiCoordinator(DataUpdateCoordinator):
             device_list = None
             web_list = None
             def web_id_for_item(item):
+                if item.get("web"):
+                    return item["nukiId"] # Already in web mode
                 as_hex = "{0:x}".format(item["nukiId"])
                 deviceType = item.get("deviceType", 0)
                 if deviceType == 2:
