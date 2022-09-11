@@ -10,6 +10,13 @@ mqtt:
     payload_on: 'off'
     payload_off: 'om'
     availability_mode: latest
+# ESPCAM32 Gas Meter
+  - name: "Main error meter AIOE"
+    state_topic: "gasmeter/main/error"
+    value_template: "{{ value != 'no error' }}"
+    json_attributes_topic: "gasmeter/main/json"
+    icon: "mdi:alert-circle"
+
   sensor:
   - name: github_checkrun_home_assistant_beta
     state_topic: github_checkrun/home_assistant_beta
@@ -44,3 +51,18 @@ mqtt:
   - name: Zigbee2MQTT Bridge state
     state_topic: "zigbee2mqtt/bridge/state"
     icon: mdi:router-wireless
+#### ESP32 CAM Gas meter
+  - name: "Main meter AIOE"
+    state_topic: "gasmeter/main/value"
+    value_template: "{{ value }}"
+    unit_of_measurement: "m³"
+    icon: "mdi:power"
+  - name: "Main rate meter AIOE"
+    state_topic: "gasmeter/main/rate"
+    value_template: "{{ value }}"
+    icon: "mdi:swap-vertical"
+  - name: "Main timestamp meter AIOE"
+    state_topic: "gasmeter/main/timestamp"
+    value_template: "{{ value }}"
+    icon: "mdi:clock-outline"
+
