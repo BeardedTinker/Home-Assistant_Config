@@ -9,3 +9,4 @@ entities:
   - light.fridge
   - light.oven
   - light.sink
+  - light.kitchen_countertop
