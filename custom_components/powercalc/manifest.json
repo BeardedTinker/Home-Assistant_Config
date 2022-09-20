@@ -12,7 +12,6 @@
         "group",
         "template",
         "select",
-        "hue",
         "utility_meter"
     ],
     "documentation": "https://github.com/bramstroker/homeassistant-powercalc",
@@ -23,5 +22,5 @@
     "requirements": [
         "numpy>=1.21.1"
     ],
-    "version": "v0.25.5"
+    "version": "v0.25.6"
 }
