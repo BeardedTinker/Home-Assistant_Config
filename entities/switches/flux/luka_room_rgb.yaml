@@ -1,0 +1,15 @@
+#####
+# Flux integration - internal Circadian lights control
+# https://www.home-assistant.io/integrations/flux
+#####
+
+platform: flux
+name: Luka floor flux
+lights:
+  - light.luka_floor_light
+start_time: "07:00"
+stop_time: "23:00"
+start_colortemp: 4000
+sunset_colortemp: 3000
+stop_colortemp: 1900
+mode: rgb 
