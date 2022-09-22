@@ -25,7 +25,7 @@ from homeassistant.const import (
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
 )
-from homeassistant.core import HomeAssistant, State, callback
+from homeassistant.core import CoreState, HomeAssistant, State, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -82,17 +82,13 @@ async def create_group_sensors(
         filters = default_filters.copy()
         filters.append(lambda elm: not isinstance(elm, GroupedSensor))
         filters.append(lambda elm: isinstance(elm, class_name))
-        return list(
-            map(
-                lambda x: x.entity_id,
-                list(
-                    filter(
-                        lambda x: all(f(x) for f in filters),
-                        all_entities,
-                    )
-                ),
+        return [
+            x.entity_id
+            for x in filter(
+                lambda x: all(f(x) for f in filters),
+                all_entities,
             )
-        )
+        ]
 
     group_sensors = []
 
@@ -251,7 +247,7 @@ def create_grouped_power_sensor(
         hass, sensor_config, name=group_name, unique_id=unique_id
     )
 
-    _LOGGER.debug(f"Creating grouped power sensor: %s (entity_id=%s)", name, entity_id)
+    _LOGGER.debug("Creating grouped power sensor: %s (entity_id=%s)", name, entity_id)
 
     return GroupedPowerSensor(
         name=name,
@@ -326,27 +322,34 @@ class GroupedSensor(BaseEntity, RestoreEntity, SensorEntity):
 
         async_track_state_change_event(self.hass, self._entities, self.on_state_change)
 
-        self._async_hide_members()
+        self._async_hide_members(self._sensor_config.get(CONF_HIDE_MEMBERS))
+
+    async def async_will_remove_from_hass(self) -> None:
+        """
+        This will trigger when entity is about to be removed from HA
+        Unhide the entities, when they where hidden before
+        """
+        if self._sensor_config.get(CONF_HIDE_MEMBERS) is True:
+            self._async_hide_members(False)
 
     @callback
-    def _async_hide_members(self) -> None:
-        """Hide or unhide group members."""
+    def _async_hide_members(self, hide: True):
+        """Hide/unhide group members"""
         registry = er.async_get(self.hass)
         for entity_id in self._entities:
             registry_entry = registry.async_get(entity_id)
             if not registry_entry:
                 continue
 
-            if self._sensor_config.get(CONF_HIDE_MEMBERS):
-                registry.async_update_entity(
-                    entity_id, hidden_by=er.RegistryEntryHider.INTEGRATION
-                )
-            elif registry_entry.hidden_by == er.RegistryEntryHider.INTEGRATION:
-                registry.async_update_entity(entity_id, hidden_by=None)
+            hidden_by = er.RegistryEntryHider.INTEGRATION if hide else None
+            registry.async_update_entity(entity_id, hidden_by=hidden_by)
 
     @callback
     def on_state_change(self, event):
         """Triggered when one of the group entities changes state"""
+        if self.hass.state != CoreState.running:
+            return
+
         ignored_states = (STATE_UNAVAILABLE, STATE_UNKNOWN)
         all_states = [self.hass.states.get(entity_id) for entity_id in self._entities]
         states: list[State] = list(filter(None, all_states))
