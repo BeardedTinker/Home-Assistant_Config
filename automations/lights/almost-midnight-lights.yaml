@@ -15,13 +15,13 @@ condition:
   state: 'on'
 
 action:
-- service: light.turn_on
-  target:
-    entity_id:
-      - light.living_room_lights
-  data:
-    transition: 60
-    brightness: 32
+#- service: light.turn_on
+#  target:
+#    entity_id:
+#      - light.living_room_lights
+#  data:
+#    transition: 60
+#    brightness: 32
 - service: light.turn_off
   data:
     transition: 90
