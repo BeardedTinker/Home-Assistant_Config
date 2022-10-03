@@ -5,9 +5,11 @@
 
 alias: 'LG TV Turn On'
 id: c611f6bc-331d-49fa-9be8-795be2bc85a7
+
 trigger:
   - platform: webostv.turn_on
     entity_id: media_player.lg_tv
+
 action:
   - service: wake_on_lan.send_magic_packet
     data:
