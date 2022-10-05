@@ -1,0 +1,41 @@
+#####
+# Further automate when kids are out - disable Tado heating for room
+# Enable heating when back home
+#####
+
+alias: Zita - disable heating when out
+id: f6c0b21b-e6de-4adf-895e-fbdea61c88de
+
+trigger:
+  - platform: zone
+    entity_id: person.zita
+    zone: zone.home
+    event: leave
+  - platform: zone
+    entity_id: person.zita
+    zone: zone.home
+    event: enter
+
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: stop
+      sequence:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.zita_room
+          data:
+            hvac_mode: 'off'
+    - conditions:
+      - condition: trigger
+        id: start
+      sequence:
+        - service: climate.set_hvac_mode
+          target:
+            entity_id: climate.zita_room
+          data:
+            hvac_mode: 'auto'
+    default: []
+
+mode: single
