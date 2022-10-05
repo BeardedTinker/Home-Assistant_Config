@@ -35,7 +35,7 @@ action:
           target:
             entity_id: climate.zita_room
           data:
-            hvac_mode: 'auto'
+            hvac_mode: auto
     default: []
 
 mode: single
