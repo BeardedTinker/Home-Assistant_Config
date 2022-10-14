@@ -3,6 +3,7 @@
   "name": "Uptime Kuma",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/uptime_kuma",
+  "issue_tracker": "https://github.com/meichthys/uptime_kuma/issues",
   "requirements": ["pyuptimekuma==0.0.6"],
   "ssdp": [],
   "zeroconf": [],
