@@ -8,6 +8,6 @@ entity_id: light.balcony_light
 energy_sensor_id: sensor.balcony_light_energy_3
 power_sensor_id: sensor.balcony_light_power
 unique_id: 87e01129-ecba-41e2-ad2a-445c57d30ea4
-#linear:
-#  min_power: 0.5
-#  max_power: 11
+linear:
+  min_power: 0.5
+  max_power: 11

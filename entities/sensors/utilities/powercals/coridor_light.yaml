@@ -8,6 +8,6 @@ entity_id: light.corridor_light
 energy_sensor_id: sensor.corridor_light_energy_3
 power_sensor_id: sensor.corridor_light_power
 unique_id: c9cf27e3-fa5b-4473-9ef7-6fde14ffe9b3
-#linear:
-#  min_power: 0.5
-#  max_power: 22
+linear:
+  min_power: 0.5
+  max_power: 22
