@@ -26,3 +26,17 @@ action:
 - service: notify.energy_log
   data:
     message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ state_attr('sensor.power_stats','min_value') }},{{ state_attr('sensor.power_stats','max_value') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }}"
+- service: google_sheets.append_sheet
+  data:
+    config_entry: 51c0f06b0f810b83d19af8dc1fe65bad
+    worksheet: Energy
+    data:
+      Date: "{{ states('sensor.date') }}"
+      Total Energy: "{{ states('sensor.daily_energy_total') }}"
+      Daylight energy: "{{ states('sensor.sun_energy_day') }}"
+      Night Time Energy: "{{ states('sensor.sun_energy_night') }}"
+      Power Stats: "{{ states('sensor.power_stats') }}"
+      Minimum Power: "{{ state_attr('sensor.power_stats','min_value') }}"
+      Maximum Power: "{{ state_attr('sensor.power_stats','max_value') }}"
+      Cost HRK: "{{ states('sensor.daily_total_energy_cost') }}"
+      #Cost EUR: "{{ states('sensor.daily_total_energy_cost') }}"

@@ -1,0 +1,9 @@
+#####
+# Google Sheets panel
+# https://www.home-assistant.io/integrations/google_sheets/
+#####
+
+gsheets:
+  title: 'Google Sheets'
+  icon: mdi:table
+  url: !secret gsheets_url
