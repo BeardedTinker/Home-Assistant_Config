@@ -1,0 +1,15 @@
+esphome:
+  name: rpi-pico-w
+
+rp2040:
+  board: rpipicow
+  framework:
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+
+logger:
+api: 
+ota:
