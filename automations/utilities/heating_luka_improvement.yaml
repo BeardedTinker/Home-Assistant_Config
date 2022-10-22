@@ -40,4 +40,4 @@ action:
             hvac_mode: 'auto'
     default: []
 
-mode: single
+mode: queued
