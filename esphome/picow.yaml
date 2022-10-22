@@ -1,0 +1,33 @@
+esphome:
+  name: picow
+
+rp2040:
+  board: rpipicow
+  framework:
+    # Required until https://github.com/platformio/platform-raspberrypi/pull/36 is merged
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+#  encryption:
+#    key: "MrPaieKNShqfBTtUO0/z5Ih8SsbGtMULwZBPis1pUP8="
+
+ota:
+  password: "344ef72f693dbc5832f01ea8fb2d758a"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+  manual_ip:
+    static_ip: 192.168.1.40 # Set this to the IP of the ESP
+    gateway: 192.168.1.1 # Set this to the IP address of the router. Often ends with .1
+    subnet: 255.255.252.0 # The subnet of the network. 255.255.255.0 works for most home networks.
+
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "Picow Fallback Hotspot"
+    password: "91fN6kpKHKNE"
+    
