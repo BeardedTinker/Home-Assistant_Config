@@ -7,7 +7,7 @@ platform: powercalc
 create_group: Downstairs lights
 entities:
   - entity_id: sensor.rice_lights_power_2
-  - entity_is: sensor.stairs_power_2
+  - entity_id: sensor.stairs_power_2
   - create_group: Balcony lights PM
     entities:
       - entity_id: light.balcony_light
