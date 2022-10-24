@@ -37,7 +37,6 @@ CONF_MODEL_ID = "model"
 CONF_OPTIMISTIC = "optimistic"
 CONF_POSITION_TEMPLATE = "position_template"
 CONF_POWERED = "powered"
-CONF_PUSH_OFF_DELAY = "push_off_delay"
 CONF_QOS = "qos"
 CONF_SET_POSITION_TEMPLATE = "set_position_template"
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
@@ -362,6 +361,10 @@ SENSOR_FLOOD = "flood"
 SENSOR_GAS = "gas"
 SENSOR_HUMIDITY = "humidity"
 SENSOR_ILLUMINATION = "illumination"
+SENSOR_INPUT_0 = "input 0"
+SENSOR_INPUT_1 = "input 1"
+SENSOR_INPUT_2 = "input 2"
+SENSOR_INPUT_3 = "input 3"
 SENSOR_IP = "ip"
 SENSOR_LAST_RESTART = "last_restart"
 SENSOR_LOADERROR = "loaderror"
@@ -413,6 +416,10 @@ TOPIC_COMMAND_VALVE_POSITION = "~thermostat/0/command/valve_pos"
 TOPIC_ENERGY = "~relay/energy"
 TOPIC_EXT_SWITCH = "~ext_switch/0"
 TOPIC_INFO = "~info"
+TOPIC_INPUT_0 = "~input/0"
+TOPIC_INPUT_1 = "~input/1"
+TOPIC_INPUT_2 = "~input/2"
+TOPIC_INPUT_3 = "~input/3"
 TOPIC_LIGHT_ENERGY = "~light/{light_id}/energy"
 TOPIC_LIGHT_ENERGY_RGBW2_COLOR = "~color/{light_id}/energy"
 TOPIC_LIGHT_ENERGY_RGBW2_WHITE = "~white/{light_id}/energy"
@@ -1164,6 +1171,30 @@ OPTIONS_SENSOR_GAS = {
     KEY_STATE_TOPIC: TOPIC_SENSOR_GAS,
     KEY_VALUE_TEMPLATE: TPL_GAS,
 }
+OPTIONS_SENSOR_INPUT_0 = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_PAYLOAD_OFF: VALUE_0,
+    KEY_PAYLOAD_ON: VALUE_1,
+    KEY_STATE_TOPIC: TOPIC_INPUT_0,
+}
+OPTIONS_SENSOR_INPUT_1 = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_PAYLOAD_OFF: VALUE_0,
+    KEY_PAYLOAD_ON: VALUE_1,
+    KEY_STATE_TOPIC: TOPIC_INPUT_1,
+}
+OPTIONS_SENSOR_INPUT_2 = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_PAYLOAD_OFF: VALUE_0,
+    KEY_PAYLOAD_ON: VALUE_1,
+    KEY_STATE_TOPIC: TOPIC_INPUT_2,
+}
+OPTIONS_SENSOR_INPUT_3 = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_PAYLOAD_OFF: VALUE_0,
+    KEY_PAYLOAD_ON: VALUE_1,
+    KEY_STATE_TOPIC: TOPIC_INPUT_3,
+}
 
 DEVICE_TRIGGERS_MAP = {
     VALUE_BUTTON_DOUBLE_PRESS: "SS",
@@ -1568,10 +1599,10 @@ if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
     binary_sensors = {
         SENSOR_EXT_SWITCH: OPTIONS_SENSOR_EXT_SWITCH,
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
     }
     inputs_types = [VALUE_BUTTON_LONG_PRESS, VALUE_BUTTON_SHORT_PRESS]
     relay_binary_sensors = {
-        "input": {},
         "longpush": {},
         "shortpush": {},
     }
@@ -1596,8 +1627,8 @@ if model_id == MODEL_SHELLY1L_ID or dev_id_prefix == MODEL_SHELLY1L_PREFIX:
 
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        "input 0": {},
-        "input 1": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
         "longpush 0": {},
         "longpush 1": {},
         SENSOR_OVERTEMPERATURE: OPTIONS_SENSOR_OVERTEMPERATURE,
@@ -1633,10 +1664,10 @@ if model_id == MODEL_SHELLY1PM_ID or dev_id_prefix == MODEL_SHELLY1PM_PREFIX:
     relay_sensors = {
         SENSOR_POWER: OPTIONS_SENSOR_RELAY_POWER,
         SENSOR_ENERGY: OPTIONS_SENSOR_RELAY_ENERGY,
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
     }
     relay_binary_sensors = {
         SENSOR_OVERPOWER: OPTIONS_SENSOR_OVERPOWER,
-        "input": {},
         "longpush": {},
         "shortpush": {},
     }
@@ -1665,8 +1696,8 @@ if model_id == MODEL_SHELLYAIR_ID or dev_id_prefix == MODEL_SHELLYAIR_PREFIX:
     relay_sensors = {
         SENSOR_POWER: OPTIONS_SENSOR_RELAY_POWER,
         SENSOR_ENERGY: OPTIONS_SENSOR_RELAY_ENERGY,
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
     }
-    relay_binary_sensors = {"input": {}}
     sensors = {
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
         SENSOR_SSID: OPTIONS_SENSOR_SSID,
@@ -1700,8 +1731,8 @@ if model_id == MODEL_SHELLY2_ID or dev_id_prefix == MODEL_SHELLY2_PREFIX:
     }
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        "input 0": {},
-        "input 1": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
     }
     sensors = {
         SENSOR_ENERGY: OPTIONS_SENSOR_ENERGY,
@@ -1753,8 +1784,8 @@ if model_id == MODEL_SHELLY25_ID or dev_id_prefix == MODEL_SHELLY25_PREFIX:
     }
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        "input 0": {},
-        "input 1": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
         SENSOR_OVERTEMPERATURE: OPTIONS_SENSOR_OVERTEMPERATURE,
     }
     buttons = {
@@ -1773,7 +1804,7 @@ if model_id == MODEL_SHELLYUNI_ID or dev_id_prefix == MODEL_SHELLYUNI_PREFIX:
     inputs_types = [VALUE_BUTTON_LONG_PRESS, VALUE_BUTTON_SHORT_PRESS]
     relay_binary_sensors = {
         SENSOR_OVERPOWER: OPTIONS_SENSOR_OVERPOWER,
-        "input": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
         "longpush": {},
         "shortpush": {},
     }
@@ -1868,11 +1899,14 @@ if model_id == MODEL_SHELLY4PRO_ID or dev_id_prefix == MODEL_SHELLY4PRO_PREFIX:
         SENSOR_POWER: OPTIONS_SENSOR_RELAY_POWER,
         SENSOR_ENERGY: OPTIONS_SENSOR_RELAY_ENERGY,
     }
-    relay_binary_sensors = {
-        SENSOR_OVERPOWER: OPTIONS_SENSOR_OVERPOWER,
-        "input": {},
+    relay_binary_sensors = {SENSOR_OVERPOWER: OPTIONS_SENSOR_OVERPOWER}
+    binary_sensors = {
+        SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
+        SENSOR_INPUT_2: OPTIONS_SENSOR_INPUT_2,
+        SENSOR_INPUT_3: OPTIONS_SENSOR_INPUT_3,
     }
-    binary_sensors = {SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE}
     bin_sensors_entity_categories = [ENTITY_CATEGORY_DIAGNOSTIC]
     bin_sensors_enabled = [True]
     bin_sensors_device_classes = [DEVICE_CLASS_UPDATE]
@@ -1995,7 +2029,7 @@ if (
         SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
     }
     binary_sensors = {
-        "input 0": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
         "shortpush": {},
         "double shortpush": {},
         "triple shortpush": {},
@@ -2120,7 +2154,7 @@ if model_id == MODEL_SHELLYRGBW2_ID or dev_id_prefix == MODEL_SHELLYRGBW2_PREFIX
 
     binary_sensors = {
         SENSOR_FIRMWARE_UPDATE: OPTIONS_SENSOR_FIRMWARE_UPDATE,
-        "input 0": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
         "longpush 0": {},
         "shortpush/0": {},
     }
@@ -2172,8 +2206,8 @@ if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREF
         SENSOR_OVERTEMPERATURE: OPTIONS_SENSOR_OVERTEMPERATURE,
         SENSOR_OVERLOAD: OPTIONS_SENSOR_OVERLOAD,
         SENSOR_LOADERROR: OPTIONS_SENSOR_LOADERROR,
-        "input 0": {},
-        "input 1": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
         "longpush 0": {},
         "longpush 1": {},
         "shortpush/0": {},
@@ -2215,8 +2249,8 @@ if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PR
         SENSOR_OVERTEMPERATURE: OPTIONS_SENSOR_OVERTEMPERATURE,
         SENSOR_OVERLOAD: OPTIONS_SENSOR_OVERLOAD,
         SENSOR_LOADERROR: OPTIONS_SENSOR_LOADERROR,
-        "input 0": {},
-        "input 1": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
         "longpush 0": {},
         "longpush 1": {},
         "shortpush/0": {},
@@ -2378,9 +2412,9 @@ if model_id == MODEL_SHELLYI3_ID or dev_id_prefix == MODEL_SHELLYI3_PREFIX:
         VALUE_BUTTON_LONG_SHORT_PRESS,
     ]
     binary_sensors = {
-        "input 0": {},
-        "input 1": {},
-        "input 2": {},
+        SENSOR_INPUT_0: OPTIONS_SENSOR_INPUT_0,
+        SENSOR_INPUT_1: OPTIONS_SENSOR_INPUT_1,
+        SENSOR_INPUT_2: OPTIONS_SENSOR_INPUT_2,
         "shortpush/0": {},
         "shortpush/1": {},
         "shortpush/2": {},
@@ -2808,9 +2842,6 @@ for relay_id in range(relays):
 
     # relay's binary sensors
     for sensor, sensor_options in relay_binary_sensors.items():
-        push_off_delay = True
-        if isinstance(device_config.get(CONF_PUSH_OFF_DELAY), bool):
-            push_off_delay = device_config.get(CONF_PUSH_OFF_DELAY)
         config_topic = f"{disc_prefix}/binary_sensor/{dev_id}-{make_id(sensor)}-{relay_id}/config".encode(
             "ascii", "ignore"
         ).decode(
@@ -3067,9 +3098,6 @@ for sensor_id in range(ext_humi_sensors):
 
 # binary sensors
 for sensor, sensor_options in binary_sensors.items():
-    push_off_delay = True
-    if isinstance(device_config.get(CONF_PUSH_OFF_DELAY), bool):
-        push_off_delay = device_config.get(CONF_PUSH_OFF_DELAY)
     config_topic = (
         f"{disc_prefix}/binary_sensor/{dev_id}-{make_id(sensor)}/config".encode(
             "ascii", "ignore"
