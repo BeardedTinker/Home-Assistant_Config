@@ -6,8 +6,8 @@
 platform: powercalc
 create_group: Upstairs lights
 entities:
-#  - entity_id: light.a
-#  - entity_id: light.b
+  - entity_id: sensor.stream_desk_power_2
+  - entity_id: sensor.ledge_power_2
   - create_group: Bedroom lights PM
     entities:
       - entity_id: light.bedroom
