@@ -4,7 +4,6 @@ substitutions:
 
 esphome:
   name: ${name}
-  name_add_mac_suffix: true
   project:
     name: esphome.bluetooth-proxy
     version: "1.0"
