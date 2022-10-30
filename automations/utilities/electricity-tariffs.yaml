@@ -8,11 +8,11 @@ id: bbbc9885-74b9-4895-9fca-0ce2c3879bf0
 
 trigger:
 - platform: time
-  at: '07:00:00'
+  at: input_datetime.peak_energy
   variables:
     tariff: "peak"
 - platform: time
-  at: '21:00:00'      
+  at: input_datetime.offpeak_energy
   variables:
     tariff: "offpeak"
 
