@@ -72,6 +72,7 @@ from .const import (
     CONF_CREATE_UTILITY_METERS,
     CONF_CUSTOM_MODEL_DIRECTORY,
     CONF_DAILY_FIXED_ENERGY,
+    CONF_DELAY,
     CONF_DISABLE_STANDBY_POWER,
     CONF_ENERGY_INTEGRATION_METHOD,
     CONF_ENERGY_SENSOR_CATEGORY,
@@ -96,6 +97,7 @@ from .const import (
     CONF_POWER_SENSOR_NAMING,
     CONF_POWER_TEMPLATE,
     CONF_SENSOR_TYPE,
+    CONF_SLEEP_POWER,
     CONF_STANDBY_POWER,
     CONF_TEMPLATE,
     CONF_UTILITY_METER_OFFSET,
@@ -148,7 +150,7 @@ from .strategy.wled import CONFIG_SCHEMA as WLED_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
-SUPPORTED_ENTITY_DOMAINS = (
+SUPPORTED_ENTITY_DOMAINS = [
     light.DOMAIN,
     switch.DOMAIN,
     fan.DOMAIN,
@@ -164,7 +166,7 @@ SUPPORTED_ENTITY_DOMAINS = (
     sensor.DOMAIN,
     vacuum.DOMAIN,
     water_heater.DOMAIN,
-)
+]
 
 MAX_GROUP_NESTING_LEVEL = 5
 
@@ -215,6 +217,12 @@ SENSOR_CONFIG = {
     ),
     vol.Optional(CONF_IGNORE_UNAVAILABLE_STATE): cv.boolean,
     vol.Optional(CONF_CALCULATION_ENABLED_CONDITION): cv.template,
+    vol.Optional(CONF_SLEEP_POWER): vol.Schema(
+        {
+            vol.Required(CONF_POWER): vol.Coerce(float),
+            vol.Required(CONF_DELAY): cv.positive_int,
+        }
+    ),
 }
 
 
@@ -250,7 +258,7 @@ async def async_setup_platform(
     config: ConfigType,
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
-):
+) -> None:
     """Setup sensors from YAML config sensor entries"""
 
     await _async_setup_entities(hass, config, async_add_entities, discovery_info)
@@ -258,7 +266,7 @@ async def async_setup_platform(
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
-):
+) -> None:
     """Setup sensors from config entry (GUI config flow)"""
     sensor_config = convert_config_entry_to_sensor_config(entry)
     sensor_type = entry.data.get(CONF_SENSOR_TYPE)
@@ -289,7 +297,7 @@ async def _async_setup_entities(
     config: dict[str, Any],
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
-):
+) -> None:
     """Main routine to setup power/energy sensors from provided configuration"""
 
     register_entity_services()
@@ -307,7 +315,7 @@ async def _async_setup_entities(
 
 
 @callback
-def register_entity_services():
+def register_entity_services() -> None:
     """Register the different entity services"""
     platform = entity_platform.async_get_current_platform()
     platform.async_register_entity_service(
@@ -323,7 +331,7 @@ def register_entity_services():
     )
 
 
-def convert_config_entry_to_sensor_config(config_entry: ConfigEntry) -> dict[str, Any]:
+def convert_config_entry_to_sensor_config(config_entry: ConfigEntry) -> ConfigType:
     """Convert the config entry structure to the sensor config which we use to create the entities"""
     sensor_config = dict(config_entry.data.copy())
 
@@ -426,14 +434,9 @@ async def create_sensors(
         for entity_config in config[CONF_ENTITIES]:
             # When there are nested entities, combine these with the current entities, recursively
             if CONF_ENTITIES in entity_config or CONF_CREATE_GROUP in entity_config:
-                try:
-                    (child_new_sensors, child_existing_sensors) = await create_sensors(
-                        hass, entity_config, context=context
-                    )
-                except SensorConfigurationError as err:
-                    _LOGGER.error(err)
-                    continue
-
+                (child_new_sensors, child_existing_sensors) = await create_sensors(
+                    hass, entity_config, context=context
+                )
                 new_sensors.extend(child_new_sensors)
                 existing_sensors.extend(child_existing_sensors)
                 continue
@@ -603,7 +606,7 @@ async def check_entity_not_already_configured(
     hass: HomeAssistant,
     used_unique_ids: list[str],
     is_discovered: True,
-):
+) -> None:
     if source_entity.entity_id == DUMMY_ENTITY_ID:
         return
 

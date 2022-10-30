@@ -123,6 +123,9 @@ async def create_group_sensors_from_config_entry(
 
     group_name = entry.data.get(CONF_NAME)
 
+    if CONF_UNIQUE_ID not in sensor_config:
+        sensor_config[CONF_UNIQUE_ID] = entry.entry_id
+
     power_sensor_ids: set[str] = set(
         resolve_entity_ids_recursively(hass, entry, SensorDeviceClass.POWER)
     )
@@ -242,7 +245,7 @@ def create_grouped_power_sensor(
     power_sensor_ids: set[str],
 ) -> GroupedPowerSensor:
     name = generate_power_sensor_name(sensor_config, group_name)
-    unique_id = sensor_config.get(CONF_UNIQUE_ID)
+    unique_id = sensor_config.get(CONF_UNIQUE_ID) or sensor_config.get(group_name)
     entity_id = generate_power_sensor_entity_id(
         hass, sensor_config, name=group_name, unique_id=unique_id
     )
@@ -333,7 +336,7 @@ class GroupedSensor(BaseEntity, RestoreEntity, SensorEntity):
             self._async_hide_members(False)
 
     @callback
-    def _async_hide_members(self, hide: True):
+    def _async_hide_members(self, hide: True) -> None:
         """Hide/unhide group members"""
         registry = er.async_get(self.hass)
         for entity_id in self._entities:
@@ -345,16 +348,32 @@ class GroupedSensor(BaseEntity, RestoreEntity, SensorEntity):
             registry.async_update_entity(entity_id, hidden_by=hidden_by)
 
     @callback
-    def on_state_change(self, event):
+    def on_state_change(self, event) -> None:
         """Triggered when one of the group entities changes state"""
         if self.hass.state != CoreState.running:
             return
 
-        ignored_states = (STATE_UNAVAILABLE, STATE_UNKNOWN)
         all_states = [self.hass.states.get(entity_id) for entity_id in self._entities]
         states: list[State] = list(filter(None, all_states))
+        unavailable_entities = [
+            state.entity_id
+            for state in states
+            if state and state.state == STATE_UNAVAILABLE
+        ]
+        if unavailable_entities and isinstance(self, GroupedEnergySensor):
+            _LOGGER.warning(
+                "%s: One or more members of the group are unavailable, setting group to unavailable (%s)",
+                self.entity_id,
+                ",".join(unavailable_entities),
+            )
+            self._attr_available = False
+            self.async_schedule_update_ha_state(True)
+            return
+
         available_states = [
-            state for state in states if state and state.state not in ignored_states
+            state
+            for state in states
+            if state and state.state not in [STATE_UNKNOWN, STATE_UNAVAILABLE]
         ]
 
         # Remove members with an incompatible unit of measurement for now
@@ -366,7 +385,7 @@ class GroupedSensor(BaseEntity, RestoreEntity, SensorEntity):
             ):  # No unit of measurement, probably sensor has been reset
                 continue
             if unit_of_measurement != self._attr_native_unit_of_measurement:
-                _LOGGER.error(
+                _LOGGER.warning(
                     f"Group member '{state.entity_id}' has another unit of measurement '{unit_of_measurement}' than the group '{self.entity_id}' which has '{self._attr_native_unit_of_measurement}', this is not supported yet. Removing this entity from the total sum."
                 )
                 available_states.remove(state)
@@ -401,7 +420,7 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
     def __init__(
         self,
         name: str,
-        entities: list[str],
+        entities: set[str],
         entity_id: str,
         sensor_config: dict[str, Any],
         unique_id: str | None = None,
