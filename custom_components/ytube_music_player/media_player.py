@@ -1482,6 +1482,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				self._attributes['current_playlist_title'] = str(playlist_info['title'])
 			elif(media_type == MEDIA_TYPE_ALBUM):
 				crash_extra = 'get_album(browseId=' + str(media_id) + ')'
+				if media_id[:7] == "OLAK5uy": #Sharing over Android app sends 'bad' album id. Checking and converting.
+					media_id = await self.hass.async_add_executor_job(self._api.get_album_browse_id, media_id)
 				self._tracks = await self.hass.async_add_executor_job(self._api.get_album, media_id)  # no limit needed
 				self._tracks = self._tracks['tracks'][:self._trackLimit]  # limit function doesn't really work ... seems like
 				for i in range(0, len(self._tracks)):
@@ -1785,8 +1787,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			self._name = self._org_name + " - " + str(self._attributes['likeStatus'])
 			self.log_me('debug', "Showing like status in name until restart")
 		elif(command == SERVICE_CALL_GOTO_TRACK):
-			self.log_me('debug', "Going to Track " + str(parameters) + ".")
-			self._next_track_no = min(max(int(parameters) - 1 - 1, -1), len(self._tracks) - 1)
+			self.log_me('debug', "Going to Track " + str(all_params[0]) + ".")
+			self._next_track_no = min(max(int(all_params[0]) - 1 - 1, -1), len(self._tracks) - 1)
 			prev_shuffle = self._shuffle  # store current shuffle setting
 			self._shuffle = False  # set false, otherwise async_get_track will override next_track
 			await self.async_get_track()
