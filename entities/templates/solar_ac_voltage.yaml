@@ -1,0 +1,16 @@
+#####
+# Converting attribute to sensor
+#
+#####
+
+- sensor: 
+    - name: "Solar AC Voltage"
+      unique_id: 61d9c307-276c-4150-8f45-e733b3e6cc83
+      unit_of_measurement: V
+      state_class: measurement
+      device_class: voltage
+      icon: mdi:solar-power
+      state: "{{ state_attr('switch.smart_inverter', 'voltage')| float }}"
+      attributes:
+        last_reset: "2022-11-05T12:00:00+00:00"
+

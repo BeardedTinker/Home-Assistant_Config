@@ -1,0 +1,16 @@
+#####
+# Converting attribute to sensor
+#
+#####
+
+- sensor: 
+    - name: "Solar AC current"
+      unique_id: c347aba1-1974-4761-b49b-dc78d4dcfeda
+      unit_of_measurement: A
+      state_class: measurement
+      device_class: current
+      icon: mdi:solar-power-variant
+      state: "{{ state_attr('switch.smart_inverter', 'current_consumption')|float / 10 }}" #| replace (',','.') 
+      attributes:
+        last_reset: "2022-11-05T12:00:00+00:00"
+

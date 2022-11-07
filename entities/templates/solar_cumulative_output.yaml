@@ -1,0 +1,16 @@
+#####
+# Converting attribute to sensor
+#
+#####
+
+- sensor:
+    - name: "Solar Cumulative Output"
+      unique_id: fd4a96ae-dc49-4822-b2e7-c53669948406
+      unit_of_measurement: kWh
+      state_class: total_increasing
+      device_class: energy
+      icon: mdi:solar-panel
+      state: "{{ state_attr('switch.smart_inverter', 'current')| float / 100 }}"
+      attributes:
+        last_reset: "2022-11-05T12:00:00+00:00"
+
