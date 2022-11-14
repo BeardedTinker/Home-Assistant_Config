@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 from typing import Optional
 
 import homeassistant.helpers.device_registry as dr
@@ -25,14 +24,16 @@ async def get_power_profile(
     hass: HomeAssistant,
     config: dict,
     entity_entry: Optional[er.RegistryEntry] = None,
+    model_info: Optional[ModelInfo] = None,
 ) -> PowerProfile | None:
+    if not model_info and entity_entry:
+        model_info = await autodiscover_model(hass, entity_entry)
+
     manufacturer = config.get(CONF_MANUFACTURER)
     model = config.get(CONF_MODEL)
-    if (manufacturer is None or model is None) and entity_entry:
-        model_info = await autodiscover_model(hass, entity_entry)
-        if model_info:
-            manufacturer = config.get(CONF_MANUFACTURER) or model_info.manufacturer
-            model = config.get(CONF_MODEL) or model_info.model
+    if (manufacturer is None or model is None) and model_info:
+        manufacturer = config.get(CONF_MANUFACTURER) or model_info.manufacturer
+        model = config.get(CONF_MODEL) or model_info.model
 
     if not manufacturer or not model:
         return None
@@ -63,16 +64,16 @@ async def is_autoconfigurable(
         power_profile = await get_power_profile(hass, sensor_config, entry)
         if not power_profile:
             return False
-        return bool(
-            power_profile and not power_profile.is_additional_configuration_required
-        )
+        if power_profile.has_sub_profiles and power_profile.sub_profile:
+            return True
+        return not power_profile.is_additional_configuration_required
     except ModelNotSupported:
         return False
 
 
 async def autodiscover_model(
     hass: HomeAssistant, entity_entry: er.RegistryEntry
-) -> Optional[ModelInfo]:
+) -> ModelInfo | None:
     """Try to auto discover manufacturer and model from the known device information"""
 
     if not await has_manufacturer_and_model_information(hass, entity_entry):
@@ -85,8 +86,6 @@ async def autodiscover_model(
     device_registry = dr.async_get(hass)
     device_entry = device_registry.async_get(entity_entry.device_id)
     model_id = device_entry.model
-    if match := re.search(r"\(([^\(\)]+)\)$", str(device_entry.model)):
-        model_id = match.group(1)
 
     manufacturer = device_entry.manufacturer
     if MANUFACTURER_ALIASES.get(manufacturer):

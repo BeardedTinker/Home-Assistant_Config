@@ -233,10 +233,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         self.source_entity_id = discovery_info[CONF_ENTITY_ID]
         self.source_entity = discovery_info[DISCOVERY_SOURCE_ENTITY]
-        self.power_profile = discovery_info[DISCOVERY_POWER_PROFILE]
-
         del sensor_config[DISCOVERY_SOURCE_ENTITY]
-        del sensor_config[DISCOVERY_POWER_PROFILE]
+
+        if DISCOVERY_POWER_PROFILE in discovery_info:
+            self.power_profile = discovery_info[DISCOVERY_POWER_PROFILE]
+            del sensor_config[DISCOVERY_POWER_PROFILE]
+
         self.sensor_config.update(sensor_config)
 
         self.context["title_placeholders"] = {
@@ -244,6 +246,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             "manufacturer": self.sensor_config.get(CONF_MANUFACTURER),
             "model": self.sensor_config.get(CONF_MODEL),
         }
+
+        if discovery_info.get(CONF_MODE) == CalculationStrategy.WLED:
+            return await self.async_step_wled()
+
         return await self.async_step_library()
 
     async def async_step_user(self, user_input=None) -> FlowResult:
@@ -393,6 +399,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_MODEL: self.power_profile.model,
                     }
                 )
+                if (
+                    self.power_profile.has_sub_profiles
+                    and not self.power_profile.sub_profile_select
+                ):
+                    return await self.async_step_sub_profile()
+
                 return await self.async_step_power_advanced()
 
             return await self.async_step_manufacturer()
@@ -445,8 +457,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.sensor_config.get(CONF_MODEL),
                 )
             )
-            sub_profiles = profile.get_sub_profiles()
-            if sub_profiles:
+            if profile.has_sub_profiles:
                 return await self.async_step_sub_profile()
             errors = await self.validate_strategy_config()
             if not errors:
@@ -471,9 +482,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Append the sub profile to the model
             model = f"{self.sensor_config.get(CONF_MODEL)}/{user_input.get(CONF_SUB_PROFILE)}"
             self.sensor_config[CONF_MODEL] = model
-            errors = await self.validate_strategy_config()
-            if not errors:
-                return await self.async_step_power_advanced()
+            return await self.async_step_power_advanced()
 
         model_info = ModelInfo(
             self.sensor_config.get(CONF_MANUFACTURER),

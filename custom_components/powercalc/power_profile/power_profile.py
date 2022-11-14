@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from enum import Enum
 from typing import NamedTuple, Protocol
 
@@ -74,6 +75,10 @@ class PowerProfile:
             if alias.lower() == model:
                 return True
 
+        # Also try to match model ID between parentheses.
+        if match := re.search(r"\(([^\(\)]+)\)$", model):
+            return self.supports(match.group(1))
+
         return False
 
     @property
@@ -140,12 +145,6 @@ class PowerProfile:
 
     @property
     def is_additional_configuration_required(self) -> bool:
-        if (
-            self.has_sub_profiles
-            and self.sub_profile is None
-            and self.sub_profile_select is None
-        ):
-            return True
         return self._json_data.get("requires_additional_configuration") or False
 
     @property
