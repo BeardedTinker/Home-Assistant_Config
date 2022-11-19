@@ -1,5 +1,5 @@
 #####
-# Notify Luka when someone is on Minecraft server
+# Notify when someone is on Minecraft server
 #
 #####
 
@@ -15,23 +15,30 @@ condition:
   conditions:
     - condition: state
       entity_id: sensor.skyblock_players_online
+      state: unavailable
+    - condition: state
+      entity_id: sensor.skyblock_players_online
+      state: unknown
+    - condition: state
+      entity_id: sensor.skyblock_players_online
       state: '0'
     - condition: state
       entity_id: input_boolean.audio_notifications
       state: 'off'
 
+
 action:
-- service: script.notify_engine
-  data:
-    who: 'kids'
-    title: '🎮*Someone is playing minecraft*'
-    value1: 'Currently, {{states("sensor.skyblock_players_online")}} player(s) is/are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
-    group: system
-    tag_id: 'information'
-    importance_id: default
-    color: 'green'
-    sticky: 'false'
-    timeout: 300
+#- service: script.notify_engine
+#  data:
+#    who: 'kids'
+#    title: '🎮*Someone is playing minecraft*'
+#    value1: 'Currently, {{states("sensor.skyblock_players_online")}} player(s) is/are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
+#    group: system
+#    tag_id: 'information'
+#    importance_id: default
+#    color: 'green'
+#    sticky: 'false'
+#    timeout: 300
 #- service: media_player.volume_set
 #  target:
 #    entity_id: 
@@ -62,3 +69,8 @@ action:
             message: 'Currently, {{states("sensor.skyblock_players_online")}} players are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
           extra:
             volume: 0.4
+- service: notify.andrej_discord
+  data:
+    target: !secret discord_offtopic_id
+    message: 'YT Channel Members Stoneblock 3 Minecraft server update:, {{states("sensor.skyblock_players_online")}} player(s) are online: {{state_attr("sensor.skyblock_players_online", "players_list")}}'
+        
