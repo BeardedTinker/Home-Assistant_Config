@@ -10,7 +10,6 @@
       state_class: measurement
       device_class: voltage
       icon: mdi:solar-power
-      state: "{{ state_attr('switch.smart_inverter', 'voltage')| float }}"
+      state: "{{ state_attr('switch.smart_inverter', 'voltage')| float(default=0) }}"
       attributes:
         last_reset: "2022-11-05T12:00:00+00:00"
-
