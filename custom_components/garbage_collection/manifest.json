@@ -1,7 +1,7 @@
 {
   "domain": "garbage_collection",
   "name": "Garbage Collection",
-  "version": "4.8.3",
+  "version": "4.9.0",
   "documentation": "https://github.com/bruxy70/Garbage-Collection/",
   "issue_tracker": "https://github.com/bruxy70/Garbage-Collection/issues",
   "iot_class": "calculated",
