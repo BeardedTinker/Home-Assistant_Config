@@ -7,6 +7,7 @@ ATTR_BUTTONS = "buttons"
 ATTR_COVER = "cover"
 ATTR_COVER_SENSORS = "cover_sensors"
 ATTR_COVERS = "covers"
+ATTR_FAN = "fan"
 ATTR_FW_ID = "fw_id"
 ATTR_ID = "id"
 ATTR_INPUT_BINARY_SENSORS = "inputs_binary_sensors"
@@ -61,6 +62,7 @@ KEY_AVAILABILITY = "avty"
 KEY_AVAILABILITY_MODE = "avty_mode"
 KEY_COMMAND_OFF_TEMPLATE = "cmd_off_tpl"
 KEY_COMMAND_ON_TEMPLATE = "cmd_on_tpl"
+KEY_COMMAND_TEMPLATE = "cmd_tpl"
 KEY_COMMAND_TOPIC = "cmd_t"
 KEY_CONFIGURATION_URL = "cu"
 KEY_CONNECTIONS = "cns"
@@ -106,6 +108,7 @@ KEY_STATE_OPENING = "stat_opening"
 KEY_STATE_STOPPED = "stat_stopped"
 KEY_STATE_TEMPLATE = "stat_tpl"
 KEY_STATE_TOPIC = "stat_t"
+KEY_STATE_VALUE_TEMPLATE = "stat_val_tpl"
 KEY_SUBTYPE = "stype"
 KEY_SW_VERSION = "sw"
 KEY_TITLE = "tit"
@@ -990,7 +993,13 @@ def get_consumption_type(consumption_list, relay_id):
     except IndexError:
         return ATTR_SWITCH
 
-    return ATTR_LIGHT if "light" in consumption_type.lower() else ATTR_SWITCH
+    if "light" in consumption_type.lower():
+        return ATTR_LIGHT
+
+    if "fan" in consumption_type.lower():
+        return ATTR_FAN
+
+    return ATTR_SWITCH
 
 
 def mqtt_publish(topic, payload):
@@ -1099,6 +1108,33 @@ def get_light(relay_id, relay_type, profile):
         KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
+        KEY_AVAILABILITY: availability,
+        KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
+        KEY_QOS: qos,
+        KEY_DEVICE: device_info,
+        KEY_DEFAULT_TOPIC: default_topic,
+    }
+    return topic, payload
+
+
+def get_fan(relay_id, relay_type, profile):
+    """Create configuration for Shelly relay as fan entity."""
+    topic = encode_config_topic(f"{disc_prefix}/fan/{device_id}-{relay_id}/config")
+
+    if relay_type != ATTR_FAN or profile == ATTR_COVER:
+        payload = ""
+        return topic, payload
+
+    relay_name = (
+        device_config[f"switch:{relay_id}"][ATTR_NAME]
+        or f"{device_name} Relay {relay_id}"
+    )
+    payload = {
+        KEY_NAME: relay_name,
+        KEY_COMMAND_TOPIC: TOPIC_RPC,
+        KEY_COMMAND_TEMPLATE: f"{{%if value==^ON^%}}{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}{{%else%}}{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}{{%endif%}}",
+        KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
+        KEY_STATE_VALUE_TEMPLATE: "{%if value_json.output%}ON{%else%}OFF{%endif%}",
         KEY_AVAILABILITY: availability,
         KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
         KEY_QOS: qos,
@@ -1382,6 +1418,9 @@ def configure_device():
         config[topic] = payload
 
         topic, payload = get_light(relay_id, relay_type, profile)
+        config[topic] = payload
+
+        topic, payload = get_fan(relay_id, relay_type, profile)
         config[topic] = payload
 
         for sensor, description in relay_sensors.items():
