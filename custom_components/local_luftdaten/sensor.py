@@ -10,21 +10,38 @@ https://github.com/lichtteil/local_luftdaten/
 
 import logging
 import asyncio
+from typing import Optional
 import aiohttp
 import async_timeout
 import datetime
 
 import json
 
-import requests
+from .const import (
+    DEFAULT_NAME,
+    DEFAULT_RESOURCE,
+    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_VERIFY_SSL,
+    SENSOR_DESCRIPTIONS
+)
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+    CONF_RESOURCE,
+    CONF_SCAN_INTERVAL,
+    CONF_VERIFY_SSL
+)
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorDeviceClass,
+    SensorEntity
+)
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
-
-from .const import *
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,7 +50,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST): cv.string,
     vol.Required(CONF_MONITORED_CONDITIONS):
-        vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
+        vol.All(cv.ensure_list, [vol.In(SENSOR_DESCRIPTIONS)]),
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_RESOURCE, default=DEFAULT_RESOURCE): cv.string,
     vol.Optional(CONF_VERIFY_SSL, default=DEFAULT_VERIFY_SSL): cv.boolean,
@@ -58,71 +75,67 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     devices = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
-        devices.append(LuftdatenSensor(rest_client, name, variable))
+        devices.append(
+            LuftdatenSensor(rest_client, name, SENSOR_DESCRIPTIONS[variable]))
 
     async_add_entities(devices, True)
 
 
-class LuftdatenSensor(Entity):
+class LuftdatenSensor(SensorEntity):
     """Implementation of a LuftdatenSensor sensor."""
 
-    def __init__(self, rest_client, name, sensor_type):
+    _name: str
+    _native_value: Optional[any]
+    _rest_client: "LuftdatenClient"
+
+    def __init__(self, rest_client, name, description):
         """Initialize the LuftdatenSensor sensor."""
-        self.rest_client = rest_client
+        self._rest_client = rest_client
         self._name = name
-        self._state = None
-        self.sensor_type = sensor_type
-        self._unit_of_measurement = SENSOR_TYPES[sensor_type][1]
-        self._device_class = SENSOR_TYPES[sensor_type][2]
-        self._unique_id = '{}-{}'.format(self._name, self.sensor_type)
+        self._native_value = None
+
+        self.entity_description = description
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return '{}-{}'.format(self._name, self.entity_description.key)
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return '{} {}'.format(self._name, SENSOR_TYPES[self.sensor_type][0])
+        return '{} {}'.format(self._name, self.entity_description.name)
 
     @property
-    def state(self):
-        """Return the state of the device."""
-        return self._state
-
-    @property
-    def unit_of_measurement(self):
-        """Return the unit of measurement of this entity, if any."""
-        return self._unit_of_measurement
-
-    @property
-    def device_class(self):
-        """Return the device class of this entity, if any."""
-        return self._device_class
+    def native_value(self):
+        """Return the value reported by the sensor."""
+        return self._native_value
 
     @property
     def icon(self):
-        """Icon of the sensor, if class is None."""
-        if SENSOR_TYPES[self.sensor_type][0] == "PM2.5":
+        """Return the icon to use in the frontend, if any."""
+        if self.device_class in [SensorDeviceClass.PM1, SensorDeviceClass.PM25]:
             return 'mdi:thought-bubble-outline'
-        elif SENSOR_TYPES[self.sensor_type][0] == "PM10":
+        elif self.device_class == SensorDeviceClass.PM10:
             return 'mdi:thought-bubble'
-        elif SENSOR_TYPES[self.sensor_type][2] == None:
-            return 'mdi:cloud-search-outline'
 
-    @property
-    def unique_id(self):
-        return self._unique_id
+        return None
 
     async def async_update(self):
         """Get the latest data from REST API and update the state."""
         try:
-            await self.rest_client.async_update()
+            await self._rest_client.async_update()
         except LuftdatenError:
             return
-        parsed_json = self.rest_client.data
+        parsed_json = self._rest_client.data
 
-        if parsed_json != None:
-            sensordata_values = parsed_json['sensordatavalues']
-            for sensordata_value in sensordata_values:
-                if sensordata_value['value_type'] == self.sensor_type:
-                    self._state = sensordata_value['value']
+        if parsed_json is None:
+            return
+
+        sensordata_values = parsed_json['sensordatavalues']
+        for sensordata_value in sensordata_values:
+            if sensordata_value['value_type'] == self.entity_description.key:
+                self._native_value = sensordata_value['value']
 
 
 class LuftdatenError(Exception):
@@ -153,7 +166,7 @@ class LuftdatenClient(object):
                     return
 
             # Handle calltime differences: substract 5 second from current time
-            self.lastUpdate = datetime.datetime.now() - timedelta(seconds=5)
+            self.lastUpdate = datetime.datetime.now() - datetime.timedelta(seconds=5)
 
             # Query local device
             responseData = None
