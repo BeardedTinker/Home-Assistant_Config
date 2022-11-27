@@ -2,7 +2,7 @@
   "domain": "uptime_kuma",
   "name": "Uptime Kuma",
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/uptime_kuma",
+  "documentation": "https://github.com/meichthys/uptime_kuma/blob/main/README.md",
   "issue_tracker": "https://github.com/meichthys/uptime_kuma/issues",
   "requirements": ["pyuptimekuma==0.0.6"],
   "ssdp": [],
@@ -12,5 +12,5 @@
   "codeowners": ["@meichthys", "@jayakornk"],
   "iot_class": "cloud_polling",
   "loggers": ["pyuptimekuma"],
-  "version": "1.2.1"
+  "version": "2.0.2"
 }
