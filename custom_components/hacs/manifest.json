@@ -1,0 +1,23 @@
+{
+    "codeowners": [
+        "@ludeeus"
+    ],
+    "config_flow": true,
+    "dependencies": [
+        "http",
+        "websocket_api",
+        "frontend",
+        "persistent_notification",
+        "lovelace",
+        "repairs"
+    ],
+    "documentation": "https://hacs.xyz/docs/configuration/start",
+    "domain": "hacs",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/hacs/integration/issues",
+    "name": "HACS",
+    "requirements": [
+        "aiogithubapi>=22.2.4"
+    ],
+    "version": "1.28.4"
+}

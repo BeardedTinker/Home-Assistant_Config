@@ -1,0 +1,76 @@
+# Descriptions for Music Assistant custom services
+
+queue_command:
+  name: Queue command
+  description: "Send a command directly to a Music Assistant player(queue), bypassing the need for a Music Assistant generated player. You may provide the origin media_player as well as the (optional) media_player entity created by MA itself. Note: Only use this special service for advanced purposes. Usually you can just the builtin HA services."
+  target:
+    entity:
+      domain: media_player
+  fields:
+    
+    command:
+      name: Command
+      description: The command to issue on the player(queue).
+      required: true
+      advanced: false
+      example: "play"
+      selector:
+        select:
+          options:
+            - play
+            - pause
+            - next
+            - previous
+            - stop
+            - clear
+            - play_media
+            - shuffle_on
+            - shuffle_off
+            - repeat
+            - snapshot_create
+            - snapshot_restore
+            - play_announcement
+
+    uri:
+      name: Media item to play
+      description: To be used together with play_media command, the uri to play on the queue.
+      required: false
+      advanced: false
+      example: "spotify://playlist/aabbccddeeff"
+      selector:
+        text:
+
+    enqueue_mode:
+      name: Enqueue mode.
+      description: "Only to be used with play_media command: Select Enqueue mode."
+      required: false
+      advanced: true
+      default: "play"
+      selector:
+        select:
+          options:
+            - "play"
+            - "replace"
+            - "next"
+            - "replace_next"
+            - "add"
+
+    repeat_mode:
+      name: Repeat mode.
+      description: "Only to be used with repeat command: Select repeat mode."
+      required: false
+      advanced: true
+      selector:
+        select:
+          options:
+            - "one"
+            - "all"
+            - "off"
+    
+    radio_mode:
+      name: Enable radio mode.
+      description: "Only to be used with play_media command: Wether to enable radio mode."
+      required: false
+      advanced: true
+      selector:
+        boolean:
