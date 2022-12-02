@@ -7,7 +7,6 @@ import time
 from homeassistant.components.geo_location import GeolocationEvent
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
-    CONF_UNIT_SYSTEM_IMPERIAL,
     LENGTH_KILOMETERS,
     LENGTH_MILES,
 )
@@ -17,6 +16,7 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 from homeassistant.util.dt import utc_from_timestamp
+from homeassistant.util.unit_system import IMPERIAL_SYSTEM
 
 from .const import ATTR_EXTERNAL_ID, ATTR_PUBLICATION_DATE, ATTRIBUTION, DOMAIN
 
@@ -97,7 +97,7 @@ class BlitzortungEventManager:
         self._strikes = Strikes(max_tracked_lightnings)
         self._window_seconds = window_seconds
 
-        if hass.config.units.name == CONF_UNIT_SYSTEM_IMPERIAL:
+        if hass.config.units == IMPERIAL_SYSTEM:
             self._unit = LENGTH_MILES
         else:
             self._unit = LENGTH_KILOMETERS
