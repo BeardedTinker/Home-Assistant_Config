@@ -1,0 +1,6 @@
+#####
+# Shell script to create and mount /music folder out of Synology NAS (SAMBA)
+#
+#####
+
+  mount_music_folder: !secret mount_music

@@ -1,0 +1,19 @@
+#####
+# Automation to trigger Synology NAS Samba mount for Music
+#
+#####
+
+alias: Mount Synology Music Folder
+id: 3b6c7f69-7406-4531-9493-f08e2de71630
+
+description: Mounts Samba share for use with Music Assistant 
+
+trigger:
+- platform: homeassistant
+  event: start
+
+condition: []
+
+action:
+- service: shell_command.mount_music_folder
+  data: {}
