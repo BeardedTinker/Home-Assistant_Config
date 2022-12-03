@@ -104,17 +104,19 @@ From other devices that I use, here is a list:
   + [SwichBot Curtain Rod 2]()
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
-  + Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)
+  + --Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)--
   + Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   + Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
   + Amazon Echo 3rd Gen
   + Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
   + LG webOS TV
-  + Xiaomi Mi TV stick
+  + --Xiaomi Mi TV stick--
+  + Chromacst with [Google TV]() stick 
 
 ##### HEATING
   + tado° [Smart Thermostat](https://www.tado.com/hr/)
   + tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
+  + tado° [Smart AC+ controller]()
   
 ##### CAMERAS
   + [Reolink RLC-811A 8MP PoE camera](https://bit.ly/3xu9sBx )
@@ -179,6 +181,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - AccuWeather
   - AirVisual
   - Alexa Media Player
+  - Android TV
   - Anniversaries
   - Blitzortung (HACS)
   - Certificate Expiry
@@ -193,24 +196,31 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Generic camera
   - GitHub
   - GDACS
+  - Google Assistant
   - Google Calendar
   - Google Cast
+  - Google Sheets
   - HACS
   - Home Assistant Supervisor
+  - HomeKit controller
+  - iBeacon
   - International Space Station
   - Internet Printing Protocol
   - Launch library
   - LG TV
+  - Local Tuya
   - Mikrotik
   - Minecraft Server
   - MJPEG IP Camera
   - Mobile App
   - Moon
   - MQTT
+  - Music Assistant
   - Network UPS Tool
   - Nuki
   - ONVIF
   - OpenUV
+  - PowerCalc
   - Radio Browser
   - Reolink
   - Season
@@ -220,16 +230,20 @@ Following is a list of active Integrations that are visible at Configuration->In
   - SpaceX
   - SpeedTest
   - Sun
+  - SwitchBot
   - Synology DSM
   - Tado
   - Tile
+  - Tuya
   - Ubiquity UniFi
   - Uptime
   - Version
   - Watchan
   - Withings
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
+  - Xiaomi BLE
   - Xiaomi Miio
+  - yTubeMusic
 
 
 ## Folder and files
@@ -245,35 +259,35 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   180 |
-| Binary sensors       |   286 |
+| Automations          |   184 |
+| Binary sensors       |   290 |
 | Cameras              |    14 |
-| Climates             |     4 |
+| Climates             |    11 |
 | Counters             |     4 |
-| Device trackers      |    58 |
-| Entities             |  2706 |
+| Device trackers      |   120 |
+| Entities             |  3018 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    19 |
-| Input Date/Time      |    27 |
+| Input Date/Time      |    29 |
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
 | Lights               |    43 |
-| Lines of code (YAML) | 30802 |
+| Lines of code (YAML) | 31603 |
 | Locks                |     2 |
-| Media players        |    20 |
+| Media players        |    25 |
 | Persons              |     6 |
 | Plants               |     8 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  1647 |
-| Switches             |   117 |
+| Sensors              |  1828 |
+| Switches             |   126 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 04.05.2022 10:30 PM
+* Updated: 03.12.2022 9:20 PM
 
 ### Missing files
 
