@@ -54,7 +54,7 @@
           - artwork: cover
             icon: mdi:cast
             type: custom:mini-media-player
-            entity: media_player.living_room_tv
+            entity: media_player.google_tv
           - type: custom:mini-media-player
             entity: media_player.loft_tv
         type: vertical-stack
