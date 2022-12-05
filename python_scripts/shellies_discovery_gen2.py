@@ -14,6 +14,7 @@ ATTR_INPUT_BINARY_SENSORS = "inputs_binary_sensors"
 ATTR_INPUT_EVENTS = "input_events"
 ATTR_INPUTS = "inputs"
 ATTR_LIGHT = "light"
+ATTR_LIGHTS = "lights"
 ATTR_MAC = "mac"
 ATTR_MANUFACTURER = "Allterco Robotics"
 ATTR_MIN_FIRMWARE_DATE = "min_firmware_date"
@@ -60,6 +61,7 @@ EVENT_SINGLE_PUSH = "single_push"
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY = "avty"
 KEY_AVAILABILITY_MODE = "avty_mode"
+KEY_BRIGHTNESS_TEMPLATE = "bri_tpl"
 KEY_COMMAND_OFF_TEMPLATE = "cmd_off_tpl"
 KEY_COMMAND_ON_TEMPLATE = "cmd_on_tpl"
 KEY_COMMAND_TEMPLATE = "cmd_tpl"
@@ -124,6 +126,7 @@ MODEL_PLUS_2PM = "shellyplus2pm"
 MODEL_PLUS_HT = "shellyplusht"
 MODEL_PLUS_I4 = "shellyplusi4"
 MODEL_PLUS_PLUG_US = "shellyplugus"
+MODEL_PLUS_WALL_DIMMER = "shellypluswdus"
 MODEL_PRO_1 = "shellypro1"
 MODEL_PRO_1PM = "shellypro1pm"
 MODEL_PRO_2 = "shellypro2"
@@ -184,6 +187,7 @@ STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 TOPIC_COVER = "~status/cover:{cover}"
 TOPIC_HUMIDITY = "~status/humidity:0"
 TOPIC_INPUT = "~status/input:{relay}"
+TOPIC_LIGHT = "~status/light:{light}"
 TOPIC_ONLINE = "~online"
 TOPIC_RPC = "~rpc"
 TOPIC_STATUS_CLOUD = "~status/cloud"
@@ -763,6 +767,24 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20220211,
     },
+    MODEL_PLUS_WALL_DIMMER: {
+        ATTR_NAME: "Shelly Plus Wall Dimmer",
+        ATTR_MODEL_ID: "SNDM-0013US",
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_LIGHTS: 1,
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20221024,
+    },
     MODEL_PRO_1: {
         ATTR_NAME: "Shelly Pro 1",
         ATTR_MODEL_ID: "SPSW-001XE16EU",
@@ -794,7 +816,7 @@ SUPPORTED_MODELS = {
     },
     MODEL_PRO_1PM: {
         ATTR_NAME: "Shelly Pro 1PM",
-        ATTR_MODEL_ID: "SPSW-001PE16EU",
+        ATTR_MODEL_ID: "SPSW-x01PE16EU",
         ATTR_BINARY_SENSORS: {
             SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
             SENSOR_FIRMWARE: {},
@@ -835,7 +857,7 @@ SUPPORTED_MODELS = {
     },
     MODEL_PRO_2: {
         ATTR_NAME: "Shelly Pro 2",
-        ATTR_MODEL_ID: "SPSW-002XE16EU",
+        ATTR_MODEL_ID: "SPSW-x02XE16EU",
         ATTR_BINARY_SENSORS: {
             SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
             SENSOR_FIRMWARE: {},
@@ -864,7 +886,7 @@ SUPPORTED_MODELS = {
     },
     MODEL_PRO_2PM: {
         ATTR_NAME: "Shelly Pro 2PM",
-        ATTR_MODEL_ID: "SPSW-002PE16EU",
+        ATTR_MODEL_ID: "SPSW-x02PE16EU",
         ATTR_BINARY_SENSORS: {
             SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
             SENSOR_FIRMWARE: {},
@@ -944,7 +966,7 @@ SUPPORTED_MODELS = {
     },
     MODEL_PRO_4PM: {
         ATTR_NAME: "Shelly Pro 4PM",
-        ATTR_MODEL_ID: "SPSW-004PE16EU",
+        ATTR_MODEL_ID: "SPSW-x04PE16EU",
         ATTR_BINARY_SENSORS: {
             SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
             SENSOR_FIRMWARE: {},
@@ -1088,7 +1110,7 @@ def get_switch(relay_id, relay_type, profile):
     return topic, payload
 
 
-def get_light(relay_id, relay_type, profile):
+def get_relay_light(relay_id, relay_type, profile):
     """Create configuration for Shelly relay as light entity."""
     topic = encode_config_topic(f"{disc_prefix}/light/{device_id}-{relay_id}/config")
 
@@ -1117,7 +1139,7 @@ def get_light(relay_id, relay_type, profile):
     return topic, payload
 
 
-def get_fan(relay_id, relay_type, profile):
+def get_relay_fan(relay_id, relay_type, profile):
     """Create configuration for Shelly relay as fan entity."""
     topic = encode_config_topic(f"{disc_prefix}/fan/{device_id}-{relay_id}/config")
 
@@ -1137,6 +1159,32 @@ def get_fan(relay_id, relay_type, profile):
         KEY_STATE_VALUE_TEMPLATE: "{%if value_json.output%}ON{%else%}OFF{%endif%}",
         KEY_AVAILABILITY: availability,
         KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
+        KEY_QOS: qos,
+        KEY_DEVICE: device_info,
+        KEY_DEFAULT_TOPIC: default_topic,
+    }
+    return topic, payload
+
+
+def get_light(light_id):
+    """Create configuration for Shelly light entity."""
+    topic = encode_config_topic(f"{disc_prefix}/light/{device_id}-{light_id}/config")
+
+    light_name = (
+        device_config[f"light:{light_id}"][ATTR_NAME]
+        or f"{device_name} Light {light_id}"
+    )
+    payload = {
+        KEY_SCHEMA: "template",
+        KEY_NAME: light_name,
+        KEY_COMMAND_TOPIC: TOPIC_RPC,
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:false}}}}",
+        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:true{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}}}}}",
+        KEY_STATE_TOPIC: TOPIC_LIGHT.format(light=light_id),
+        KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
+        KEY_BRIGHTNESS_TEMPLATE: "{{value_json.brightness|float|multiply(2.55)|round}}",
+        KEY_AVAILABILITY: availability,
+        KEY_UNIQUE_ID: f"{device_id}-{light_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
         KEY_DEFAULT_TOPIC: default_topic,
@@ -1407,6 +1455,10 @@ def configure_device():
             )
             config[topic] = payload
 
+    for light_id in range(lights):
+        topic, payload = get_light(light_id)
+        config[topic] = payload
+
     for relay_id in range(relays):
         consumption_types = [
             item.lower()
@@ -1417,10 +1469,10 @@ def configure_device():
         topic, payload = get_switch(relay_id, relay_type, profile)
         config[topic] = payload
 
-        topic, payload = get_light(relay_id, relay_type, profile)
+        topic, payload = get_relay_light(relay_id, relay_type, profile)
         config[topic] = payload
 
-        topic, payload = get_fan(relay_id, relay_type, profile)
+        topic, payload = get_relay_fan(relay_id, relay_type, profile)
         config[topic] = payload
 
         for sensor, description in relay_sensors.items():
@@ -1595,7 +1647,7 @@ if mac is None:
     raise ValueError("mac value None is not valid, check script configuration")
 
 device_name = device_config["sys"]["device"][ATTR_NAME]
-device_url = f"http://{device_config['mqtt']['topic_prefix']}.local/"
+device_url = f"http://{device_id}.local/"
 default_topic = f"{device_config['mqtt']['topic_prefix']}/"
 wakeup_period = device_config["sys"].get("sleep", {}).get("wakeup_period", 0)
 
@@ -1642,6 +1694,8 @@ input_binary_sensors = SUPPORTED_MODELS[model].get(ATTR_INPUT_BINARY_SENSORS, {}
 relays = SUPPORTED_MODELS[model].get(ATTR_RELAYS, 0)
 relay_sensors = SUPPORTED_MODELS[model].get(ATTR_RELAY_SENSORS, {})
 relay_binary_sensors = SUPPORTED_MODELS[model].get(ATTR_RELAY_BINARY_SENSORS, {})
+
+lights = SUPPORTED_MODELS[model].get(ATTR_LIGHTS, 0)
 
 buttons = SUPPORTED_MODELS[model].get(ATTR_BUTTONS, {})
 sensors = SUPPORTED_MODELS[model].get(ATTR_SENSORS, {})
