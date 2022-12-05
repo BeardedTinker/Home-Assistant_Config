@@ -18,12 +18,12 @@
 
 substitutions:
   devicename: "schefflera_arboricola"
-  upper_devicename: Schefflera Arboricola
+  upper_devicename: "Schefflera Arboricola"
   awake_duration: 7s      # set how long to stay awake - NOT less then 10sec
   sleep_duration: 90min    # set how long to sleep in minutes
   update_interval: 5s
   fixed_ip: 192.168.2.50
-  max_voltage: 3.46439
+  max_voltage: 3,46439
 #############################################
 ##### Nothing to change after this line #####
 ##### Except for calibration data if    #####

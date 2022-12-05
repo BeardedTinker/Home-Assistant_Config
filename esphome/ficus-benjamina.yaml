@@ -23,21 +23,14 @@ substitutions:
   sleep_duration: 90min    # set how long to sleep in minutes
   update_interval: 5s
   fixed_ip: 192.168.2.51
+  calibration_zero_perc_voltage: "2.834"
+  calibration_hundread_perc_voltage: "1.410"
 
 #############################################
 ##### Nothing to change after this line #####
 ##### Except for calibration data if    #####
 ##### want to do it!                    #####
 #############################################
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_key
-  manual_ip:
-    static_ip: ${fixed_ip}
-    gateway: 192.168.1.1
-    subnet: 255.255.252.0
-#  fast_connect: enable
 
 esphome:
   name: "${devicename}"
@@ -46,6 +39,15 @@ esphome:
   on_boot:
     then:
       - script.execute: consider_deep_sleep
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+  fast_connect: enable
+  manual_ip:
+    static_ip: ${fixed_ip}
+    gateway: 192.168.1.1
+    subnet: 255.255.252.0
 
 ota:
   on_end:
@@ -58,13 +60,18 @@ ota:
 
 api:
 
-mqtt:
-  broker: !secret mqtt_ip
-  username: !secret mqtt_user
-  password: !secret mqtt_password
-  discovery: true
+#mqtt:
+#  broker: !secret mqtt_ip
+#  username: !secret mqtt_user
+#  password: !secret mqtt_password
+#  discovery: true
 
 logger:
+
+# Deep sleep section
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: ${sleep_duration}
 
 i2c:
   - id: bus_a
@@ -72,7 +79,12 @@ i2c:
     scl: 26
     scan: true
     setup_priority: -200
-  
+  - id: bus_b
+    sda: 21
+    scl: 22
+    scan: true
+    setup_priority: -200
+
 # Power switch
 switch:
   - platform: gpio
@@ -89,6 +101,11 @@ binary_sensor:
     id: ${devicename}_prevent_deep_sleep
     name: 'Prevent sensor Deep Sleep'
     entity_id: input_boolean.${devicename}_prevent_deep_sleep
+  - platform: gpio
+    name: "${upper_devicename} Wake Button"
+    pin: 35
+    internal: true
+    setup_priority: 1000
 
 sensor:
 
@@ -127,10 +144,14 @@ sensor:
     attenuation: 11db
     unit_of_measurement: '%'
     filters:
+      - calibrate_linear:             # comment for raw data
+      # Map 0.0 (from sensor) to 0.0 (true value)
+        - ${calibration_zero_perc_voltage} -> 0.0                 # comment for raw data
+        - ${calibration_hundread_perc_voltage} -> 100.0             
       # 1.410v = in water
       # 2.834v = dry
-      lambda: |-
-        return (2.834 - x) * 100.0 / (2.834 - 1.410);
+#      lambda: |-
+#        return (2.834 - x) * 100.0 / (2.834 - 1.410);
     update_interval: ${update_interval}
     
 # Lux sensor
@@ -162,18 +183,20 @@ sensor:
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery"
-    attenuation: 6db
+    attenuation: 11db
     unit_of_measurement: "V"
     icon: "mdi:battery-high"
     device_class: "voltage"
     state_class: "measurement"
     accuracy_decimals: 3
     filters:
+      - multiply: 2
 #      # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
           - 0.0 -> 0.0
-          - 2.06 -> 1.89
-      - lambda: return x * 2.0;
+#          - 2.06 -> 1.89
+          - 4.00 -> 4.00
+#      - lambda: return x * 2.0;
     id: ${devicename}_voltage
     update_interval: ${update_interval}
 
@@ -183,17 +206,17 @@ sensor:
     name: "${upper_devicename} Battery %"
     unit_of_measurement: '%'
     filters:
-      - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) / 0.66402 * 100);  
+      - multiply: 2
+      - calibrate_linear:
+        # Map 0.0 (from sensor) to 0.0 (true value)
+        - 3.18 -> 0.0
+        - 4.20 -> 100.0
+#      - lambda: |-
+#          return ((id(${devicename}_voltage).state - 2.76) / 0.66402 * 100);  
     # 2.76v = minimum
     # 3.42402v = maximum       
     # (current - minimum) * 100 / difference between max & mix 
     update_interval: ${update_interval}
-
-# Deep sleep section
-deep_sleep:
-  id: deep_sleep_control
-  sleep_duration: ${sleep_duration}
 
 # Script section
 script:
