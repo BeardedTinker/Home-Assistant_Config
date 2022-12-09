@@ -1,5 +1,5 @@
 """Define constants used in garbage_collection."""
-
+from homeassistant.helpers import selector
 
 # Constants for garbage_collection.
 # Base component constants
@@ -67,15 +67,15 @@ STATE_TODAY = "today"
 STATE_TOMORROW = "tomorrow"
 
 FREQUENCY_OPTIONS = [
-    "weekly",
-    "even-weeks",
-    "odd-weeks",
-    "every-n-weeks",
-    "every-n-days",
-    "monthly",
-    "annual",
-    "blank",
-    "group",
+    selector.SelectOptionDict(value="weekly", label="weekly"),
+    selector.SelectOptionDict(value="even-weeks", label="even-weeks"),
+    selector.SelectOptionDict(value="odd-weeks", label="odd-weeks"),
+    selector.SelectOptionDict(value="every-n-weeks", label="every-n-weeks"),
+    selector.SelectOptionDict(value="every-n-days", label="every-n-days"),
+    selector.SelectOptionDict(value="monthly", label="monthly"),
+    selector.SelectOptionDict(value="annual", label="annual"),
+    selector.SelectOptionDict(value="blank", label="blank"),
+    selector.SelectOptionDict(value="group", label="group"),
 ]
 
 WEEKLY_FREQUENCY = ["weekly", "even-weeks", "odd-weeks"]
@@ -106,17 +106,36 @@ ANNUAL_FREQUENCY = ["annual"]
 GROUP_FREQUENCY = ["group"]
 BLANK_FREQUENCY = ["blank"]
 
+WEEKDAY_OPTIONS = [
+    selector.SelectOptionDict(value="mon", label="Monday"),
+    selector.SelectOptionDict(value="tue", label="Tuesday"),
+    selector.SelectOptionDict(value="wed", label="Wednesday"),
+    selector.SelectOptionDict(value="thu", label="Thursday"),
+    selector.SelectOptionDict(value="fri", label="Friday"),
+    selector.SelectOptionDict(value="sat", label="Saturday"),
+    selector.SelectOptionDict(value="sun", label="Sunday"),
+]
+
+
 MONTH_OPTIONS = [
-    "jan",
-    "feb",
-    "mar",
-    "apr",
-    "may",
-    "jun",
-    "jul",
-    "aug",
-    "sep",
-    "oct",
-    "nov",
-    "dec",
+    selector.SelectOptionDict(value="jan", label="January"),
+    selector.SelectOptionDict(value="feb", label="February"),
+    selector.SelectOptionDict(value="mar", label="March"),
+    selector.SelectOptionDict(value="apr", label="April"),
+    selector.SelectOptionDict(value="may", label="May"),
+    selector.SelectOptionDict(value="jun", label="June"),
+    selector.SelectOptionDict(value="jul", label="July"),
+    selector.SelectOptionDict(value="aug", label="August"),
+    selector.SelectOptionDict(value="sep", label="September"),
+    selector.SelectOptionDict(value="oct", label="October"),
+    selector.SelectOptionDict(value="nov", label="November"),
+    selector.SelectOptionDict(value="dec", label="December"),
+]
+
+ORDER_OPTIONS = [
+    selector.SelectOptionDict(value="1", label="1st"),
+    selector.SelectOptionDict(value="2", label="2nd"),
+    selector.SelectOptionDict(value="3", label="3rd"),
+    selector.SelectOptionDict(value="4", label="4th"),
+    selector.SelectOptionDict(value="5", label="5th"),
 ]

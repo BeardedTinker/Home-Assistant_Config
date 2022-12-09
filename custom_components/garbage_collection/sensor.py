@@ -476,7 +476,7 @@ class GarbageCollection(RestoreEntity):
         else:
             self._days = None
             self._attr_state = None
-            self._attr_icon = None
+            self._attr_icon = self._icon_normal
 
 
 class WeeklyCollection(GarbageCollection):
