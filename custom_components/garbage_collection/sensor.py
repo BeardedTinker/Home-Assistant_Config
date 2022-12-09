@@ -96,16 +96,13 @@ class GarbageCollection(RestoreEntity):
         self._hidden = config.get(ATTR_HIDDEN, False)
         self._manual = config.get(const.CONF_MANUAL)
         first_month = config.get(const.CONF_FIRST_MONTH, const.DEFAULT_FIRST_MONTH)
+        months = [m["value"] for m in const.MONTH_OPTIONS]
         self._first_month: int = (
-            const.MONTH_OPTIONS.index(first_month) + 1
-            if first_month in const.MONTH_OPTIONS
-            else 1
+            months.index(first_month) + 1 if first_month in months else 1
         )
         last_month = config.get(const.CONF_LAST_MONTH, const.DEFAULT_LAST_MONTH)
         self._last_month: int = (
-            const.MONTH_OPTIONS.index(last_month) + 1
-            if last_month in const.MONTH_OPTIONS
-            else 12
+            months.index(last_month) + 1 if last_month in months else 12
         )
         self._verbose_state = config.get(const.CONF_VERBOSE_STATE)
         self._icon_normal = config.get(const.CONF_ICON_NORMAL)
@@ -322,19 +319,20 @@ class GarbageCollection(RestoreEntity):
         if not self.date_inside(day):
             year = day.year
             month = day.month
+            months = [m["label"] for m in const.MONTH_OPTIONS]
             if self._first_month <= self._last_month < month:
                 _LOGGER.debug(
                     "(%s) %s outside the range, lookig from %s next year",
                     self._attr_name,
                     day,
-                    const.MONTH_OPTIONS[self._first_month - 1],
+                    months[self._first_month - 1],
                 )
                 return date(year + 1, self._first_month, 1)
             _LOGGER.debug(
                 "(%s) %s outside the range, searching from %s",
                 self._attr_name,
                 day,
-                const.MONTH_OPTIONS[self._first_month - 1],
+                months[self._first_month - 1],
             )
             return date(year, self._first_month, 1)
         return day

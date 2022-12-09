@@ -22,9 +22,12 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
 _LOGGER = logging.getLogger(__name__)
 
+months = [m["value"] for m in const.MONTH_OPTIONS]
+frequencies = [f["value"] for f in const.FREQUENCY_OPTIONS]
+
 SENSOR_SCHEMA = vol.Schema(
     {
-        vol.Required(const.CONF_FREQUENCY): vol.In(const.FREQUENCY_OPTIONS),
+        vol.Required(const.CONF_FREQUENCY): vol.In(frequencies),
         vol.Optional(const.CONF_ICON_NORMAL): cv.icon,
         vol.Optional(const.CONF_ICON_TODAY): cv.icon,
         vol.Optional(const.CONF_ICON_TOMORROW): cv.icon,
@@ -37,8 +40,8 @@ SENSOR_SCHEMA = vol.Schema(
         vol.Optional(const.CONF_COLLECTION_DAYS): vol.All(
             cv.ensure_list, [vol.In(WEEKDAYS)]
         ),
-        vol.Optional(const.CONF_FIRST_MONTH): vol.In(const.MONTH_OPTIONS),
-        vol.Optional(const.CONF_LAST_MONTH): vol.In(const.MONTH_OPTIONS),
+        vol.Optional(const.CONF_FIRST_MONTH): vol.In(months),
+        vol.Optional(const.CONF_LAST_MONTH): vol.In(months),
         vol.Optional(const.CONF_WEEKDAY_ORDER_NUMBER): vol.All(
             cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=1, max=5))]
         ),
