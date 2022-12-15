@@ -294,6 +294,11 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
         except KeyError:
             pass
 
+        if event.data.get("smtp") is self._object_type:
+            self._event_state = True
+            if self.enabled:
+                self.async_schedule_update_ha_state()
+
         if event.data.get("ai_refreshed") is not True:
             return
 

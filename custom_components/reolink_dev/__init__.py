@@ -25,6 +25,7 @@ from .const import (
     BASE,
     CONF_CHANNEL,
     CONF_USE_HTTPS,
+    CONF_SMTP_PORT,
     CONF_MOTION_OFF_DELAY,
     CONF_PLAYBACK_MONTHS,
     CONF_PROTOCOL,
@@ -32,6 +33,7 @@ from .const import (
     CONF_THUMBNAIL_PATH,
     CONF_STREAM_FORMAT,
     CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    DEFAULT_SMTP_PORT,
     COORDINATOR,
     MOTION_UPDATE_COORDINATOR,
     DOMAIN,
@@ -93,6 +95,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.data[CONF_PASSWORD],
         )
         await push.subscribe(base.event_id)
+        await push.set_smtp_port(entry.options.get(CONF_SMTP_PORT, DEFAULT_SMTP_PORT))
         hass.data[DOMAIN][base.push_manager] = push
 
     async def async_update_data():
@@ -159,6 +162,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     await base.set_protocol(entry.options[CONF_PROTOCOL])
     await base.set_stream(entry.options[CONF_STREAM])
     await base.set_stream_format(entry.options[CONF_STREAM_FORMAT])
+    await base.set_smtp_port(entry.options[CONF_SMTP_PORT])
 
     motion_state_coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][MOTION_UPDATE_COORDINATOR]
 
@@ -181,6 +185,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     base = hass.data[DOMAIN][entry.entry_id][BASE]
     push = hass.data[DOMAIN][base.push_manager]
+
+    await base.set_smtp_port(0) # Stop SMTP server
 
     if not await push.count_members() > 1:
         await push.unsubscribe()

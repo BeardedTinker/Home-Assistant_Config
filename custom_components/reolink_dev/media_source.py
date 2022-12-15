@@ -40,6 +40,8 @@ from homeassistant.components.stream import create_stream
 
 from homeassistant.helpers.event import async_call_later
 
+from homeassistant.components.camera import DynamicStreamSettings
+
 from .base import ReolinkBase, searchtime_to_datetime
 
 # from . import typings
@@ -126,7 +128,7 @@ class ReolinkMediaSource(MediaSource):
 
         url = await base.api.get_vod_source(file)
         _LOGGER.debug("Load VOD %s", url)
-        stream = create_stream(self.hass, url, {})
+        stream = create_stream(self.hass, url, {}, DynamicStreamSettings())
         stream.add_provider("hls", timeout=3600)
         url: str = stream.endpoint_url("hls")
         # the media browser seems to have a problem with the master_playlist

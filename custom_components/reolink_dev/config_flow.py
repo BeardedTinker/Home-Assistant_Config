@@ -21,6 +21,7 @@ from .const import (
     BASE,
     CONF_CHANNEL,
     CONF_USE_HTTPS,
+    CONF_SMTP_PORT,
     CONF_MOTION_OFF_DELAY,
     CONF_PLAYBACK_MONTHS,
     CONF_PROTOCOL,
@@ -28,6 +29,7 @@ from .const import (
     CONF_STREAM_FORMAT,
     CONF_THUMBNAIL_PATH,
     CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    DEFAULT_SMTP_PORT,
     DEFAULT_MOTION_OFF_DELAY,
     DEFAULT_USE_HTTPS,
     DEFAULT_PLAYBACK_MONTHS,
@@ -186,6 +188,12 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
                                  ), ): vol.In(
                         ["h264", "h265"]
                     ),
+                    vol.Required(
+                        CONF_SMTP_PORT,
+                        default=self.config_entry.options.get(
+                            CONF_SMTP_PORT, DEFAULT_SMTP_PORT
+                        ),
+                    ): cv.positive_int,
                     vol.Required(
                         CONF_MOTION_OFF_DELAY,
                         default=self.config_entry.options.get(

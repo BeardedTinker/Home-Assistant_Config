@@ -19,6 +19,7 @@ CONF_STREAM = "stream"
 CONF_STREAM_FORMAT = "stream_format"
 CONF_PROTOCOL = "protocol"
 CONF_CHANNEL = "channel"
+CONF_SMTP_PORT = "smtp_port"
 CONF_MOTION_OFF_DELAY = "motion_off_delay"
 CONF_PLAYBACK_MONTHS = "playback_months"
 CONF_THUMBNAIL_PATH = "playback_thumbnail_path"
@@ -26,6 +27,7 @@ CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY = "motion_states_update_fallback_delay"
 
 DEFAULT_USE_HTTPS = True
 DEFAULT_CHANNEL = 1
+DEFAULT_SMTP_PORT = 0
 DEFAULT_MOTION_OFF_DELAY = 60
 DEFAULT_PROTOCOL = "rtmp"
 DEFAULT_STREAM = "main"
