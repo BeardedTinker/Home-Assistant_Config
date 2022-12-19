@@ -199,8 +199,8 @@ MIN_MOTION_FIRMWARE_DATE = 20220517
 # Firmware 2.1.4-rc1 release date
 MIN_MOTION2_FIRMWARE_DATE = 20220301
 
-# Firmware 2.1.5 release date
-MIN_VALVE_FIRMWARE_DATE = 20220404
+# Firmware 2.1.6 release date
+MIN_VALVE_FIRMWARE_DATE = 20220612
 
 # Firmware 1.11.7 release date
 MIN_DIMMER_FIRMWARE_DATE = 20211109
@@ -383,6 +383,7 @@ SENSOR_OVERTEMPERATURE = "overtemperature"
 SENSOR_POWER = "power"
 SENSOR_POWER_FACTOR = "pf"
 SENSOR_REACTIVE_POWER = "reactive_power"
+SENSOR_REPORTED_WINDOW_STATE = "reported_window_state"
 SENSOR_RETURNED_ENERGY = "returned_energy"
 SENSOR_RSSI = "rssi"
 SENSOR_SELF_TEST = "self_test"
@@ -399,6 +400,7 @@ SENSOR_UPTIME = "uptime"
 SENSOR_VALVE = "valve"
 SENSOR_VIBRATION = "vibration"
 SENSOR_VOLTAGE = "voltage"
+SENSOR_WINDOW_STATE_REPORTING = "window_state_reporting"
 
 UPDATE_FIRMWARE = "firmware"
 
@@ -525,10 +527,17 @@ TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_MOTION_MOTION = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
+TPL_REPORTED_WINDOW_STATE = (
+    "{%if value_json.thermostats.0.window_open==true%}ON{%else%}OFF{%endif%}"
+)
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
 TPL_VALVE = "{{value.replace(^_^,^ ^)}}"
 TPL_VALVE_MIN_POSITION = "{{value_json.thermostats.0.valve_min_percent}}"
 TPL_VALVE_POSITION = "{{value_json.thermostats.0.pos}}"
+TPL_WINDOW_STATE_REPORTING = (
+    "{%if value_json.thermostats.0.open_window_report==true%}ON{%else%}OFF{%endif%}"
+)
+
 TPL_NEW_FIRMWARE_FROM_INFO = (
     "{%if value_json[^update^].has_update==true%}ON{%else%}OFF{%endif%}"
 )
@@ -1400,6 +1409,22 @@ OPTIONS_UPDATE_FIRMWARE_BATTERY_POWERED = {
     KEY_LATEST_VERSION_TOPIC: TOPIC_INFO,
     KEY_NAME: "Firmware",
     KEY_STATE_TOPIC: TOPIC_INFO,
+}
+OPTIONS_SENSOR_REPORTED_WINDOW_STATE = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
+    KEY_DEVICE_CLASS: DEVICE_CLASS_WINDOW,
+    KEY_NAME: "Reported window state",
+    KEY_STATE_TOPIC: TOPIC_INFO,
+    KEY_VALUE_TEMPLATE: TPL_REPORTED_WINDOW_STATE,
+}
+
+OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_NAME: "Window state reporting",
+    KEY_STATE_TOPIC: TOPIC_SETTINGS,
+    KEY_VALUE_TEMPLATE: TPL_WINDOW_STATE_REPORTING,
 }
 
 ROLLER_DEVICE_CLASSES = [
@@ -2513,6 +2538,8 @@ if model_id == MODEL_SHELLYVALVE_ID:
         SENSOR_CHARGER: OPTIONS_SENSOR_CHARGER,
         SENSOR_CLOUD: OPTIONS_SENSOR_CLOUD,
         SENSOR_CALIBRATED: OPTIONS_SENSOR_CALIBRATED,
+        SENSOR_REPORTED_WINDOW_STATE: OPTIONS_SENSOR_REPORTED_WINDOW_STATE,
+        SENSOR_WINDOW_STATE_REPORTING: OPTIONS_SENSOR_WINDOW_STATE_REPORTING,
         "firmware update": {},
     }
     buttons = {
