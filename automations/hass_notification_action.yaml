@@ -1,0 +1,33 @@
+#####
+#
+#
+#####
+
+id: '7d61e44b-19e4-4aae-8795-5455ebc89e43'
+alias: HASS Notifications
+
+description: ''
+
+trigger:
+- type: opened
+  platform: device
+  device_id: 2529e8e786fd4163af33f8f16cee9919
+  entity_id: binary_sensor.front_door_contact
+  domain: binary_sensor
+
+condition: []
+
+action:
+- service: notify.bt_desktop
+  data:
+    title: Front Door
+    message: Someone on the front door
+    data:
+      image: /api/camera_proxy/camera.ebroz920_lift
+      actions:
+      - action: 'yes'
+        title: 'Yes'
+      - action: URI
+        title: Open Cameras
+        uri: /lovelace/cameras
+mode: single
