@@ -1,0 +1,26 @@
+#####
+# Send response to action
+#
+#####
+
+id: 16f5c5dc-f15e-4762-b9b6-56d0c189297c
+alias: HASS Response YES
+
+description: ""
+
+trigger:
+  - platform: event
+    event_type: hass_agent_notifications
+    event_data:
+      action: "yes"
+      device_name: BT-Desktop
+
+condition: []
+
+action:
+  - service: notify.bt_desktop
+    data:
+      message: You clicked YES
+      title: Action response
+
+mode: single

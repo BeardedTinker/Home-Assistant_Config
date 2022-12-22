@@ -1,0 +1,29 @@
+#####
+# Send response to action
+#
+#####
+
+id: daa7b0af-d0e3-40dc-ab26-842d786cc0e5
+alias: HASS Response open
+
+description: ""
+
+trigger:
+  - platform: event
+    event_type: hass_agent_notifications
+    event_data:
+      action: "open"
+      device_name: BT-Desktop
+
+condition: []
+
+action:
+  - service: lock.open
+    data:
+      entity: lock.nuki_opener_lock
+  - service: notify.bt_desktop
+    data:
+      message: Door open
+      title: Action response
+
+mode: single

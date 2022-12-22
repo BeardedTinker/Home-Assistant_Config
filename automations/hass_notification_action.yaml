@@ -27,7 +27,7 @@ action:
       actions:
       - action: 'yes'
         title: 'Yes'
-      - action: URI
-        title: Open Cameras
-        uri: /lovelace/cameras
+      - action: 'open'
+        title: 'Open Door'
+
 mode: single
