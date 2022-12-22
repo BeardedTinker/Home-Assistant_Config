@@ -3,7 +3,7 @@
 #
 #####
 
-- bt_desktop_capacity_c:
-  friendly_name: "BT Drive C"
-  unit_of_measurement: "MB"
-  value_template: "{{ state_attr('sensor.bt_desktop_storage_c', 'AvailableSpaceMB') | float(0) }}"
+- sensor:
+  - name: "BT Desktop Capacity C"
+    unit_of_measurement: "MB"
+    state: "{{ state_attr('sensor.bt_desktop_storage_c', 'AvailableSpaceMB') | float(0) }}"
