@@ -1,0 +1,9 @@
+#####
+# HASS.Agent Luka PC Disk C storage
+#
+#####
+
+- luka_notebook_capacity_c:
+    friendly_name: "Luka Drive C"
+    unit_of_measurement: "MB"
+    value_template: "{{ state_attr('sensor.luka_notebook_storage_c', 'AvailableSpaceMB') | float(0) }}"

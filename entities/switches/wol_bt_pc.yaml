@@ -1,0 +1,14 @@
+#####
+# Wake On LAN - BT PC
+# https://www.home-assistant.io/integrations/wake_on_lan/
+#####
+
+platform: wake_on_lan
+name: BT Desktop
+mac: "4c:ed:fb:74:98:42"
+host: 192.168.1.124
+broadcast_address: 192.168.0.252
+turn_off:
+  service: button.press
+  data:
+    entity_id: button.desktop_m14q7v1_satellite_shutdown

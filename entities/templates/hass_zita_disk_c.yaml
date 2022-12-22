@@ -1,0 +1,9 @@
+#####
+# HASS.Agent Zita PC Disk C storage
+#
+#####
+
+- zita_notebook_capacity_c:
+    friendly_name: "Zita Drive C"
+    unit_of_measurement: "MB"
+    value_template: "{{ state_attr('sensor.zita_notebook_satellite_storage_c', 'AvailableSpaceMB') | float(0) }}"
