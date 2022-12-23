@@ -25,7 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def _validate_config(
-    handler: SchemaConfigFlowHandler | SchemaOptionsFlowHandler, data: Any
+    _: SchemaConfigFlowHandler | SchemaOptionsFlowHandler, data: Any
 ) -> Any:
     """Validate config."""
     if const.CONF_DATE in data:
@@ -209,7 +209,7 @@ async def detail_config_schema(
         if handler.options[const.CONF_FREQUENCY] in const.DAILY_FREQUENCY:
             # every-n-days
             options_schema[
-                required(const.CONF_FIRST_DATE, handler.options)
+                required(const.CONF_FIRST_DATE, handler.options, helpers.now().date())
             ] = selector.DateSelector()
     if handler.options.get(const.CONF_VERBOSE_STATE, False):
         # "verbose_state"
@@ -224,7 +224,7 @@ async def detail_config_schema(
     return vol.Schema(options_schema)
 
 
-async def choose_details_step(options: dict[str, Any]) -> str:
+async def choose_details_step(_: dict[str, Any]) -> str:
     """Return next step_id for options flow."""
     return "detail"
 
