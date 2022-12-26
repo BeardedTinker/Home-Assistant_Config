@@ -4,9 +4,11 @@
 
 alias: "PM10 increase"
 id: 7b02a4e6-80fe-40c5-a6d3-5b5b8fad4b47
+
 trigger:
   platform: state
   entity_id: binary_sensor.pm10_increase
+
 condition:
   condition: and
   conditions:
@@ -16,5 +18,9 @@ condition:
     - condition: numeric_state
       entity_id: sensor.luftdaten_43996_p10
       above: 50
+    - condition: state
+      entity_id: input_boolean.audio_notifications
+      state: 'on'
+
 action:
 - service: script.pm10_increase_speech

@@ -18,7 +18,7 @@ condition:
       state: 'off'
     - condition: state
       entity_id: input_boolean.audio_notifications
-      state: 'on'
+      state: 'off'
 
 action:
 - service: script.notify_engine
