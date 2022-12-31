@@ -11,23 +11,6 @@ from typing import Any, Final, NamedTuple, Optional, cast
 import homeassistant.helpers.config_validation as cv
 import homeassistant.helpers.entity_registry as er
 import voluptuous as vol
-from homeassistant.components import (
-    binary_sensor,
-    climate,
-    device_tracker,
-    fan,
-    humidifier,
-    input_boolean,
-    input_number,
-    input_select,
-    light,
-    media_player,
-    remote,
-    sensor,
-    switch,
-    vacuum,
-    water_heater,
-)
 from homeassistant.components.group import DOMAIN as GROUP_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
@@ -99,6 +82,7 @@ from .const import (
     CONF_SENSOR_TYPE,
     CONF_SLEEP_POWER,
     CONF_STANDBY_POWER,
+    CONF_STATES_POWER,
     CONF_TEMPLATE,
     CONF_UNAVAILABLE_POWER,
     CONF_UTILITY_METER_OFFSET,
@@ -125,12 +109,14 @@ from .const import (
     SensorType,
     UnitPrefix,
 )
+from .discovery import autodiscover_model
 from .errors import (
+    ModelNotSupported,
     PowercalcSetupError,
     SensorAlreadyConfiguredError,
     SensorConfigurationError,
 )
-from .power_profile.model_discovery import is_autoconfigurable
+from .power_profile.factory import get_power_profile
 from .sensors.abstract import BaseEntity
 from .sensors.daily_energy import (
     DAILY_FIXED_ENERGY_SCHEMA,
@@ -345,6 +331,13 @@ def convert_config_entry_to_sensor_config(config_entry: ConfigEntry) -> ConfigTy
         if CONF_POWER_TEMPLATE in fixed_config:
             fixed_config[CONF_POWER] = Template(fixed_config[CONF_POWER_TEMPLATE])
             del fixed_config[CONF_POWER_TEMPLATE]
+        if CONF_STATES_POWER in fixed_config:
+            new_states_power = {}
+            for key, value in fixed_config[CONF_STATES_POWER].items():
+                if isinstance(value, str) and "{{" in value:
+                    value = Template(value)
+                new_states_power[key] = value
+            fixed_config[CONF_STATES_POWER] = new_states_power
         sensor_config[CONF_FIXED] = fixed_config
 
     if CONF_LINEAR in sensor_config:
@@ -739,6 +732,27 @@ def resolve_area_entities(
     return {
         entity.entity_id: entity for entity in entities if entity.domain == LIGHT_DOMAIN
     }
+
+
+async def is_autoconfigurable(
+    hass: HomeAssistant,
+    entity_entry: er.RegistryEntry,
+    sensor_config: ConfigType = None,
+) -> bool:
+    if sensor_config is None:
+        sensor_config = {}
+    try:
+        model_info = await autodiscover_model(hass, entity_entry)
+        power_profile = await get_power_profile(
+            hass, sensor_config, model_info=model_info
+        )
+        if not power_profile:
+            return False
+        if power_profile.has_sub_profiles and power_profile.sub_profile:
+            return True
+        return not power_profile.is_additional_configuration_required
+    except ModelNotSupported:
+        return False
 
 
 class EntitiesBucket(NamedTuple):

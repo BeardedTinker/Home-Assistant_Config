@@ -4,9 +4,9 @@ import json
 import logging
 import os
 import re
-from enum import Enum
 from typing import NamedTuple, Protocol
 
+from homeassistant.backports.enum import StrEnum
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
@@ -20,7 +20,7 @@ from ..errors import ModelNotSupported, PowercalcSetupError, UnsupportedStrategy
 _LOGGER = logging.getLogger(__name__)
 
 
-class DeviceType(Enum):
+class DeviceType(StrEnum):
     LIGHT = "light"
     SMART_SWITCH = "smart_switch"
     SMART_SPEAKER = "smart_speaker"
@@ -102,8 +102,18 @@ class PowerProfile:
         return self._json_data.get("standby_power_on") or 0
 
     @property
-    def supported_strategies(self) -> list[CalculationStrategy]:
-        return self._json_data.get("supported_modes") or [CalculationStrategy.LUT]
+    def calculation_strategy(self) -> CalculationStrategy:
+        """
+        Get the calculation strategy this profile provides.
+        supported modes is here for BC purposes.
+        """
+        if "supported_modes" in self._json_data:
+            _LOGGER.warning(
+                "Deprecation: supported_modes detected in model.json file. "
+                "You must rename this to calculation_strategy for this to keep working in the future"
+            )
+            return self._json_data.get("supported_modes")[0]
+        return self._json_data.get("calculation_strategy") or CalculationStrategy.LUT
 
     @property
     def linked_lut(self) -> str | None:
@@ -145,7 +155,7 @@ class PowerProfile:
 
     def is_strategy_supported(self, mode: CalculationStrategy) -> bool:
         """Whether a certain calculation strategy is supported by this profile"""
-        return mode in self.supported_strategies
+        return mode == self.calculation_strategy
 
     @property
     def is_additional_configuration_required(self) -> bool:
@@ -172,6 +182,10 @@ class PowerProfile:
         if not device_type:
             return DeviceType.LIGHT
         return DeviceType(device_type)
+
+    @property
+    def config_flow_discovery_remarks(self) -> str | None:
+        return self._json_data.get("config_flow_discovery_remarks")
 
     def get_sub_profiles(self) -> list[str]:
         """Get listing op possible sub profiles"""

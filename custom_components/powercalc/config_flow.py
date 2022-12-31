@@ -69,9 +69,10 @@ from .const import (
     CalculationStrategy,
     SensorType,
 )
+from .discovery import autodiscover_model
 from .errors import ModelNotSupported, StrategyConfigurationError
+from .power_profile.factory import get_power_profile
 from .power_profile.library import ModelInfo, ProfileLibrary
-from .power_profile.model_discovery import get_power_profile
 from .power_profile.power_profile import PowerProfile
 from .sensors.daily_energy import DEFAULT_DAILY_UPDATE_FREQUENCY
 from .strategy.factory import PowerCalculatorStrategyFactory
@@ -293,7 +294,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_virtual_power(user_input)
 
     async def async_step_virtual_power(
-        self, user_input: dict[str, str] = None, strategy_selection: bool = True
+        self, user_input: dict[str, str] = None
     ) -> FlowResult:
         if user_input is not None:
             self.source_entity_id = user_input[CONF_ENTITY_ID]
@@ -446,14 +447,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self.source_entity.entity_entry and self.power_profile is None:
             try:
                 self.power_profile = await get_power_profile(
-                    self.hass, {}, self.source_entity.entity_entry
+                    self.hass,
+                    {},
+                    await autodiscover_model(
+                        self.hass, self.source_entity.entity_entry
+                    ),
                 )
             except ModelNotSupported:
                 self.power_profile = None
         if self.power_profile:
+            remarks = self.power_profile.config_flow_discovery_remarks
+            if remarks:
+                remarks = "\n\n" + remarks
             return self.async_show_form(
                 step_id="library",
                 description_placeholders={
+                    "remarks": remarks,
                     "manufacturer": self.power_profile.manufacturer,
                     "model": self.power_profile.model,
                 },
@@ -473,7 +482,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             return await self.async_step_model()
 
-        schema = _create_schema_manufacturer(self.hass)
+        schema = _create_schema_manufacturer(self.hass, self.source_entity.domain)
         return self.async_show_form(
             step_id="manufacturer",
             data_schema=schema,
@@ -498,8 +507,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="model",
-            data_schema=_create_schema_model(
-                self.hass, self.sensor_config.get(CONF_MANUFACTURER)
+            data_schema=await _create_schema_model(
+                self.hass,
+                self.sensor_config.get(CONF_MANUFACTURER),
+                self.source_entity.domain,
             ),
             description_placeholders={
                 "supported_models_link": "https://github.com/bramstroker/homeassistant-powercalc/blob/master/docs/supported_models.md"
@@ -556,8 +567,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def validate_strategy_config(self) -> dict:
         strategy_name = (
-            self.sensor_config.get(CONF_MODE)
-            or self.power_profile.supported_strategies[0]
+            self.sensor_config.get(CONF_MODE) or self.power_profile.calculation_strategy
         )
         strategy = await _create_strategy_object(
             self.hass,
@@ -625,7 +635,7 @@ class OptionsFlowHandler(OptionsFlow):
                         self.current_config.get(CONF_MODEL),
                     )
                     self.power_profile = await get_power_profile(
-                        self.hass, {}, None, model_info
+                        self.hass, {}, model_info
                     )
                     if self.power_profile and self.power_profile.needs_fixed_config:
                         self.strategy = CalculationStrategy.FIXED
@@ -854,12 +864,12 @@ def _create_linear_schema(source_entity_id: str) -> vol.Schema:
     )
 
 
-def _create_schema_manufacturer(hass: HomeAssistant) -> vol.Schema:
+def _create_schema_manufacturer(hass: HomeAssistant, entity_domain: str) -> vol.Schema:
     """Create manufacturer schema"""
     library = ProfileLibrary(hass)
     manufacturers = [
         selector.SelectOptionDict(value=manufacturer, label=manufacturer)
-        for manufacturer in library.get_manufacturer_listing()
+        for manufacturer in library.get_manufacturer_listing(entity_domain)
     ]
     return vol.Schema(
         {
@@ -872,12 +882,15 @@ def _create_schema_manufacturer(hass: HomeAssistant) -> vol.Schema:
     )
 
 
-def _create_schema_model(hass: HomeAssistant, manufacturer: str) -> vol.Schema:
+async def _create_schema_model(
+    hass: HomeAssistant, manufacturer: str, entity_domain: str
+) -> vol.Schema:
     """Create model schema"""
     library = ProfileLibrary(hass)
     models = [
-        selector.SelectOptionDict(value=model, label=model)
-        for model in library.get_model_listing(manufacturer)
+        selector.SelectOptionDict(value=profile.model, label=profile.model)
+        for profile in await library.get_profiles_by_manufacturer(manufacturer)
+        if profile.is_entity_domain_supported(entity_domain)
     ]
     return vol.Schema(
         {
