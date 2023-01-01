@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
 from typing import Any, Mapping, Optional
 
 import homeassistant.helpers.entity_registry as er
@@ -129,11 +128,11 @@ def find_related_real_energy_sensor(
     return RealEnergySensor(energy_sensors[0])
 
 
-class EnergySensor(ABC):
+class EnergySensor(BaseEntity):
     """Class which all energy sensors should extend from"""
 
 
-class VirtualEnergySensor(IntegrationSensor, EnergySensor, BaseEntity):
+class VirtualEnergySensor(IntegrationSensor, EnergySensor):
     """Virtual energy sensor, totalling kWh"""
 
     def __init__(

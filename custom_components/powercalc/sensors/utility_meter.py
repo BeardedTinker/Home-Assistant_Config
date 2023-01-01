@@ -30,17 +30,17 @@ from ..const import (
 )
 from ..errors import SensorConfigurationError
 from .abstract import BaseEntity
-from .energy import RealEnergySensor, VirtualEnergySensor
+from .energy import EnergySensor, RealEnergySensor
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def create_utility_meters(
     hass: HomeAssistant,
-    energy_sensor: VirtualEnergySensor | RealEnergySensor,
+    energy_sensor: EnergySensor,
     sensor_config: dict,
     net_consumption: bool = False,
-) -> list[UtilityMeterSensor]:
+) -> list[VirtualUtilityMeter]:
     """Create the utility meters"""
 
     if not sensor_config.get(CONF_CREATE_UTILITY_METERS):
@@ -209,11 +209,6 @@ class VirtualUtilityMeter(UtilityMeterSensor, BaseEntity):
     def unique_id(self):
         """Return the unique id."""
         return self._attr_unique_id
-
-    @unique_id.setter
-    def unique_id(self, value):
-        """Set unique id."""
-        self._attr_unique_id = value
 
     @property
     def native_value(self):

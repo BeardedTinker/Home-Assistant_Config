@@ -123,13 +123,13 @@ from .sensors.daily_energy import (
     create_daily_fixed_energy_power_sensor,
     create_daily_fixed_energy_sensor,
 )
-from .sensors.energy import create_energy_sensor
+from .sensors.energy import EnergySensor, create_energy_sensor
 from .sensors.group import (
     add_to_associated_group,
     create_group_sensors,
     create_group_sensors_from_config_entry,
 )
-from .sensors.power import RealPowerSensor, VirtualPowerSensor, create_power_sensor
+from .sensors.power import VirtualPowerSensor, create_power_sensor
 from .sensors.utility_meter import create_utility_meters
 from .strategy.fixed import CONFIG_SCHEMA as FIXED_SCHEMA
 from .strategy.linear import CONFIG_SCHEMA as LINEAR_SCHEMA
@@ -215,7 +215,11 @@ SENSOR_CONFIG = build_nested_configuration_schema(SENSOR_CONFIG)
 
 PLATFORM_SCHEMA: Final = vol.All(  # noqa: F811
     cv.has_at_least_one_key(
-        CONF_ENTITY_ID, CONF_ENTITIES, CONF_INCLUDE, CONF_DAILY_FIXED_ENERGY
+        CONF_ENTITY_ID,
+        CONF_POWER_SENSOR_ID,
+        CONF_ENTITIES,
+        CONF_INCLUDE,
+        CONF_DAILY_FIXED_ENERGY,
     ),
     PLATFORM_SCHEMA.extend(SENSOR_CONFIG),
 )
@@ -391,11 +395,7 @@ async def create_sensors(
         )
 
     # Setup a power sensor for one single appliance. Either by manual configuration or discovery
-    if (
-        CONF_ENTITY_ID in config
-        or discovery_info is not None
-        or CONF_DAILY_FIXED_ENERGY in config
-    ):
+    if CONF_ENTITIES not in config and CONF_INCLUDE not in config:
         if discovery_info:
             config[CONF_ENTITY_ID] = discovery_info[CONF_ENTITY_ID]
         merged_sensor_config = get_merged_sensor_configuration(global_config, config)
@@ -504,7 +504,7 @@ async def create_individual_sensors(  # noqa: C901
 
     entities_to_add: list[BaseEntity] = []
 
-    energy_sensor = None
+    energy_sensor: EnergySensor | None = None
     if CONF_DAILY_FIXED_ENERGY in sensor_config:
         energy_sensor = await create_daily_fixed_energy_sensor(
             hass, sensor_config, source_entity
@@ -532,9 +532,7 @@ async def create_individual_sensors(  # noqa: C901
                 hass, sensor_config, power_sensor, source_entity
             )
             entities_to_add.append(energy_sensor)
-            if isinstance(power_sensor, VirtualPowerSensor) and isinstance(
-                energy_sensor, SensorEntity
-            ):
+            if isinstance(power_sensor, VirtualPowerSensor):
                 power_sensor.set_energy_sensor_attribute(energy_sensor.entity_id)
 
     if energy_sensor:
@@ -737,14 +735,12 @@ def resolve_area_entities(
 async def is_autoconfigurable(
     hass: HomeAssistant,
     entity_entry: er.RegistryEntry,
-    sensor_config: ConfigType = None,
+    sensor_config: ConfigType | None = None,
 ) -> bool:
-    if sensor_config is None:
-        sensor_config = {}
     try:
         model_info = await autodiscover_model(hass, entity_entry)
         power_profile = await get_power_profile(
-            hass, sensor_config, model_info=model_info
+            hass, sensor_config or {}, model_info=model_info
         )
         if not power_profile:
             return False
@@ -756,8 +752,8 @@ async def is_autoconfigurable(
 
 
 class EntitiesBucket(NamedTuple):
-    new: list[Entity, RealPowerSensor] = []
-    existing: list[Entity, RealPowerSensor] = []
+    new: list[BaseEntity] = []
+    existing: list[BaseEntity] = []
 
 
 class CreationContext(NamedTuple):
