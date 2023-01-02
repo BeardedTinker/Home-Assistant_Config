@@ -1,0 +1,35 @@
+esphome:
+  name: sw420
+
+esp32:
+  board: esp-wrover-kit
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_key
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Sw420 Fallback Hotspot"
+    password: "if1KBCglUg7N"
+
+binary_sensor:
+  - platform: status
+    name: "LaundryBot"
+  - platform: gpio
+    pin: GPIO16
+    name: "washer"
+    device_class: vibration
+    #filters:
+    #- delayed_on: 10ms
+    #- delayed_off: 5min
