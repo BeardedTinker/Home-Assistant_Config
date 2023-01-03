@@ -1,4 +1,3 @@
-
 - id: '1601330561655'
   name: Test scene
   entities:
@@ -62,3 +61,190 @@
       friendly_name: Corner
       supported_features: 43
   icon: mdi:party
+- id: '1672721639647'
+  name: Google TV
+  entities:
+    light.tv:
+      min_color_temp_kelvin: 2202
+      max_color_temp_kelvin: 4000
+      min_mireds: 250
+      max_mireds: 454
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      color:
+        x: 0.5056
+        y: 0.4152
+      color_temp_startup: 454
+      last_seen: '2023-01-03T05:52:16+01:00'
+      level_config:
+        on_level: previous
+      linkquality: 47
+      power_on_behavior: previous
+      update:
+        installed_version: 587757105
+        latest_version: 587531825
+        state: idle
+      update_available: false
+      icon: phu:desk-lamp
+      friendly_name: TV
+      supported_features: 44
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2202
+      color_temp: 454
+      hs_color:
+      - 29.79
+      - 84.553
+      rgb_color:
+      - 255
+      - 146
+      - 39
+      xy_color:
+      - 0.579
+      - 0.388
+      state: 'on'
+    light.corner:
+      min_color_temp_kelvin: 2202
+      max_color_temp_kelvin: 4000
+      min_mireds: 250
+      max_mireds: 454
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      color:
+        x: 0.5056
+        y: 0.4152
+      color_temp_startup: 454
+      last_seen: '2023-01-03T05:51:44+01:00'
+      level_config:
+        on_level: previous
+      linkquality: 29
+      power_on_behavior: previous
+      update:
+        installed_version: 587757105
+        latest_version: 587531825
+        state: idle
+      update_available: false
+      icon: phu:table-shade
+      friendly_name: Corner
+      supported_features: 44
+      color_mode: color_temp
+      brightness: 127
+      color_temp_kelvin: 2202
+      color_temp: 454
+      hs_color:
+      - 29.79
+      - 84.553
+      rgb_color:
+      - 255
+      - 146
+      - 39
+      xy_color:
+      - 0.579
+      - 0.388
+      state: 'on'
+    light.standing:
+      min_color_temp_kelvin: 2202
+      max_color_temp_kelvin: 4000
+      min_mireds: 250
+      max_mireds: 454
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      color:
+        x: 0.5056
+        y: 0.4152
+      last_seen: '2023-01-03T05:52:22+01:00'
+      level_config:
+        on_level: previous
+      linkquality: 91
+      power_on_behavior:
+      update:
+        installed_version: 587757105
+        latest_version: 587531825
+        state: idle
+      update_available:
+      icon: phu:floor-spot
+      friendly_name: Standing
+      supported_features: 44
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2202
+      color_temp: 454
+      hs_color:
+      - 29.79
+      - 84.553
+      rgb_color:
+      - 255
+      - 146
+      - 39
+      xy_color:
+      - 0.579
+      - 0.388
+      state: 'on'
+    light.entrance:
+      min_color_temp_kelvin: 2202
+      max_color_temp_kelvin: 4000
+      min_mireds: 250
+      max_mireds: 454
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      color:
+        x: 0.5056
+        y: 0.4152
+      color_temp_startup: 454
+      last_seen: '2023-01-03T05:51:51+01:00'
+      level_config:
+        on_level: previous
+      linkquality: 91
+      power_on_behavior: previous
+      update:
+        installed_version: 587798065
+        latest_version: 537040419
+        state: idle
+      update_available: false
+      friendly_name: Entrance
+      supported_features: 44
+      color_mode: color_temp
+      brightness: 127
+      color_temp_kelvin: 2202
+      color_temp: 454
+      hs_color:
+      - 29.79
+      - 84.553
+      rgb_color:
+      - 255
+      - 146
+      - 39
+      xy_color:
+      - 0.579
+      - 0.388
+      state: 'on'
+  icon: mdi:android
+  metadata: {}
