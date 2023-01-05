@@ -1,0 +1,39 @@
+#####
+# Movie time startscene
+#####
+
+alias: Movie Time start lights
+id: 8dfa46124-c4bd-44d4-9a89-525159658d63
+
+description: ""
+mode: single
+
+trigger:
+  - platform: state
+    entity_id:
+      - media_player.google_tv
+    to: playing
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+
+condition:
+  - condition: state
+    entity_id: light.corner
+    state: "on"
+
+action:
+  - service: scene.create
+    data:
+      scene_id: before
+      snapshot_entities:
+      - light.tv
+      - light.standing
+      - light.corner
+      - light.entrance
+  - service: scene.turn_on
+    target:
+      entity_id: scene.movie_time
+    data:
+      transition: 2

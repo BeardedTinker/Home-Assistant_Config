@@ -1,0 +1,31 @@
+#####
+# Movie time stop scene
+#####
+
+alias: Movie Time lights stop
+id: 11e9b983-e40e-4d6d-a68e-16e645ace916
+
+description: ""
+mode: single
+
+trigger:
+  - platform: state
+    entity_id:
+      - media_player.google_tv
+    from: playing
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
+
+condition:
+  - condition: state
+    entity_id: light.corner
+    state: "on"
+
+action:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.before
+    data:
+      transition: 3
