@@ -44,6 +44,7 @@ from .const import (
     CONF_STREAM,
     CONF_STREAM_FORMAT,
     CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    CONF_ONVIF_SUBSCRIPTION_DISABLED,
     DEFAULT_USE_HTTPS,
     DEFAULT_CHANNEL,
     DEFAULT_MOTION_OFF_DELAY,
@@ -52,6 +53,7 @@ from .const import (
     DEFAULT_STREAM_FORMAT,
     DEFAULT_TIMEOUT,
     DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    DEFAULT_ONVIF_SUBSCRIPTION_DISABLED,
     DOMAIN,
     PUSH_MANAGER,
     SESSION_RENEW_THRESHOLD,
@@ -155,6 +157,10 @@ class ReolinkBase:
             self.motion_states_update_fallback_delay = DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY
         else:
             self.motion_states_update_fallback_delay = options[CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY]
+
+        self.onvif_subscription_disabled = DEFAULT_ONVIF_SUBSCRIPTION_DISABLED
+        if CONF_ONVIF_SUBSCRIPTION_DISABLED in options:
+            self.onvif_subscription_disabled = options[CONF_ONVIF_SUBSCRIPTION_DISABLED]
 
         from .binary_sensor import MotionSensor, ObjectDetectedSensor
 

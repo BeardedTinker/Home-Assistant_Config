@@ -29,6 +29,7 @@ from .const import (
     CONF_STREAM_FORMAT,
     CONF_THUMBNAIL_PATH,
     CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    CONF_ONVIF_SUBSCRIPTION_DISABLED,
     DEFAULT_SMTP_PORT,
     DEFAULT_MOTION_OFF_DELAY,
     DEFAULT_USE_HTTPS,
@@ -39,6 +40,7 @@ from .const import (
     DEFAULT_THUMBNAIL_PATH,
     DEFAULT_TIMEOUT,
     DEFAULT_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    DEFAULT_ONVIF_SUBSCRIPTION_DISABLED,
     DOMAIN,
 )
 
@@ -200,6 +202,12 @@ class ReolinkOptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_MOTION_OFF_DELAY, DEFAULT_MOTION_OFF_DELAY
                         ),
                     ): vol.All(vol.Coerce(int), vol.Range(min=0)),
+                    vol.Required(
+                        CONF_ONVIF_SUBSCRIPTION_DISABLED,
+                        default=self.config_entry.options.get(
+                            CONF_ONVIF_SUBSCRIPTION_DISABLED, DEFAULT_ONVIF_SUBSCRIPTION_DISABLED
+                        ),
+                    ): vol.All(vol.Coerce(bool)),
                     vol.Required(
                         CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
                         default=self.config_entry.options.get(

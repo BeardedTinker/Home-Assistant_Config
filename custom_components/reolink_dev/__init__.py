@@ -33,6 +33,7 @@ from .const import (
     CONF_THUMBNAIL_PATH,
     CONF_STREAM_FORMAT,
     CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY,
+    CONF_ONVIF_SUBSCRIPTION_DISABLED,
     DEFAULT_SMTP_PORT,
     COORDINATOR,
     MOTION_UPDATE_COORDINATOR,
@@ -94,7 +95,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.data[CONF_USERNAME],
             entry.data[CONF_PASSWORD],
         )
-        await push.subscribe(base.event_id)
+        if not base.onvif_subscription_disabled:
+            await push.subscribe(base.event_id)
+
         await push.set_smtp_port(entry.options.get(CONF_SMTP_PORT, DEFAULT_SMTP_PORT))
         hass.data[DOMAIN][base.push_manager] = push
 
@@ -102,7 +105,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         """Perform the actual updates."""
 
         async with async_timeout.timeout(base.timeout):
-            await push.renew()
+            if not base.onvif_subscription_disabled:
+                await push.renew()
             await base.update_states()
 
     coordinator = DataUpdateCoordinator(
@@ -124,7 +128,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # Force a refresh of motion sensors (in case Webhook is broken)
             if base.sensor_motion_detection is not None:
                 # hass.bus.async_fire(base.event_id, {"motion": False})
-                await base.sensor_motion_detection.handle_event(Event(base.event_id, {"motion": True}))
+                await base.sensor_motion_detection.handle_event(Event(base.event_id, {"motion": True, "available": True}))
 
     coordinator_motion_update = DataUpdateCoordinator(
         hass,
@@ -167,6 +171,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     motion_state_coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][MOTION_UPDATE_COORDINATOR]
 
     base.motion_states_update_fallback_delay = entry.options[CONF_MOTION_STATES_UPDATE_FALLBACK_DELAY]
+    base.onvif_subscription_disabled = entry.options[CONF_ONVIF_SUBSCRIPTION_DISABLED]
 
     if motion_state_coordinator.update_interval != base.motion_states_update_fallback_delay:
         if base.motion_states_update_fallback_delay is None or base.motion_states_update_fallback_delay <= 0:
