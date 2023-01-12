@@ -39,3 +39,5 @@ action:
   entity_id: input_boolean.audio_notifications
 - service: input_boolean.turn_off
   entity_id: input_boolean.morning_report_done
+- service: input_boolean.turn_off
+  entity_id: input_boolean.evening_report_done
