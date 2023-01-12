@@ -28,6 +28,7 @@ ATTR_SENSORS = "sensors"
 ATTR_SWITCH = "switch"
 ATTR_UPDATES = "updates"
 
+BUTTON_MUTE_ALARM = "mute_alarm"
 BUTTON_RESTART = "restart"
 BUTTON_UPDATE_FIRMWARE = "update_firmware"
 
@@ -46,6 +47,7 @@ DEVICE_CLASS_POWER_FACTOR = "power_factor"
 DEVICE_CLASS_PROBLEM = "problem"
 DEVICE_CLASS_RESTART = "restart"
 DEVICE_CLASS_SIGNAL_STRENGTH = "signal_strength"
+DEVICE_CLASS_SMOKE = "smoke"
 DEVICE_CLASS_TEMPERATURE = "temperature"
 DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_UPDATE = "update"
@@ -58,9 +60,13 @@ EVENT_DOUBLE_PUSH = "double_push"
 EVENT_LONG_PUSH = "long_push"
 EVENT_SINGLE_PUSH = "single_push"
 
+HOME_ASSISTANT = "home-assistant"
+
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY = "avty"
 KEY_AVAILABILITY_MODE = "avty_mode"
+KEY_AVAILABILITY_TEMPLATE = "avty_tpl"
+KEY_AVAILABILITY_TOPIC = "avty_t"
 KEY_BRIGHTNESS_TEMPLATE = "bri_tpl"
 KEY_COMMAND_OFF_TEMPLATE = "cmd_off_tpl"
 KEY_COMMAND_ON_TEMPLATE = "cmd_on_tpl"
@@ -125,7 +131,9 @@ MODEL_PLUS_1PM = "shellyplus1pm"
 MODEL_PLUS_2PM = "shellyplus2pm"
 MODEL_PLUS_HT = "shellyplusht"
 MODEL_PLUS_I4 = "shellyplusi4"
-MODEL_PLUS_PLUG_US = "shellyplugus"
+MODEL_PLUS_PLUG_S = "shellyplusplugs"
+MODEL_PLUS_PLUG_US = "shellyplusplugus"
+MODEL_PLUS_SMOKE = "shellyplussmoke"
 MODEL_PLUS_WALL_DIMMER = "shellypluswdus"
 MODEL_PRO_1 = "shellypro1"
 MODEL_PRO_1PM = "shellypro1pm"
@@ -149,6 +157,7 @@ SENSOR_OVERTEMP = "overtemp"
 SENSOR_OVERVOLTAGE = "overvoltage"
 SENSOR_POWER = "power"
 SENSOR_POWER_FACTOR = "power_factor"
+SENSOR_SMOKE = "smoke"
 SENSOR_SSID = "ssid"
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_VOLTAGE = "voltage"
@@ -193,12 +202,13 @@ TOPIC_RPC = "~rpc"
 TOPIC_STATUS_CLOUD = "~status/cloud"
 TOPIC_STATUS_DEVICE_POWER = "~status/devicepower:0"
 TOPIC_STATUS_RPC = "~status/rpc"
+TOPIC_STATUS_SMOKE = "~status/smoke:0"
 TOPIC_STATUS_SYS = "~status/sys"
 TOPIC_STATUS_WIFI = "~status/wifi"
 TOPIC_SWITCH_RELAY = "~status/switch:{relay}"
 TOPIC_TEMPERATURE = "~status/temperature:0"
 
-TPL_BATTERY = "{{value_json.battery.percent}}"
+TPL_BATTERY = "{%if value_json.battery.percent%}{{value_json.battery.percent}}{%endif%}"
 TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD_INDEPENDENT = "{%if value_json.connected%}ON{%else%}OFF{%endif%}"
 TPL_CURRENT = "{{value_json.current|round(1)}}"
@@ -229,6 +239,7 @@ TPL_RELAY_OVERTEMP = (
 TPL_RELAY_OVERVOLTAGE = (
     "{%if ^overvoltage^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
 )
+TPL_SMOKE = "{%if value_json.alarm%}ON{%else%}OFF{%endif%}"
 TPL_TEMPERATURE = "{{value_json.temperature.tC|round(1)}}"
 TPL_TEMPERATURE_INDEPENDENT = "{{value_json.tC|round(1)}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.sys.uptime)|timestamp_local}}"
@@ -263,12 +274,21 @@ DEVICE_TRIGGER_MAP = {
     EVENT_SINGLE_PUSH: TRIGGER_BUTTON_SHORT_PRESS,
 }
 
+DESCRIPTION_BUTTON_MUTE_ALARM = {
+    KEY_ICON: "mdi:volume-mute",
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_NAME: "Mute Alarm",
+    KEY_PAYLOAD_PRESS: "{{^id^:1,^src^:^{source}^,^method^:^Smoke.Mute^}}",
+    KEY_AVAILABILITY_TOPIC: TOPIC_STATUS_SMOKE,
+    KEY_AVAILABILITY_TEMPLATE: "{%if value_json.alarm%}online{%else%}offline{%endif%}",
+}
 DESCRIPTION_BUTTON_RESTART = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_RESTART,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
     KEY_NAME: "Restart",
-    KEY_PAYLOAD_PRESS: "{{^id^:1,^src^:^{device_id}^,^method^:^Shelly.Reboot^}}",
+    KEY_PAYLOAD_PRESS: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Reboot^}}",
 }
 DESCRIPTION_BATTERY = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY,
@@ -482,6 +502,13 @@ DESCRIPTION_SLEEPING_SENSOR_CLOUD = {
     KEY_STATE_TOPIC: TOPIC_STATUS_CLOUD,
     KEY_VALUE_TEMPLATE: TPL_CLOUD_INDEPENDENT,
 }
+DESCRIPTION_SENSOR_SMOKE = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_SMOKE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Smoke",
+    KEY_STATE_TOPIC: TOPIC_STATUS_SMOKE,
+    KEY_VALUE_TEMPLATE: TPL_SMOKE,
+}
 DESCRIPTION_SLEEPING_SENSOR_FIRMWARE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_UPDATE,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -551,7 +578,7 @@ DESCRIPTION_UPDATE_FIRMWARE = {
     KEY_LATEST_VERSION_TEMPLATE: TPL_FIRMWARE_STABLE,
     KEY_LATEST_VERSION_TOPIC: TOPIC_STATUS_RPC,
     KEY_NAME: "Firmware",
-    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{device_id}^,^method^:^Shelly.Update^,^params^:{{^stage^:^stable^}}}}",
+    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Update^,^params^:{{^stage^:^stable^}}}}",
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE,
 }
@@ -562,7 +589,7 @@ DESCRIPTION_UPDATE_FIRMWARE_BETA = {
     KEY_LATEST_VERSION_TEMPLATE: TPL_FIRMWARE_BETA,
     KEY_LATEST_VERSION_TOPIC: TOPIC_STATUS_RPC,
     KEY_NAME: "Firmware beta",
-    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{device_id}^,^method^:^Shelly.Update^,^params^:{{^stage^:^beta^}}}}",
+    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Update^,^params^:{{^stage^:^beta^}}}}",
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE,
 }
@@ -731,6 +758,42 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20220308,
     },
+    MODEL_PLUS_PLUG_S: {
+        ATTR_NAME: "Shelly Plus Plug S",
+        ATTR_MODEL_ID: "SNPL-00112EU",
+        ATTR_BINARY_SENSORS: {
+            SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD,
+            SENSOR_FIRMWARE: {},
+        },
+        ATTR_BUTTONS: {
+            BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART,
+            BUTTON_UPDATE_FIRMWARE: {},
+        },
+        ATTR_RELAYS: 1,
+        ATTR_RELAY_BINARY_SENSORS: {
+            SENSOR_OVERPOWER: DESCRIPTION_SENSOR_OVERPOWER,
+            SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP,
+            SENSOR_OVERVOLTAGE: DESCRIPTION_SENSOR_OVERVOLTAGE,
+        },
+        ATTR_RELAY_SENSORS: {
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_CURRENT,
+            SENSOR_ENERGY: DESCRIPTION_SENSOR_ENERGY,
+            SENSOR_POWER: DESCRIPTION_SENSOR_POWER,
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_TEMPERATURE,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_VOLTAGE,
+        },
+        ATTR_SENSORS: {
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20221205,
+    },
     MODEL_PLUS_PLUG_US: {
         ATTR_NAME: "Shelly Plus Plug US",
         ATTR_MODEL_ID: "SNPL-00116US",
@@ -766,6 +829,25 @@ SUPPORTED_MODELS = {
             UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
         },
         ATTR_MIN_FIRMWARE_DATE: 20220211,
+    },
+    MODEL_PLUS_SMOKE: {
+        ATTR_BATTERY_POWERED: True,
+        ATTR_NAME: "Shelly Plus Smoke",
+        ATTR_MODEL_ID: "SNSN-0031Z",
+        ATTR_BINARY_SENSORS: {
+            SENSOR_CLOUD: DESCRIPTION_SLEEPING_SENSOR_CLOUD,
+            SENSOR_FIRMWARE: DESCRIPTION_SLEEPING_SENSOR_FIRMWARE,
+            SENSOR_SMOKE: DESCRIPTION_SENSOR_SMOKE,
+        },
+        ATTR_BUTTONS: {BUTTON_MUTE_ALARM: DESCRIPTION_BUTTON_MUTE_ALARM},
+        ATTR_SENSORS: {
+            SENSOR_BATTERY: DESCRIPTION_BATTERY,
+            SENSOR_LAST_RESTART: DESCRIPTION_SLEEPING_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SLEEPING_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SLEEPING_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SLEEPING_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20221209,
     },
     MODEL_PLUS_WALL_DIMMER: {
         ATTR_NAME: "Shelly Plus Wall Dimmer",
@@ -1067,10 +1149,10 @@ def get_cover(cover_id, profile):
         KEY_VALUE_TEMPLATE: "{%if value_json.state!=^calibrating^%}{{value_json.state}}{%endif%}",
         KEY_POSITION_TEMPLATE: "{%if is_number(value_json.get(^current_pos^))%}{{value_json.current_pos}}{%endif%}",
         KEY_SET_POSITION_TOPIC: TOPIC_RPC,
-        KEY_SET_POSITION_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.GoToPosition^,^params^:{{^id^:{cover_id},^pos^:{{{{position}}}}}}}}",
-        KEY_PAYLOAD_OPEN: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.Open^,^params^:{{^id^:{cover_id}}}}}",
-        KEY_PAYLOAD_CLOSE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.Close^,^params^:{{^id^:{cover_id}}}}}",
-        KEY_PAYLOAD_STOP: f"{{^id^:1,^src^:^{device_id}^,^method^:^Cover.Stop^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_SET_POSITION_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.GoToPosition^,^params^:{{^id^:{cover_id},^pos^:{{{{position}}}}}}}}",
+        KEY_PAYLOAD_OPEN: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Open^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_PAYLOAD_CLOSE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Close^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_PAYLOAD_STOP: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Stop^,^params^:{{^id^:{cover_id}}}}}",
         KEY_AVAILABILITY: availability,
         KEY_UNIQUE_ID: f"{device_id}-{cover_id}".lower(),
         KEY_QOS: qos,
@@ -1095,8 +1177,8 @@ def get_switch(relay_id, relay_type, profile):
     payload = {
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_PAYLOAD_OFF: f"{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
-        KEY_PAYLOAD_ON: f"{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
+        KEY_PAYLOAD_OFF: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
+        KEY_PAYLOAD_ON: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_VALUE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_STATE_OFF: VALUE_OFF,
@@ -1126,8 +1208,8 @@ def get_relay_light(relay_id, relay_type, profile):
         KEY_SCHEMA: "template",
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
-        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
+        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_AVAILABILITY: availability,
@@ -1154,7 +1236,7 @@ def get_relay_fan(relay_id, relay_type, profile):
     payload = {
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_TEMPLATE: f"{{%if value==^ON^%}}{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}{{%else%}}{{^id^:1,^src^:^{device_id}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}{{%endif%}}",
+        KEY_COMMAND_TEMPLATE: f"{{%if value==^ON^%}}{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}{{%else%}}{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}{{%endif%}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_STATE_VALUE_TEMPLATE: "{%if value_json.output%}ON{%else%}OFF{%endif%}",
         KEY_AVAILABILITY: availability,
@@ -1178,8 +1260,8 @@ def get_light(light_id):
         KEY_SCHEMA: "template",
         KEY_NAME: light_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:false}}}}",
-        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{device_id}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:true{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}}}}}",
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:false}}}}",
+        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:true{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}}}}}",
         KEY_STATE_TOPIC: TOPIC_LIGHT.format(light=light_id),
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_BRIGHTNESS_TEMPLATE: "{{value_json.brightness|float|multiply(2.55)|round}}",
@@ -1385,15 +1467,19 @@ def get_button(button, description):
     payload = {
         KEY_NAME: f"{device_name} {description[KEY_NAME]}",
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_PAYLOAD_PRESS: description[KEY_PAYLOAD_PRESS].format(device_id=device_id),
+        KEY_PAYLOAD_PRESS: description[KEY_PAYLOAD_PRESS].format(source=HOME_ASSISTANT),
         KEY_ENABLED_BY_DEFAULT: str(description[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{device_id}-{button}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
 
+    if description.get(KEY_AVAILABILITY_TOPIC):
+        payload[KEY_AVAILABILITY_TOPIC] = description[KEY_AVAILABILITY_TOPIC]
+        payload[KEY_AVAILABILITY_TEMPLATE] = description[KEY_AVAILABILITY_TEMPLATE]
+    elif availability:
+        payload[KEY_AVAILABILITY] = availability
     if description.get(KEY_DEVICE_CLASS):
         payload[KEY_DEVICE_CLASS] = description[KEY_DEVICE_CLASS]
     if description.get(KEY_ENTITY_CATEGORY):
@@ -1427,7 +1513,7 @@ def get_update(update, description):
     if description.get(KEY_PAYLOAD_INSTALL):
         payload[KEY_COMMAND_TOPIC] = TOPIC_RPC
         payload[KEY_PAYLOAD_INSTALL] = description[KEY_PAYLOAD_INSTALL].format(
-            device_id=device_id
+            source=HOME_ASSISTANT
         )
     if description.get(KEY_DEVICE_CLASS):
         payload[KEY_DEVICE_CLASS] = description[KEY_DEVICE_CLASS]
