@@ -9,13 +9,14 @@ Google Dark Theme:
   # Header:
   app-header-background-color: rgb(23, 23, 23)
   app-header-text-color: rgb(198, 203, 210)
+  app-header-selection-bar-color: var(--primary-color)
+  app-header-edit-background-color: rgb(136, 136, 136)
   # Main Interface Colors
   primary-color: rgb(138, 180, 248)
-  light-primary-color: var(--primary-color)
   primary-background-color: rgb(23, 23, 23)
   secondary-background-color: rgb(32, 33, 36)
   divider-color: var(--primary-background-color)
-  accent-color: rgb(138, 180, 248)
+  accent-color: var(--primary-color)
   # Text
   primary-text-color: rgb(242, 242, 242)
   secondary-text-color: rgb(166, 166, 166)
@@ -25,15 +26,15 @@ Google Dark Theme:
   sidebar-icon-color: rgb(169, 177, 188)
   sidebar-text-color: rgb(198, 203, 210)
   sidebar-background-color: rgb(32, 33, 36)
-  sidebar-selected-background-color: var(--primary-background-color)
   sidebar-selected-icon-color: rgb(138, 180, 248)
   sidebar-selected-text-color: var(--sidebar-selected-icon-color)
   # Buttons
   paper-item-icon-color: rgb(169, 177, 188)
   paper-item-icon-active-color: rgb(138, 180, 248)
+  mdc-button-outline-color: rgb(138, 180, 248)
   # States and Badges
-  state-icon-color: rgb(138, 180, 248)
-  state-icon-active-color: rgb(169, 177, 188)
+  state-icon-color: var(--paper-item-icon-color)
+  state-icon-active-color: var(--paper-item-icon-active-color)
   state-icon-unavailable-color: var(--disabled-text-color)
   # Sliders
   paper-slider-knob-color: rgb(138, 180, 248)
@@ -42,8 +43,8 @@ Google Dark Theme:
   paper-slider-active-color: var(--paper-slider-knob-color)
   paper-slider-secondary-color: var(--light-primary-color)
   # Labels
-  label-badge-background-color: rgb(32, 33, 36)
-  label-badge-text-color: rgb(198, 203, 210)
+  label-badge-background-color: var(--secondary-background-color)
+  label-badge-text-color: var(--primary-text-color)
   label-badge-red: rgb(208, 101, 104)
   label-badge-green: rgb(128, 200, 132)
   label-badge-blue: rgb(138, 180, 248)
@@ -51,8 +52,8 @@ Google Dark Theme:
   label-badge-gray: rgb(95, 98, 103)
   # Cards
   card-background-color: rgb(32, 33, 36)
-  ha-card-border-radius: "10px"
-  ha-card-box-shadow: 1px 1px 5px 0px rgb(12, 12, 14)
+  ha-card-background: rgb(32, 33, 36)
+  ha-card-border-color: rgb(42, 43, 46)
   paper-dialog-background-color: var(--card-background-color)
   paper-listbox-background-color: var(--card-background-color)
   paper-card-background-color: var(--card-background-color)
@@ -70,20 +71,23 @@ Google Dark Theme:
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
   data-table-background-color: var(--primary-background-color)
-  mdc-checkbox-unchecked-color: rgb(169, 177, 188)
   # Dropdowns
-  material-background-color: var(--secondary-background-color)
-  material-secondary-background-color: var(--primary-background-color)
-  mdc-theme-surface: var(--primary-background-color)
+  material-background-color: var(--table-row-background-color)
+  material-secondary-background-color: var(--table-row-alternative-background-color)
+  mdc-theme-surface: var(--secondary-background-color)
   # Pre/Code
   markdown-code-background-color: rgb(23, 23, 23)
+  code-editor-background-color: rgb(23, 23, 23)
   # Checkboxes
-  mdc-select-fill-color: rgb(32, 33, 36)
+  mdc-checkbox-unchecked-color: rgb(169, 177, 188)
+  mdc-checkbox-disable-color: var(--disabled-text-color)
+  mdc-select-fill-color: rgb(42, 43, 46)
   mdc-select-ink-color: var(--primary-text-color)
   mdc-select-label-ink-color: var(--secondary-text-color)
   mdc-select-idle-line-color: var(--primary-text-color)
   mdc-select-dropdown-icon-color: var(--secondary-text-color)
   mdc-select-hover-line-color: var(--accent-color)
+  mdc-text-field-fill-color: var(--mdc-select-fill-color)
   # Input
   input-fill-color: var(--secondary-background-color)
   input-dropdown-icon-color: var(--secondary-text-color)
@@ -91,3 +95,6 @@ Google Dark Theme:
   input-label-ink-color: var(--secondary-text-color)
   input-idle-line-color: var(--primary-text-color)
   input-hover-line-color: var(--accent-color)
+  #RGB
+  rgb-primary-text-color: 169, 177, 188
+  rgb-primary-color: 169, 177, 188
