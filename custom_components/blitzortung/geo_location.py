@@ -1,8 +1,8 @@
 """Support for Blitzortung geo location events."""
 import bisect
-import hashlib
 import logging
 import time
+import uuid
 
 from homeassistant.components.geo_location import GeolocationEvent
 from homeassistant.const import (
@@ -108,7 +108,7 @@ class BlitzortungEventManager:
             lightning["distance"],
             lightning["lat"],
             lightning["lon"],
-            "km",
+            self._unit,
             lightning["time"],
             lightning["status"],
             lightning["region"],
@@ -147,7 +147,7 @@ class BlitzortungEvent(GeolocationEvent):
         self._region = region
         self._publication_date = time / 1e9
         self._remove_signal_delete = None
-        self._strike_id = hashlib.sha1(f"{latitude}_{longitude}_{time}_{status}_{region}".encode()).hexdigest()
+        self._strike_id = str(uuid.uuid4()).replace("-", "")
         self._unit_of_measurement = unit
         self.entity_id = "geo_location.lightning_strike_{0}".format(self._strike_id)
 
