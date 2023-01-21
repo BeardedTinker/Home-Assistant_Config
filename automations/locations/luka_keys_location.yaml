@@ -1,0 +1,38 @@
+#####
+# Notification when keys are not matching location
+#
+#####
+
+alias: Luka keys arrival
+id: 6528720b-7a27-4498-a1d4-5e91ccae5fc6
+
+description: 'Notify when Luka keys are home but phone not'
+
+trigger:
+  - platform: zone
+    entity_id: device_tracker.luka_keys
+    zone: zone.home
+    event: enter
+
+condition:
+  condition: state
+  entity_id: person.luka
+  state: not_home
+  for:
+    hours: 0
+    minutes: 15
+    seconds: 0
+
+action:
+  - service: script.notify_engine
+    data:
+      who: 'luka'
+      title: '🛰️ *Luka location*'
+      value1: 'Luka, please start your Home Assistant app on iOS'
+      group: info
+      tag_id: 'information'
+      importance_id: default
+      color: 'green'
+      sticky: 'true'
+
+mode: single
