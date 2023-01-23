@@ -6,6 +6,6 @@
 platform: group
 name: kids
 services:
-  - service: iphone
-  - service: fig_lx1
+  - service: mobile_app_luka_iphone
+  - service: mobile_app_fig_lx1
   - service: ebroz_bot
