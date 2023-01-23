@@ -50,7 +50,7 @@ notify_engine:
           {% elif who == 'andrej' %}
             notify.mobile_app_ele_l29
           {% elif who == 'luka' %}
-            notify.mobile_app_iphone
+            notify.mobile_app_luka_iphone
           {% elif who == 'zita' %}
             notify.mobile_app_fig_lx1
           {% elif who == 'parents' %}

@@ -9,6 +9,6 @@ services:
   - service: mobile_app_ele_l29
   - service: mobile_app_eml_l29 
   - service: mobile_app_fig_lx1
-  - service: mobile_app_iphone
+  - service: mobile_app_luka_iphone
   - service: ebroz_bot
   - service: syno_chat
