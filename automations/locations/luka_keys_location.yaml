@@ -18,10 +18,10 @@ condition:
   condition: state
   entity_id: person.luka
   state: not_home
-  for:
-    hours: 0
-    minutes: 15
-    seconds: 0
+#  for:
+#    hours: 0
+#    minutes: 15
+#    seconds: 0
 
 action:
   - service: script.notify_engine
