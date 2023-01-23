@@ -100,7 +100,11 @@ KEY_ACTION_TEMPLATE = "act_tpl"
 KEY_ACTION_TOPIC = "act_t"
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY_TOPIC = "avty_t"
+KEY_BRIGHTNESS_COMMAND_TEMPLATE = "bri_cmd_tpl"
+KEY_BRIGHTNESS_COMMAND_TOPIC = "bri_cmd_t"
+KEY_BRIGHTNESS_STATE_TOPIC = "bri_stat_t"
 KEY_BRIGHTNESS_TEMPLATE = "bri_tpl"
+KEY_BRIGHTNESS_VALUE_TEMPLATE = "bri_val_tpl"
 KEY_COLOR_TEMP_TEMPLATE = "clr_temp_tpl"
 KEY_COMMAND_OFF_TEMPLATE = "cmd_off_tpl"
 KEY_COMMAND_ON_TEMPLATE = "cmd_on_tpl"
@@ -112,6 +116,11 @@ KEY_CURRENT_TEMPERATURE_TEMPLATE = "curr_temp_tpl"
 KEY_CURRENT_TEMPERATURE_TOPIC = "curr_temp_t"
 KEY_DEVICE = "dev"
 KEY_DEVICE_CLASS = "dev_cla"
+KEY_EFFECT_COMMAND_TEMPLATE = "fx_cmd_tpl"
+KEY_EFFECT_COMMAND_TOPIC = "fx_cmd_t"
+KEY_EFFECT_LIST = "fx_list"
+KEY_EFFECT_STATE_TOPIC = "fx_stat_t"
+KEY_EFFECT_VALUE_TEMPLATE = "fx_val_tpl"
 KEY_ENABLED_BY_DEFAULT = "en"
 KEY_ENTITY_CATEGORY = "ent_cat"
 KEY_ENTITY_PICTURE = "ent_pic"
@@ -155,6 +164,10 @@ KEY_PRECISION = "precision"
 KEY_QOS = "qos"
 KEY_RELEASE_URL = "rel_u"
 KEY_RETAIN = "ret"
+KEY_RGBW_COMMAND_TEMPLATE = "rgbw_cmd_tpl"
+KEY_RGBW_COMMAND_TOPIC = "rgbw_cmd_t"
+KEY_RGBW_STATE_TOPIC = "rgbw_stat_t"
+KEY_RGBW_VALUE_TEMPLATE = "rgbw_val_tpl"
 KEY_SCHEMA = "schema"
 KEY_SET_POSITION_TEMPLATE = "set_pos_tpl"
 KEY_SET_POSITION_TOPIC = "set_pos_t"
@@ -166,6 +179,7 @@ KEY_STATE_OPENING = "stat_opening"
 KEY_STATE_STOPPED = "stat_stopped"
 KEY_STATE_TEMPLATE = "stat_tpl"
 KEY_STATE_TOPIC = "stat_t"
+KEY_STATE_VALUE_TEMPLATE = "stat_val_tpl"
 KEY_STEP = "step"
 KEY_SUBTYPE = "stype"
 KEY_SW_VERSION = "sw"
@@ -1332,7 +1346,7 @@ OPTIONS_SENSOR_CHARGER_BUTTON = {
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_PAYLOAD_OFF: "false",
     KEY_PAYLOAD_ON: "true",
-    KEY_STATE_TOPIC: TOPIC_CHARGER,
+    KEY_STATE_TOPIC: TOPIC_SENSOR_CHARGER,
 }
 OPTIONS_SENSOR_CHARGER_SENSE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_BATTERY_CHARGING,
@@ -3124,50 +3138,50 @@ for light_id in range(rgbw_lights):
         light_name = device_config[f"light-{light_id}-name"]
     else:
         light_name = f"{device_name} Light {light_id}"
-    state_topic = f"~color/{light_id}/status"
-    command_topic = f"~color/{light_id}/set"
+    state_topic = f"~color/{light_id}"
+    status_topic = f"~color/{light_id}/status"
+    set_topic = f"~color/{light_id}/set"
+    command_topic = f"~color/{light_id}/command"
     availability_topic = TOPIC_ONLINE
     unique_id = f"{dev_id}-light-{light_id}".lower()
     config_topic = f"{disc_prefix}/light/{dev_id}-{light_id}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
     if mode == LIGHT_COLOR and model == MODEL_SHELLYRGBW2:
-        payload = (
-            '{"schema":"template",'
-            '"name":"' + light_name + '",'
-            '"cmd_t":"' + command_topic + '",'
-            '"stat_t":"' + state_topic + '",'
-            '"avty_t":"' + availability_topic + '",'
-            '"pl_avail":"true",'
-            '"pl_not_avail":"false",'
-            '"fx_list":["Off", "Meteor Shower", "Gradual Change", "Flash"],'
-            '"cmd_on_tpl":"{\\"turn\\":\\"on\\"{%if brightness is defined%},\\"gain\\":{{brightness|float|multiply(0.3922)|round}}{%endif%}{%if red is defined and green is defined and blue is defined%},\\"red\\":{{red}},\\"green\\":{{green}},\\"blue\\":{{blue}}{%endif%}{%if effect is defined%}{%if effect==\\"Meteor Shower\\"%}\\"effect\\":1{%elif effect==\\"Gradual Change\\"%}\\"effect\\":2{%elif effect==\\"Flash\\"%}\\"effect\\":3{%else%}\\"effect\\":0{%endif%}{%else%}\\"effect\\":0{%endif%}{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"cmd_off_tpl":"{\\"turn\\":\\"off\\"{%if transition is defined%},\\"transition\\":{{min(transition|multiply(1000),'
-            + str(MAX_TRANSITION)
-            + ')}}{%endif%}}",'
-            '"stat_tpl":"{%if value_json.ison%}on{%else%}off{%endif%}",'
-            '"bri_tpl":"{{value_json.gain|float|multiply(2.55)|round}}",'
-            '"r_tpl":"{{value_json.red}}",'
-            '"g_tpl":"{{value_json.green}}",'
-            '"b_tpl":"{{value_json.blue}}",'
-            '"fx_tpl":"{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Flash{%else%}Off{%endif%}",'
-            '"uniq_id":"' + unique_id + '",'
-            '"qos":"' + str(qos) + '",'
-            '"dev": {"cns":[["' + KEY_MAC + '","' + format_mac(mac) + '"]],'
-            '"name":"' + device_name + '",'
-            '"mdl":"' + model + '",'
-            '"sw":"' + fw_ver + '",'
-            '"mf":"' + ATTR_MANUFACTURER + '"},'
-            '"~":"' + default_topic + '"}'
-        )
+        payload = {
+            KEY_NAME: light_name,
+            KEY_AVAILABILITY_TOPIC: availability_topic,
+            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
+            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_COMMAND_TOPIC: command_topic,
+            KEY_STATE_TOPIC: state_topic,
+            KEY_STATE_VALUE_TEMPLATE: "{{value.lower()}}",
+            KEY_PAYLOAD_ON: VALUE_ON,
+            KEY_PAYLOAD_OFF: VALUE_OFF,
+            KEY_RGBW_COMMAND_TOPIC: set_topic,
+            KEY_RGBW_COMMAND_TEMPLATE: "{^red^:{{red}},^green^:{{green}},^blue^:{{blue}},^white^:{{white}}}",
+            KEY_RGBW_STATE_TOPIC: status_topic,
+            KEY_RGBW_VALUE_TEMPLATE: "{{value_json.red}},{{value_json.green}},{{value_json.blue}},{{value_json.white}}",
+            KEY_BRIGHTNESS_STATE_TOPIC: status_topic,
+            KEY_BRIGHTNESS_VALUE_TEMPLATE: "{{value_json.gain|float|multiply(2.55)|round(0)}}",
+            KEY_BRIGHTNESS_COMMAND_TOPIC: set_topic,
+            KEY_BRIGHTNESS_COMMAND_TEMPLATE: "{^gain^:{{value|float|multiply(0.3922)|round(0)}}}",
+            KEY_EFFECT_COMMAND_TOPIC: set_topic,
+            KEY_EFFECT_COMMAND_TEMPLATE: "{ {%if value==^Off^%}^effect^:0{%elif value==^Meteor Shower^%}^effect^:1{%elif value==^Gradual Change^%}^effect^:2{%elif value==^Flash^%}^effect^:3{%endif%} }",
+            KEY_EFFECT_LIST: ["Off", "Meteor Shower", "Gradual Change", "Flash"],
+            KEY_EFFECT_STATE_TOPIC: status_topic,
+            KEY_EFFECT_VALUE_TEMPLATE: "{%if value_json.effect==1%}Meteor Shower{%elif value_json.effect==2%}Gradual Change{%elif value_json.effect==3%}Flash{%else%}Off{%endif%}",
+            KEY_UNIQUE_ID: unique_id,
+            KEY_QOS: qos,
+            KEY_DEVICE: device_info,
+            "~": default_topic,
+        }
     else:
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
 
-    mqtt_publish(config_topic, payload, retain)
+    mqtt_publish(config_topic, payload, retain, json=True)
 
     # color light's binary sensors
     for sensor, sensor_options in light_binary_sensors.items():
