@@ -188,15 +188,13 @@ sensor:
     icon: "mdi:battery-high"
     device_class: "voltage"
     state_class: "measurement"
-    accuracy_decimals: 3
+    accuracy_decimals: 2
     filters:
       - multiply: 2
 #      # Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
           - 0.0 -> 0.0
-#          - 2.06 -> 1.89
           - 4.00 -> 4.00
-#      - lambda: return x * 2.0;
     id: ${devicename}_voltage
     update_interval: ${update_interval}
 
@@ -205,17 +203,14 @@ sensor:
     pin: 33
     name: "${upper_devicename} Battery %"
     unit_of_measurement: '%'
+    attenuation: 11db
+    accuracy_decimals: 2
     filters:
       - multiply: 2
       - calibrate_linear:
         # Map 0.0 (from sensor) to 0.0 (true value)
         - 3.18 -> 0.0
         - 4.20 -> 100.0
-#      - lambda: |-
-#          return ((id(${devicename}_voltage).state - 2.76) / 0.66402 * 100);  
-    # 2.76v = minimum
-    # 3.42402v = maximum       
-    # (current - minimum) * 100 / difference between max & mix 
     update_interval: ${update_interval}
 
 # Script section

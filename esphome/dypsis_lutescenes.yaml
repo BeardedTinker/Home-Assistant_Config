@@ -162,18 +162,18 @@ sensor:
   - platform: adc
     pin: 33
     name: "${upper_devicename} Battery"
-    attenuation: 6db
+    attenuation: 11db
     unit_of_measurement: "V"
     icon: "mdi:battery-high"
     device_class: "voltage"
     state_class: "measurement"
-    accuracy_decimals: 3
+    accuracy_decimals: 2
     filters:
-#      # Map 0.0 (from sensor) to 0.0 (true value)
+      - multiply: 2
+#       Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
           - 0.0 -> 0.0
-          - 2.06 -> 1.89
-      - lambda: return x * 2.0;
+          - 4.00 -> 4.00
     id: ${devicename}_voltage
     update_interval: ${update_interval}
 
@@ -182,12 +182,14 @@ sensor:
     pin: 33
     name: "${upper_devicename} Battery %"
     unit_of_measurement: '%'
+    attenuation: 11db
+    accuracy_decimals: 2
     filters:
-      - lambda: |-
-          return ((id(${devicename}_voltage).state - 2.76) / 0.78696  * 100);  
-    # 2.76v = minimum
-    # 3.54696v = maximum       
-    # (current - minimum) * 100 / difference between max & mix 
+      - multiply: 2
+#       Map 0.0 (from sensor) to 0.0 (true value)
+      - calibrate_linear:
+        - 3.18 -> 0.0
+        - 4.20 -> 100.0
     update_interval: ${update_interval}
 
 # Deep sleep section
