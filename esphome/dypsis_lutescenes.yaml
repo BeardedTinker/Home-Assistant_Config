@@ -37,7 +37,7 @@ wifi:
     static_ip: ${fixed_ip}
     gateway: 192.168.1.1
     subnet: 255.255.252.0
-#  fast_connect: enable
+  fast_connect: enable
 
 esphome:
   name: "${devicename}"
