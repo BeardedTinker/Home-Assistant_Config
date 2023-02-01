@@ -424,6 +424,10 @@ class ReolinkPush:
                         _LOGGER.info("SMTP pet detected")
                         handled = True
                         self._hass.bus.async_fire(self._event_id, {"motion": True, "smtp": "pet"})
+                    elif (event[0] == "Dog or cat Detected"):
+                        _LOGGER.info("SMTP pet detected")
+                        handled = True
+                        self._hass.bus.async_fire(self._event_id, {"motion": True, "smtp": "pet"})
 
         if not handled:
             _LOGGER.warning("SMTP received unhandled message: %s", envelope.content.decode('ascii'))
