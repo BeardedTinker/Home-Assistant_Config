@@ -1,0 +1,236 @@
+name: Madimack pool heatpump
+primary_entity:
+  entity: climate
+  dps:
+    - id: 1
+      name: hvac_mode
+      type: boolean
+      mapping:
+        - dps_val: false
+          value: "off"
+          icon: "mdi:hvac-off"
+          icon_priority: 1
+        - dps_val: true
+          value: "heat"
+          icon: "mdi:hot-tub"
+          icon_priority: 4
+    - id: 102
+      name: current_temperature
+      type: integer
+      readonly: true
+    - id: 103
+      name: temperature_unit
+      type: boolean
+      mapping:
+        - dps_val: false
+          value: F
+        - dps_val: true
+          value: C
+    - id: 105
+      name: hvac_action
+      type: string
+      readonly: true
+      mapping:
+        - dps_val: heating
+          value: heating
+        - dps_val: "1"
+          value: heating
+        - dps_val: cooling
+          value: cooling
+        - dps_val: "2"
+          value: cooling
+        - constraint: hvac_mode
+          conditions:
+            - dps_val: false
+              value: "off"
+            - dps_val: true
+              value: idle
+    - id: 106
+      name: temperature
+      type: integer
+      mapping:
+        - constraint: temperature_unit
+          conditions:
+            - dps_val: false
+              range:
+                min: 60
+                max: 115
+      range:
+        min: 18
+        max: 45
+    - id: 107
+      type: integer
+      name: min_temperature
+    - id: 108
+      type: integer
+      name: max_temperature
+    - id: 115
+      type: bitfield
+      name: error
+      mapping:
+        - dps_val: 0
+          value: OK
+        - dps_val: 4
+          value: Water Flow Protection
+          icon: "mdi:water-pump-off"
+          icon_priority: 2
+    - id: 116
+      type: bitfield
+      name: error_2
+    - id: 117
+      name: preset_mode
+      type: boolean
+      mapping:
+        - dps_val: false
+          value: Silent
+        - dps_val: true
+          value: Boost
+    - id: 118
+      name: unknown_118
+      type: boolean
+    - id: 126
+      name: unknown_126
+      type: integer
+    - id: 130
+      name: defrosting
+      type: boolean
+      hidden: true
+      mapping:
+        - dps_val: true
+          icon: "mdi:snowflake-melt"
+          icon_priority: 3
+    - id: 134
+      name: unknown_134
+      type: boolean
+    - id: 135
+      name: unknown_135
+      type: boolean
+    - id: 136
+      name: unknown_136
+      type: boolean
+    - id: 139
+      name: unknown_139
+      type: boolean
+    - id: 140
+      name: unknown_140
+      type: string
+secondary_entities:
+  - entity: sensor
+    category: diagnostic
+    name: Power level
+    icon: "mdi:signal"
+    class: power_factor
+    dps:
+      - id: 104
+        type: integer
+        name: sensor
+        unit: "%"
+        readonly: true
+  - entity: sensor
+    category: diagnostic
+    class: temperature
+    name: Evaporator coil pipe temperature
+    dps:
+      - id: 120
+        type: integer
+        name: sensor
+      - id: 103
+        name: unit
+        type: boolean
+        mapping:
+          - dps_val: false
+            value: F
+          - dps_val: true
+            value: C
+  - entity: binary_sensor
+    name: Water flow
+    class: problem
+    category: diagnostic
+    dps:
+      - id: 115
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 4
+            value: true
+          - value: false
+  - entity: binary_sensor
+    name: Defrosting
+    class: cold
+    category: diagnostic
+    dps:
+      - id: 130
+        type: boolean
+        name: sensor
+  - entity: sensor
+    category: diagnostic
+    class: temperature
+    name: Exhaust gas temperature
+    dps:
+      - id: 122
+        type: integer
+        name: sensor
+      - id: 103
+        name: unit
+        type: boolean
+        mapping:
+          - dps_val: false
+            value: F
+          - dps_val: true
+            value: C
+  - entity: sensor
+    category: diagnostic
+    class: temperature
+    name: Ambient temperature
+    dps:
+      - id: 124
+        type: integer
+        name: sensor
+      - id: 103
+        name: unit
+        type: boolean
+        mapping:
+          - dps_val: false
+            value: F
+          - dps_val: true
+            value: C
+  - entity: sensor
+    category: diagnostic
+    name: Compressor speed
+    class: power_factor
+    dps:
+      - id: 125
+        type: integer
+        name: sensor
+        unit: "%"
+  - entity: sensor
+    category: diagnostic
+    class: temperature
+    name: Cooling plate temperature
+    dps:
+      - id: 127
+        type: integer
+        name: sensor
+      - id: 103
+        name: unit
+        type: boolean
+        mapping:
+          - dps_val: false
+            value: F
+          - dps_val: true
+            value: C
+  - entity: sensor
+    category: diagnostic
+    name: EEV opening
+    dps:
+      - id: 128
+        name: sensor
+        type: integer
+  - entity: sensor
+    category: diagnostic
+    name: Fan speed
+    dps:
+      - id: 129
+        name: sensor
+        type: integer
+

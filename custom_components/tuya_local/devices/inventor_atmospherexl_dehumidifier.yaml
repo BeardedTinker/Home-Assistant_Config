@@ -1,0 +1,334 @@
+name: Inventor Atomsphere XL dehumidifier
+primary_entity:
+  entity: humidifier
+  class: dehumidifier
+  dps:
+    - id: 110
+      type: string
+      name: switch
+      mapping:
+        - dps_val: "air_purifier"
+          value: false
+        - dps_val: "dehumi_air"
+          value: true
+          constraint: main_switch
+          conditions:
+            - dps_val: false
+              invalid: true
+    - id: 1
+      name: main_switch
+      type: boolean
+      mapping:
+        - dps_val: false
+          icon: "mdi:air-humidifier-off"
+          icon_priority: 1
+        - dps_val: true
+          icon: "mdi:air-humidifier"
+          icon_priority: 3
+    - id: 3
+      type: string
+      name: humidity
+      range:
+        min: 0
+        max: 80
+      mapping:
+        - dps_val: "CO"
+          value: 0
+        - dps_val: "40"
+          value: 40
+        - dps_val: "45"
+          value: 45
+        - dps_val: "50"
+          value: 50
+        - dps_val: "55"
+          value: 55
+        - dps_val: "60"
+          value: 60
+        - dps_val: "65"
+          value: 65
+        - dps_val: "70"
+          value: 70
+        - dps_val: "75"
+          value: 75
+        - dps_val: "80"
+          value: 80
+    - id: 5
+      type: string
+      name: mode
+      mapping:
+        - dps_val: auto
+          value: Auto
+        - dps_val: manual
+          value: Manual
+        - dps_val: drying
+          value: Clothes
+        - dps_val: night
+          value: Sleep
+    - id: 19
+      type: bitfield
+      name: error_code
+# The following do not have descriptions in iot.tuya.com, the names
+# though can be obtained from the debugger.  But functionality needs
+# to be confirmed before making them separate entities
+    - id: 105
+      type: string
+      name: air_purifier
+secondary_entities:
+  - entity: fan
+    dps:
+      - id: 1
+        type: boolean
+        name: switch
+      - id: 4
+        name: speed
+        type: string
+        mapping:
+          - dps_val: low
+            value: 50
+            constraint: dehumid_mode
+            conditions:
+              - dps_val: air_purifier
+                value_redirect: fan_speed_purifier
+          - dps_val: high
+            value: 100
+            constraint: dehumid_mode
+            conditions:
+              - dps_val: air_purifier
+                value_redirect: fan_speed_purifier
+      - id: 8
+        name: oscillate
+        type: boolean
+      - id: 110
+        type: string
+        name: dehumid_mode
+        hidden: true
+      - id: 112
+        type: string
+        name: fan_speed_purifier
+        hidden: true
+        mapping:
+          - dps_val: low
+            value: 33
+          - dps_val: middle
+            value: 66
+          - dps_val: high
+            value: 100
+  - entity: sensor
+    class: humidity
+    name: Room humidity
+    dps:
+      - id: 6
+        type: integer
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    class: temperature
+    name: Room temperature
+    dps:
+      - id: 7
+        type: integer
+        name: sensor
+        unit: C
+        class: measurement
+  - entity: switch
+    category: config
+    name: Ionizer
+    icon: "mdi:creation"
+    dps:
+      - id: 10
+        name: switch
+        type: boolean
+  - entity: switch
+    category: config
+    name: UV sterilization
+    icon: "mdi:solar-power"
+    dps:
+      - id: 13
+        name: switch
+        type: boolean
+  - entity: sensor
+    class: pm25
+    name: PM2.5
+    dps:
+      - id: 15
+        type: integer
+        name: sensor
+        unit: ugm3
+  - entity: lock
+    name: Child lock
+    category: config
+    dps:
+      - id: 16
+        type: boolean
+        name: lock
+        mapping:
+          - dps_val: true
+            icon: "mdi:hand-back-right-off"
+          - dps_val: false
+            icon: "mdi:hand-back-right"
+  - entity: select
+    name: Timer
+    category: config
+    icon: "mdi:timer"
+    dps:
+      - id: 17
+        type: string
+        name: option
+        mapping:
+          - dps_val: "None"
+            value: "Off"
+          - dps_val: 1h
+            value: 1 hour
+          - dps_val: 2h
+            value: 2 hours
+          - dps_val: 3h
+            value: 3 hours
+          - dps_val: 4h
+            value: 4 hours
+          - dps_val: 5h
+            value: 5 hours
+          - dps_val: 6h
+            value: 6 hours
+          - dps_val: 7h
+            value: 7 hours
+          - dps_val: 8h
+            value: 8 hours
+          - dps_val: 9h
+            value: 9 hours
+  - entity: sensor
+    name: Timer
+    category: diagnostic
+    icon: "mdi:timer"
+    dps:
+      - id: 18
+        type: integer
+        name: sensor
+        unit: min
+  - entity: binary_sensor
+    class: cold
+    name: Defrost
+    category: diagnostic
+    dps:
+      - id: 19
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 32
+            value: true
+          - value: false
+  - entity: binary_sensor
+    class: problem
+    name: Tank full or missing
+    category: diagnostic
+    dps:
+      - id: 19
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 64
+            value: true
+          - value: false
+  - entity: binary_sensor
+    class: problem
+    name: Error
+    category: diagnostic
+    # Several errors are bundled here since they are actual faults and the
+    # recommended action is turn off for 10 minutes for all and get it serviced
+    # if the error persists.
+    dps:
+      - id: 19
+        type: bitfield
+        name: sensor
+        mapping:
+          # C1: Defrost sensor error
+          - dps_val: 1
+            value: true
+          # C1: Humidity/temperature sensor failure
+          - dps_val: 2
+            value: true
+          # C2: Possible refridgerant leakage (sensor temps too close)
+          - dps_val: 4
+            value: true
+          # 000: not described
+          - dps_val: 8
+            value: true
+          # 999: not described
+          - dps_val: 16
+            value: true
+          # no error / P1/P2/Replace_Hepa (covered by individual sensors)
+          - value: false
+  - entity: binary_sensor
+    class: problem
+    name: HEPA filter replacement
+    category: diagnostic
+    dps:
+      - id: 19
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 128
+            value: true
+          - value: false
+  - entity: binary_sensor
+    class: problem
+    name: High humidity
+    category: diagnostic
+    dps:
+      - id: 106
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+  - entity: binary_sensor
+    class: problem
+    name: Low humidity
+    category: diagnostic
+    dps:
+      - id: 107
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+  - entity: select
+    category: config
+    name: Purifier mode
+    icon: "mdi:cog"
+    dps:
+      - id: 105
+        type: string
+        name: option
+        mapping:
+        - dps_val: auto
+          value: Auto
+        - dps_val: manual
+          value: Manual
+        - dps_val: night
+          value: Sleep
+  - entity: select
+    category: config
+    name: Lighting
+    icon: "mdi:lightbulb"
+    dps:
+      - id: 111
+        type: string
+        name: option
+        mapping:
+          - dps_val: "1"
+            value: Display only
+          - dps_val: "2"
+            value: "Off"
+          - dps_val: "3"
+            value: "On"
+  - entity: sensor
+    category: diagnostic
+    name: Air quality
+    icon: "mdi:weather-dust"
+    dps:
+      - id: 108
+        type: string
+        name: sensor

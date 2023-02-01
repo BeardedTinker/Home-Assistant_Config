@@ -1,0 +1,77 @@
+name: Ledkia fan and light controller
+primary_entity:
+  entity: fan
+  dps:
+    - id: 60
+      type: boolean
+      name: switch
+    - id: 62
+      type: integer
+      name: speed
+      optional: true
+      range:
+        min: 1
+        max: 6
+      mapping:
+        - scale: 0.06
+    - id: 63
+      type: string
+      name: direction
+secondary_entities:
+  - entity: light
+    dps:
+      - id: 20
+        type: boolean
+        name: switch
+      - id: 21
+        type: string
+        name: color_mode
+        mapping:
+          - dps_val: white
+            value: color_temp
+      - id: 22
+        type: integer
+        name: brightness
+        range:
+          min: 10
+          max: 1000
+        mapping:
+          - scale: 3.92
+      - id: 23
+        type: integer
+        name: color_temp
+        range:
+          min: 0
+          max: 1000
+        optional: true
+        mapping:
+          - invert: true
+            step: 500
+      - id: 59
+        type: string
+        name: light_type
+        optional: true
+  - entity: number
+    name: Minimum brightness
+    icon: "mdi:brightness-6"
+    category: config
+    dps:
+      - id: 58
+        type: integer
+        name: value
+        optional: true
+        range:
+          min: 10
+          max: 1000
+  - entity: number
+    name: Fan timer
+    icon: "mdi:timer"
+    category: config
+    dps:
+      - id: 64
+        type: integer
+        name: value
+        range:
+          min: 0
+          max: 540
+        unit: min

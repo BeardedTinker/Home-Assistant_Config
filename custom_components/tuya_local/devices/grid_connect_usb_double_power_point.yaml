@@ -1,0 +1,178 @@
+# With limitation on reiterating same type of entity there is not much left to do to achieve full functionality.
+# However, it might complement existing Tuya v2 cloud integration or even localtuya by providing:
+# -  power reading
+# - child lock
+# - master switch (not very usable)
+
+name: Grid Connnect power metered double outlet with USB
+primary_entity:
+  entity: switch
+  category: config
+  name: Master
+  class: outlet
+  dps:
+    - id: 18
+      type: integer
+      name: current_a
+      readonly: true
+      mapping:
+        - scale: 1000
+    - id: 19
+      type: integer
+      name: current_power_w
+      readonly: true
+      mapping:
+        - scale: 10
+    - id: 20
+      type: integer
+      name: voltage_v
+      readonly: true
+      mapping:
+        - scale: 10
+    - id: 21
+      name: test_bit
+      type: integer
+      readonly: true
+    - id: 22
+      name: voltage_calibration
+      type: integer
+      readonly: true
+    - id: 23
+      name: current_calibration
+      type: integer
+      readonly: true
+    - id: 24
+      name: power_calibration
+      type: integer
+      readonly: true
+    - id: 25
+      name: energy_calibration
+      type: integer
+      readonly: true
+    - id: 101
+      name: switch
+      type: boolean
+secondary_entities:
+  - entity: lock
+    name: Child lock
+    category: config
+    dps:
+      - id: 40
+        name: lock
+        type: boolean
+        mapping:
+          - dps_val: true
+            icon: "mdi:account-lock"
+          - dps_val: false
+            icon: "mdi:account"
+  - entity: switch
+    class: outlet
+    name: Outlet 1
+    dps:
+      - id: 1
+        name: switch
+        type: boolean
+      - id: 9
+        name: countdown
+        type: integer
+      - id: 101
+        name: master
+        type: boolean
+        hidden: true
+  - entity: switch
+    class: outlet
+    name: Outlet 2
+    dps:
+      - id: 2
+        name: switch
+        type: boolean
+      - id: 10
+        name: countdown
+        type: integer
+      - id: 101
+        name: master
+        type: boolean
+        hidden: true
+  - entity: sensor
+    class: energy
+    category: diagnostic
+    name: Energy
+    dps:
+      - id: 17
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: Wh
+  - entity: sensor
+    class: current
+    category: diagnostic
+    name: Current
+    dps:
+      - id: 18
+        name: sensor
+        type: integer
+        class: measurement
+        unit: mA
+  - entity: sensor
+    class: power
+    category: diagnostic
+    name: Power
+    dps:
+      - id: 19
+        name: sensor
+        type: integer
+        class: measurement
+        unit: W
+        mapping:
+          - scale: 10
+  - entity: sensor
+    class: voltage
+    category: diagnostic
+    name: Voltage
+    dps:
+      - id: 20
+        name: sensor
+        type: integer
+        class: measurement
+        unit: V
+        mapping:
+          - scale: 10
+  - entity: select
+    category: config
+    name: Initial state
+    icon: "mdi:toggle-switch"
+    dps:
+      - id: 38
+        name: option
+        type: string
+        mapping:
+          - dps_val: "on"
+            value: "On"
+          - dps_val: "off"
+            value: "Off"
+          - dps_val: "memory"
+            value: "Last State"
+  - entity: number
+    name: Timer 1
+    icon: "mdi:timer"
+    category: config
+    dps:
+      - id: 9
+        type: integer
+        name: value
+        unit: s
+        range:
+          min: 0
+          max: 86400
+  - entity: number
+    name: Timer 2
+    icon: "mdi:timer"
+    category: config
+    dps:
+      - id: 10
+        type: integer
+        name: value
+        unit: s
+        range:
+          min: 0
+          max: 86400

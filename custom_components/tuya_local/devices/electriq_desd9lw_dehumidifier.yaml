@@ -1,0 +1,107 @@
+name: ElectriQ DESD9LW dehumidifier
+primary_entity:
+  entity: climate
+  dps:
+    - id: 1
+      name: hvac_mode
+      type: boolean
+      mapping:
+        - dps_val: false
+          icon: "mdi:air-humidifier-off"
+          value: "off"
+        - dps_val: true
+          constraint: mode
+          conditions:
+            - dps_val: "Auto"
+              value: "auto"
+              icon: "mdi:air-humidifier"
+            - dps_val: "Heater"
+              value: "heat"
+              icon: "mdi:fire"
+            - dps_val: "Dehumidity"
+              value: "dry"
+              icon: "mdi:water"
+            - dps_val: "Fan"
+              value: "fan_only"
+              icon: "mdi:fan"
+    - id: 2
+      type: integer
+      name: humidity
+      range:
+        min: 35
+        max: 80
+      mapping:
+        - step: 5
+    - id: 4
+      type: string
+      name: fan_mode
+      mapping:
+        - dps_val: "Low"
+          constraint: mode
+          conditions:
+            - dps_val: "Auto"
+              invalid: true
+          value: "Low"
+        - dps_val: "Medium"
+          constraint: mode
+          conditions:
+            - dps_val: "Auto"
+              invalid: true
+          value: "Medium"
+        - dps_val: "High"
+          constraint: mode
+          conditions:
+            - dps_val: "Auto"
+              invalid: true
+          value: "High"
+    - id: 5
+      name: mode
+      type: string
+      hidden: true
+    - id: 6
+      type: integer
+      name: current_humidity
+      readonly: true
+    - id: 7
+      type: integer
+      name: current_temperature
+      readonly: true
+    - id: 10
+      type: boolean
+      name: swing_mode
+      mapping:
+        - dps_val: false
+          value: "off"
+        - dps_val: true
+          value: "vertical"
+    - id: 101
+      type: integer
+      name: temperature
+      range:
+        min: 16
+        max: 30
+secondary_entities:
+  - entity: light
+    name: "UV sterilization"
+    icon: "mdi:solar-power"
+    dps:
+      - id: 15
+        name: switch
+        type: boolean
+  - entity: switch
+    name: "Ionizer"
+    icon: "mdi:creation"
+    dps:
+      - id: 12
+        name: switch
+        type: boolean
+  - entity: sensor
+    name: Current humidity
+    class: humidity
+    dps:
+      - id: 6
+        type: integer
+        name: sensor
+        class: measurement
+        unit: "%"
+        readonly: true

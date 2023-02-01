@@ -1,0 +1,61 @@
+name: Kogan panel heater
+legacy_type: kogan_heater
+primary_entity:
+  entity: climate
+  dps:
+    - id: 2
+      type: integer
+      range:
+        min: 15
+        max: 35
+      name: temperature
+    - id: 3
+      type: integer
+      name: current_temperature
+      readonly: true
+    - id: 4
+      type: string
+      mapping:
+        - dps_val: "Low"
+          value: "Low"
+        - dps_val: "High"
+          value: "High"
+      name: preset_mode
+    - id: 7
+      type: boolean
+      mapping:
+        - dps_val: false
+          value: "off"
+          icon: "mdi:radiator-disabled"
+        - dps_val: true
+          value: "heat"
+          icon: "mdi:radiator"
+      name: hvac_mode
+    - id: 8
+      type: integer
+      name: timer
+secondary_entities:
+  - entity: lock
+    name: Child lock
+    category: config
+    dps:
+      - id: 6
+        type: boolean
+        name: lock
+        mapping:
+          - dps_val: true
+            icon: "mdi:hand-back-right-off"
+          - dps_val: false
+            icon: "mdi:hand-back-right"
+  - entity: number
+    name: Timer
+    icon: "mdi:timer"
+    category: config
+    dps:
+      - id: 8
+        name: value
+        type: integer
+        unit: min
+        range:
+          min: 0
+          max: 1440
