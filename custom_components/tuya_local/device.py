@@ -22,6 +22,7 @@ from .const import (
     API_PROTOCOL_VERSIONS,
     CONF_DEVICE_ID,
     CONF_LOCAL_KEY,
+    CONF_POLL_ONLY,
     CONF_PROTOCOL_VERSION,
     DOMAIN,
 )
@@ -45,6 +46,7 @@ class TuyaLocalDevice(object):
         local_key,
         protocol_version,
         hass: HomeAssistant,
+        poll_only=False,
     ):
         """
         Represents a Tuya-based device.
@@ -54,6 +56,8 @@ class TuyaLocalDevice(object):
             address (str): The network address.
             local_key (str): The encryption key.
             protocol_version (str | number): The protocol version.
+            hass (HomeAssistant): The Home Assistant instance.
+            poll_only (bool): True if the device should be polled only
         """
         self._name = name
         self._children = []
@@ -65,7 +69,8 @@ class TuyaLocalDevice(object):
         self._api = tinytuya.Device(dev_id, address, local_key)
         self._refresh_task = None
         self._protocol_configured = protocol_version
-
+        self._poll_only = poll_only
+        self._temporary_poll = False
         self._reset_cached_state()
 
         self._hass = hass
@@ -81,7 +86,7 @@ class TuyaLocalDevice(object):
         self._CACHE_TIMEOUT = 120
         # More attempts are needed in auto mode so we can cycle through all
         # the possibilities a couple of times
-        self._AUTO_CONNECTION_ATTEMPTS = 9
+        self._AUTO_CONNECTION_ATTEMPTS = len(API_PROTOCOL_VERSIONS) * 2 + 1
         self._SINGLE_PROTO_CONNECTION_ATTEMPTS = 3
         self._lock = Lock()
 
@@ -142,9 +147,17 @@ class TuyaLocalDevice(object):
         self._refresh_task = None
 
     def register_entity(self, entity):
+        # If this is the first child entity to register, refresh the device
+        # state
+        should_poll = len(self._children) == 0
+
         self._children.append(entity)
         if not self._running and not self._startup_listener:
             self.start()
+        if self.has_returned_state:
+            entity.async_schedule_update_ha_state()
+        elif should_poll:
+            entity.async_schedule_update_ha_state(True)
 
     async def async_unregister_entity(self, entity):
         self._children.remove(entity)
@@ -170,22 +183,32 @@ class TuyaLocalDevice(object):
                 f"{self.name} receive loop terminated by exception {t}",
             )
 
+    @property
+    def should_poll(self):
+        return self._poll_only or self._temporary_poll or not self.has_returned_state
+
+    def pause(self):
+        self._temporary_poll = True
+
+    def resume(self):
+        self._temporary_poll = False
+
     async def async_receive(self):
         """Receive messages from a persistent connection asynchronously."""
         # If we didn't yet get any state from the device, we may need to
         # negotiate the protocol before making the connection persistent
-        persist = self.has_returned_state
+        persist = not self.should_poll
         self._api.set_socketPersistent(persist)
         while self._running:
             try:
                 last_cache = self._cached_state["updated_at"]
                 now = time()
-                if persist != self.has_returned_state:
+                if persist == self.should_poll:
                     # use persistent connections after initial communication
                     # has been established.  Until then, we need to rotate
                     # the protocol version, which seems to require a fresh
                     # connection.
-                    persist = self.has_returned_state
+                    persist = not self.should_poll
                     self._api.set_socketPersistent(persist)
 
                 if now - last_cache > self._CACHE_TIMEOUT:
@@ -300,6 +323,8 @@ class TuyaLocalDevice(object):
         new_state = self._api.status()
         self._cached_state = self._cached_state | new_state["dps"]
         self._cached_state["updated_at"] = time()
+        for entity in self._children:
+            entity.async_schedule_update_ha_state()
         _LOGGER.debug(
             f"{self.name} refreshed device state: {json.dumps(new_state, default=non_json)}",
         )
@@ -345,29 +370,25 @@ class TuyaLocalDevice(object):
 
     async def _send_pending_updates(self):
         pending_properties = self._get_unsent_properties()
-        payload = self._api.generate_payload(
-            tinytuya.CONTROL,
-            pending_properties,
-        )
 
         _LOGGER.debug(
             f"{self.name} sending dps update: {json.dumps(pending_properties, default=non_json)}"
         )
 
         await self._retry_on_failed_connection(
-            lambda: self._send_payload(payload),
+            lambda: self._set_values(pending_properties),
             "Failed to update device state.",
         )
 
-    def _send_payload(self, payload):
+    def _set_values(self, properties):
         try:
             self._lock.acquire()
-            self._api.send(payload)
+            self._api.set_multiple_values(properties, nowait=True)
             self._cached_state["updated_at"] = 0
             now = time()
             self._last_connection = now
             pending_updates = self._get_pending_updates()
-            for key in list(pending_updates):
+            for key in properties.keys():
                 pending_updates[key]["updated_at"] = now
                 pending_updates[key]["sent"] = True
         finally:
@@ -399,6 +420,8 @@ class TuyaLocalDevice(object):
                 if i + 1 == connections:
                     self._reset_cached_state()
                     self._api_protocol_working = False
+                    for entity in self._children:
+                        entity.async_schedule_update_ha_state()
                     _LOGGER.error(error_message)
                 if not self._api_protocol_working:
                     await self._rotate_api_protocol_version()
@@ -473,6 +496,7 @@ def setup_device(hass: HomeAssistant, config: dict):
         config[CONF_LOCAL_KEY],
         config[CONF_PROTOCOL_VERSION],
         hass,
+        config[CONF_POLL_ONLY],
     )
     hass.data[DOMAIN][config[CONF_DEVICE_ID]] = {"device": device}
 

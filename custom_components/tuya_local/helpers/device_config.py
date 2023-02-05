@@ -518,7 +518,6 @@ class TuyaDpsConfig:
             except ValueError:
                 self.stringify = False
         else:
-
             self.stringify = False
 
         result = value
@@ -591,7 +590,13 @@ class TuyaDpsConfig:
 
             for c in m.get("conditions", {}):
                 if "value" in c and str(c["value"]) == str(value):
-                    return m
+                    c_dp = self._entity.find_dps(m.get("constraint"))
+                    # only consider the condition a match if we can change
+                    # the dp to match, or it already matches
+                    if not c_dp.readonly or device.get_property(c_dp.id) == c.get(
+                        "dps_val"
+                    ):
+                        return m
                 if "value" not in c and "value_mirror" in c:
                     r_dps = self._entity.find_dps(c["value_mirror"])
                     if str(r_dps.get_value(device)) == str(value):
@@ -628,6 +633,9 @@ class TuyaDpsConfig:
         """Return the dps values that would be set when setting to value"""
         result = value
         dps_map = {}
+        if self.readonly:
+            return dps_map
+
         mapping = self._find_map_for_value(value, device)
         if mapping:
             replaced = False
@@ -740,7 +748,7 @@ def available_configs():
     """List the available config files."""
     _CONFIG_DIR = dirname(config_dir.__file__)
 
-    for (path, dirs, files) in walk(_CONFIG_DIR):
+    for path, dirs, files in walk(_CONFIG_DIR):
         for basename in sorted(files):
             if fnmatch(basename, "*.yaml"):
                 yield basename

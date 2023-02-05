@@ -1,102 +1,97 @@
-name: RGBCW Lightbulb
-products:
-  - id: aok3caeleulg1neh
-    name: Lijun smart bulb RGBCW
+name: Scenario light socket
 primary_entity:
-  entity: light
+  entity: switch
+  class: outlet
   dps:
-    - id: 20
+    - id: 1
       type: boolean
       name: switch
-    - id: 21
-      type: string
-      name: color_mode
-      mapping:
-        - dps_val: white
-          value: color_temp
-        - dps_val: colour
-          value: rgbw
-        - dps_val: scene
-          value: Scene
-        - dps_val: music
-          value: Music
-    - id: 22
-      name: brightness
-      type: integer
-      range:
-        min: 10
-        max: 1000
-      mapping:
-        - scale: 3.92
-    - id: 23
-      name: color_temp
-      type: integer
-      optional: true
-      range:
-        min: 0
-        max: 1000
-      mapping:
-        - invert: true
-    - id: 24
-      name: rgbhsv
-      type: hex
-      optional: true
-      format:
-        - name: h
-          bytes: 2
-          range:
-            min: 0
-            max: 360
-        - name: s
-          bytes: 2
-          range:
-            min: 0
-            max: 1000
-        - name: v
-          bytes: 2
-          range:
-            min: 0
-            max: 1000
-    - id: 25
-      name: scene_data
-      type: hex
-      optional: true
-    - id: 27
-      name: music_data
-      type: hex
-      optional: true
-    - id: 28
-      name: control_data
-      type: hex
-      optional: true
-    - id: 30
-      name: rhythm_mode
-      type: hex
-      optional: true
-    - id: 31
-      name: sleep_mode
-      type: hex
-      optional: true
-    - id: 32
-      name: wakeup_mode
-      type: hex
-      optional: true
 secondary_entities:
+  - entity: light
+    name: Night light
+    dps:
+      - id: 27
+        name: switch
+        type: boolean
+      - id: 28
+        type: string
+        name: color_mode
+        mapping:
+          - dps_val: colour
+            value: rgbw
+          - dps_val: scene
+            value: Scene
+          - dps_val: music
+            value: Music
+      - id: 31
+        name: rgbhsv
+        type: hex
+        optional: true
+        format:
+          - name: h
+            bytes: 2
+            range:
+              min: 0
+              max: 360
+          - name: s
+            bytes: 2
+            range:
+              min: 0
+              max: 1000
+          - name: v
+            bytes: 2
+            range:
+              min: 0
+              max: 1000
   - entity: number
-    name: Timer
     category: config
     icon: "mdi:timer"
+    name: Timer
     dps:
-      - id: 26
-        name: value
+      - id: 33
         type: integer
+        name: value
+        unit: min
         range:
           min: 0
           max: 86400
-        unit: min
         mapping:
           - scale: 60
             step: 60
+  - entity: sensor
+    name: Current
+    class: current
+    category: diagnostic
+    dps:
+      - id: 4
+        type: integer
+        name: sensor
+        unit: mA
+        class: measurement
+  - entity: sensor
+    name: Voltage
+    class: voltage
+    category: diagnostic
+    dps:
+      - id: 5
+        type: integer
+        name: sensor
+        unit: V
+        class: measurement
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Power
+    class: power
+    category: diagnostic
+    dps:
+      - id: 6
+        type: integer
+        name: sensor
+        unit: W
+        class: measurement
+        mapping:
+          - scale: 10
   - entity: select
     name: Scene
     icon: "mdi:palette"
@@ -108,7 +103,6 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: "000c0d0000000000000000c80000"
-            # color: brown, static
             value: Night
           - dps_val: "010e0d0000840000000003e801f4"
             # color: white, static
@@ -131,3 +125,7 @@ secondary_entities:
           - dps_val: "07464602000003e803e800000000464602007803e803e80000000046460200f003e803e800000000464602003d03e803e80000000046460200ae03e803e800000000464602011303e803e800000000"
             # color* R+G+B+Y+C+V, Breath, Mid speed
             value: Gorgeous
+
+
+
+

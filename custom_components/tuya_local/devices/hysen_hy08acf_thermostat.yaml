@@ -46,14 +46,20 @@ primary_entity:
           value: Manual
     - id: 5
       type: string
-      name: fan_speed
+      name: fan_mode
       mapping:
         - dps_val: low
           value: Low
         - dps_val: med
+          value: Medium
+        - dps_val: high
           value: High
         - dps_val: auto
           value: Auto
+          constraint: operation
+          conditions:
+            - dps_val: ventilate
+              invalid: true
     - id: 13
       type: bitfield
       name: fault_code
@@ -66,15 +72,32 @@ primary_entity:
     - id: 118
       name: operation
       type: string
-      hidden: true
+#      hidden: true
     - id: 119
-      name: valve
+      name: hvac_action
       type: string
       mapping:
         - dps_val: "0"
-          value: closed
+          constraint: hvac_mode
+          conditions:
+            - dps_val: false
+              value: "off"
+            - dps_val: true
+              value: idle
         - dps_val: "1"
-          value: open
+          constraint: hvac_mode
+          conditions:
+            - dps_val: false
+              value: "off"
+            - dps_val: true
+              value: heating
+        - dps_val: "2"
+          constraint: hvac_mode
+          conditions:
+            - dps_val: false
+              value: "off"
+            - dps_val: true
+              value: cooling
     - id: 121
       name: program
       type: integer
@@ -87,6 +110,9 @@ secondary_entities:
       - id: 7
         type: boolean
         name: lock
+      - id: 105
+        type: string
+        name: lock_type
   - entity: binary_sensor
     name: Fault
     class: problem
@@ -153,19 +179,6 @@ secondary_entities:
         range:
           min: 5
           max: 15
-  - entity: select
-    name: Child lock type
-    category: config
-    icon: "mdi:hand-back-right-off"
-    dps:
-      - id: 105
-        type: string
-        name: option
-        mapping:
-          - dps_val: lockfull
-            value: Full lock
-          - dps_val: lockhalf
-            value: Semi lock
   - entity: switch
     name: Fan ECO
     category: config

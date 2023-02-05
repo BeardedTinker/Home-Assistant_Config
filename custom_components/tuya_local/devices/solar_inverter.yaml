@@ -1,5 +1,4 @@
 name: Smart Inverter
-icon: "mdi:solar-power"
 products:
   - id: xcgsq9ggffz7lqhh
     name: SG700MD
