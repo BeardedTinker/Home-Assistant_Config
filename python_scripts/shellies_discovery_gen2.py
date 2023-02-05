@@ -37,6 +37,7 @@ BUTTON_UPDATE_FIRMWARE = "update_firmware"
 
 CONF_DISCOVERY_PREFIX = "discovery_prefix"
 CONF_QOS = "qos"
+CONF_SCRIPT_PREFIX = "script_prefix"
 
 DEFAULT_DISC_PREFIX = "homeassistant"
 
@@ -171,6 +172,11 @@ SENSOR_POWER_FACTOR = "power_factor"
 SENSOR_SMOKE = "smoke"
 SENSOR_SSID = "ssid"
 SENSOR_TEMPERATURE = "temperature"
+SENSOR_TOTAL_ACTIVE_ENERGY = "total_active_energy"
+SENSOR_TOTAL_ACTIVE_POWER = "total_active_power"
+SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY = "total_active_returned_energy"
+SENSOR_TOTAL_APPARENT_POWER = "total_apparent_power"
+SENSOR_TOTAL_CURRENT = "total_current"
 SENSOR_VOLTAGE = "voltage"
 SENSOR_WIFI_IP = "wifi_ip"
 SENSOR_WIFI_SIGNAL = "wifi_signal"
@@ -205,12 +211,14 @@ STATE_CLASS_MEASUREMENT = "measurement"
 STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 
 TOPIC_COVER = "~status/cover:{cover}"
+TOPIC_EMDATA = "~status/emdata:{emeter_id}"
 TOPIC_EMETER = "~status/em:{emeter_id}"
 TOPIC_HUMIDITY = "~status/humidity:0"
 TOPIC_INPUT = "~status/input:{relay}"
 TOPIC_LIGHT = "~status/light:{light}"
 TOPIC_ONLINE = "~online"
 TOPIC_RPC = "~rpc"
+TOPIC_SHELLIES_DISCOVERY_SCRIPT = "shelies_discovery_script"
 TOPIC_STATUS_CLOUD = "~status/cloud"
 TOPIC_STATUS_DEVICE_POWER = "~status/devicepower:0"
 TOPIC_STATUS_RPC = "~status/rpc"
@@ -228,7 +236,18 @@ TPL_EMETER_ACTIVE_POWER = "{{{{value_json.{phase}_act_power|round(1)}}}}"
 TPL_EMETER_APPARENT_POWER = "{{{{value_json.{phase}_aprt_power|round(1)}}}}"
 TPL_EMETER_CURRENT = "{{{{value_json.{phase}_current|round(1)}}}}"
 TPL_EMETER_N_CURRENT = "{%if value_json.n_current%}{{value_json.n_current|round(1)}}{%else%}unknown{%endif%}"
+TPL_EMETER_PHASE_TOTAL_ACTIVE_ENERGY = (
+    "{{{{value_json.{phase}_total_act_energy|round(1)}}}}"
+)
+TPL_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY = (
+    "{{{{value_json.{phase}_total_act_ret_energy|round(1)}}}}"
+)
 TPL_EMETER_POWER_FACTOR = "{{{{value_json.{phase}_pf}}}}"
+TPL_EMETER_TOTAL_ACTIVE_ENERGY = "{{value_json.total_act|round(1)}}"
+TPL_EMETER_TOTAL_ACTIVE_POWER = "{{value_json.total_act_power|round(1)}}"
+TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = "{{value_json.total_act_ret|round(1)}}"
+TPL_EMETER_TOTAL_APPARENT_POWER = "{{value_json.total_aprt_power|round(1)}}"
+TPL_EMETER_TOTAL_CURRENT = "{{value_json.total_current|round(1)}}"
 TPL_EMETER_VOLTEAGE = "{{{{value_json.{phase}_voltage|round(1)}}}}"
 TPL_ENERGY = "{{value_json.aenergy.total|round(2)}}"
 TPL_ETH_IP = "{{value_json.eth.ip}}"
@@ -362,6 +381,15 @@ DESCRIPTION_SENSOR_N_CURRENT = {
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_EMETER_N_CURRENT,
 }
+DESCRIPTION_SENSOR_TOTAL_CURRENT = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_CURRENT,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Total current",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_UNIT: UNIT_AMPERE,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_CURRENT,
+}
 DESCRIPTION_SENSOR_CURRENT_COVER = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_CURRENT,
     KEY_ENABLED_BY_DEFAULT: False,
@@ -452,6 +480,51 @@ DESCRIPTION_SENSOR_EMETER_ACTIVE_POWER = {
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_EMETER_ACTIVE_POWER,
 }
+DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_ENERGY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Phase {phase} total active energy",
+    KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
+    KEY_STATE_TOPIC: TOPIC_EMDATA,
+    KEY_UNIT: UNIT_WATTH,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_PHASE_TOTAL_ACTIVE_ENERGY,
+}
+DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Phase {phase} total active returned energy",
+    KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
+    KEY_STATE_TOPIC: TOPIC_EMDATA,
+    KEY_UNIT: UNIT_WATTH,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY,
+}
+DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_ENERGY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Total active energy",
+    KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
+    KEY_STATE_TOPIC: TOPIC_EMDATA.format(emeter_id=0),
+    KEY_UNIT: UNIT_WATTH,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_ENERGY,
+}
+DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Total active returned energy",
+    KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
+    KEY_STATE_TOPIC: TOPIC_EMDATA.format(emeter_id=0),
+    KEY_UNIT: UNIT_WATTH,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY,
+}
+DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_POWER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_POWER,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Total active power",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_UNIT: UNIT_WATT,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_POWER,
+}
 DESCRIPTION_SENSOR_EMETER_APPARENT_POWER = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_APPARENT_POWER,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -460,6 +533,15 @@ DESCRIPTION_SENSOR_EMETER_APPARENT_POWER = {
     KEY_STATE_TOPIC: TOPIC_EMETER,
     KEY_UNIT: UNIT_VA,
     KEY_VALUE_TEMPLATE: TPL_EMETER_APPARENT_POWER,
+}
+DESCRIPTION_SENSOR_EMETER_TOTAL_APPARENT_POWER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_APPARENT_POWER,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Total apparent power",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_UNIT: UNIT_VA,
+    KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_APPARENT_POWER,
 }
 DESCRIPTION_SENSOR_POWER_COVER = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_POWER,
@@ -1140,19 +1222,26 @@ SUPPORTED_MODELS = {
             SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
             SENSOR_N_CURRENT: DESCRIPTION_SENSOR_N_CURRENT,
             SENSOR_DEVICE_TEMPERATURE: DESCRIPTION_SENSOR_DEVICE_TEMPERATURE,
+            SENSOR_TOTAL_CURRENT: DESCRIPTION_SENSOR_TOTAL_CURRENT,
+            SENSOR_TOTAL_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_POWER,
+            SENSOR_TOTAL_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_APPARENT_POWER,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY,
         },
         ATTR_EMETER_SENSORS: {
-            SENSOR_CURRENT: DESCRIPTION_SENSOR_EMETER_CURRENT,
-            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_EMETER_VOLTAGE,
             SENSOR_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_ACTIVE_POWER,
             SENSOR_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_APPARENT_POWER,
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_EMETER_CURRENT,
             SENSOR_POWER_FACTOR: DESCRIPTION_SENSOR_EMETER_POWER_FACTOR,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_EMETER_VOLTAGE,
         },
         ATTR_UPDATES: {
             UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
             UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
         },
-        ATTR_MIN_FIRMWARE_DATE: 20221221,
+        ATTR_MIN_FIRMWARE_DATE: 20230202,
     },
     MODEL_PRO_4PM: {
         ATTR_NAME: "Shelly Pro 4PM",
@@ -1741,31 +1830,35 @@ def configure_device():
 def install_script(script_id):
     """Install the script on the device."""
     topic = encode_config_topic(f"{device_id}/rpc")
+    if script_prefix:
+        script_topic = f"{script_prefix}/TOPIC_SHELLIES_DISCOVERY_SCRIPT"
+    else:
+        script_topic = TOPIC_SHELLIES_DISCOVERY_SCRIPT
 
     logger.info("Installing the script with ID: %s", script_id)  # noqa: F821
 
     payload = {
         "id": 1,
-        "src": "shelies_discovery_script",
+        "src": script_topic,
         "method": "Script.Create",
         "params": {"name": SCRIPT_CURRENT_NAME},
     }
     mqtt_publish(topic, payload)
     payload = {
         "id": 1,
-        "src": "shelies_discovery_script",
+        "src": script_topic,
         "method": "Script.PutCode",
         "params": {"id": script_id, "code": SCRIPT_CODE},
     }
     mqtt_publish(topic, payload)
     payload = {
         "id": 1,
-        "src": "shelies_discovery_script",
+        "src": script_topic,
         "method": "Script.Start",
         "params": {"id": script_id},
     }
     mqtt_publish(topic, payload)
-    payload = f"{{'id': 1, 'src': 'shelies_discovery_script', 'method': 'Script.SetConfig', 'params': {{'id': {script_id}, 'config': {{'enable': true}}}}}}"
+    payload = f"{{'id': 1, 'src': {script_topic}, 'method': 'Script.SetConfig', 'params': {{'id': {script_id}, 'config': {{'enable': true}}}}}}"
     mqtt_publish(topic, payload)
 
 
@@ -1839,7 +1932,13 @@ if model not in SUPPORTED_MODELS:
 device_config = data["device_config"]  # noqa: F821
 firmware_id = device_config["sys"]["device"][ATTR_FW_ID]
 
-if model != MODEL_PLUS_HT and script_installed() is False:
+script_prefix = data.get(CONF_SCRIPT_PREFIX, None)  # noqa: F821
+if script_prefix and (script_prefix[-1] == "/" or " " in script_prefix):
+    raise ValueError(
+        f"Script prefix value {script_prefix} is not valid, check script configuration"
+    )
+
+if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE) and script_installed() is False:
     removed = remove_old_script_versions()
     if not removed:
         script_id = get_script_id()
