@@ -182,7 +182,10 @@ def get_entity_state(hass, entry, friendly_names=False):
     if entity and entity.attributes.get("friendly_name", None):
         if friendly_names:
             name = entity.name
-    state = "missing" if not entity else entity.state.replace("unavailable", "unavail")
+    # fix for #75, some integrations return non-string states
+    state = (
+        "missing" if not entity else str(entity.state).replace("unavailable", "unavail")
+    )
     return state, name
 
 
@@ -269,6 +272,12 @@ def parse(hass, folders, ignored_files, root=None):
             _LOGGER.debug("%s parsed", yaml_file)
         except OSError as exception:
             _LOGGER.error("Unable to parse %s: %s", yaml_file, exception)
+        except UnicodeDecodeError as exception:
+            _LOGGER.error(
+                "Unable to parse %s: %s. Use UTF-8 encoding to avoid this error",
+                yaml_file,
+                exception,
+            )
 
     # remove ignored entities and services from resulting lists
     ignored_items = get_config(hass, CONF_IGNORED_ITEMS, [])
