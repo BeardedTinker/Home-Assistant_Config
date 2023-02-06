@@ -1831,7 +1831,7 @@ def install_script(script_id):
     """Install the script on the device."""
     topic = encode_config_topic(f"{device_id}/rpc")
     if script_prefix:
-        script_topic = f"{script_prefix}/TOPIC_SHELLIES_DISCOVERY_SCRIPT"
+        script_topic = f"{script_prefix}/{TOPIC_SHELLIES_DISCOVERY_SCRIPT}"
     else:
         script_topic = TOPIC_SHELLIES_DISCOVERY_SCRIPT
 
