@@ -1829,7 +1829,7 @@ def configure_device():
 
 def install_script(script_id):
     """Install the script on the device."""
-    topic = encode_config_topic(f"{device_id}/rpc")
+    topic = encode_config_topic(f"{default_topic}rpc")
     if script_prefix:
         script_topic = f"{script_prefix}/{TOPIC_SHELLIES_DISCOVERY_SCRIPT}"
     else:
@@ -1930,6 +1930,11 @@ if model not in SUPPORTED_MODELS:
     )
 
 device_config = data["device_config"]  # noqa: F821
+default_topic = f"{device_config['mqtt']['topic_prefix']}/"
+if " " in default_topic:
+    raise ValueError(
+        f"MQTT prefix value {default_topic} is not valid, check device configuration"
+    )
 firmware_id = device_config["sys"]["device"][ATTR_FW_ID]
 
 script_prefix = data.get(CONF_SCRIPT_PREFIX, None)  # noqa: F821
@@ -1962,7 +1967,6 @@ if mac is None:
 
 device_name = device_config["sys"]["device"][ATTR_NAME]
 device_url = f"http://{device_id}.local/"
-default_topic = f"{device_config['mqtt']['topic_prefix']}/"
 wakeup_period = device_config["sys"].get("sleep", {}).get("wakeup_period", 0)
 
 if not device_name:
