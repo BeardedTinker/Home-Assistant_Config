@@ -1,0 +1,13 @@
+#####
+# Check state on Smart Inverter if Power is over 0W
+# Set binary sensor to TRUE if yes
+#####
+
+platform: template
+sensors:
+  smart_inverter_on:
+    friendly_name: Smart Inverter State
+    entity_id:
+      - sensor.smart_inverter_power
+    value_template: >-
+      {{ states('sensor.smart_inverter_power') | float(0) > 0 }}
