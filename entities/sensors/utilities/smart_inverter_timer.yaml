@@ -1,13 +1,13 @@
 #####
 # Track time Smarrt Inverter was in On state
-#
+# Last 24h
 #####
 
 platform: history_stats
 name: Smart Inverter Daily
-#friendly_name:
 entity_id: binary_sensor.smart_inverter_on
 state: "on"
 type: time
-start: "{{ now() - timedelta(hours=24) }}"
-end: "{{ now() }}"
+end: '{{ now() }}'
+duration:
+  hours: 24

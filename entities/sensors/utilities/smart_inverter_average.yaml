@@ -1,0 +1,11 @@
+#####
+# Track Average power of solar inverter
+# 24 hours period
+#####
+
+platform: statistics
+name: "Smart Inverter average power"
+entity_id: sensor.smart_inverter_power
+state_characteristic: average_step
+max_age:
+  hours: 24

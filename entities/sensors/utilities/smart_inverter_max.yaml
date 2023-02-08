@@ -1,0 +1,11 @@
+#####
+# Track Maximum power of solar inverter
+# 24 hours period
+#####
+
+  platform: statistics
+  name: "Smart Inverter max power"
+  entity_id: sensor.smart_inverter_power
+  state_characteristic: value_max
+  max_age:
+    hours: 24

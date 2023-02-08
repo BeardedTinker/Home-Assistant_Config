@@ -1,0 +1,11 @@
+#####
+# Track Minimum power of solar inverter
+# 24 hours period
+#####
+
+platform: statistics
+name: "Smart Inverter min power"
+entity_id: sensor.smart_inverter_power
+state_characteristic: value_min
+max_age:
+  hours: 24
