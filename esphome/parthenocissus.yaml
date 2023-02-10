@@ -20,10 +20,14 @@
 substitutions:
   devicename: "parthenocissus"
   upper_devicename: Parthenocissus
-  awake_duration: 6s      # set how long to stay awake - NOT less then 10sec
+  awake_duration: 10s      # set how long to stay awake - NOT less then 10sec
   sleep_duration: 90min    # set how long to sleep in minutes
-  update_interval: 5s
+  update_interval: 15min   # set how fast to update sensors
   fixed_ip: 192.168.2.53
+  moisture_min: '1.410'    # dry
+  moisture_max: '2.834'    # moist
+  conductivity_min: '0.0'
+  conductivity_max: '1.1'
 
 #############################################
 ##### Nothing to change after this line #####
@@ -38,15 +42,20 @@ wifi:
     static_ip: ${fixed_ip}
     gateway: 192.168.1.1
     subnet: 255.255.252.0
-#  fast_connect: enable
+  fast_connect: enable
 
 esphome:
   name: "${devicename}"
-  platform: ESP32
-  board: esp32dev
   on_boot:
     then:
+      - wait_until:
+          condition:
+            wifi.connected:
+          timeout: 10s
       - script.execute: consider_deep_sleep
+
+esp32:
+  board: lolin_d32
 
 ota:
   on_end:
@@ -58,6 +67,8 @@ ota:
             entity_id: input_boolean.${devicename}_prevent_deep_sleep
 
 api:
+  encryption:
+    key: "MrPaieKNShqfBTtUO0/z5Ih8SsbGtMULwZBPis1pUP8="
 
 mqtt:
   broker: !secret mqtt_ip
@@ -73,11 +84,22 @@ i2c:
     scl: 26
     scan: true
     setup_priority: -200
-  
+
+# Time from HA
+time:
+  - platform: homeassistant
+
+# Button for restart
+button:
+  - platform: restart
+    name: 'Restart - ${devicename}'
+
 # Power switch
 switch:
   - platform: gpio
-    pin: GPIO4
+    pin:
+      number: 4
+      mode: INPUT_PULLUP
     name: "${upper_devicename} Power Sensors"
     id: spower
     restore_mode: ALWAYS_ON
@@ -123,17 +145,38 @@ sensor:
 
 # Soil humidity %
   - platform: adc
-    pin: 32
+    pin: GPIO32
     name: "${upper_devicename} Soil Moisture"
+    id: ${devicename}_moisture
+    icon: 'mdi:watering-can'
     attenuation: 11db
     unit_of_measurement: '%'
+    accuracy_decimals: 2
+    device_class: 'moisture'
+    state_class: 'measurement'
     filters:
       # 1.410v = in water
       # 2.834v = dry
-      lambda: |-
-        return (2.834 - x) * 100.0 / (2.834 - 1.410);
+      - calibrate_linear: 
+          - ${moisture_min} -> 0.0 
+          - ${moisture_max} -> 100.0
+#      lambda: |-
+#        return (2.834 - x) * 100.0 / (2.834 - 1.410);
     update_interval: ${update_interval}
-    
+
+# Fertilizer sensor
+  - platform: adc
+    pin: GPIO34
+    name: "${upper_devicename} Salt"
+    unit_of_measurement: '%'
+    accuracy_decimals: 2
+    filters:
+      # Map 0.0 (from sensor) to 0.0 (true value)
+      - calibrate_linear:
+          - ${conductivity_min} -> 0.0 
+          - ${conductivity_max} -> 100.0 
+    update_interval: ${update_interval}
+
 # Lux sensor
   - platform: bh1750
     i2c_id: bus_a
@@ -145,20 +188,10 @@ sensor:
     state_class: "measurement"
     setup_priority: -300
     update_interval: ${update_interval}
-  
-# Fertilizer sensor
-  - platform: adc
-    pin: GPIO34
-    name: "${upper_devicename} Salt"
-    unit_of_measurement: '%'
-    accuracy_decimals: 4
     filters:
-      # Map 0.0 (from sensor) to 0.0 (true value)
-      - calibrate_linear:
-          - 0.0 -> 0.0
-          - 1.1 -> 100.0  
-    update_interval: ${update_interval}
-    
+      - lambda: |-
+          return x * 200.0;
+
 # Battery V
   - platform: adc
     pin: 33
@@ -171,8 +204,8 @@ sensor:
     accuracy_decimals: 2
     filters:
       - multiply: 2
-#       Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
+#       Map 0.0 (from sensor) to 0.0 (true value)
           - 0.0 -> 0.0
           - 4.00 -> 4.00
     id: ${devicename}_voltage
@@ -187,8 +220,8 @@ sensor:
     accuracy_decimals: 2
     filters:
       - multiply: 2
-#       Map 0.0 (from sensor) to 0.0 (true value)
       - calibrate_linear:
+#       Map 0.0 (from sensor) to 0.0 (true value)
         - 3.18 -> 0.0
         - 4.20 -> 100.0
     update_interval: ${update_interval}
