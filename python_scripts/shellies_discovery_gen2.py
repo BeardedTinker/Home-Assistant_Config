@@ -1340,10 +1340,10 @@ def get_cover(cover_id, profile):
         KEY_VALUE_TEMPLATE: "{%if value_json.state!=^calibrating^%}{{value_json.state}}{%endif%}",
         KEY_POSITION_TEMPLATE: "{%if is_number(value_json.get(^current_pos^))%}{{value_json.current_pos}}{%endif%}",
         KEY_SET_POSITION_TOPIC: TOPIC_RPC,
-        KEY_SET_POSITION_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.GoToPosition^,^params^:{{^id^:{cover_id},^pos^:{{{{position}}}}}}}}",
-        KEY_PAYLOAD_OPEN: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Open^,^params^:{{^id^:{cover_id}}}}}",
-        KEY_PAYLOAD_CLOSE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Close^,^params^:{{^id^:{cover_id}}}}}",
-        KEY_PAYLOAD_STOP: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Cover.Stop^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_SET_POSITION_TEMPLATE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Cover.GoToPosition^,^params^:{{^id^:{cover_id},^pos^:{{{{position}}}}}}}}",
+        KEY_PAYLOAD_OPEN: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Cover.Open^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_PAYLOAD_CLOSE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Cover.Close^,^params^:{{^id^:{cover_id}}}}}",
+        KEY_PAYLOAD_STOP: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Cover.Stop^,^params^:{{^id^:{cover_id}}}}}",
         KEY_AVAILABILITY: availability,
         KEY_UNIQUE_ID: f"{device_id}-{cover_id}".lower(),
         KEY_QOS: qos,
@@ -1368,8 +1368,8 @@ def get_switch(relay_id, relay_type, profile):
     payload = {
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_PAYLOAD_OFF: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
-        KEY_PAYLOAD_ON: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
+        KEY_PAYLOAD_OFF: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
+        KEY_PAYLOAD_ON: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_VALUE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_STATE_OFF: VALUE_OFF,
@@ -1399,8 +1399,8 @@ def get_relay_light(relay_id, relay_type, profile):
         KEY_SCHEMA: "template",
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
-        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}",
+        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_AVAILABILITY: availability,
@@ -1427,7 +1427,7 @@ def get_relay_fan(relay_id, relay_type, profile):
     payload = {
         KEY_NAME: relay_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_TEMPLATE: f"{{%if value==^ON^%}}{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}{{%else%}}{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}{{%endif%}}",
+        KEY_COMMAND_TEMPLATE: f"{{%if value==^ON^%}}{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:true}}}}{{%else%}}{{^id^:1,^src^:^{source_topic}^,^method^:^Switch.Set^,^params^:{{^id^:{relay_id},^on^:false}}}}{{%endif%}}",
         KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY.format(relay=relay_id),
         KEY_STATE_VALUE_TEMPLATE: "{%if value_json.output%}ON{%else%}OFF{%endif%}",
         KEY_AVAILABILITY: availability,
@@ -1451,8 +1451,8 @@ def get_light(light_id):
         KEY_SCHEMA: "template",
         KEY_NAME: light_name,
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:false}}}}",
-        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{HOME_ASSISTANT}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:true{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}}}}}",
+        KEY_COMMAND_OFF_TEMPLATE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:false}}}}",
+        KEY_COMMAND_ON_TEMPLATE: f"{{^id^:1,^src^:^{source_topic}^,^method^:^Light.Set^,^params^:{{^id^:{light_id},^on^:true{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}}}}}",
         KEY_STATE_TOPIC: TOPIC_LIGHT.format(light=light_id),
         KEY_STATE_TEMPLATE: "{%if value_json.output%}on{%else%}off{%endif%}",
         KEY_BRIGHTNESS_TEMPLATE: "{{value_json.brightness|float|multiply(2.55)|round}}",
@@ -1677,7 +1677,7 @@ def get_button(button, description):
     payload = {
         KEY_NAME: f"{device_name} {description[KEY_NAME]}",
         KEY_COMMAND_TOPIC: TOPIC_RPC,
-        KEY_PAYLOAD_PRESS: description[KEY_PAYLOAD_PRESS].format(source=HOME_ASSISTANT),
+        KEY_PAYLOAD_PRESS: description[KEY_PAYLOAD_PRESS].format(source=source_topic),
         KEY_ENABLED_BY_DEFAULT: str(description[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{device_id}-{button}".lower(),
         KEY_QOS: qos,
@@ -1723,7 +1723,7 @@ def get_update(update, description):
     if description.get(KEY_PAYLOAD_INSTALL):
         payload[KEY_COMMAND_TOPIC] = TOPIC_RPC
         payload[KEY_PAYLOAD_INSTALL] = description[KEY_PAYLOAD_INSTALL].format(
-            source=HOME_ASSISTANT
+            source=source_topic
         )
     if description.get(KEY_DEVICE_CLASS):
         payload[KEY_DEVICE_CLASS] = description[KEY_DEVICE_CLASS]
@@ -1942,6 +1942,11 @@ if script_prefix and (script_prefix[-1] == "/" or " " in script_prefix):
     raise ValueError(
         f"Script prefix value {script_prefix} is not valid, check script configuration"
     )
+
+if script_prefix:
+    source_topic = f"{script_prefix}/{HOME_ASSISTANT}"
+else:
+    source_topic = HOME_ASSISTANT
 
 if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE) and script_installed() is False:
     removed = remove_old_script_versions()
