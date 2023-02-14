@@ -2,11 +2,12 @@
 # Mold indicator sensor Zita room
 # Calculating possibiliy of mold
 # Check video here: https://youtu.be/8KwRPF5NoI8
+# Indoor: 21.92; Outdoor: 7.09; Critical: 15; Calibration: 1.888748419721871
 #####
 
 platform: mold_indicator
 name: Zita room mold indicator
-indoor_temp_sensor: sensor.luka_room_temperature
-indoor_humidity_sensor: sensor.luka_room_humidity
+indoor_temp_sensor: sensor.zita_room_temperature
+indoor_humidity_sensor: sensor.zita_room_humidity
 outdoor_temp_sensor: sensor.balcony_temperature
-calibration_factor: 1.9288
+calibration_factor: 1.888748419721871
