@@ -1,0 +1,12 @@
+{
+  "domain": "mold_risk_index",
+  "name": "Mold Risk Index",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Strixx76/mold_risk_index",
+  "issue_tracker": "https://github.com/Strixx76/mold_risk_index/issues",
+  "codeowners": ["@Strixx76"],
+  "iot_class": "calculated",
+  "config_flow": true,
+  "dependencies": [],
+  "requirements": []
+}
