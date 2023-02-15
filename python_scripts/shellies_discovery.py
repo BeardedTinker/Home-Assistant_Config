@@ -351,6 +351,7 @@ MODEL_SHELLYUNI_PREFIX = "shellyuni"
 NUMBER_BOOST_TIME = "boost_time"
 NUMBER_MINIMAL_VALVE_POSITION = "minimal_valve_position"
 NUMBER_VALVE_POSITION = "valve_position"
+NUMBER_LIGHT_BRIGHTNESS = "brightness"
 
 OFF_DELAY = 1
 
@@ -514,6 +515,7 @@ TPL_COLOR_TEMP_WHITE_LIGHT = (
     "{{((1000000/(value_json.temp|int,2700)|max)|round(0,^floor^))}}"
 )
 TPL_COMMAND_ON_WHITE_LIGHT = "{{^turn^:^on^{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}{{%if transition is defined%}},^transition^:{{{{min(transition|multiply(1000), {max_transition})}}}}{{%endif%}}}}"
+TPL_COMMAND_SET_BRIGHTNESS_WHITE_LIGHT = "{{^brightness^:{{{{value|float|round}}}}}}"
 TPL_COMMAND_ON_WHITE_LIGHT_DUO = "{{^turn^:^on^{{%if brightness is defined%}},^brightness^:{{{{brightness|float|multiply(0.3922)|round}}}}{{%endif%}}{{%if color_temp is defined%}},^temp^:{{{{(1000000/(color_temp|int))|round(0,^floor^)}}}}{{%endif%}}{{%if transition is defined%}},^transition^:{{{{min(transition|multiply(1000), {max_transition})}}}}{{%endif%}}}}"
 TPL_COMMAND_PROFILES = "{{value.split(^ ^)[-1]}}"
 TPL_CONCENTRATION = (
@@ -685,6 +687,18 @@ OPTIONS_NUMBER_MINIMAL_VALVE_POSITION = {
     KEY_VALUE_TEMPLATE: TPL_VALVE_MIN_POSITION,
     KEY_UNIT: UNIT_PERCENT,
 }
+OPTIONS_NUMBER_LIGHT_BRIGHTNESS = {
+    KEY_COMMAND_TOPIC: TOPIC_LIGHT_SET,
+    KEY_COMMAND_TEMPLATE: TPL_COMMAND_SET_BRIGHTNESS_WHITE_LIGHT,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_MIN: 0,
+    KEY_MAX: 100,
+    KEY_STEP: 1,
+    KEY_ICON: "mdi:brightness-percent",
+    KEY_STATE_TOPIC: TOPIC_LIGHT_STATUS,
+    KEY_VALUE_TEMPLATE: "{{value_json.brightness}}",
+    KEY_UNIT: UNIT_PERCENT,
+}
 OPTIONS_BOOST_TIME = {
     KEY_COMMAND_TOPIC: TOPIC_COMMAND_BOOST_MINUTES,
     KEY_ENABLED_BY_DEFAULT: True,
@@ -724,7 +738,7 @@ if use_kwh:
     OPTIONS_SENSOR_ENERGY_METER = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         KEY_ENABLED_BY_DEFAULT: True,
-        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
         KEY_STATE_TOPIC: TOPIC_METER_ENERGY,
         KEY_UNIT: UNIT_KWH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN_KWH,
@@ -732,7 +746,7 @@ if use_kwh:
     OPTIONS_SENSOR_RETURNED_ENERGY_METER = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         KEY_ENABLED_BY_DEFAULT: True,
-        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
         KEY_STATE_TOPIC: TOPIC_METER_RETURNED_ENERGY,
         KEY_UNIT: UNIT_KWH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN_KWH,
@@ -805,7 +819,7 @@ else:
     OPTIONS_SENSOR_ENERGY_METER = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         KEY_ENABLED_BY_DEFAULT: True,
-        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
         KEY_STATE_TOPIC: TOPIC_METER_ENERGY,
         KEY_UNIT: UNIT_WH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN,
@@ -813,7 +827,7 @@ else:
     OPTIONS_SENSOR_RETURNED_ENERGY_METER = {
         KEY_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         KEY_ENABLED_BY_DEFAULT: True,
-        KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
         KEY_STATE_TOPIC: TOPIC_METER_RETURNED_ENERGY,
         KEY_UNIT: UNIT_WH,
         KEY_VALUE_TEMPLATE: TPL_ENERGY_WMIN,
@@ -1639,6 +1653,7 @@ relay_binary_sensors = {}
 relay_sensors = {}
 light_binary_sensors = {}
 light_sensors = {}
+light_numbers = {}
 rgbw_lights = 0
 rollers = 0
 updates = {}
@@ -2195,6 +2210,7 @@ if model_id == MODEL_SHELLYDIMMER_ID or dev_id_prefix == MODEL_SHELLYDIMMER_PREF
         SENSOR_ENERGY: OPTIONS_SENSOR_LIGHT_ENERGY,
         SENSOR_OVERPOWER_VALUE: OPTIONS_SENSOR_LIGHT_OVERPOWER_VALUE,
     }
+    light_numbers = {NUMBER_LIGHT_BRIGHTNESS: OPTIONS_NUMBER_LIGHT_BRIGHTNESS}
     buttons = {BUTTON_RESTART: OPTIONS_BUTTON_RESTART}
     updates = {UPDATE_FIRMWARE: OPTIONS_UPDATE_FIRMWARE}
 
@@ -2230,6 +2246,7 @@ if model_id == MODEL_SHELLYDIMMER2_ID or dev_id_prefix == MODEL_SHELLYDIMMER2_PR
         SENSOR_ENERGY: OPTIONS_SENSOR_LIGHT_ENERGY,
         SENSOR_OVERPOWER_VALUE: OPTIONS_SENSOR_LIGHT_OVERPOWER_VALUE,
     }
+    light_numbers = {NUMBER_LIGHT_BRIGHTNESS: OPTIONS_NUMBER_LIGHT_BRIGHTNESS}
     buttons = {BUTTON_RESTART: OPTIONS_BUTTON_RESTART}
     updates = {UPDATE_FIRMWARE: OPTIONS_UPDATE_FIRMWARE}
 
@@ -3392,6 +3409,46 @@ for light_id, light_options in white_lights.items():
             payload = ""
 
         mqtt_publish(config_topic, payload, retain)
+
+    # light numbers
+    for number, number_options in light_numbers.items():
+        config_topic = (
+            f"{disc_prefix}/number/{dev_id}-{light_id}-{number}/config".encode(
+                "ascii", "ignore"
+            ).decode("utf-8")
+        )
+
+        payload = {
+            KEY_NAME: f"{device_name} {format_entity_name(number)} {light_id}",
+            KEY_COMMAND_TOPIC: number_options[KEY_COMMAND_TOPIC].format(
+                light_id=light_id
+            ),
+            KEY_COMMAND_TEMPLATE: number_options[KEY_COMMAND_TEMPLATE].format(),
+            KEY_MAX: number_options[KEY_MAX],
+            KEY_MIN: number_options[KEY_MIN],
+            KEY_STEP: number_options[KEY_STEP],
+            KEY_STATE_TOPIC: number_options[KEY_STATE_TOPIC].format(light_id=light_id),
+            KEY_VALUE_TEMPLATE: number_options[KEY_VALUE_TEMPLATE],
+            KEY_UNIT: number_options[KEY_UNIT],
+            KEY_ENABLED_BY_DEFAULT: str(number_options[KEY_ENABLED_BY_DEFAULT]).lower(),
+            KEY_UNIQUE_ID: f"{dev_id}-{number}-{light_id}".lower(),
+            KEY_QOS: qos,
+            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
+            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
+            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_DEVICE: device_info,
+            "~": default_topic,
+        }
+        if number_options.get(KEY_ENTITY_CATEGORY):
+            payload[KEY_ENTITY_CATEGORY] = number_options[KEY_ENTITY_CATEGORY]
+        if number_options.get(KEY_DEVICE_CLASS):
+            payload[KEY_DEVICE_CLASS] = number_options[KEY_DEVICE_CLASS]
+        if number_options.get(ATTR_ICON):
+            payload[KEY_ICON] = number_options[ATTR_ICON]
+        if dev_id.lower() in ignored:
+            payload = ""
+
+        mqtt_publish(config_topic, payload, retain, json=True)
 
 # meter sensors
 for meter_id in range(meters):
