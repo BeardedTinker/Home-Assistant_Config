@@ -292,11 +292,15 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
     async def handle_event(self, event):
         """Handle incoming event for motion detection and availability."""
 
+        new_availability = self._available
+
         try:
             new_availability = event.data["available"]
-            if new_availability != self._available:
-                self._available = new_availability
-                self.async_schedule_update_ha_state()
+            if not new_availability:
+                if new_availability != self._available:
+                    self._available = new_availability
+                    self.async_schedule_update_ha_state()
+                return
         except KeyError:
             pass
 
@@ -330,8 +334,11 @@ class ObjectDetectedSensor(ReolinkEntity, BinarySensorEntity):
                     break
 
             if not object_found:
-                self._available = False
-                self.async_schedule_update_ha_state()
+                new_availability = False
+
+        if new_availability != self._available:
+            self._available = new_availability
+            self.async_schedule_update_ha_state()
 
 
 
