@@ -1,11 +1,11 @@
-name: USB + 3 outlet power monitor powerstrip
-product:
-  - id: tsbguim4trl6fa7g
-    name: Gosund P1
+name: USB 4way powerstrip
+products:
+  - id: D7Hl3AxFbHDS98iO
+    name: AOFO ZLD-44EU-W
 primary_entity:
   entity: switch
-  class: outlet
   name: Outlet 1
+  class: outlet
   dps:
     - id: 1
       type: boolean
@@ -26,8 +26,14 @@ secondary_entities:
         type: boolean
         name: switch
   - entity: switch
-    name: USB switch
-    class: switch
+    name: Outlet 4
+    class: outlet
+    dps:
+      - id: 4
+        type: boolean
+        name: switch
+  - entity: switch
+    name: USB
     dps:
       - id: 7
         type: boolean
@@ -37,10 +43,10 @@ secondary_entities:
     category: config
     icon: "mdi:timer"
     dps:
-      - id: 9
+      - id: 101
         type: integer
         name: value
-        unit: min 
+        unit: min
         range:
           min: 0
           max: 86400
@@ -52,10 +58,10 @@ secondary_entities:
     category: config
     icon: "mdi:timer"
     dps:
-      - id: 10
+      - id: 102
         type: integer
         name: value
-        unit: min 
+        unit: min
         range:
           min: 0
           max: 86400
@@ -67,10 +73,25 @@ secondary_entities:
     category: config
     icon: "mdi:timer"
     dps:
-      - id: 11
+      - id: 103
         type: integer
         name: value
-        unit: min 
+        unit: min
+        range:
+          min: 0
+          max: 86400
+        mapping:
+          - scale: 60
+            step: 60
+  - entity: number
+    name: Timer 4
+    category: config
+    icon: "mdi:timer"
+    dps:
+      - id: 104
+        type: integer
+        name: value
+        unit: min
         range:
           min: 0
           max: 86400
@@ -82,64 +103,15 @@ secondary_entities:
     category: config
     icon: "mdi:timer"
     dps:
-      - id: 15
+      - id: 105
         type: integer
         name: value
-        unit: min 
+        unit: min
         range:
           min: 0
           max: 86400
         mapping:
           - scale: 60
             step: 60
-  - entity: sensor
-    name: Current
-    class: current
-    category: diagnostic
-    dps:
-      - id: 18
-        type: integer
-        name: sensor
-        unit: mA
-        class: measurement
-  - entity: sensor
-    name: Power
-    class: power
-    category: diagnostic
-    dps:
-      - id: 19
-        type: integer
-        name: sensor
-        unit: W
-        class: measurement
-        mapping:
-          - scale: 10
-  - entity: sensor
-    name: Voltage
-    class: voltage
-    category: diagnostic
-    dps:
-      - id: 20
-        type: integer
-        name: sensor
-        unit: V
-        class: measurement
-        mapping:
-          - scale: 10
-  - entity: binary_sensor
-    name: Overload
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 101
-        type: boolean
-        name: sensor
-  - entity: binary_sensor
-    name: USB Overload
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 102
-        type: boolean
-        name: sensor
+
 
