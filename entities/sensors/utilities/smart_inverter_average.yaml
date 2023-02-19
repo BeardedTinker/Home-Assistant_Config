@@ -5,7 +5,7 @@
 
 platform: statistics
 name: "Smart Inverter average power"
-entity_id: sensor.smart_inverter_power
+entity_id: sensor.solar_power_production
 state_characteristic: average_step
 max_age:
   hours: 24

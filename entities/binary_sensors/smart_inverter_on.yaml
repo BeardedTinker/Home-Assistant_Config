@@ -8,6 +8,6 @@ sensors:
   smart_inverter_on:
     friendly_name: Smart Inverter State
     entity_id:
-      - sensor.smart_inverter_power
+      - sensor.solar_power_production
     value_template: >-
-      {{ states('sensor.smart_inverter_power') | float(0) > 0 }}
+      {{ states('sensor.solar_power_production') | float(0) > 0 }}
