@@ -72,7 +72,7 @@ secondary entities, so only basic functionality is implemented.
 
 For some entity types, a device `class` can be set, for example `switch`
 entities can have a class of `outlet`.  This may slightly alter the UI
-behaviour. 
+behaviour.
 For most entities, it will alter the default icon, and for binary sensors
 also the state that off and on values translate to in the UI.
 
@@ -88,7 +88,7 @@ Home Assistant.
 
 This is a list of the definitions for the Tuya DPs associated with
 attributes of this entity.  There should be one list entry for each
-supported DPs reported by the device. 
+supported DPs reported by the device.
 
 The configuration of DPs entries is detailed in its own section below.
 
@@ -111,15 +111,15 @@ input method.  The default `auto` uses a slider if the range is small enough,
 or a box otherwise.
 
 ## DPs configuration
- 
+
 ### `id`
- 
+
 Every DP must have a numeric ID matching the DP ID in the Tuya protocol.
- 
+
 ### `type`
- 
+
 The type of data returned by the Tuya API. Can be one of the following:
- 
+
  - **string** can contain arbitrary text.
  - **boolean** can contain the values **True** or **False**.
  - **integer** can contain only numbers. Integers can have range set on them, be scaled and steped
@@ -128,7 +128,7 @@ The type of data returned by the Tuya API. Can be one of the following:
  - **hex** is a special case of string, where binary data is hex encoded. Platforms that use this type will need special handling to make sense of the data.
  - **json** is a special case of string, where multiple data points are encoded in json format in the string.  Platforms that use this type will need special handling to make sense of the data.
  - **float** can contain floating point numbers.  No known devices use this, but it is supported if needed.
- 
+
 ### `name`
 
 The name given to the attribute in Home Assistant. Certain names are used
@@ -144,7 +144,10 @@ to use a secondary entity for that.
 
 A boolean setting to mark attributes as readonly. If not specified, the
 default is `false`.  If set to `true`, the attributes will be reported
-to Home Assistant, but no functionality for setting them will be exposed.
+to Home Assistant, but attempting to set them will result in an error.
+This is only needed in contexts where it would normally be possible to set
+the value.  If you are creating a sensor entity, or adding an attribute of an
+entity which is inherently read-only, then you do not need to specify this.
 
 ### `optional`
 
@@ -155,12 +158,22 @@ matched even if it is not sending the dp at the time when adding a new device.
 It can also be used to match a range of devices that have variations in the extra
 attributes that are sent.
 
+### `force`
+
+*Optional, default false.*
+
+A boolean setting to mark dps as requiring an explicit update request
+to fetch.  Many energy monitoring smartplugs require this, without a
+explicit request to update them, such plugs will only return monitoring data
+rarely or never.  Devices can misbehave if this is used on dps that do not
+require it.  Use this only where needed, and generally only on read-only dps.
+
 ### `mapping`
 
 *Optional.*
 This can be used to define a list of additional rules that modify the DP
 to Home Assistant attribute mapping to something other than a one to one
-copy. 
+copy.
 
 The rules can range from simple value substitution to complex
 relationships involving other attributes. It can also be used to change
@@ -196,9 +209,9 @@ Home Assistant UI.  This can also be set in a `mapping` or `conditions` block.
 *Optional, default="C" for temperature dps on climate devices.*
 
 For temperature dps, some devices will use Fahrenhiet.  This needs to be
-indicated back to HomeAssistant by defining `unit` as "F".  For sensor 
+indicated back to HomeAssistant by defining `unit` as "F".  For sensor
 entities, see the HomeAssistant developer documentation for the full list
-of possible units (C and F are automatically translated to their Unicode 
+of possible units (C and F are automatically translated to their Unicode
 equivalents, other units are currently ASCII so can be easily entered directly).
 
 ### `class`
@@ -262,7 +275,7 @@ Home Assistant.  The scale can also be the other way, for a fan with speeds
 1, 2 and 3 as DP values, this can be converted to a percentage with a scale
 of 0.03.
 
-###`invert`
+### `invert`
 
 *Optional, default=False.*
 
@@ -298,7 +311,7 @@ if the device is off, probably it is more important to indicate that than
 whether it is in fan-only or heat mode.  So in the off/on DP, you might
 give a priority of 1 to the off icon, 3 to the on icon, and in the mode DP
 you could give a priority of 2 to the fan icon, to make it override the
-normal on icon, but not the off icon. 
+normal on icon, but not the off icon.
 If you don't specify any priorities, the icons will all get the same priority,
 so if any overlap exists in the rules, it won't always be predictable which
 icon will be displayed.
@@ -341,7 +354,7 @@ to the Tuya protocol, attempts to set it will throw an error while it meets
 the conditions to be `invalid`.  It does not make sense to set this at mapping
 level, as it would cause a situation where you can set a value then not be
 able to unset it.  Instead, this should be used with conditions, below, to
-make the behaviour dependent on another DP, such as disabling fan speed 
+make the behaviour dependent on another DP, such as disabling fan speed
 control when the preset is in sleep mode (since sleep mode should force low).
 
 ### `default`
@@ -404,7 +417,7 @@ For readonly constraints, the condition must match the constraint dp's current v
           value: y
 ```
 If `constraint_dp` is not readonly:
-|---|---|---|
+
 | constraint_dp current dps_val | target_dp target value | dps set |
 |---|---|---|
 | a | x | target_dp: 1, constraint_dp: a |
@@ -416,10 +429,9 @@ If `constraint_dp` is not readonly:
 | c | x | target_dp: 1, constraint_dp: a |
 | c | y | target_dp: 2, constraint_dp: c |
 | c | z | target_dp: 1, constraint_dp: c |
-|---|---|---|
 
 If `constraint_dp` is readonly:
-|---|---|---|
+
 | current constraint_dp | target target_dp | dps set |
 |---|---|---|
 | a | x | target_dp: 1 |
@@ -431,7 +443,6 @@ If `constraint_dp` is readonly:
 | c | x | - |
 | c | y | target_dp: 2 |
 | c | z | target_dp: 1 |
-|---|---|---|
 
 
 
@@ -462,16 +473,16 @@ value is required.
 - **current_temperature** (optional, number) a dp that reports the current temperature.
 - **current_humidity** (optional, number) a dp that reports the current humidity (%).
 - **fan_mode** (optional, mapping of strings) a dp to control the fan mode if available.
-    Any value is allowed, but HA has some standard modes: 
-    `"on", "off", auto, low, medium, high, top, middle, focus, diffuse` 
+    Any value is allowed, but HA has some standard modes:
+    `"on", "off", auto, low, medium, high, top, middle, focus, diffuse`
 - **humidity** (optional, number) a dp to control the target humidity if available. (%)
 - **hvac_mode** (optional, mapping of strings) a dp to control the mode of the device.
     Possible values are: `"off", cool, heat, heat_cool, auto, dry, fan_only`
 - **hvac_action** (optional, string) a dp thar reports the current action of the device.
     Possible values are: `"off", idle, cooling, heating, drying, fan`
 - **preset_mode** (optional, mapping of strings) a dp to control preset modes of the device.
-   Any value is allowed, but HA has some standard presets: 
-    `none, eco, away, boost, comfort, home, sleep, activity` 
+   Any value is allowed, but HA has some standard presets:
+    `none, eco, away, boost, comfort, home, sleep, activity`
 - **swing_mode** (optional, mapping of strings) a dp to control swing modes of the device.
    Possible values are: `"off", vertical, horizontal`
 - **temperature** (optional, number) a dp to set the target temperature of the device.
