@@ -256,7 +256,7 @@ text_sensor:
     id: gabor_location
     internal: true
   - platform: homeassistant
-    entity_id: sensor.gabor_distance
+    entity_id: sensor.andrej_distance
     id: gabor_distance
     internal: true
   - platform: homeassistant
@@ -264,7 +264,7 @@ text_sensor:
     id: verus_location
     internal: true
   - platform: homeassistant
-    entity_id: sensor.verus_distance
+    entity_id: sensor.mirta_distance
     id: verus_distance
     internal: true
 
@@ -357,6 +357,8 @@ font:
       - "\U000F02E3" # Bed
       - "\U000F064D" # human-male
       - "\U000F0649" # human-female
+      - "\U000F0C0D" # L circle
+      - "\U000F0C37" # Z circle      
       - "\U000F04B9" # sofa
       - "\U000F04DB" # stop
       - "\U000F040A" # play
@@ -388,6 +390,8 @@ display:
       #define ICON_bed              "\U000F02E3"
       #define ICON_human_male       "\U000F064D"
       #define ICON_human_female     "\U000F0649"
+      #define ICON_alpha_l_circle   "\U000F0C0D"     
+      #define ICON_alpha_z_circle   "\U000F0C37"      
       #define ICON_sofa             "\U000F04B9"
       #define ICON_man              "\U000F0643"
       #define ICON_woman            "\U000F1078"
@@ -486,7 +490,7 @@ display:
       }
       // Kid 1 / Zita
       y += rowHeight; // 425
-      it.printf(pad, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_human_female); 
+      it.printf(pad, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_alpha_z_circle); 
       if (!isnan(id(temp_zita).state)) {
         it.printf(temperatureCol, y, id(font_large), TextAlign::BASELINE_RIGHT, "%.1f", id(temp_zita).state);
         it.printf(temperatureCol, y - celsiusSuperscript, id(font_medium), TextAlign::BASELINE_LEFT, "°C");
@@ -497,7 +501,7 @@ display:
       }
       // Kid 2 / Luka
       y += rowHeight; // 500
-      it.printf(pad, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_human_female); 
+      it.printf(pad, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_alpha_l_circle); 
       if (!isnan(id(temp_luka).state)) {
         it.printf(temperatureCol, y, id(font_large), TextAlign::BASELINE_RIGHT, "%.1f", id(temp_luka).state);
         it.printf(temperatureCol, y - celsiusSuperscript, id(font_medium), TextAlign::BASELINE_LEFT, "°C");
