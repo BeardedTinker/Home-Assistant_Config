@@ -2,15 +2,21 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, date
 
+import logging
+
 from homeassistant.helpers.entity import Entity, generate_entity_id
 from homeassistant.components.sensor import ENTITY_ID_FORMAT
 from homeassistant.helpers import template as templater
 import homeassistant.util.dt as dt_util
+from .calendar import EntitiesCalendarData
+from homeassistant.helpers.discovery import async_load_platform
 
 from homeassistant.const import (
     CONF_NAME,
     ATTR_ATTRIBUTION,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 from .const import (
     ATTRIBUTION,
@@ -26,11 +32,16 @@ from .const import (
     CONF_ID_PREFIX,
     CONF_ONE_TIME,
     CONF_COUNT_UP,
+    DOMAIN,
+    SENSOR_PLATFORM,
+    CALENDAR_PLATFORM,
+    CALENDAR_NAME,
 )
 
-ATTR_YEARS_NEXT = "years_at_next_anniversary"
+ATTR_YEARS_NEXT = "years_at_anniversary"
 ATTR_YEARS_CURRENT = "current_years"
 ATTR_DATE = "date"
+ATTR_NEXT_DATE = "next_date"
 ATTR_WEEKS = "weeks_remaining"
 ATTR_HALF_DATE = "half_anniversary_date"
 ATTR_HALF_DAYS = "days_until_half_anniversary"
@@ -117,6 +128,7 @@ class anniversaries(Entity):
             res[ATTR_YEARS_NEXT] = self._years_next
             res[ATTR_YEARS_CURRENT] = self._years_current
         res[ATTR_DATE] = self._date
+        res[ATTR_NEXT_DATE] = self._next_date
         res[ATTR_WEEKS] = self._weeks_remaining
         if self._show_half_anniversary:
             res[ATTR_HALF_DATE] = self._half_date
@@ -161,6 +173,8 @@ class anniversaries(Entity):
             if today > nextDate:
                 nextDate = self._date.date() + relativedelta(year=today.year + 1)
 
+        self._next_date = datetime.combine(nextDate, datetime.min.time())
+        self._next_date = self._next_date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
         daysRemaining = (nextDate - today).days
         
         if self._unknown_year:
@@ -175,7 +189,10 @@ class anniversaries(Entity):
             self._icon = self._icon_normal
 
         self._state = daysRemaining
-        self._years_next = years
+        if daysRemaining == 0:
+            self._years_next = years - 1
+        else:
+            self._years_next = years
         self._years_current = years - 1
         self._weeks_remaining = int(daysRemaining / 7)
 
@@ -193,3 +210,38 @@ class anniversaries(Entity):
             self._half_days_remaining = (nextHalfDate - today).days
             self._half_date = datetime(nextHalfDate.year, nextHalfDate.month, nextHalfDate.day)
             self._half_date = self._half_date.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+
+    async def async_added_to_hass(self):
+        """Once the entity is added we should update to get the initial data loaded. Then add it to the Calendar."""
+        await super().async_added_to_hass()
+        self.async_schedule_update_ha_state(True)
+        if DOMAIN not in self.hass.data:
+            self.hass.data[DOMAIN] = {}
+        if SENSOR_PLATFORM not in self.hass.data[DOMAIN]:
+            self.hass.data[DOMAIN][SENSOR_PLATFORM] = {}
+        self.hass.data[DOMAIN][SENSOR_PLATFORM][self.entity_id] = self
+
+        if CALENDAR_PLATFORM not in self.hass.data[DOMAIN]:
+            self.hass.data[DOMAIN][
+                CALENDAR_PLATFORM
+            ] = EntitiesCalendarData(self.hass)
+            _LOGGER.debug("Creating Anniversaries calendar")
+            self.hass.async_create_task(
+                async_load_platform(
+                    self.hass,
+                    CALENDAR_PLATFORM,
+                    DOMAIN,
+                    {"name": CALENDAR_NAME},
+                    {"name": CALENDAR_NAME},
+                )
+            )
+        else:
+            _LOGGER.debug("Anniversaries calendar already exists")
+        self.hass.data[DOMAIN][CALENDAR_PLATFORM].add_entity(self.entity_id)
+
+    async def async_will_remove_from_hass(self):
+        """When sensor is removed from hassio and there are no other sensors in the Anniversaries calendar, remove it."""
+        await super().async_will_remove_from_hass()
+        _LOGGER.debug("Removing: %s" % (self._name))
+        del self.hass.data[DOMAIN][SENSOR_PLATFORM][self.entity_id]
+        self.hass.data[DOMAIN][CALENDAR_PLATFORM].remove_entity(self.entity_id)
