@@ -34,6 +34,7 @@ std::string playbackStatusToIcon(bool playing, bool paused) {
 #define ICON_w_windy "\U000F059D"
 #define ICON_w_windy_variant "\U000F059E"
 #define ICON_w_exceptional "\U000F0F38"
+#define ICON_storm "\U000F0593"
 
 std::string conditionToIcon(std::string condition, bool daytime)
 {

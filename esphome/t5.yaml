@@ -4,6 +4,8 @@ substitutions:
   ip_address: 192.168.1.181
   ip_gw: 192.168.1.1
   ip_netmask: 255.255.252.0
+  run_time: 1min
+  sleep_time: 20min
 
 esphome:
   name: dashboard
@@ -20,6 +22,14 @@ logger:
 api:
   encryption:
     key: "dPd4p6sqO5oDUW9uDSaDPTuBaDR6uyPdRCxuB7FxfC8="
+
+deep_sleep:
+  run_duration: ${run_time}
+  sleep_duration: ${sleep_time}
+  id: deep_sleep_1
+  esp32_ext1_wakeup:
+    pins: GPIO39
+    mode: ALL_LOW
 
 ota:
 
@@ -45,7 +55,7 @@ sun:
 time:
   - platform: homeassistant
     id: ntp
-    timezone: Europe/Zagreb
+#    timezone: Europe/Zagreb
     on_time_sync:
       - then:
         - component.update: sunrise
@@ -77,6 +87,8 @@ script:
   - id: all_data_received
     then:
       - component.update: t5_display
+#      - component.update: batt_volt
+#      - component.update: batt
 
 sensor:
   # weather
@@ -85,39 +97,39 @@ sensor:
     id: temperature
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day1_min
+    entity_id: sensor.accuweather_realfeel_temperature_min_1d
     id: day1_min
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day1_max
+    entity_id: sensor.accuweather_realfeel_temperature_max_1d
     id: day1_max
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day1_prec
+    entity_id: sensor.accuweather_thunderstorm_probability_day_1d
     id: day1_prec
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day2_min
+    entity_id: sensor.accuweather_realfeel_temperature_min_2d
     id: day2_min
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day2_max
+    entity_id: sensor.accuweather_realfeel_temperature_max_2d
     id: day2_max
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day2_prec
+    entity_id: sensor.accuweather_thunderstorm_probability_day_2d
     id: day2_prec
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day3_min
+    entity_id: sensor.accuweather_realfeel_temperature_min_3d
     id: day3_min
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day3_max
+    entity_id: sensor.accuweather_realfeel_temperature_max_3d
     id: day3_max
     internal: true
   - platform: homeassistant
-    entity_id: sensor.idokep_day3_prec
+    entity_id: sensor.accuweather_thunderstorm_probability_day_3d
     id: day3_prec
     internal: true
   # temperature/humidity sensors
@@ -153,6 +165,22 @@ sensor:
     entity_id: sensor.luka_room_humidity
     id: humidity_luka
     internal: true
+# Battery
+#  - platform: lilygo_t5_47_battery
+#    update_interval: 60s
+#    id: batt_volt
+#    voltage:
+#      name: "Battery Voltage"
+#  - platform: template
+#    name: "e-ink Dashboard Battery"
+#    id: batt
+#    unit_of_measurement: "%"
+#    accuracy_decimals: 0
+#    device_class: battery
+#    lambda: |-
+#      int y = (1-(4.1-id(batt_volt).voltage->state)/(4.1-3.3))*100;
+#      if (y < 100) {return y;} else {return 100;};
+
 
 binary_sensor:
   - platform: gpio
@@ -250,6 +278,16 @@ text_sensor:
     attribute: message
     id: nevnap
     internal: true
+  - platform: homeassistant
+    entity_id: calendar.zita_school
+    attribute: message
+    id: calendar_message
+    internal: true
+  - platform: homeassistant
+    entity_id: calendar.zita_school
+    attribute: start_time
+    id: calendar_start
+    internal: true    
   # zone tracking
   - platform: homeassistant
     entity_id: device_tracker.ele_l29
@@ -365,6 +403,7 @@ font:
       - "\U000F03E4" # pause
       - "\U000F0643" # man
       - "\U000F1078" # woman
+      - "\U000F00ED" # calendar
   - file: 'materialdesignicons-webfont.ttf'
     id: font_icons_tiny
     size: 32
@@ -399,6 +438,7 @@ display:
       #define ICON_down             "\U000F0046"
       #define ICON_sunrise          "\U000F059C"
       #define ICON_sunset           "\U000F059B"
+      #define ICON_calendar         "\U000F00ED"
       // positioning constants
       #define xRes 960
       #define yRes 540
@@ -427,18 +467,23 @@ display:
       auto moonIcon = moonToIcon(id(moon).state);
       it.printf(xRes - pad/2, pad, id(font_icons_small), TextAlign::TOP_RIGHT, moonIcon.c_str()); 
 
-      // === LEFT - Spotify ===
-
+      // === LEFT - Calendar ===
       y = 150;
-      auto playing = id(tv_playing_status).state == "playing";
-      auto paused = id(tv_playing_status).state == "paused";
-      auto spotifyIcon = playbackStatusToIcon(playing, paused);
-      it.printf(pad, y, id(font_icons_small), TextAlign::BASELINE_LEFT, spotifyIcon.c_str()); 
-      if (playing || paused) {
-        it.printf(77, y, id(font_big), TextAlign::BASELINE_LEFT, "%.25s", id(tv_playing_title).state.c_str());
-        it.printf(77, y + 46, id(font_medium), TextAlign::BASELINE_LEFT, "%.40s", id(tv_playing_artist).state.c_str());
-      } else {
-        it.printf(77, y - 5, id(font_big), TextAlign::BASELINE_LEFT, "-");
+      it.printf(pad, y, id(font_icons_small), TextAlign::CENTER_LEFT, ICON_calendar); 
+      if(id(calendar_message).state.length() > 0) {
+        std::string start = id(calendar_start).state;
+        struct tm tp;
+        strptime(start.c_str(), "%Y-%m-%d %H:%M:%S", &tp);
+        tp.tm_isdst = 0; // TODO: Day light saving.. will this need to be handled once the daylight saving goes off?
+        time_t c_t = mktime(&tp);
+        auto t = time::ESPTime::from_c_tm(&tp, c_t);
+        if (t.timestamp < time.timestamp + (86400*7) )  {
+          it.strftime(77+10, y-15, id(font_medium), TextAlign::CENTER_LEFT, "%a", t);
+          it.strftime(77+0, y+15, id(font_medium), TextAlign::CENTER_LEFT, "%H:%M", t);
+          it.printf(77 + 109, y, id(font_big), TextAlign::CENTER_LEFT, "%.35s", id(calendar_message).state.c_str());
+        } else {
+          it.printf(77, y, id(font_big), TextAlign::CENTER_LEFT, "No events in 7 days");
+        }
       }
 
       // === RIGHT - Weather ===
@@ -576,16 +621,16 @@ display:
         it.printf(xCenter + weatherCol*3 + weatherTempCorr, y - celsiusSuperscript, id(font_medium), TextAlign::BASELINE_LEFT, "°C");
       }
 
-      // Precipitation
+      // Thunder probability
       y += rowHeight; // 425
-      it.printf(xCenter, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_umbrella);
+      it.printf(xCenter, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_storm);
       // 20mm precipitation is using the max bar height, which is 25px
       if (!isnan(id(day1_prec).state)) {
         auto prec1size = max(min(id(day1_prec).state * 25.0 / 20.0, 25.0), 1.0);
         it.filled_rectangle(xCenter + weatherCol - 45, y - prec1size, weatherCol - pad*2, prec1size);
         if (id(day1_prec).state > 1) {
           it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day1_prec).state);
-          it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "mm");
+          it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
         } else if (id(day1_prec).state > 0) {
           it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }
@@ -595,7 +640,7 @@ display:
         it.filled_rectangle(xCenter + weatherCol*2 - 45, y - prec2size, weatherCol - pad*2, prec2size);
         if (id(day2_prec).state > 1) {
           it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day2_prec).state);
-          it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "mm");
+          it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
         } else if (id(day2_prec).state > 0) {
           it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }
@@ -605,7 +650,7 @@ display:
         it.filled_rectangle(xCenter + weatherCol*3 - 45, y - prec3size, weatherCol - pad*2, prec3size);
         if (id(day3_prec).state > 1) {
           it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day3_prec).state);
-          it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "mm");
+          it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
         } else if (id(day3_prec).state > 0) {
           it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }

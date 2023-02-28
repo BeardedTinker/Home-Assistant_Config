@@ -1,0 +1,10 @@
+#####
+# Distance from mobile phone to zone
+# https://www.home-assistant.io/docs/configuration/templating/#distance-examples
+#####
+
+- sensor:
+    - name: "Andrej distance"
+      unit_of_measurement: km
+      state_class: measurement
+      state: "{{ distance('device_tracker.ele_l29', 'zone.home') }}"
