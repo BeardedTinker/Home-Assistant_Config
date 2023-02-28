@@ -18,6 +18,7 @@ COMP_FAN = "fan"
 COMP_LIGHT = "light"
 COMP_SWITCH = "switch"
 
+CONF_DEFAULT_HEAT_TEMP = "default_heating_temperature"
 CONF_DEVELOP = "develop"
 CONF_DEVICE_NAME = "device_name"
 CONF_DISCOVERY_PREFIX = "discovery_prefix"
@@ -140,6 +141,8 @@ KEY_MAX_TEMP = "max_temp"
 KEY_MIN = "min"
 KEY_MIN_MIREDS = "min_mirs"
 KEY_MIN_TEMP = "min_temp"
+KEY_MODE_COMMAND_TEMPLATE = "mode_cmd_tpl"
+KEY_MODE_COMMAND_TOPIC = "mode_cmd_t"
 KEY_MODE_STATE_TEMPLATE = "mode_stat_tpl"
 KEY_MODE_STATE_TOPIC = "mode_stat_t"
 KEY_MODEL = "mdl"
@@ -224,6 +227,8 @@ MIN_HT_FIRMWARE_DATE = 20211109
 
 # Firmware 1.11.8 release date
 MIN_FIRMWARE_DATE = 20220209
+
+MAX_MQTT_TOPIC_LENGTH = 32
 
 MODEL_SHELLY1 = f"{ATTR_SHELLY} 1"
 MODEL_SHELLY1L = f"{ATTR_SHELLY} 1L"
@@ -366,6 +371,7 @@ PL_UPDATE_FIRMWARE = "update_fw"
 SELECT_PROFILES = "profiles"
 
 SENSOR_ADC = "adc"
+SENSOR_AUTOMATIC_TEMPERATURE_CONTROL = "automatic_temperature_control"
 SENSOR_BATTERY = "battery"
 SENSOR_CALIBRATED = "calibrated"
 SENSOR_CHARGER = "charger"
@@ -504,6 +510,9 @@ TOPIC_WHITE_STATUS = "~white/{light_id}/status"
 TPL_ACCELERATED_HEATING = "{{value_json.thermostats.0.target_t.accelerated_heating}}"
 TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
 TPL_ADC = "{{value|float|round(2)}}"
+TPL_AUTOMATIC_TEMPERATURE_CONTROL = (
+    "{%if value_json.target_t.enabled==true%}ON{%else%}OFF{%endif%}"
+)
 TPL_BATTERY = "{{value|float|round}}"
 TPL_BATTERY_FROM_INFO = "{{value_json.bat.value}}"
 TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
@@ -539,6 +548,8 @@ TPL_IP = "{{value_json.ip}}"
 TPL_IP_FROM_INFO = "{{value_json.wifi_sta.ip}}"
 TPL_LATEST_VERSION = "{%if value_json[^update^].new_version%}{{value_json[^update^].new_version}}{%else%}{{value_json[^update^].old_version}}{%endif%}"
 TPL_LUX = "{{value|float|round}}"
+TPL_MODE = "{%if value_json.thermostats.0.target_t.value==4%}off{%else%}heat{%endif%}"
+TPL_MODE_SET = "{{{{^4^ if value==^off^ else ^{default_heat_temp}^}}}}"
 TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_MOTION_MOTION = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
@@ -574,7 +585,7 @@ TPL_TEMPERATURE_EXT = "{%if is_number(value) and -100<value|int<999%}{{value|flo
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
 TPL_TILT = "{{value|float}}"
 TPL_UPDATE_TO_JSON = "{{value_json[^update^]|tojson}}"
-TPL_UPTIME = "{{(as_timestamp(now())-value_json.uptime)|timestamp_l" "ocal}}"
+TPL_UPTIME = "{{(as_timestamp(now())-value_json.uptime)|timestamp_local}}"
 TPL_VIBRATION = "{%if value_json.vibration==true%}ON{%else%}OFF{%endif%}"
 TPL_VIBRATION_MOTION = "{%if value_json.sensor.vibration==true%}ON{%else%}OFF{%endif%}"
 TPL_VOLTAGE = "{{value|float|round(1)}}"
@@ -1463,6 +1474,15 @@ OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
     KEY_VALUE_TEMPLATE: TPL_WINDOW_STATE_REPORTING,
 }
 
+OPTIONS_SENSOR_AUTOMATIC_TEMPERATURE_CONTROL = {
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_NAME: "Automatic temperature control",
+    KEY_STATE_TOPIC: TOPIC_STATUS,
+    KEY_VALUE_TEMPLATE: TPL_AUTOMATIC_TEMPERATURE_CONTROL,
+    KEY_ICON: "mdi:thermostat-auto",
+}
+
 ROLLER_DEVICE_CLASSES = [
     DEVICE_CLASS_AWNING,
     DEVICE_CLASS_BLIND,
@@ -1509,16 +1529,11 @@ def parse_version(version):
 def get_device_config(dev_id):
     """Get device configuration."""
     result = data.get(dev_id, data.get(dev_id.lower(), {}))  # noqa: F821
-    if not result:
-        result = {}
-    try:
-        if len(result) > 0:
-            result[0]
-    except TypeError:
-        logger.error("Wrong configuration for %s", dev_id)  # noqa: F821
-        result = {}
-    finally:
-        return result
+
+    if result is None:
+        raise TypeError(f"Wrong configuration for {dev_id}")
+
+    return result
 
 
 def mqtt_publish(topic, payload, retain, json=False):
@@ -1553,7 +1568,7 @@ host = data.get(CONF_HOST)  # noqa: F821
 
 if not host:
     raise ValueError(
-        "host value None is not valid, update shellies_discovery automation"
+        f"host value {host} is not valid, update shellies_discovery automation"
     )
 
 use_fahrenheit = False
@@ -1568,17 +1583,17 @@ ignored = [
 mac = data.get(CONF_MAC)  # noqa: F821
 
 if not dev_id:
-    raise ValueError("id value None is not valid, check script configuration")
+    raise ValueError(f"id value {dev_id} is not valid, check script configuration")
 if "^" in dev_id:
-    raise ValueError("Wrong char ^ in id, change device configuration")
-if len(dev_id) > 32:
+    raise ValueError("Wrong char ^ in the device ID, change device configuration")
+if len(dev_id) > MAX_MQTT_TOPIC_LENGTH:
     raise ValueError(
         f"id value {dev_id} is longer than 32 characters, use shorter custom MQTT prefix"
     )
 if not mac:
-    raise ValueError("mac value None is not valid, check script configuration")
+    raise ValueError(f"mac value {mac} is not valid, check script configuration")
 if not fw_ver:
-    raise ValueError("fw_ver value None is not valid, check script configuration")
+    raise ValueError(f"fw_ver value {fw_ver} is not valid, check script configuration")
 
 mac = str(mac).lower()
 
@@ -1593,10 +1608,10 @@ if not model_id:
 
 try:
     cur_ver_date = parse_version(fw_ver)
-except (IndexError, ValueError):
+except (IndexError, ValueError) as exc:
     raise ValueError(
         f"Firmware version {fw_ver} is not supported, update your device {dev_id}"
-    )
+    ) from exc
 
 min_ver_date = DEVICE_FIRMWARE_MAP.get(model_id, 0)
 
@@ -1609,13 +1624,9 @@ logger.debug(  # noqa: F821
     "id: %s, mac: %s, fw_ver: %s, model: %s", dev_id, mac, fw_ver, model_id
 )
 
-try:
-    if int(data.get(CONF_QOS, 0)) in (0, 1, 2):  # noqa: F821
-        qos = int(data.get(CONF_QOS, 0))  # noqa: F821
-    else:
-        raise ValueError()
-except ValueError:
-    logger.error("Not valid qos value, the default value 0 was used")  # noqa: F821
+qos = data.get(CONF_QOS, 0)  # noqa: F821
+if qos not in (0, 1, 2):
+    raise ValueError(f"QoS value {qos} is not valid, check script configuration")
 
 optimistic = data.get(CONF_OPTIMISTIC, False)  # noqa: F821
 if not isinstance(optimistic, bool):
@@ -2402,7 +2413,7 @@ if model_id == MODEL_SHELLYVALVE_ID:
     climate_entity_option = {
         KEY_MAX_TEMP: 31,
         KEY_MIN_TEMP: 4,
-        KEY_MODES: ["heat"],
+        KEY_MODES: ["heat", "off"],
         KEY_PRECISION: 0.1,
         KEY_TEMP_STEP: 0.5,
     }
@@ -2419,6 +2430,7 @@ if model_id == MODEL_SHELLYVALVE_ID:
         SENSOR_CALIBRATED: OPTIONS_SENSOR_CALIBRATED,
         SENSOR_REPORTED_WINDOW_STATE: OPTIONS_SENSOR_REPORTED_WINDOW_STATE,
         SENSOR_WINDOW_STATE_REPORTING: OPTIONS_SENSOR_WINDOW_STATE_REPORTING,
+        SENSOR_AUTOMATIC_TEMPERATURE_CONTROL: OPTIONS_SENSOR_AUTOMATIC_TEMPERATURE_CONTROL,
     }
     buttons = {BUTTON_RESTART: OPTIONS_BUTTON_RESTART}
     selectors = {SELECT_PROFILES: OPTIONS_SELECT_PROFILES}
@@ -2555,7 +2567,7 @@ for number, number_options in numbers.items():
 
     mqtt_publish(config_topic, payload, retain)
 
-# switches (not relays)
+# switches (not relays)  # noqa: ERA001
 for switch, switch_options in switches.items():
     config_topic = f"{disc_prefix}/switch/{dev_id}-{switch}/config".encode(
         "ascii", "ignore"
@@ -2655,6 +2667,15 @@ for button, button_options in buttons.items():
 
 # climate entities
 if climate_entity_option:
+    default_heat_temp = 20
+    if device_config.get(CONF_DEFAULT_HEAT_TEMP):
+        value = device_config[CONF_DEFAULT_HEAT_TEMP]
+        if (
+            climate_entity_option[KEY_MIN_TEMP]
+            < value
+            < climate_entity_option[KEY_MAX_TEMP]
+        ):
+            default_heat_temp = value
     temperature_command_topic = "~thermostat/0/command/target_t"
     config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
         "ascii", "ignore"
@@ -2674,7 +2695,11 @@ if climate_entity_option:
         KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE,
         KEY_TEMP_STEP: climate_entity_option[KEY_TEMP_STEP],
         KEY_MODE_STATE_TOPIC: TOPIC_INFO,
-        KEY_MODE_STATE_TEMPLATE: "heat",
+        KEY_MODE_COMMAND_TOPIC: temperature_command_topic,
+        KEY_MODE_COMMAND_TEMPLATE: TPL_MODE_SET.format(
+            default_heat_temp=default_heat_temp
+        ),
+        KEY_MODE_STATE_TEMPLATE: TPL_MODE,
         KEY_UNIQUE_ID: f"{dev_id}".lower(),
         KEY_OPTIMISTIC: VALUE_FALSE,
         KEY_QOS: qos,
@@ -2708,7 +2733,8 @@ for roller_id in range(rollers):
         else:
             wrong_class = device_config[f"roller-{roller_id}-class"]
             logger.error(  # noqa: F821
-                f"{wrong_class} is the wrong roller class, the default value None was used"
+                "%s is the wrong roller class, the default value None was used",
+                wrong_class,
             )
     state_topic = f"~roller/{roller_id}"
     config_topic = f"{disc_prefix}/cover/{dev_id}-roller-{roller_id}/config".encode(
@@ -3106,6 +3132,8 @@ for sensor, sensor_options in binary_sensors.items():
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
+    if sensor_options.get(KEY_ICON):
+        payload[KEY_ICON] = sensor_options[KEY_ICON]
     if sensor_options.get(KEY_ENTITY_CATEGORY):
         payload[KEY_ENTITY_CATEGORY] = sensor_options[KEY_ENTITY_CATEGORY]
     if sensor_options.get(KEY_VALUE_TEMPLATE):
