@@ -457,7 +457,9 @@ class HacsBase:
 
         try:
             await self.hass.async_add_executor_job(_write_file)
-        except BaseException as error:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        except (
+            BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        ) as error:
             self.log.error("Could not write data to %s - %s", file_path, error)
             return False
 
@@ -476,7 +478,9 @@ class HacsBase:
                 f"{reset.hour}:{reset.minute}:{reset.second}",
             )
             self.disable_hacs(HacsDisabledReason.RATE_LIMIT)
-        except BaseException as exception:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        except (
+            BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        ) as exception:
             self.log.exception(exception)
 
         return 0
@@ -515,7 +519,9 @@ class HacsBase:
             raise exception
         except GitHubException as exception:
             _exception = exception
-        except BaseException as exception:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        except (
+            BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        ) as exception:
             self.log.exception(exception)
             _exception = exception
 
@@ -726,7 +732,9 @@ class HacsBase:
                 await asyncio.sleep(1)
                 continue
 
-            except BaseException as exception:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+            except (
+                BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+            ) as exception:
                 self.log.exception("Download failed - %s", exception)
 
             return None
@@ -742,7 +750,9 @@ class HacsBase:
             entry=self.configuration.config_entry,
             platforms=platforms,
         )
-        self.hass.config_entries.async_setup_platforms(self.configuration.config_entry, platforms)
+        await self.hass.config_entries.async_forward_entry_setups(
+            self.configuration.config_entry, platforms
+        )
 
     @callback
     def async_dispatch(self, signal: HacsDispatchEvent, data: dict | None = None) -> None:
@@ -764,7 +774,18 @@ class HacsBase:
         if self.configuration.appdaemon:
             self.enable_hacs_category(HacsCategory.APPDAEMON)
         if self.configuration.netdaemon:
-            self.enable_hacs_category(HacsCategory.NETDAEMON)
+            downloaded_netdaemon = [
+                x
+                for x in self.repositories.list_downloaded
+                if x.data.category == HacsCategory.NETDAEMON
+            ]
+            if len(downloaded_netdaemon) != 0:
+                self.log.warning(
+                    "NetDaemon in HACS is deprectaded. It will stop working in the future. "
+                    "Please remove all your current NetDaemon repositories from HACS "
+                    "and download them manually if you want to continue using them."
+                )
+                self.enable_hacs_category(HacsCategory.NETDAEMON)
 
     async def async_load_hacs_from_github(self, _=None) -> None:
         """Load HACS from GitHub."""
@@ -849,6 +870,15 @@ class HacsBase:
                         repository.repository_manifest.update_data(
                             {**dict(HACS_MANIFEST_KEYS_TO_EXPORT), **manifest}
                         )
+                    self.async_dispatch(
+                        HacsDispatchEvent.REPOSITORY,
+                        {
+                            "id": 1337,
+                            "action": "update",
+                            "repository": repository.data.full_name,
+                            "repository_id": repository.data.id,
+                        },
+                    )
 
         if category == "integration":
             self.status.inital_fetch_done = True
