@@ -1,6 +1,6 @@
-name: Breville Easy Air
+name: Breville Smart Air Connect Purifier
 products:
-  - id: k2mlahbu9v4xxdlb
+  - id: tltdxtehttjbkjni
 primary_entity:
   entity: fan
   dps:
@@ -12,19 +12,35 @@ primary_entity:
           icon: "mdi:air-purifier"
         - dps_val: false
           icon: "mdi:air-purifier-off"
+    - id: 3
+      name: preset_mode
+      type: string
+      mapping:
+        - dps_val: "manual"
+          value: "Manual"
+        - dps_val: "auto"
+          value: "Auto"
     - id: 4
       type: string
       name: speed
       mapping:
         - dps_val: low
-          value: 25
+          value: 33
         - dps_val: mid
-          value: 50
+          value: 66
         - dps_val: high
-          value: 75
-        - dps_val: turbo
           value: 100
 secondary_entities:
+  - entity: sensor
+    name: PM2.5
+    icon: "mdi:air-filter"
+    class: pm25
+    dps:
+      - id: 2
+        name: sensor
+        class: measurement
+        type: integer
+        unit: ugm3
   - entity: switch
     name: Night mode
     category: config
@@ -64,9 +80,9 @@ secondary_entities:
           - dps_val: "2"
             value: "2 hour"
           - dps_val: "4"
-            value: "4 hours" 
+            value: "4 hours"
           - dps_val: "8"
-            value: "8 hours" 
+            value: "8 hours"
   - entity: sensor
     name: Time left
     category: diagnostic
@@ -77,3 +93,20 @@ secondary_entities:
         name: sensor
         type: integer
         unit: min
+  - entity: sensor
+    name: Air quality
+    class: enum
+    icon: "mdi:air-filter"
+    dps:
+      - id: 22
+        name: sensor
+        type: string
+        mapping:
+          - dps_val: "great"
+            value: "Great"
+          - dps_val: "good"
+            value: "Good"
+          - dps_val: "medium"
+            value: "Medium"
+          - dps_val: "severe"
+            value: "Severe"

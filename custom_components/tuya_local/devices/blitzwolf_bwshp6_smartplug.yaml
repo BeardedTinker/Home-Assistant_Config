@@ -1,38 +1,89 @@
-name: Energy monitoring smartplug
-products:
-  - id: 2iepauebcvo74ujc
-    name: Aubess 20A
-  - id: wrz6vzch8htux2zp
-    name: Elivco CB2S-16DL
+name: Smartplug
 primary_entity:
   entity: switch
   class: outlet
   dps:
     - id: 1
-      type: boolean
       name: switch
+      type: boolean
     - id: 21
-      type: integer
-      name: test_bit
-    - id: 26
+      name: factory_test
       type: bitfield
-      name: fault_code
+    - id: 41
+      name: cycle_time
+      type: base64
     - id: 42
+      name: random_time
       type: base64
-      name: cycle_timer
-      optional: true
     - id: 43
-      type: base64
-      name: random_timer
-      optional: true
-    - id: 44
-      type: base64
       name: inching
-      optional: true
+      type: base64
 secondary_entities:
+  - entity: sensor
+    name: Energy
+    category: diagnostic
+    dps:
+      - id: 17
+        type: integer
+        name: sensor
+        unit: Wh
+        optional: true
+      - id: 25
+        type: integer
+        name: calibration
+        optional: true
+  - entity: sensor
+    name: Current
+    class: current
+    category: diagnostic
+    dps:
+      - id: 18
+        type: integer
+        name: sensor
+        unit: mA
+        class: measurement
+        force: true
+      - id: 23
+        type: integer
+        name: calibration
+        optional: true
+  - entity: sensor
+    name: Power
+    class: power
+    category: diagnostic
+    dps:
+      - id: 19
+        type: integer
+        name: sensor
+        unit: W
+        class: measurement
+        force: true
+        mapping:
+          - scale: 10
+      - id: 24
+        type: integer
+        name: calibration
+        optional: true
+  - entity: sensor
+    name: Voltage
+    class: voltage
+    category: diagnostic
+    dps:
+      - id: 20
+        type: integer
+        name: sensor
+        unit: V
+        class: measurement
+        force: true
+        mapping:
+          - scale: 10
+      - id: 22
+        type: integer
+        name: calibration
+        optional: true
   - entity: number
-    category: config
     name: Timer
+    category: config
     icon: "mdi:timer"
     dps:
       - id: 9
@@ -45,82 +96,10 @@ secondary_entities:
         mapping:
           - scale: 60
             step: 60
-  - entity: sensor
-    category: diagnostic
-    name: Energy
-    dps:
-      - id: 17
-        name: sensor
-        type: integer
-        unit: Wh
-        optional: true
-      - id: 25
-        type: integer
-        name: calibration
-        # seems to be present even when 17 is missing, but for consistency
-        optional: true
-  - entity: sensor
-    category: diagnostic
-    class: current
-    name: Current
-    dps:
-      - id: 18
-        name: sensor
-        type: integer
-        class: measurement
-        force: true
-        unit: mA
-      - id: 23
-        type: integer
-        name: calibration
-  - entity: sensor
-    category: diagnostic
-    class: power
-    name: Power
-    dps:
-      - id: 19
-        name: sensor
-        type: integer
-        class: measurement
-        force: true
-        unit: W
-        mapping:
-          - scale: 10
-      - id: 24
-        type: integer
-        name: calibration
-  - entity: sensor
-    category: diagnostic
-    class: voltage
-    name: Voltage
-    dps:
-      - id: 20
-        name: sensor
-        type: integer
-        class: measurement
-        force: true
-        unit: V
-        mapping:
-          - scale: 10
-      - id: 22
-        type: integer
-        name: calibration
-  - entity: binary_sensor
-    class: problem
-    category: diagnostic
-    name: Error
-    dps:
-      - id: 26
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 0
-            value: false
-          - value: true
   - entity: select
-    category: config
     name: Initial state
     icon: "mdi:toggle-switch"
+    category: config
     dps:
       - id: 38
         type: string
@@ -131,21 +110,13 @@ secondary_entities:
           - dps_val: "off"
             value: "Off"
           - dps_val: memory
-            value: "Last State"
-  - entity: lock
-    name: Child Lock
-    category: config
-    icon: "mdi:hand-back-right-off"
-    dps:
-      - id: 41
-        type: boolean
-        name: lock
+            value: Last state
   - entity: select
     name: Light mode
-    category: config
     icon: "mdi:lightbulb"
+    category: config
     dps:
-      - id: 40
+      - id: 39
         type: string
         name: option
         mapping:
@@ -155,13 +126,17 @@ secondary_entities:
             value: Position
           - dps_val: none
             value: "Off"
-          - dps_val: "on"
-            value: "On"
-  - entity: switch
-    name: Overcharge protection
+  - entity: lock
+    name: Child lock
+    icon: "mdi:hand-back-right-off"
     category: config
     dps:
-      - id: 39
+      - id: 40
         type: boolean
-        name: switch
-        optional: true
+        name: lock
+
+        
+
+
+            
+

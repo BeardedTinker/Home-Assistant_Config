@@ -168,6 +168,19 @@ explicit request to update them, such plugs will only return monitoring data
 rarely or never.  Devices can misbehave if this is used on dps that do not
 require it.  Use this only where needed, and generally only on read-only dps.
 
+### `precision`
+
+*Optional, default None.*
+
+For integer dps that are sensor values, the suggested precision for
+display in Home Assistant can be specified.  If unspecified, the Home
+Assistant will use the native precision, which is calculated based on
+the scale of the dp so as to provide distinct values with as few
+decimal places as possible. For example a scale of 3 will result in
+one decimal place by default, (values displayed as x.3, x.7 rather
+than x.33333333 and x.666666) but you could override that to 2 or 0
+with by specifying the precision explicitly.
+
 ### `mapping`
 
 *Optional.*
@@ -571,8 +584,6 @@ Humidifer can also cover dehumidifiers (use class to specify which).
 
 ### switch
 - **switch** (required, boolean): a dp to control the switch state.
-- **current_power_w** (optional, number): a dp that returns the current power consumption in watts.
-   This is a legacy attribute, for the HA Energy dashboard it is advisable to also provide a sensor entity linked to the same dp as well.
 
 ### vacuum
 - **status** (required, mapping of strings): a dp to report and control the status of the vacuum.
