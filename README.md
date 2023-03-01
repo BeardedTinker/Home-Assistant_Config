@@ -117,6 +117,7 @@ From other devices that I use, here is a list:
   + tado° [Smart Thermostat](https://www.tado.com/hr/)
   + tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
   + tado° [Smart AC+ controller]()
+  + tado° [Smart AddOn Smart Thermsotat]()
   
 ##### CAMERAS
   + [Reolink RLC-811A 8MP PoE camera](https://bit.ly/3xu9sBx )
@@ -136,6 +137,7 @@ From other devices that I use, here is a list:
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
   - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer
+  - Sonoff [NSPanel Pro]()
 
 ### AddOns
 
@@ -259,13 +261,13 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   184 |
-| Binary sensors       |   290 |
+| Automations          |   190 |
+| Binary sensors       |   296 |
 | Cameras              |    14 |
-| Climates             |    11 |
+| Climates             |    15 |
 | Counters             |     4 |
-| Device trackers      |   120 |
-| Entities             |  3018 |
+| Device trackers      |   103 |
+| Entities             |  3366 |
 | Groups               |    17 |
 | Image Processing     |     1 |
 | Input Boolean        |    19 |
@@ -273,21 +275,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
-| Lights               |    43 |
-| Lines of code (YAML) | 31603 |
-| Locks                |     2 |
-| Media players        |    25 |
+| Lights               |    45 |
+| Lines of code (YAML) |100938 |
+| Locks                |     5 |
+| Media players        |    33 |
 | Persons              |     6 |
 | Plants               |     8 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  1828 |
-| Switches             |   126 |
+| Sensors              |  2040 |
+| Switches             |   151 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 03.12.2022 9:20 PM
+* Updated: 01.03.2023 11:00 PM
 
 ### Missing files
 
