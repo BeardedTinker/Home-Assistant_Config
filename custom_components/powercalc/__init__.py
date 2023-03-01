@@ -42,6 +42,7 @@ from .const import (
     CONF_POWER_SENSOR_NAMING,
     CONF_POWER_SENSOR_PRECISION,
     CONF_SENSOR_TYPE,
+    CONF_UNAVAILABLE_POWER,
     CONF_UTILITY_METER_OFFSET,
     CONF_UTILITY_METER_TARIFFS,
     CONF_UTILITY_METER_TYPES,
@@ -140,6 +141,7 @@ CONFIG_SCHEMA = vol.Schema(
                         cv.ensure_list, [cv.string]
                     ),
                     vol.Optional(CONF_IGNORE_UNAVAILABLE_STATE): cv.boolean,
+                    vol.Optional(CONF_UNAVAILABLE_POWER): vol.Coerce(float),
                 }
             ),
         )
