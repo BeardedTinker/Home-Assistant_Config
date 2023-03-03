@@ -27,14 +27,14 @@ Contents
 
 ### Intro
 
-Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.
-I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.
+Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.<br>
+I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.<br>
 Where ever I could I listed original authors of the code or parts of the code I used.
 
 
 ## YouTube Channel?
 
-A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - almost 300 videos as of Today, with at least 140 of them being Home Assistant How To's. 
+A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more than 300 videos as of Today, with at least 150 of them being Home Assistant How To's. 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6). 
 
@@ -46,7 +46,7 @@ Also, if you have time you can try and join me while streaming and there should 
 
 ### Hardware
 
-Heart of my smart home is Home Assistant running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) - DSM version 6.2.4.
+Heart of my smart home is Home Assistant OS running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) - DSM version 6.2.4.
 
 Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk (August 5th: Still haven't updated to latest firmware).
 
@@ -81,8 +81,8 @@ From other devices that I use, here is a list:
   + [Shelly Humidity and Temperature sensor](https://shelly.cloud/products/shelly-humidity-temperature-smart-home-automation-sensor/)
   + [Shelly 1L](https://shelly.cloud/products/shelly-1l-single-wire-smart-home-automation-relay/)
   + [Shelly Plus 2PM](https://shelly.cloud/shelly-plus-2pm/)
-  + Shelly H&T Plus sensor
-  + Shelly Motion 2 sensor
+  + [Shelly H&T Plus](https://www.shelly.cloud/en-hr/products/product-overview/shelly-plus-h-and-t) sensor
+  + [Shelly Motion 2](https://www.shelly.cloud/en-hr/products/product-overview/shelly-motion-2) sensor
 
   Plus some Shelly devices that are waiting installation and/or testing:
   + Shelly Uno 
@@ -91,33 +91,33 @@ From other devices that I use, here is a list:
   + Shelly Plus 1PM 
 
 ##### SWITCHBOT DEVICES
-  + [SwitchBot Contact Sensor]()
-  + [SwitchBot Motion Sensor]()
-  + [SwitchBot Meter](https://switchbot.vip/3HEb284)
-  + [SwitchBot Meter Plus]()
-  + [SwitchBot Bot]()
-  + [SwitchBot Remote]()
-  + [SwitchBot Indoor Cam](https://switchbot.vip/3QOpBue)
-  + [SwitchBot Pan & Tilt camera](https://switchbot.vip/3NiAJN1)
+  + [SwitchBot Contact Sensor](https://bit.ly/3ERCoYP)
+  + [SwitchBot Motion Sensor](https://bit.ly/41KhXH8)
+  + [SwitchBot Meter](https://bit.ly/3ETHILc)
+  + [SwitchBot Meter Plus](https://bit.ly/3J6CRsC)
+  + [SwitchBot Bot](https://bit.ly/3y6fs3Z)
+  + [SwitchBot Remote](https://bit.ly/3Yf6XhW)
+  + [SwitchBot Indoor Cam](https://bit.ly/3J81DbD)
+  + [SwitchBot Pan & Tilt camera](https://bit.ly/3Zfe9fi)
   + [SwitchBot Humidifier](https://switchbot.vip/3FtfULt)
-  + [SwitchBot Hub Mini](https://switchbot.vip/3oIgL49)
-  + [SwichBot Curtain Rod 2]()
+  + [SwitchBot Hub Mini](https://bit.ly/3kAoIuo)
+  + [SwichBot Curtain Rod 2](https://bit.ly/3YhMWqI)
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
-  + --Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)--
+  + ~~Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)~~
   + Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   + Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
-  + Amazon Echo 3rd Gen
+  + Amazon [Echo 3rd Gen](https://amzn.to/3YiL7tU)
   + Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
   + LG webOS TV
-  + --Xiaomi Mi TV stick--
-  + Chromacst with [Google TV]() stick 
+  + ~~Xiaomi Mi TV stick~~
+  + Chromcast with [Google TV 4K](https://amzn.to/3ZDr9Ld) stick 
 
 ##### HEATING
-  + tado° [Smart Thermostat](https://www.tado.com/hr/)
-  + tado° [Smart Radiator Thermostat](https://www.tado.com/us/products/smart-radiator-valve)
-  + tado° [Smart AC+ controller]()
-  + tado° [Smart AddOn Smart Thermsotat]()
+  + tado° [Smart Thermostat + bridge](https://amzn.to/3KRZ2nJ)
+  + tado° [Smart Radiator Thermostat](https://amzn.to/3mkmwaS)
+  + tado° [Smart AC+ controller](https://amzn.to/3KTYyNM)
+  + tado° [Smart AddOn Smart Thermsotat](https://amzn.to/3kKcO0M)
   
 ##### CAMERAS
   + [Reolink RLC-811A 8MP PoE camera](https://bit.ly/3xu9sBx )
@@ -126,17 +126,17 @@ From other devices that I use, here is a list:
   + various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
-  - Tile [Mate 2020](https://www.thetileapp.com/en-us/store/tiles/mate)
-  - Elgato [Key Light Air](https://www.elgato.com/en/gaming/key-light-air)
-  - [Roborock S5 max](https://us.roborock.com/pages/roborock-s5-max)
+  - Tile [Mate 2020](https://amzn.to/3KRYM8f)
+  - Elgato [Key Light Air](https://amzn.to/3IOe8Ib)
+  - [Roborock S5 max](https://amzn.to/3kBFw49)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
-  - [Nuki Opener](https://nuki.io/en/opener/) for intercom
+  - [Nuki Opener](https://amzn.to/41Jnb5V/) for intercom
   - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper)
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
-  - [Withings Thermo](https://www.withings.com/hr/en/thermo) Smart thermometer
+  - [Withings Thermo](https://amzn.to/3YhQJEs) Smart thermometer
   - Sonoff [NSPanel Pro]()
 
 ### AddOns
@@ -176,7 +176,7 @@ There are too many integrations to list them all, but some of the main ones are:
   - Synology for Surveillence station and Synology system statistics & info
   - HACS - Home Assistant Community Store - for even more custom components and plugins
   - influxDB - storing data generated by Home Assistant
-  - OctoPrint - to see what my Ender 3 Pro 3D printer is doing
+  - ~~OctoPrint - to see what my Ender 3 Pro 3D printer is doing~~
 etc...
 
 Following is a list of active Integrations that are visible at Configuration->Integration page:
@@ -191,7 +191,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - COVID-19
   - Discord
   - DLNA server
-  - Dwains Dashboard
+  ~~- Dwains Dashboard~~
   - Elgato Key Light
   - EPSHome
   - Garbage collection
@@ -210,7 +210,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Internet Printing Protocol
   - Launch library
   - LG TV
-  - Local Tuya
+  ~~- Local Tuya~~
   - Mikrotik
   - Minecraft Server
   - MJPEG IP Camera
@@ -237,6 +237,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Tado
   - Tile
   - Tuya
+  - Tuya Local 
   - Ubiquity UniFi
   - Uptime
   - Version
