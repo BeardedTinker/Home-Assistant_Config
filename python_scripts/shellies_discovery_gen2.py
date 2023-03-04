@@ -99,8 +99,8 @@ KEY_MODEL = "mdl"
 KEY_NAME = "name"
 KEY_PAYLOAD = "pl"
 KEY_PAYLOAD_AVAILABLE = "pl_avail"
-KEY_PAYLOAD_INSTALL = "pl_inst"
 KEY_PAYLOAD_CLOSE = "pl_cls"
+KEY_PAYLOAD_INSTALL = "pl_inst"
 KEY_PAYLOAD_NOT_AVAILABLE = "pl_not_avail"
 KEY_PAYLOAD_OFF = "pl_off"
 KEY_PAYLOAD_ON = "pl_on"
@@ -109,8 +109,8 @@ KEY_PAYLOAD_PRESS = "pl_prs"
 KEY_PAYLOAD_STOP = "pl_stop"
 KEY_POSITION_TEMPLATE = "pos_tpl"
 KEY_POSITION_TOPIC = "pos_t"
-KEY_RELEASE_URL = "rel_u"
 KEY_QOS = "qos"
+KEY_RELEASE_URL = "rel_u"
 KEY_SCHEMA = "schema"
 KEY_SET_POSITION_TEMPLATE = "set_pos_tpl"
 KEY_SET_POSITION_TOPIC = "set_pos_t"
@@ -124,6 +124,7 @@ KEY_STATE_TEMPLATE = "stat_tpl"
 KEY_STATE_TOPIC = "stat_t"
 KEY_STATE_VALUE_TEMPLATE = "stat_val_tpl"
 KEY_SUBTYPE = "stype"
+KEY_SUGGESTED_DISPLAY_PRECISION = "sug_dsp_prc"
 KEY_SW_VERSION = "sw"
 KEY_TITLE = "tit"
 KEY_TOPIC = "t"
@@ -229,28 +230,26 @@ TOPIC_STATUS_WIFI = "~status/wifi"
 TOPIC_SWITCH_RELAY = "~status/switch:{relay}"
 TOPIC_TEMPERATURE = "~status/temperature:0"
 
-TPL_BATTERY = "{%if value_json.battery.percent%}{{value_json.battery.percent}}{%endif%}"
+TPL_BATTERY = "{{value_json.battery.percent}}"
 TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD_INDEPENDENT = "{%if value_json.connected%}ON{%else%}OFF{%endif%}"
-TPL_CURRENT = "{{value_json.current|round(1)}}"
-TPL_EMETER_ACTIVE_POWER = "{{{{value_json.{phase}_act_power|round(1)}}}}"
-TPL_EMETER_APPARENT_POWER = "{{{{value_json.{phase}_aprt_power|round(1)}}}}"
-TPL_EMETER_CURRENT = "{{{{value_json.{phase}_current|round(1)}}}}"
-TPL_EMETER_N_CURRENT = "{%if value_json.n_current%}{{value_json.n_current|round(1)}}{%else%}unknown{%endif%}"
-TPL_EMETER_PHASE_TOTAL_ACTIVE_ENERGY = (
-    "{{{{value_json.{phase}_total_act_energy|round(1)}}}}"
-)
+TPL_CURRENT = "{{value_json.current}}"
+TPL_EMETER_ACTIVE_POWER = "{{{{value_json.{phase}_act_power}}}}"
+TPL_EMETER_APPARENT_POWER = "{{{{value_json.{phase}_aprt_power}}}}"
+TPL_EMETER_CURRENT = "{{{{value_json.{phase}_current}}}}"
+TPL_EMETER_N_CURRENT = "{{value_json.n_current}}"
+TPL_EMETER_PHASE_TOTAL_ACTIVE_ENERGY = "{{{{value_json.{phase}_total_act_energy}}}}"
 TPL_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY = (
-    "{{{{value_json.{phase}_total_act_ret_energy|round(1)}}}}"
+    "{{{{value_json.{phase}_total_act_ret_energy}}}}"
 )
 TPL_EMETER_POWER_FACTOR = "{{{{value_json.{phase}_pf}}}}"
-TPL_EMETER_TOTAL_ACTIVE_ENERGY = "{{value_json.total_act|round(1)}}"
-TPL_EMETER_TOTAL_ACTIVE_POWER = "{{value_json.total_act_power|round(1)}}"
-TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = "{{value_json.total_act_ret|round(1)}}"
-TPL_EMETER_TOTAL_APPARENT_POWER = "{{value_json.total_aprt_power|round(1)}}"
-TPL_EMETER_TOTAL_CURRENT = "{{value_json.total_current|round(1)}}"
-TPL_EMETER_VOLTEAGE = "{{{{value_json.{phase}_voltage|round(1)}}}}"
-TPL_ENERGY = "{{value_json.aenergy.total|round(2)}}"
+TPL_EMETER_TOTAL_ACTIVE_ENERGY = "{{value_json.total_act}}"
+TPL_EMETER_TOTAL_ACTIVE_POWER = "{{value_json.total_act_power}}"
+TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = "{{value_json.total_act_ret}}"
+TPL_EMETER_TOTAL_APPARENT_POWER = "{{value_json.total_aprt_power}}"
+TPL_EMETER_TOTAL_CURRENT = "{{value_json.total_current}}"
+TPL_EMETER_VOLTEAGE = "{{{{value_json.{phase}_voltage}}}}"
+TPL_ENERGY = "{{value_json.aenergy.total}}"
 TPL_ETH_IP = "{{value_json.eth.ip}}"
 TPL_EXTERNAL_POWER = "{%if value_json.external.present%}ON{%else%}OFF{%endif%}"
 TPL_FIRMWARE_BETA = "{%if value_json.sys.available_updates.beta is defined%}{{value_json.sys.available_updates.beta.version}}{%else%}{{value_json.sys.installed_version}}{%endif%}"
@@ -262,12 +261,12 @@ TPL_FIRMWARE_STABLE_ATTRS = "{{value_json.available_updates.get(^stable^,{})|to_
 TPL_FIRMWARE_STABLE_ATTRS_INDEPENDENT = (
     "{{value_json.available_updates.get(^stable^,{})|to_json}}"
 )
-TPL_HUMIDITY = "{{value_json.rh|round(1)}}"
+TPL_HUMIDITY = "{{value_json.rh}}"
 TPL_INPUT = "{%if value_json.state%}ON{%else%}OFF{%endif%}"
 TPL_INSTALLED_FIRMWARE = "{{value_json.sys.installed_version}}"
 TPL_MQTT_CONNECTED = "{%if value_json.mqtt.connected%}online{%else%}offline{%endif%}"
-TPL_POWER = "{{value_json.apower|round(1)}}"
-TPL_POWER_FACTOR = "{{value_json.pf*100|round}}"
+TPL_POWER = "{{value_json.apower}}"
+TPL_POWER_FACTOR = "{{value_json.pf*100}}"
 TPL_RELAY_OVERPOWER = (
     "{%if ^overpower^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
 )
@@ -278,12 +277,12 @@ TPL_RELAY_OVERVOLTAGE = (
     "{%if ^overvoltage^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
 )
 TPL_SMOKE = "{%if value_json.alarm%}ON{%else%}OFF{%endif%}"
-TPL_TEMPERATURE = "{{value_json.temperature.tC|round(1)}}"
-TPL_TEMPERATURE_0 = "{{value_json[^temperature:0^].tC|round(1)}}"
-TPL_TEMPERATURE_INDEPENDENT = "{{value_json.tC|round(1)}}"
+TPL_TEMPERATURE = "{{value_json.temperature.tC}}"
+TPL_TEMPERATURE_0 = "{{value_json[^temperature:0^].tC}}"
+TPL_TEMPERATURE_INDEPENDENT = "{{value_json.tC}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.sys.uptime)|timestamp_local}}"
 TPL_UPTIME_INDEPENDENT = "{{(as_timestamp(now())-value_json.uptime)|timestamp_local}}"
-TPL_VOLTAGE = "{{value_json.voltage|round(1)}}"
+TPL_VOLTAGE = "{{value_json.voltage}}"
 TPL_WIFI_IP = "{{value_json.wifi.sta_ip}}"
 TPL_WIFI_IP_INDEPENDENT = "{{value_json.sta_ip}}"
 TPL_WIFI_SIGNAL = "{{value_json.wifi.rssi}}"
@@ -363,6 +362,7 @@ DESCRIPTION_SENSOR_CURRENT = {
     KEY_NAME: "Current",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_CURRENT,
 }
@@ -372,6 +372,7 @@ DESCRIPTION_SENSOR_EMETER_CURRENT = {
     KEY_NAME: "Phase {phase} current",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_EMETER_CURRENT,
 }
@@ -381,6 +382,7 @@ DESCRIPTION_SENSOR_N_CURRENT = {
     KEY_NAME: "N current",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_EMETER_N_CURRENT,
 }
@@ -390,6 +392,7 @@ DESCRIPTION_SENSOR_TOTAL_CURRENT = {
     KEY_NAME: "Total current",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_CURRENT,
 }
@@ -399,6 +402,7 @@ DESCRIPTION_SENSOR_CURRENT_COVER = {
     KEY_NAME: "Current",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_AMPERE,
     KEY_VALUE_TEMPLATE: TPL_CURRENT,
 }
@@ -408,6 +412,7 @@ DESCRIPTION_SENSOR_ENERGY = {
     KEY_NAME: "Energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_ENERGY,
 }
@@ -417,6 +422,7 @@ DESCRIPTION_SENSOR_ENERGY_COVER = {
     KEY_NAME: "Energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_ENERGY,
 }
@@ -471,6 +477,7 @@ DESCRIPTION_SENSOR_POWER = {
     KEY_NAME: "Power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_POWER,
 }
@@ -480,6 +487,7 @@ DESCRIPTION_SENSOR_EMETER_ACTIVE_POWER = {
     KEY_NAME: "Phase {phase} active power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_EMETER_ACTIVE_POWER,
 }
@@ -489,6 +497,7 @@ DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_ENERGY = {
     KEY_NAME: "Phase {phase} total active energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_EMDATA,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_EMETER_PHASE_TOTAL_ACTIVE_ENERGY,
 }
@@ -498,6 +507,7 @@ DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY = {
     KEY_NAME: "Phase {phase} total active returned energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_EMDATA,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY,
 }
@@ -507,6 +517,7 @@ DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_ENERGY = {
     KEY_NAME: "Total active energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_EMDATA.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_ENERGY,
 }
@@ -516,6 +527,7 @@ DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = {
     KEY_NAME: "Total active returned energy",
     KEY_STATE_CLASS: STATE_CLASS_TOTAL_INCREASING,
     KEY_STATE_TOPIC: TOPIC_EMDATA.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATTH,
     KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY,
 }
@@ -525,6 +537,7 @@ DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_POWER = {
     KEY_NAME: "Total active power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_ACTIVE_POWER,
 }
@@ -534,6 +547,7 @@ DESCRIPTION_SENSOR_EMETER_APPARENT_POWER = {
     KEY_NAME: "Phase {phase} apparent power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_VA,
     KEY_VALUE_TEMPLATE: TPL_EMETER_APPARENT_POWER,
 }
@@ -543,6 +557,7 @@ DESCRIPTION_SENSOR_EMETER_TOTAL_APPARENT_POWER = {
     KEY_NAME: "Total apparent power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER.format(emeter_id=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_VA,
     KEY_VALUE_TEMPLATE: TPL_EMETER_TOTAL_APPARENT_POWER,
 }
@@ -552,6 +567,7 @@ DESCRIPTION_SENSOR_POWER_COVER = {
     KEY_NAME: "Power",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_WATT,
     KEY_VALUE_TEMPLATE: TPL_POWER,
 }
@@ -561,6 +577,7 @@ DESCRIPTION_SENSOR_POWER_FACTOR = {
     KEY_NAME: "Power factor",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 0,
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_POWER_FACTOR,
 }
@@ -578,6 +595,7 @@ DESCRIPTION_SENSOR_POWER_FACTOR_COVER = {
     KEY_NAME: "Power factor",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 0,
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_POWER_FACTOR,
 }
@@ -596,6 +614,7 @@ DESCRIPTION_SENSOR_RELAY_TEMPERATURE = {
     KEY_NAME: "Temperature",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE,
 }
@@ -606,6 +625,7 @@ DESCRIPTION_SENSOR_COVER_TEMPERATURE = {
     KEY_NAME: "Temperature",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE,
 }
@@ -616,6 +636,7 @@ DESCRIPTION_SENSOR_DEVICE_TEMPERATURE = {
     KEY_NAME: "Device temperature",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_0,
 }
@@ -625,6 +646,7 @@ DESCRIPTION_SENSOR_VOLTAGE = {
     KEY_NAME: "Voltage",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_SWITCH_RELAY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_VOLT,
     KEY_VALUE_TEMPLATE: TPL_VOLTAGE,
 }
@@ -634,6 +656,7 @@ DESCRIPTION_SENSOR_EMETER_VOLTAGE = {
     KEY_NAME: "Phase {phase} voltage",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_EMETER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_VOLT,
     KEY_VALUE_TEMPLATE: TPL_EMETER_VOLTEAGE,
 }
@@ -643,6 +666,7 @@ DESCRIPTION_SENSOR_VOLTAGE_COVER = {
     KEY_NAME: "Voltage",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_COVER,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_VOLT,
     KEY_VALUE_TEMPLATE: TPL_VOLTAGE,
 }
@@ -695,6 +719,7 @@ DESCRIPTION_SLEEPING_SENSOR_HUMIDITY = {
     KEY_NAME: "Humidity",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_HUMIDITY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_HUMIDITY,
 }
@@ -704,6 +729,7 @@ DESCRIPTION_SLEEPING_SENSOR_TEMPERATURE = {
     KEY_NAME: "Temperature",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_TEMPERATURE,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_INDEPENDENT,
 }
@@ -1617,6 +1643,10 @@ def get_sensor(
         payload[KEY_ENTITY_CATEGORY] = description[KEY_ENTITY_CATEGORY]
     if description.get(KEY_STATE_CLASS):
         payload[KEY_STATE_CLASS] = description[KEY_STATE_CLASS]
+    if description.get(KEY_SUGGESTED_DISPLAY_PRECISION):
+        payload[KEY_SUGGESTED_DISPLAY_PRECISION] = description[
+            KEY_SUGGESTED_DISPLAY_PRECISION
+        ]
 
     return topic, payload
 
@@ -1996,10 +2026,7 @@ if script_prefix and (script_prefix[-1] == "/" or " " in script_prefix):
         f"Script prefix value {script_prefix} is not valid, check script configuration"
     )
 
-if script_prefix:
-    source_topic = f"{script_prefix}/{HOME_ASSISTANT}"
-else:
-    source_topic = HOME_ASSISTANT
+source_topic = f"{script_prefix}/{HOME_ASSISTANT}" if script_prefix else HOME_ASSISTANT
 
 if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE) and script_installed() is False:
     removed = remove_old_script_versions()
@@ -2010,10 +2037,10 @@ if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE) and script_installed() is Fals
 min_firmware_date = SUPPORTED_MODELS[model][ATTR_MIN_FIRMWARE_DATE]
 try:
     firmware_date = int(firmware_id.split("-", 1)[0])
-except ValueError:
+except ValueError as exc:
     raise ValueError(
         f"firmware version {min_firmware_date} is not supported, update your device {device_id}"
-    )
+    ) from exc
 if firmware_date < min_firmware_date:
     raise ValueError(
         f"firmware dated {min_firmware_date} is required, update your device {device_id}"
