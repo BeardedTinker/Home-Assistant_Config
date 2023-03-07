@@ -1,3 +1,4 @@
+# part 1:
 esphome:
   name: esp32c3
   platformio_options:
@@ -20,10 +21,10 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "zZNtox22sB0XUv6zUAPiVCZw0FyWKroLrc42hs1TIw8="
+    key: "PCLHfMMDMbNRmV2LxPNBFAGvbihBF45NPBacUr7t5ao="
 
 ota:
-  password: "2eff26511d00692c7b4c1f3e1b0fc2b1"
+  password: "4abc1e2b8eafde954564f1f5c586e832"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -32,8 +33,9 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Esp32C3 Fallback Hotspot"
-    password: "zEdr1H9M4MDQ"
+    password: "ppsg50Myl9GI"
 
+# part 3:
 uart:
   id: uart_bus
   baud_rate:  115200
@@ -456,4 +458,6 @@ sensor:
   name: "Custom Motion speed"
   id: custom_motion_speed
   icon: mdi:run-fast
+
+    
     
