@@ -48,7 +48,7 @@ notify_engine:
           {% if who == 'mirta' %}
             notify.mobile_app_eml_l29
           {% elif who == 'andrej' %}
-            notify.mobile_app_ele_l29
+            notify.mobile_app_pixel_7_pro
           {% elif who == 'luka' %}
             notify.mobile_app_luka_iphone
           {% elif who == 'zita' %}

@@ -13,7 +13,7 @@ supervisor_update_available:
   message: "New version is {{ state_attr('sensor.supervisor_updates', 'newest_version') }}. Currently on {{ state_attr('sensor.supervisor_updates', 'current_version') }}"
   notifiers:
     - 'syno_chat'
-    - 'mobile_app_ele_l29'
+    - 'mobile_app_pixel_7_pro'
   data:
     tag: 'supervisor-update-available'
     url: 'http://hassio.local/hassio/dashboard'

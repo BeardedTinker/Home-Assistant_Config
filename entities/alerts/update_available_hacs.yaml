@@ -13,7 +13,7 @@ hacs_update_available:
   message: ""
   notifiers:
     - 'syno_chat'
-    - 'mobile_app_ele_l29'
+    - 'mobile_app_pixel_7_pro'
   data:
     tag: 'hacs-update-available'
     url: 'http://hassio.local/hacs/installed'

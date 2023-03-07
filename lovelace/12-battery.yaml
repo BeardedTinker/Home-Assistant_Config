@@ -23,7 +23,7 @@
       - type: custom:battery-state-card
         title: Phone battery levels
         entities:
-          - entity: sensor.ele_l29_battery_level
+          - entity: sensor.pixel_7_pro_battery_level
             name: Andrej phone battery
           - entity: sensor.eml_l29_battery_level
             name: Mirta phone battery

@@ -6,5 +6,5 @@
 platform: group
 name: andrej_discord
 services:
-  - service: mobile_app_ele_l29
+  - service: mobile_app_pixel_7_pro
   - service: discord_bot

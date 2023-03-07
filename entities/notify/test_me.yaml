@@ -6,7 +6,7 @@
 platform: group
 name: test_group
 services:
-  - service: mobile_app_ele_l29
+  - service: mobile_app_pixel_7_pro
   - service: ebroz_bot 
   - service: syno_chat
   - service: on_the_display_me
