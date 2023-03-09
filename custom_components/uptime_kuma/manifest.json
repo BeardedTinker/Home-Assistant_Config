@@ -4,7 +4,7 @@
   "config_flow": true,
   "documentation": "https://github.com/meichthys/uptime_kuma/blob/main/README.md",
   "issue_tracker": "https://github.com/meichthys/uptime_kuma/issues",
-  "requirements": ["pyuptimekuma==0.0.6"],
+  "requirements": ["pyuptimekuma-hass"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
@@ -12,5 +12,5 @@
   "codeowners": ["@meichthys", "@jayakornk"],
   "iot_class": "cloud_polling",
   "loggers": ["pyuptimekuma"],
-  "version": "2.0.2"
+  "version": "2.1.0"
 }
