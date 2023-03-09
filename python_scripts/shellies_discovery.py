@@ -99,7 +99,7 @@ EXPIRE_AFTER_FOR_SHELLY_VALVE = int(1.2 * 60 * 60)  # 1.2 * 60 min
 KEY_ACTION_TEMPLATE = "act_tpl"
 KEY_ACTION_TOPIC = "act_t"
 KEY_AUTOMATION_TYPE = "atype"
-KEY_AVAILABILITY_TOPIC = "avty_t"
+KEY_AVAILABILITY = "avty"
 KEY_BRIGHTNESS_COMMAND_TEMPLATE = "bri_cmd_tpl"
 KEY_BRIGHTNESS_COMMAND_TOPIC = "bri_cmd_t"
 KEY_BRIGHTNESS_STATE_TOPIC = "bri_stat_t"
@@ -543,6 +543,7 @@ TPL_MODE = "{%if value_json.thermostats.0.target_t.value==4%}off{%else%}heat{%en
 TPL_MODE_SET = "{{{{^4^ if value==^off^ else ^{default_heat_temp}^}}}}"
 TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
 TPL_MOTION_MOTION = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
+TPL_MQTT_CONNECTED = "{%if value_json.mqtt.connected%}online{%else%}offline{%endif%}"
 TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
 TPL_REPORTED_WINDOW_STATE = (
@@ -2406,6 +2407,18 @@ if battery_powered:
             f"expire_after value {expire_after} is not an integer, check script configuration"
         )
 
+availability = [
+    {
+        KEY_TOPIC: TOPIC_ONLINE,
+        KEY_PAYLOAD_AVAILABLE: "true",
+        KEY_PAYLOAD_NOT_AVAILABLE: "false",
+    },
+    {
+        KEY_TOPIC: TOPIC_INFO,
+        KEY_VALUE_TEMPLATE: TPL_MQTT_CONNECTED,
+    },
+]
+
 # updates
 for update, update_options in updates.items():
     config_topic = f"{disc_prefix}/update/{dev_id}-{update}/config".encode(
@@ -2430,9 +2443,7 @@ for update, update_options in updates.items():
     if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
         payload[KEY_EXPIRE_AFTER] = expire_after
     elif not battery_powered:
-        payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
-        payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
-        payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
+        payload[KEY_AVAILABILITY] = availability
     if update_options.get(KEY_COMMAND_TOPIC):
         payload[KEY_COMMAND_TOPIC] = update_options[KEY_COMMAND_TOPIC]
         payload[KEY_PAYLOAD_INSTALL] = update_options[KEY_PAYLOAD_INSTALL]
@@ -2463,9 +2474,7 @@ for number, number_options in numbers.items():
         KEY_ENABLED_BY_DEFAULT: str(number_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{number}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
@@ -2498,9 +2507,7 @@ for switch, switch_options in switches.items():
         KEY_ENABLED_BY_DEFAULT: str(switch_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{switch}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
@@ -2531,9 +2538,7 @@ for select, select_options in selectors.items():
         KEY_ENABLED_BY_DEFAULT: str(select_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{select}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
@@ -2561,9 +2566,7 @@ for button, button_options in buttons.items():
         KEY_ENABLED_BY_DEFAULT: str(button_options[KEY_ENABLED_BY_DEFAULT]).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{button}".lower(),
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
@@ -2616,9 +2619,7 @@ if climate_entity_option:
         KEY_UNIQUE_ID: f"{dev_id}".lower(),
         KEY_OPTIMISTIC: VALUE_FALSE,
         KEY_QOS: qos,
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
         "~": default_topic,
     }
@@ -2667,9 +2668,7 @@ for roller_id in range(rollers):
             KEY_PAYLOAD_OPEN: VALUE_OPEN,
             KEY_PAYLOAD_CLOSE: VALUE_CLOSE,
             KEY_PAYLOAD_STOP: VALUE_STOP,
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_UNIQUE_ID: f"{dev_id}-roller-{roller_id}".lower(),
             KEY_OPTIMISTIC: str(optimistic).lower(),
             KEY_QOS: qos,
@@ -2710,9 +2709,7 @@ for relay_id in range(relays):
                 KEY_STATE_TOPIC: state_topic,
                 KEY_PAYLOAD_OFF: VALUE_OFF,
                 KEY_PAYLOAD_ON: VALUE_ON,
-                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-                KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-                KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+                KEY_AVAILABILITY: availability,
                 KEY_UNIQUE_ID: f"{dev_id}-relay-{relay_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
@@ -2739,9 +2736,7 @@ for relay_id in range(relays):
         payload = {
             KEY_NAME: f"{device_name} {format_entity_name(sensor)} {relay_id}",
             KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(relay_id=relay_id),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_FORCE_UPDATE: str(force_update).lower(),
             KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
             KEY_UNIQUE_ID: f"{dev_id}-relay-{sensor}-{relay_id}".lower(),
@@ -2792,9 +2787,7 @@ for relay_id in range(relays):
                 KEY_ENABLED_BY_DEFAULT: str(
                     sensor_options[KEY_ENABLED_BY_DEFAULT]
                 ).lower(),
-                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-                KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-                KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+                KEY_AVAILABILITY: availability,
                 KEY_UNIQUE_ID: f"{dev_id}-{make_id(sensor)}-{relay_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
@@ -2894,9 +2887,7 @@ for sensor, sensor_options in sensors.items():
     if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
         payload[KEY_EXPIRE_AFTER] = expire_after
     elif not battery_powered:
-        payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
-        payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
-        payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
+        payload[KEY_AVAILABILITY] = availability
     if no_battery_sensor and sensor == SENSOR_BATTERY:
         payload = ""
     if use_fahrenheit and sensor == SENSOR_TEMPERATURE:
@@ -2981,9 +2972,7 @@ for sensor_id in range(ext_temp_sensors):
             KEY_UNIT: UNIT_CELSIUS,
             KEY_DEVICE_CLASS: SENSOR_TEMPERATURE,
             KEY_FORCE_UPDATE: str(force_update).lower(),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
@@ -3019,9 +3008,7 @@ for sensor_id in range(ext_humi_sensors):
             KEY_UNIT: UNIT_PERCENT,
             KEY_DEVICE_CLASS: SENSOR_HUMIDITY,
             KEY_FORCE_UPDATE: str(force_update).lower(),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
@@ -3067,9 +3054,7 @@ for sensor, sensor_options in binary_sensors.items():
     if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
         payload[KEY_EXPIRE_AFTER] = expire_after
     elif not battery_powered:
-        payload[KEY_AVAILABILITY_TOPIC] = TOPIC_ONLINE
-        payload[KEY_PAYLOAD_AVAILABLE] = VALUE_TRUE
-        payload[KEY_PAYLOAD_NOT_AVAILABLE] = VALUE_FALSE
+        payload[KEY_AVAILABILITY] = availability
     if sensor_options.get(KEY_DEVICE_CLASS):
         payload[KEY_DEVICE_CLASS] = sensor_options[KEY_DEVICE_CLASS]
     if (
@@ -3110,7 +3095,6 @@ for light_id in range(rgbw_lights):
     status_topic = f"~color/{light_id}/status"
     set_topic = f"~color/{light_id}/set"
     command_topic = f"~color/{light_id}/command"
-    availability_topic = TOPIC_ONLINE
     unique_id = f"{dev_id}-light-{light_id}".lower()
     config_topic = f"{disc_prefix}/light/{dev_id}-{light_id}/config".encode(
         "ascii", "ignore"
@@ -3118,9 +3102,7 @@ for light_id in range(rgbw_lights):
     if mode == LIGHT_COLOR and model == MODEL_SHELLYRGBW2:
         payload = {
             KEY_NAME: light_name,
-            KEY_AVAILABILITY_TOPIC: availability_topic,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_COMMAND_TOPIC: command_topic,
             KEY_STATE_TOPIC: state_topic,
             KEY_STATE_VALUE_TEMPLATE: "{{value.lower()}}",
@@ -3162,9 +3144,7 @@ for light_id in range(rgbw_lights):
             payload = {
                 KEY_NAME: f"{device_name} {format_entity_name(sensor)} {light_id}",
                 KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC],
-                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-                KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-                KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+                KEY_AVAILABILITY: availability,
                 KEY_UNIQUE_ID: f"{dev_id}-color-{sensor}-{light_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
@@ -3200,9 +3180,7 @@ for light_id in range(rgbw_lights):
         payload = {
             KEY_NAME: f"{device_name} {format_entity_name(sensor)} {light_id}",
             KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(light_id=light_id),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_FORCE_UPDATE: str(force_update).lower(),
             KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
             KEY_UNIQUE_ID: f"{dev_id}-color-{sensor}-{light_id}".lower(),
@@ -3256,9 +3234,7 @@ for light_id, light_options in white_lights.items():
         KEY_NAME: light_name,
         KEY_COMMAND_TOPIC: light_options[KEY_COMMAND_TOPIC].format(light_id=light_id),
         KEY_STATE_TOPIC: light_options[KEY_STATE_TOPIC].format(light_id=light_id),
-        KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-        KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-        KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+        KEY_AVAILABILITY: availability,
         KEY_COMMAND_ON_TEMPLATE: light_options[KEY_COMMAND_ON_TEMPLATE].format(
             max_transition=MAX_TRANSITION
         ),
@@ -3298,9 +3274,7 @@ for light_id, light_options in white_lights.items():
                 KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(
                     light_id=light_id
                 ),
-                KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-                KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-                KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+                KEY_AVAILABILITY: availability,
                 KEY_UNIQUE_ID: f"{dev_id}-white-{sensor}-{light_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
@@ -3336,9 +3310,7 @@ for light_id, light_options in white_lights.items():
         payload = {
             KEY_NAME: f"{device_name} {format_entity_name(sensor)} {light_id}",
             KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(light_id=light_id),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_FORCE_UPDATE: str(force_update).lower(),
             KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
             KEY_UNIQUE_ID: f"{dev_id}-white-{sensor}-{light_id}".lower(),
@@ -3392,9 +3364,7 @@ for light_id, light_options in white_lights.items():
             KEY_ENABLED_BY_DEFAULT: str(number_options[KEY_ENABLED_BY_DEFAULT]).lower(),
             KEY_UNIQUE_ID: f"{dev_id}-{number}-{light_id}".lower(),
             KEY_QOS: qos,
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_DEVICE: device_info,
             "~": default_topic,
         }
@@ -3424,9 +3394,7 @@ for meter_id in range(meters):
         payload = {
             KEY_NAME: f"{device_name} {format_entity_name(sensor)} {meter_id}",
             KEY_STATE_TOPIC: sensor_options[KEY_STATE_TOPIC].format(meter_id=meter_id),
-            KEY_AVAILABILITY_TOPIC: TOPIC_ONLINE,
-            KEY_PAYLOAD_AVAILABLE: VALUE_TRUE,
-            KEY_PAYLOAD_NOT_AVAILABLE: VALUE_FALSE,
+            KEY_AVAILABILITY: availability,
             KEY_FORCE_UPDATE: str(force_update).lower(),
             KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
             KEY_UNIQUE_ID: f"{dev_id}-emeter-{sensor}-{meter_id}".lower(),
