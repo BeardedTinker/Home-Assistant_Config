@@ -58,5 +58,13 @@ action:
           target:
             entity_id:
               - light.zita_desk_lights
+    - conditions:
+      - condition: trigger
+        id: hold
+      sequence:
+        - service: light.toggle
+          target:
+            entity_id:
+              - light.zita_desk_matrix
     default: []
 mode: parallel
