@@ -7,4 +7,4 @@
     - name: "Andrej distance"
       unit_of_measurement: km
       state_class: measurement
-      state: "{{ distance('device_tracker.pixel_7_pro', 'zone.home') }}"
+      state: "{{ distance('device_tracker.pixel_7_pro', 'zone.home')|round(1) }}"

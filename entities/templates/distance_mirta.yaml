@@ -7,4 +7,4 @@
     - name: "Mirta distance"
       unit_of_measurement: km
       state_class: measurement
-      state: "{{ distance('device_tracker.eml_l29', 'zone.home') }}"
+      state: "{{ distance('device_tracker.eml_l29', 'zone.home')|round(1) }}"
