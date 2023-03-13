@@ -1,0 +1,18 @@
+#####
+# Try to fix unavailable location for iPhone
+#
+#####
+
+alias: Request location update Luka
+id: 5826469c-8861-4f91-9d49-68510c33eb3b
+
+description: 'Request iPhone location update'
+
+trigger:
+- platform: time_pattern
+  minutes: "15"
+
+action:
+  - service: notify.mobile_app_luka_iphone
+    data:
+      message: "request_location_update"
