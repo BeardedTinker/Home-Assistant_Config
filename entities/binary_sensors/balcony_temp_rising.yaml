@@ -7,7 +7,7 @@ platform: trend
 sensors:
   balcony_temp_rising:
     entity_id: sensor.balcony_temperature
-#    sample_duration: 1200
-#    max_samples: 120
+    sample_duration: 1200
+    max_samples: 120
     min_gradient: 0.0008
     device_class: heat

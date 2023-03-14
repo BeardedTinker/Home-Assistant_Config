@@ -23,6 +23,31 @@ api:
   encryption:
     key: "dPd4p6sqO5oDUW9uDSaDPTuBaDR6uyPdRCxuB7FxfC8="
 
+## External components for T5 support ##
+external_components:
+  - source:
+      type: git
+      url: https://github.com/vbaksa/esphome
+      ref: dev
+    components:
+      - lilygo_t5_47_battery 
+      - lilygo_t5_47_display
+  # - source: github://tiaanv/esphome-components
+  #   components:
+  #     - t547
+  #- source:
+  #    type: git
+  #    url: https://github.com/kaweksl/esphome
+  #    ref: dev
+  #  components:
+  #    - lilygo_t5_47_battery 
+  #    - lilygo_t5_47_display
+  # - source: github://ashald/esphome@lilygo-t5-47
+  #   components:
+  #     - lilygo_t5_47
+## -- ##
+
+## Only needed if powered via battery ##
 deep_sleep:
   run_duration: ${run_time}
   sleep_duration: ${sleep_time}
@@ -30,6 +55,7 @@ deep_sleep:
   esp32_ext1_wakeup:
     pins: GPIO39
     mode: ALL_LOW
+## -- ##
 
 ota:
 
@@ -61,28 +87,6 @@ time:
         - component.update: sunrise
         - component.update: sunset
 
-external_components:
-  # - source: github://ashald/esphome@lilygo-t5-47
-  #   components:
-  #     - lilygo_t5_47
-   - source:
-       type: git
-       url: https://github.com/vbaksa/esphome
-       ref: dev
-     components:
-       - lilygo_t5_47_battery 
-       - lilygo_t5_47_display
-  # - source: github://tiaanv/esphome-components
-  #   components:
-  #     - t547
-  #- source:
-  #    type: git
-  #    url: https://github.com/kaweksl/esphome
-  #    ref: dev
-  #  components:
-  #    - lilygo_t5_47_battery 
-  #    - lilygo_t5_47_display
-
 script:
   - id: all_data_received
     then:
@@ -106,7 +110,7 @@ sensor:
     internal: true
   - platform: homeassistant
     entity_id: sensor.accuweather_thunderstorm_probability_day_1d
-    id: day1_prec
+    id: day1_storm
     internal: true
   - platform: homeassistant
     entity_id: sensor.accuweather_realfeel_temperature_min_2d
@@ -118,7 +122,7 @@ sensor:
     internal: true
   - platform: homeassistant
     entity_id: sensor.accuweather_thunderstorm_probability_day_2d
-    id: day2_prec
+    id: day2_storm
     internal: true
   - platform: homeassistant
     entity_id: sensor.accuweather_realfeel_temperature_min_3d
@@ -130,7 +134,7 @@ sensor:
     internal: true
   - platform: homeassistant
     entity_id: sensor.accuweather_thunderstorm_probability_day_3d
-    id: day3_prec
+    id: day3_storm
     internal: true
   # temperature/humidity sensors
   - platform: homeassistant
@@ -165,7 +169,8 @@ sensor:
     entity_id: sensor.luka_room_humidity
     id: humidity_luka
     internal: true
-# Battery
+
+## Battery ##
 #  - platform: lilygo_t5_47_battery
 #    update_interval: 60s
 #    id: batt_volt
@@ -180,7 +185,7 @@ sensor:
 #    lambda: |-
 #      int y = (1-(4.1-id(batt_volt).voltage->state)/(4.1-3.3))*100;
 #      if (y < 100) {return y;} else {return 100;};
-
+## -- ##
 
 binary_sensor:
   - platform: gpio
@@ -192,15 +197,16 @@ binary_sensor:
       then:
         - component.update: t5_display
   - platform: homeassistant
-    entity_id: binary_sensor.idokep_temp_falling
+    entity_id: binary_sensor.balcony_temp_falling
     id: temp_falling
     internal: true
   - platform: homeassistant
-    entity_id: binary_sensor.idokep_temp_rising
+    entity_id: binary_sensor.balcony_temp_rising
     id: temp_rising
     internal: true
 
 text_sensor:
+
   # sun/moon
   - platform: sun
     id: sunrise
@@ -222,14 +228,11 @@ text_sensor:
     entity_id: sensor.moon
     id: moon
     internal: true
-  # weather
+## NOT used but required later ##
   - platform: homeassistant
     entity_id: sensor.idokep_condition
     id: condition
     internal: true
-    on_value: # Actions to perform once data for the last sensor has been received
-      then:
-        - script.execute: all_data_received
   - platform: homeassistant
     entity_id: sensor.idokep_day1_dow
     id: day1_dow
@@ -254,24 +257,8 @@ text_sensor:
     entity_id: sensor.idokep_day3_condition
     id: day3_condition
     internal: true
-  # spotify
-  - platform: homeassistant
-    entity_id: media_player.lg_tv
-    id: tv_playing_status
-    internal: true
-  - platform: homeassistant
-    entity_id: media_player.lg_tv
-    attribute: media_title
-    id: tv_playing_title
-    internal: true
-  - platform: homeassistant
-    entity_id: media_player.lg_tv
-    attribute: media_artist
-    id: tv_playing_artist
-    internal: true
-    on_value: # Actions to perform once data for the last sensor has been received
-      then:
-        - script.execute: all_data_received  
+## -- ##
+
   # calendar
   - platform: homeassistant
     entity_id: calendar.krscanski_blagdani
@@ -288,24 +275,39 @@ text_sensor:
     attribute: start_time
     id: calendar_start
     internal: true    
+    on_value: # Actions to perform once data for the last sensor has been received
+      then:
+        - script.execute: all_data_received
+
   # zone tracking
   - platform: homeassistant
-    entity_id: device_tracker.ele_l29
-    id: gabor_location
+    entity_id: device_tracker.pixel_7_pro
+    id: andrej_location
     internal: true
   - platform: homeassistant
     entity_id: sensor.andrej_distance
-    id: gabor_distance
+    id: andrej_distance
     internal: true
   - platform: homeassistant
     entity_id: device_tracker.eml_l29
-    id: verus_location
+    id: mirta_location
     internal: true
   - platform: homeassistant
     entity_id: sensor.mirta_distance
-    id: verus_distance
+    id: mirta_distance
     internal: true
+    on_value: # Actions to perform once data for the last sensor has been received
+      then:
+        - script.execute: all_data_received  
 
+## Fonts used on display##
+# Google Sans Medium
+# Google Sans Bold
+# https://github.com/sahibjotsaggu/Google-Sans-Fonts
+# Check that filename matches name below
+# Material UI Icons - https://pictogrammers.github.io/@mdi/font/5.3.45/ 
+# https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf
+## -- ##
 font:
   - file: "Google_Sans_Medium.ttf"
     id: font_small
@@ -564,12 +566,12 @@ display:
       y = 290;
       it.printf(centerCol, y + rowHeight/4, id(font_icons_small), TextAlign::BASELINE_CENTER, ICON_man);
       y += rowHeight; // 350
-      auto gaborLocationText = locationToHungarian(id(gabor_location).state, id(gabor_distance).state);
+      auto gaborLocationText = locationToHungarian(id(andrej_location).state, id(andrej_distance).state);
       it.printf(centerCol, y - rowHeight/4, id(font_medium), TextAlign::BASELINE_CENTER, "%s", gaborLocationText.c_str());
       y += rowHeight; // 425
       it.printf(centerCol, y + rowHeight/4, id(font_icons_small), TextAlign::BASELINE_CENTER, ICON_woman);
       y += rowHeight; // 500
-      auto verusLocationText = locationToHungarian(id(verus_location).state, id(verus_distance).state);
+      auto verusLocationText = locationToHungarian(id(mirta_location).state, id(mirta_distance).state);
       it.printf(centerCol, y - rowHeight/4, id(font_medium), TextAlign::BASELINE_CENTER, "%s", verusLocationText.c_str());
 
       it.line(xCenter - 10, 220, xCenter - 10, yRes);
@@ -583,13 +585,13 @@ display:
       it.printf(xCenter + weatherCol*3, y, id(font_medium), TextAlign::BASELINE_CENTER, "%s", id(day3_dow).state.c_str());
 
       // Condition
-      y += 65; // 295
-      auto day1Icon = conditionToIcon(id(day1_condition).state, dayTime);
-      auto day2Icon = conditionToIcon(id(day2_condition).state, dayTime);
-      auto day3Icon = conditionToIcon(id(day3_condition).state, dayTime);
-      it.printf(xCenter + weatherCol, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day1Icon.c_str());
-      it.printf(xCenter + weatherCol*2, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day2Icon.c_str());
-      it.printf(xCenter + weatherCol*3, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day3Icon.c_str());
+      //y += 65; // 295
+      //auto day1Icon = conditionToIcon(id(day1_condition).state, dayTime);
+      //auto day2Icon = conditionToIcon(id(day2_condition).state, dayTime);
+      //auto day3Icon = conditionToIcon(id(day3_condition).state, dayTime);
+      //it.printf(xCenter + weatherCol, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day1Icon.c_str());
+      //it.printf(xCenter + weatherCol*2, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day2Icon.c_str());
+      //it.printf(xCenter + weatherCol*3, y, id(font_icons_small), TextAlign::BASELINE_CENTER, day3Icon.c_str());
 
       // High/low temperature
       y += 60; // 350
@@ -625,33 +627,33 @@ display:
       y += rowHeight; // 425
       it.printf(xCenter, y, id(font_icons_small), TextAlign::BASELINE_LEFT, ICON_storm);
       // 20mm precipitation is using the max bar height, which is 25px
-      if (!isnan(id(day1_prec).state)) {
-        auto prec1size = max(min(id(day1_prec).state * 25.0 / 20.0, 25.0), 1.0);
+      if (!isnan(id(day1_storm).state)) {
+        auto prec1size = max(min(id(day1_storm).state * 25.0 / 20.0, 25.0), 1.0);
         it.filled_rectangle(xCenter + weatherCol - 45, y - prec1size, weatherCol - pad*2, prec1size);
-        if (id(day1_prec).state > 1) {
-          it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day1_prec).state);
+        if (id(day1_storm).state > 1) {
+          it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day1_storm).state);
           it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
-        } else if (id(day1_prec).state > 0) {
+        } else if (id(day1_storm).state > 0) {
           it.printf(xCenter + weatherCol + 3, y-prec1size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }
       }
-      if (!isnan(id(day2_prec).state)) {
-        auto prec2size = max(min(id(day2_prec).state * 25.0 / 20.0, 25.0), 1.0);
+      if (!isnan(id(day2_storm).state)) {
+        auto prec2size = max(min(id(day2_storm).state * 25.0 / 20.0, 25.0), 1.0);
         it.filled_rectangle(xCenter + weatherCol*2 - 45, y - prec2size, weatherCol - pad*2, prec2size);
-        if (id(day2_prec).state > 1) {
-          it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day2_prec).state);
+        if (id(day2_storm).state > 1) {
+          it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day2_storm).state);
           it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
-        } else if (id(day2_prec).state > 0) {
+        } else if (id(day2_storm).state > 0) {
           it.printf(xCenter + weatherCol*2 + 3, y-prec2size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }
       }
-      if (!isnan(id(day3_prec).state)) {
-        auto prec3size = max(min(id(day3_prec).state * 25.0 / 20.0, 25.0), 1.0);
+      if (!isnan(id(day3_storm).state)) {
+        auto prec3size = max(min(id(day3_storm).state * 25.0 / 20.0, 25.0), 1.0);
         it.filled_rectangle(xCenter + weatherCol*3 - 45, y - prec3size, weatherCol - pad*2, prec3size);
-        if (id(day3_prec).state > 1) {
-          it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day3_prec).state);
+        if (id(day3_storm).state > 1) {
+          it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_medium), TextAlign::BASELINE_RIGHT, "%.0f", id(day3_storm).state);
           it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_small), TextAlign::BASELINE_LEFT, "%");
-        } else if (id(day3_prec).state > 0) {
+        } else if (id(day3_storm).state > 0) {
           it.printf(xCenter + weatherCol*3 + 3, y-prec3size-pad/2, id(font_medium), TextAlign::BASELINE_CENTER, ". . .");
         }
       }

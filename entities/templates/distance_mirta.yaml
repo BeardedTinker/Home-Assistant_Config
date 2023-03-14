@@ -1,6 +1,7 @@
 #####
 # Distance from mobile phone to zone
 # https://www.home-assistant.io/docs/configuration/templating/#distance-examples
+#
 #####
 
 - sensor:
