@@ -215,7 +215,7 @@ STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 TOPIC_COVER = "~status/cover:{cover}"
 TOPIC_EMDATA = "~status/emdata:{emeter_id}"
 TOPIC_EMETER = "~status/em:{emeter_id}"
-TOPIC_HUMIDITY = "~status/humidity:0"
+TOPIC_HUMIDITY = "~status/humidity:{sensor}"
 TOPIC_INPUT = "~status/input:{relay}"
 TOPIC_LIGHT = "~status/light:{light}"
 TOPIC_ONLINE = "~online"
@@ -228,7 +228,7 @@ TOPIC_STATUS_SMOKE = "~status/smoke:0"
 TOPIC_STATUS_SYS = "~status/sys"
 TOPIC_STATUS_WIFI = "~status/wifi"
 TOPIC_SWITCH_RELAY = "~status/switch:{relay}"
-TOPIC_TEMPERATURE = "~status/temperature:0"
+TOPIC_TEMPERATURE = "~status/temperature:{sensor}"
 
 TPL_BATTERY = "{{value_json.battery.percent}}"
 TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
@@ -718,7 +718,7 @@ DESCRIPTION_SLEEPING_SENSOR_HUMIDITY = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_NAME: "Humidity",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
-    KEY_STATE_TOPIC: TOPIC_HUMIDITY,
+    KEY_STATE_TOPIC: TOPIC_HUMIDITY.format(sensor=0),
     KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_HUMIDITY,
@@ -728,7 +728,7 @@ DESCRIPTION_SLEEPING_SENSOR_TEMPERATURE = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_NAME: "Temperature",
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
-    KEY_STATE_TOPIC: TOPIC_TEMPERATURE,
+    KEY_STATE_TOPIC: TOPIC_TEMPERATURE.format(sensor=0),
     KEY_SUGGESTED_DISPLAY_PRECISION: 1,
     KEY_UNIT: UNIT_CELSIUS,
     KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_INDEPENDENT,
@@ -789,7 +789,26 @@ DESCRIPTION_UPDATE_FIRMWARE_BETA = {
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE,
 }
-
+DESCRIPTION_EXTERNAL_SENSOR_TEMPERATURE = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Temperature {sensor}",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_TEMPERATURE,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
+    KEY_UNIT: UNIT_CELSIUS,
+    KEY_VALUE_TEMPLATE: TPL_TEMPERATURE_INDEPENDENT,
+}
+DESCRIPTION_EXTERNAL_SENSOR_HUMIDITY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Humidity {sensor}",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_HUMIDITY,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
+    KEY_UNIT: UNIT_PERCENT,
+    KEY_VALUE_TEMPLATE: TPL_HUMIDITY,
+}
 
 SUPPORTED_MODELS = {
     MODEL_PLUS_1: {
@@ -1552,6 +1571,7 @@ def get_sensor(
     cover_id=None,
     emeter_id=None,
     emeter_phase=None,
+    sensor_id=None,
 ):
     """Create configuration for Shelly sensor entity."""
     if emeter_id is not None:
@@ -1565,6 +1585,10 @@ def get_sensor(
     elif relay_id is not None:
         topic = encode_config_topic(
             f"{disc_prefix}/sensor/{device_id}-{relay_id}-{sensor}/config"
+        )
+    elif sensor_id is not None:
+        topic = encode_config_topic(
+            f"{disc_prefix}/sensor/{device_id}-{sensor_id}-{sensor}/config"
         )
     else:
         topic = encode_config_topic(f"{disc_prefix}/sensor/{device_id}-{sensor}/config")
@@ -1596,6 +1620,9 @@ def get_sensor(
         sensor_name = (
             f"{device_name} {description[KEY_NAME].format(phase=emeter_phase.upper())}"
         )
+    elif sensor_id is not None:
+        unique_id = f"{device_id}-{sensor_id}-{sensor}".lower()
+        sensor_name = f"{device_name} {device_config[f'{sensor}:{sensor_id}']['name'] or description[KEY_NAME].format(sensor=sensor_id)}"
     else:
         unique_id = f"{device_id}-{sensor}".lower()
         sensor_name = f"{device_name} {description[KEY_NAME]}"
@@ -1630,6 +1657,8 @@ def get_sensor(
         payload[KEY_STATE_TOPIC] = description[KEY_STATE_TOPIC].format(
             emeter_id=emeter_id
         )
+    elif sensor_id is not None:
+        payload[KEY_STATE_TOPIC] = description[KEY_STATE_TOPIC].format(sensor=sensor_id)
     else:
         payload[KEY_STATE_TOPIC] = description[KEY_STATE_TOPIC]
 
@@ -1906,6 +1935,24 @@ def configure_device():
     for binary_sensor, description in binary_sensors.items():
         topic, payload = get_binary_sensor(binary_sensor, description)
         config[topic] = payload
+
+    if device_config["sys"]["device"].get("addon_type") == "sensor":
+        for sensor_id in range(100, 199):
+            if device_config.get(f"temperature:{sensor_id}"):
+                topic, payload = get_sensor(
+                    "temperature",
+                    DESCRIPTION_EXTERNAL_SENSOR_TEMPERATURE,
+                    sensor_id=sensor_id,
+                )
+                config[topic] = payload
+
+            if device_config.get(f"humidity:{sensor_id}"):
+                topic, payload = get_sensor(
+                    "humidity",
+                    DESCRIPTION_EXTERNAL_SENSOR_HUMIDITY,
+                    sensor_id=sensor_id,
+                )
+                config[topic] = payload
 
     return config
 
