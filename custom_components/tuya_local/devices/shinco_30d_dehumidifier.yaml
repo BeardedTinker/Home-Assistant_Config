@@ -1,93 +1,94 @@
-name: BVF CP-1 heater
-products:
-  - id: t2htqaryl4gymeuv
+name: Shinco dehumidifier
 primary_entity:
-  entity: climate
+  entity: humidifier
+  class: dehumidifier
   dps:
     - id: 1
       type: boolean
-      name: hvac_mode
-      mapping:
-        - dps_val: false
-          value: "off"
-        - dps_val: true
-          value: heat
+      name: switch
     - id: 2
       type: string
-      name: preset_mode
+      name: mode
       mapping:
-        - dps_val: hot
-          value: Comfort
-        - dps_val: eco
-          value: Economy
-        - dps_val: cold
-          value: Anti-frost
-        - dps_val: auto
-          value: Program
-    - id: 16
+        - dps_val: "0"
+          value: Continuous
+        - dps_val: "1"
+          value: Auto
+    - id: 4
       type: integer
-      name: temperature
+      name: humidity
       range:
-        min: 5
-        max: 45
-      unit: C
-    - id: 24
-      type: integer
-      name: current_temperature
-secondary_entities:
-  - entity: light
-    name: Display
-    category: config
+        min: 25
+        max: 80
+    - id: 11
+      type: bitfield
+      name: fault_code
+secondary_entites:
+  - entity: fan
     dps:
+      - id: 1
+        type: boolean
+        name: switch
       - id: 6
-        type: boolean
-        name: switch
-  - entity: switch
-    name: Beep
-    icon: "mdi:bell"
-    category: config
-    dps:
-      - id: 7
-        type: boolean
-        name: switch
-  - entity: switch
-    name: Window detection
-    category: config
-    icon: "mdi:window-open-variant"
-    dps:
+        type: string
+        name: speed
+        mapping:
+          - dps_val: "0"
+            value: 50
+          - dps_val: "1"
+            value: 100
       - id: 8
         type: boolean
-        name: switch
-  - entity: number
-    name: Temperature correction
-    category: config
-    icon: "mdi:thermometer-check"
+        name: oscillate
+  - entity: sensor
+    name: Humidity
+    class: humidity
     dps:
-      - id: 27
+      - id: 3
         type: integer
-        name: value
-        unit: C
-        range:
-          min: -9
-          max: 9
+        name: sensor
+        unit: "%"
+  - entity: switch
+    name: Ionizer
+    category: config
+    icon: "mdi:creation"
+    dps:
+      - id: 5
+        type: boolean
+        name: switch
   - entity: lock
     name: Child lock
     icon: "mdi:hand-back-right-off"
     category: config
     dps:
-      - id: 40
+      - id: 7
         type: boolean
         name: lock
+  - entity: binary_sensor
+    name: 11
+    class: problem
+    category: diagnostic
+    dps:
+      - id: 11
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
   - entity: select
     name: Timer
     icon: "mdi:timer"
     category: config
     dps:
-      - id: 41
+      - id: 12
         type: string
         name: option
+        optional: true
         mapping:
           - dps_val: cancel
+            value: "Off"
+          - dps_val: null
             value: "Off"
           - dps_val: "1h"
             value: "1 hour"
@@ -137,3 +138,33 @@ secondary_entities:
             value: "23 hours"
           - dps_val: "24h"
             value: "24 hours"
+  - entity: sensor
+    name: Time remaing
+    class: duration
+    category: diagnostic
+    dps:
+      - id: 13
+        type: integer
+        name: sensor
+        unit: min
+  - entity: binary_sensor
+    name: Inside drying
+    class: running
+    category: diagnostic
+    dps:
+      - id: 101
+        type: boolean
+        name: sensor
+        optional: true
+        persist: false
+        mapping:
+          - dps_val: null
+            value: false
+  - entity: binary_sensor
+    name: Water pump
+    class: running
+    category: diagnostic
+    dps:
+      - id: 102
+        type: boolean
+        name: sensor

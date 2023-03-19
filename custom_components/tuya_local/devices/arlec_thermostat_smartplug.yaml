@@ -8,6 +8,7 @@ primary_entity:
     - id: 2
       type: boolean
       name: hvac_mode
+      icon: "mdi:thermostat-box"
       mapping:
         - dps_val: false
           value: "off"
@@ -112,13 +113,31 @@ secondary_entities:
           - scale: 60
             step: 60
   - entity: switch
-    name: Customize mode
-    icon: "mdi:tune"
+    name: Climate mode
     category: config
     dps:
       - id: 9
         type: boolean
         name: switch
+        mapping:
+          - dps_val: true
+            icon: "mdi:thermostat-auto"
+          - dps_val: false
+            icon: "mdi:toggle-switch"
+  - entity: switch
+    dps:
+      - id: 1
+        type: boolean
+        name: switch
+        optional: true
+        mapping:
+          constraint: climate_mode
+          conditions:
+            - dps_val: true
+              invalid: true
+      - id: 9
+        type: boolean
+        name: climate_mode
   - entity: sensor
     name: Current
     class: current
@@ -205,6 +224,14 @@ secondary_entities:
         mapping:
           - scale: 10
             step: 5
+      - id: 20
+        type: string
+        name: unit
+        mapping:
+          - dps_val: c
+            value: C
+          - dps_val: f
+            value: F
   - entity: number
     name: Temperature correction
     category: config
@@ -216,14 +243,24 @@ secondary_entities:
         range:
           min: -9
           max: 9
+      - id: 20
+        type: string
+        name: unit
+        mapping:
+          - dps_val: c
+            value: C
+          - dps_val: f
+            value: F
   - entity: number
     name: Humidity hysteresis
     category: config
+    class: humidity
     icon: "mdi:arrow-collapse-vertical"
     dps:
       - id: 42
         type: integer
         name: value
+        unit: "%"
         range:
           min: 2
           max: 20
@@ -232,11 +269,13 @@ secondary_entities:
   - entity: number
     name: Humidity correction
     category: config
+    class: humidity
     icon: "mdi:pan-vertical"
     dps:
       - id: 47
         type: integer
         name: value
+        unit: "%"
         range:
           min: -9
           max: 9
@@ -268,6 +307,8 @@ secondary_entities:
       - id: 50
         type: bitfield
         name: sensor
+        optional: true
+        persist: false
         mapping:
           - dps_val: 0
             value: false

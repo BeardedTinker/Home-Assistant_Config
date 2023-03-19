@@ -66,6 +66,7 @@ secondary_entities:
   - entity: number
     name: Maximum Standby Power
     category: config
+    class: power
     dps:
       - id: 51
         type: integer
@@ -77,6 +78,7 @@ secondary_entities:
           max: 100
         mapping:
           - dps_val: null
+            invalid: true
           - scale: 10
   - entity: sensor
     name: Energy
@@ -103,6 +105,7 @@ secondary_entities:
         type: bitfield
         name: sensor
         optional: true
+        persist: false
         mapping:
           - dps_val: null
             value: false
