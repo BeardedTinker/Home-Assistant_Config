@@ -289,7 +289,7 @@ text_sensor:
     id: andrej_distance
     internal: true
   - platform: homeassistant
-    entity_id: device_tracker.eml_l29
+    entity_id: device_tracker.oppo
     id: mirta_location
     internal: true
   - platform: homeassistant
