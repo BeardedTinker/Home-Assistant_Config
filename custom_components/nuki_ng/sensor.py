@@ -217,7 +217,7 @@ class LastUnlockUser(NukiEntity, SensorEntity):
         timestamp = self.coordinator.info_field(self.device_id, None, "last_log", "timestamp")
         action = self.coordinator.info_field(self.device_id, "unknown", "last_log", "action")
         return {
-            "timestamp": datetime.fromisoformat(timestamp) if not None else None,
+            "timestamp": datetime.fromisoformat(timestamp) if isinstance(timestamp, str) else None,
             "action": action,
         }
 

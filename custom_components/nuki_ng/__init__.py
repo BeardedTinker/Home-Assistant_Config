@@ -4,6 +4,7 @@ from .constants import DOMAIN, PLATFORMS
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import service, entity_registry, device_registry
+from homeassistant.helpers.entity import EntityCategory
 
 # from homeassistant.helpers import device_registry
 from homeassistant.helpers.update_coordinator import (
@@ -183,3 +184,21 @@ class NukiBridge(CoordinatorEntity):
             "model": model,
             "sw_version": versions.get("firmwareVersion"),
         }
+
+
+class NukiOpenerRingSuppressionEntity(NukiEntity):
+    
+    SUP_RING = 4
+    SUP_RTO = 2
+    SUP_CM = 1
+    
+    @property
+    def entity_category(self):
+        return EntityCategory.CONFIG
+    
+    @property
+    def doorbellSuppression(self):
+        return self.coordinator.info_field(self.device_id, 0, "openerAdvancedConfig", "doorbellSuppression")
+    
+    async def update_doorbell_suppression(self, new_value):
+        await self.coordinator.update_config(self.device_id, "openerAdvancedConfig", dict(doorbellSuppression=new_value))

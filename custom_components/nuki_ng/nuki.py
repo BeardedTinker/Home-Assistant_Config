@@ -7,6 +7,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 from homeassistant.helpers.network import get_url
 from homeassistant.components import webhook
+from homeassistant.exceptions import HomeAssistantError
 
 import requests
 import logging
@@ -36,7 +37,7 @@ class NukiInterface:
     async def async_json(self, cb):
         response = await self.hass.async_add_executor_job(lambda: cb(requests))
         if not response.ok:
-            raise ConnectionError(f"Http response for {response.request.url}: {response.status_code} {response.reason}")
+            raise HomeAssistantError(f"Http response for {response.request.url}: {response.status_code} {response.reason}")
         if response.status_code > 200:
             _LOGGER.debug(f"async_json: http status: {response.status_code} - {response.text}")
             return dict()
@@ -146,7 +147,7 @@ class NukiInterface:
                     )
                 )
                 if not result.get("success", True):
-                    raise ConnectionError(result.get("message"))
+                    raise HomeAssistantError(result.get("message"))
                 return True
         return False
 
@@ -170,7 +171,7 @@ class NukiInterface:
                 lambda r: r.get(self.bridge_url("/callback/add", {"url": callback_url}), timeout=BRIDGE_TIMEOUT)
             )
             if not result.get("success", True):
-                raise ConnectionError(result.get("message"))
+                raise HomeAssistantError(result.get("message"))
         _LOGGER.debug("Callback is set - re-added")
         callbacks = await self.async_json(
             lambda r: r.get(self.bridge_url("/callback/list"), timeout=BRIDGE_TIMEOUT)
@@ -401,14 +402,14 @@ class NukiCoordinator(DataUpdateCoordinator):
             if self.api.can_web():
                 try:
                     web_list = await self.api.web_list()
-                except ConnectionError:
+                except HomeAssistantError:
                     _LOGGER.warning("Despite being configured, Web API request has failed")
                     _LOGGER.exception("Error while fetching list of devices via web API:")
                 if not device_list:
                     device_list = web_list
             result = dict(devices={}, bridge_info=bridge_info)
             if not device_list:
-                raise ConnectionError("No available device data")
+                raise HomeAssistantError("No available device data")
             for key, item in device_list.items():
                 dev_id = item["nukiId"]
                 if self.api.can_web():
@@ -416,12 +417,12 @@ class NukiCoordinator(DataUpdateCoordinator):
                     item["webId"] = web_id
                     try:
                         item["web_auth"] = await self.api.web_list_all_auths(web_id)
-                    except ConnectionError:
+                    except HomeAssistantError:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
                         _LOGGER.exception("Error while fetching auth:")
                     try:
                         item["last_log"] = await self.api.web_get_last_unlock_log(web_id)
-                    except ConnectionError:
+                    except HomeAssistantError:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
                         _LOGGER.exception("Error while fetching last log entry")
                 if web_list:
@@ -474,19 +475,19 @@ class NukiCoordinator(DataUpdateCoordinator):
         if self.api.can_bridge():
             await self.api.bridge_reboot()
         else:
-            raise ConnectionError("Not supported")
+            raise HomeAssistantError("Not supported")
 
     async def do_fwupdate(self):
         if self.api.can_bridge():
             await self.api.bridge_fwupdate()
         else:
-            raise ConnectionError("Not supported")
+            raise HomeAssistantError("Not supported")
 
     async def do_delete_callback(self, callback):
         if self.api.can_bridge():
             await self.api.bridge_remove_callback(callback)
         else:
-            raise ConnectionError("Not supported")
+            raise HomeAssistantError("Not supported")
 
     def device_data(self, dev_id: str):
         return self.data.get("devices", {}).get(dev_id, {})
