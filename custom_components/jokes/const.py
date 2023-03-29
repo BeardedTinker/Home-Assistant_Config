@@ -1,0 +1,3 @@
+"""Jokes constants."""
+
+DOMAIN = "jokes"

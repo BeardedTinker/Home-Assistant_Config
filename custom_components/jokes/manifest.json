@@ -1,0 +1,15 @@
+{
+  "codeowners": ["@LaggAt"],
+  "domain": "jokes",
+  "name": "Jokes",
+  "version": "0.0.1",
+  "config_flow": true,
+  "documentation": "https://github.com/LaggAt/ha-jokes/blob/master/README.md",
+  "issue_tracker": "https://github.com/LaggAt/ha-jokes/issues",
+  "requirements": [],
+  "iot_class": "cloud_polling",
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": []
+}
