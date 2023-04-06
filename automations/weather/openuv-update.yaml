@@ -13,7 +13,6 @@ condition:
   before: sunset
   condition: sun
 action:
-#  service: openuv.update_data
   service: homeassistant.update_entity
   target:
     entity_id: 
