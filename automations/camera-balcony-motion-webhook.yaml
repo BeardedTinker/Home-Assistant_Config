@@ -16,6 +16,6 @@ action:
       entity_id: camera.ebroz920_terasa2
       filename: /config/tmp/balcony.jpg
     service: camera.snapshot
-  - data:
-      entity_id: image_processing.facebox_saved_image
-    service: image_processing.scan
+#  - data:
+#      entity_id: image_processing.facebox_saved_image
+#    service: image_processing.scan
