@@ -14,7 +14,7 @@
         {% if states('sensor.solar_cumulative_output') not in ['unavailable', 'unknown'] %}
           {{state_attr('switch.smart_inverter', 'current')|float / 100 }}
         {% else %}
-          {{ this.state }}
+          0
         {% endif %}  
 #      state: "{{ state_attr('switch.smart_inverter', 'current')| float / 100 }}"
       attributes:

@@ -14,7 +14,7 @@
         {% if states('sensor.solar_ac_voltage') not in ['unavailable', 'unknown'] %}
           {{state_attr('switch.smart_inverter', 'voltage')|float(default=0) }}
         {% else %}
-          {{ this.state }}
+          0
         {% endif %}     
 #        "{{ state_attr('switch.smart_inverter', 'voltage')| float(default=0) }}"
       attributes:
