@@ -26,6 +26,8 @@ from homeassistant.components.climate.const import (
 )
 from homeassistant.const import (
     ATTR_TEMPERATURE,
+    PRECISION_TENTHS,
+    PRECISION_WHOLE,
     UnitOfTemperature,
 )
 import logging
@@ -132,19 +134,16 @@ class TuyaLocalClimate(TuyaLocalEntity, ClimateEntity):
         """Return the precision of the temperature setting."""
         # unlike sensor, this is a decimal of the smallest unit that can be
         # represented, not a number of decimal places.
-        temp = (
-            self._temperature_dps.scale(self._device)
-            if self._temperature_dps
-            else self._temp_high_dps.scale(self._device)
-            if self._temp_high_dps
-            else 1
-        )
+        dp = self._temperature_dps or self._temp_high_dps
+        temp = dp.scale(self._device) if dp else 1
         current = (
             self._current_temperature_dps.scale(self._device)
             if self._current_temperature_dps
             else 1
         )
-        return 1.0 / max(temp, current)
+        if max(temp, current) > 1.0:
+            return PRECISION_TENTHS
+        return PRECISION_WHOLE
 
     @property
     def target_temperature(self):
