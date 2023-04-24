@@ -1,0 +1,33 @@
+#####
+#
+#
+#####
+
+
+- sensor: 
+  - name: "Solar Power Production"
+    unique_id: 75a4dbe7-575c-42f2-a5e1-71c7301641d9
+    unit_of_measurement: W
+    state_class: measurement
+    device_class: power
+    icon: mdi:solar-power-variant
+    state: >
+      {% if states('sensor.solar_power_production') not in ['unavailable', 'unknown'] %}
+        {{ (states('sensor.smart_inverter_power')| float | round(2))}}
+      {% else %}
+        "0.0"
+      {% endif %}        
+#        "{{ state_attr('switch.smart_inverter', 'current_consumption')|float(default=0) / 10 }}" #| replace (',','.') 
+    attributes:
+      last_reset: "2022-11-05T12:00:00+00:00"
+
+#platform: template
+#sensors:
+#  solar_power_production:
+#    unit_of_measurement: "W"
+##    state_class: measurement
+#    device_class: power
+#    value_template: >-
+#      {{ (states('sensor.smart_inverter_power')| float | round(2))}}
+#    availability_template: >-
+#      {{ states('sensor.smart_inverter_power') not in ['unknown', 'unavailable', '0', '0.0']}}

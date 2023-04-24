@@ -10,6 +10,12 @@
       state_class: total_increasing
       device_class: energy
       icon: mdi:solar-panel
-      state: "{{ state_attr('switch.smart_inverter', 'current')| float / 100 }}"
+      state: >
+        {% if states('sensor.solar_cumulative_output') not in ['unavailable', 'unknown'] %}
+          {{state_attr('switch.smart_inverter', 'current')|float / 100 }}
+        {% else %}
+          {{ this.state }}
+        {% endif %}  
+#      state: "{{ state_attr('switch.smart_inverter', 'current')| float / 100 }}"
       attributes:
         last_reset: "2022-11-05T12:00:00+00:00"
