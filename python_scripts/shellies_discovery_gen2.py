@@ -809,6 +809,11 @@ DESCRIPTION_EXTERNAL_SENSOR_HUMIDITY = {
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_HUMIDITY,
 }
+DESCRIPTION_EXTERNAL_SENSOR_INPUT = {
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_TOPIC: TOPIC_INPUT,
+    KEY_VALUE_TEMPLATE: TPL_INPUT,
+}
 
 SUPPORTED_MODELS = {
     MODEL_PLUS_1: {
@@ -1937,7 +1942,28 @@ def configure_device():
         config[topic] = payload
 
     if device_config["sys"]["device"].get("addon_type") == "sensor":
-        for sensor_id in range(100, 199):
+        for input_id in range(100, 200):
+            if input_config := device_config.get(f"input:{input_id}"):
+                input_type = input_config["type"]
+
+                for event in (
+                    EVENT_SINGLE_PUSH,
+                    EVENT_DOUBLE_PUSH,
+                    EVENT_LONG_PUSH,
+                    EVENT_TRIPLE_PUSH,
+                ):
+                    topic, payload = get_input(input_id, input_type, event)
+                    config[topic] = payload
+
+                topic, payload = get_binary_sensor(
+                    "input",
+                    DESCRIPTION_EXTERNAL_SENSOR_INPUT,
+                    input_id,
+                    is_input=True,
+                    input_type=input_type,
+                )
+                config[topic] = payload
+        for sensor_id in range(100, 200):
             if device_config.get(f"temperature:{sensor_id}"):
                 topic, payload = get_sensor(
                     "temperature",
