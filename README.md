@@ -188,7 +188,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Blitzortung (HACS)
   - Certificate Expiry
   - CO2Signal
-  - COVID-19
+  ~~- COVID-19~~
   - Discord
   - DLNA server
   ~~- Dwains Dashboard~~
