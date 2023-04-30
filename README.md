@@ -270,12 +270,12 @@ Up-to-date count of various things in Home Assistant
 | -------------------- |:-----:|
 | Alerts               |     4 |
 | Automations          |   192 |
-| Binary sensors       |   333 |
+| Binary sensors       |   33¸5 |
 | Cameras              |    17 |
 | Climates             |    15 |
 | Counters             |     4 |
 | Device trackers      |   140 |
-| Entities             |  3623 |
+| Entities             |  3625 |
 | Groups               |    17 |
 | Image Processing     |     0 |
 | Input Boolean        |    19 |
@@ -291,13 +291,13 @@ Up-to-date count of various things in Home Assistant
 | Plants               |     8 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  2228 |
+| Sensors              |  2227 |
 | Switches             |   159 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 29.04.2023 00:00 AM
+* Updated: 30.04.2023 11:45 PM
 
 ### Missing files
 

@@ -6,12 +6,12 @@
 platform: template
 name: "Super Weather station"
 unique_id: e17d521d-14f5-4cbf-a630-1a60a89faff9
-condition_template: "{{ states('weather.dark_sky') }}" 
+condition_template: "{{ states('weather.forecast_home') }}" 
 temperature_template: "{{ states('sensor.balcony_temperature') | float(0) }}"
 humidity_template: "{{ states('sensor.balcony_humidity') | float(0) }}"
 forecast_template: "{{ state_attr('weather.accuweather', 'forecast') }}"
 pressure_template:  "{{ states('sensor.balcony_pressure') | float(0) }}"
-wind_speed_template: "{{ state_attr('weather.dark_sky', 'wind_speed') }}"
+wind_speed_template: "{{ state_attr('weather.forecast_home', 'wind_speed') }}"
 wind_bearing_template: "{{ state_attr('weather.accuweather', 'wind_bearing') }}"
 ozone_template: "{{ states('sensor.current_ozone_level') | float(0) }}"
-visibility_template: "{{ state_attr('weather.dark_sky', 'visibility') }}"
+visibility_template: "{{ state_attr('weather.forecast_home', 'visibility') }}"
