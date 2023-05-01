@@ -1,49 +1,66 @@
-name: Dual switch with timers
-products:
-  - id: 7c35xxu0foeqpdka
-    name: BlitzWolf BW-SS5
+name: Triple switch
 primary_entity:
   entity: switch
   name: Switch 1
   dps:
     - id: 1
-      type: boolean
       name: switch
+      type: boolean
 secondary_entities:
   - entity: switch
     name: Switch 2
     dps:
       - id: 2
-        type: boolean
         name: switch
+        type: boolean
+  - entity: switch
+    name: Switch 3
+    dps:
+      - id: 3
+        name: switch
+        type: boolean
   - entity: number
-    name: Timer 1
-    icon: "mdi:timer"
     category: config
+    name: Timer Switch 1
+    icon: "mdi:timer"
     dps:
       - id: 9
-        type: integer
         name: value
+        type: integer
+        unit: min
         range:
           min: 0
           max: 86400
         mapping:
           - scale: 60
             step: 60
-        unit: min
   - entity: number
-    name: Timer 2
-    icon: "mdi:timer"
     category: config
+    name: Timer Switch 2
+    icon: "mdi:timer"
     dps:
       - id: 10
-        type: integer
         name: value
+        type: integer
+        unit: min
         range:
           min: 0
           max: 86400
         mapping:
           - scale: 60
             step: 60
+  - entity: number
+    category: config
+    name: Timer Switch 3
+    icon: "mdi:timer"
+    dps:
+      - id: 11
+        name: value
+        type: integer
         unit: min
-
+        range:
+          min: 0
+          max: 86400
+        mapping:
+          - scale: 60
+            step: 60

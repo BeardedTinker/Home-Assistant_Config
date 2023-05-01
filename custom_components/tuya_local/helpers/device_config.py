@@ -359,8 +359,8 @@ class TuyaDpsConfig:
     def get_value(self, device):
         """Return the value of the dps from the given device."""
         mask = self.mask(device)
-        if mask:
-            bytevalue = self.decoded_value(device)
+        bytevalue = self.decoded_value(device)
+        if mask and isinstance(bytevalue, bytes):
             value = int.from_bytes(bytevalue, "big")
             scale = mask & (1 + ~mask)
             map_scale = self.scale(device)
@@ -382,7 +382,7 @@ class TuyaDpsConfig:
                 )
                 return None
 
-        elif self.rawtype == "base64":
+        elif self.rawtype == "base64" and isinstance(v, str):
             try:
                 return b64decode(v)
             except ValueError:
@@ -864,8 +864,11 @@ def possible_matches(dps):
     """Return possible matching configs for a given set of dps values."""
     for cfg in available_configs():
         parsed = TuyaDeviceConfig(cfg)
-        if parsed.matches(dps):
-            yield parsed
+        try:
+            if parsed.matches(dps):
+                yield parsed
+        except TypeError:
+            _LOGGER.error("Parse error in %s", cfg)
 
 
 def get_config(conf_type):
