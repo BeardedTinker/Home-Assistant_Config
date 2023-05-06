@@ -11,6 +11,10 @@ mode: queued
 trigger:
   platform: webhook
   webhook_id: !secret github_actions_webhook
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
 
 condition: '{{trigger.json.check_run.check_suite.head_branch == "master"}}'
 
