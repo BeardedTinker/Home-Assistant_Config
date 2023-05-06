@@ -11,6 +11,10 @@ mode: queued
 trigger:
   platform: webhook
   webhook_id: !secret github_webhook
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
 
 condition:
   - condition: template

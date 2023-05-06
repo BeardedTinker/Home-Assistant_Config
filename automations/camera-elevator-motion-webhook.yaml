@@ -8,6 +8,10 @@ id: 89d798a8-ad2c-4944-a58b-54e3e4064ba5
 trigger:
   platform: webhook
   webhook_id: motion_elevator_hook
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
 
 condition: []
 

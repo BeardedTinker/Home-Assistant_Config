@@ -8,6 +8,10 @@ id: c0449754-3f87-43b8-ab6b-271b3f476c7e
 trigger:
   platform: webhook
   webhook_id: !secret reolink_wh 
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
 
 condition: []
 

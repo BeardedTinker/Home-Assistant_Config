@@ -9,6 +9,10 @@ id: ad71ef48-da55-4ecc-9645-894d5f95e32f
 trigger:
   - platform: webhook
     webhook_id: synochat
+    allowed_methods:
+      - POST
+      - PUT
+    local_only: true
 
 action:
   service: switch.turn_on

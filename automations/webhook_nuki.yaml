@@ -8,7 +8,11 @@ id: 91d650da-538b-494e-af37-b9260e32e98f
 trigger:
   platform: webhook
   webhook_id: !secret nuki_wh
-
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
+  
 condition: []
 
 action:

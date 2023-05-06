@@ -8,6 +8,10 @@ id: 10cc6ce3-ea9e-42f4-aa47-ca782462368f
 trigger:
   platform: webhook
   webhook_id: !secret unknown_wh 
+  allowed_methods:
+    - POST
+    - PUT
+  local_only: true
 
 condition: []
 
