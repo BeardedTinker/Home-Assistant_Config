@@ -14,6 +14,6 @@ history:
 #      - person.rashmi
 #      - device_tracker.meta_alok
 #      - person.alok
-  exclude:
-    domains:
-      - automation
+#  exclude:
+#    domains:
+#      - automation
