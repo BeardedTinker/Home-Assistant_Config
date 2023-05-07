@@ -37,7 +37,7 @@ jobs:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
       - name: Copy stub files into configuration folder
@@ -60,7 +60,7 @@ jobs:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
       - name: Copy stub files into configuration folder
