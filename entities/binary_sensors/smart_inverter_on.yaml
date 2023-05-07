@@ -7,7 +7,7 @@ platform: template
 sensors:
   smart_inverter_on:
     friendly_name: Smart Inverter State
-    entity_id:
-      - sensor.solar_power_production
+#    entity_id:
+#      - sensor.solar_power_production
     value_template: >-
       {{ states('sensor.solar_power_production') | float(0) > 0 }}
