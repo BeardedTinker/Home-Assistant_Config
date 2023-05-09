@@ -1,6 +1,7 @@
 name: Skyfan DC fan
 product:
-  - id: vzj97d3m05yjhchn
+  - id: pktxz1vynowmavuc
+    name: Skyfan DC fan with light
 primary_entity:
   entity: fan
   dps:
@@ -11,11 +12,11 @@ primary_entity:
       type: string
       name: preset_mode
       mapping:
-        - dps_val: smart
+        - dps_val: Normal
           value: Normal
-        - dps_val: nature
+        - dps_val: Nature
           value: Nature
-        - dps_val: sleep
+        - dps_val: Sleep
           value: Sleep
     - id: 3
       type: integer
@@ -29,6 +30,29 @@ primary_entity:
       type: string
       name: direction
 secondary_entities:
+  - entity: light
+    dps:
+      - id: 15
+        type: boolean
+        name: switch
+      - id: 16
+        name: brightness
+        type: integer
+        range:
+          min: 1
+          max: 5
+        mapping:
+          - scale: 0.0196
+      - id: 19
+        name: color_temp
+        type: string
+        mapping:
+          - dps_val: Coolwhite
+            value: 154
+          - dps_val: Naturalwhite
+            value: 250
+          - dps_val: Warmwhite
+            value: 454
   - entity: select
     name: Timer
     icon: "mdi:timer"

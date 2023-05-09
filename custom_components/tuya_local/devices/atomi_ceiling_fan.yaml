@@ -1,7 +1,7 @@
-name: Chanfok ceiling fan
+name: Ceiling fan
 products:
-  - id: tvtzgei8bgaezsvi
-    name: JST-DC-WYfen
+  - id: keyxcgdguks9shua
+    name: Atomi 52 inch ceiling fan
 primary_entity:
   entity: fan
   dps:
@@ -16,26 +16,29 @@ primary_entity:
           value: Fresh
         - dps_val: nature
           value: Natural
-    - id: 62
+    - id: 64
       type: integer
       name: speed
       range:
         min: 0
-        max: 6
+        max: 3
       mapping:
-        - scale: 0.06
-    - id: 63
+        - scale: 0.03
+    - id: 71
       type: string
-      name: direction
-    - id: 101
-      type: boolean
-      name: unknown_101
+      name: unknown_71
 secondary_entities:
   - entity: light
+    name: Light
     dps:
       - id: 20
         type: boolean
         name: switch
+      - id: 21
+        # docs give the standard white, colour, scene, music values, but this
+        # device does not have color or scene dps, so just leave it for monitoring
+        name: work_mode
+        type: string
       - id: 22
         name: brightness
         type: integer
@@ -50,18 +53,26 @@ secondary_entities:
         range:
           min: 0
           max: 1000
+  - entity: number
+    name: Light timer
+    category: config
+    icon: "mdi:timer"
+    dps:
+      - id: 26
+        type: integer
+        name: value
+        unit: min
+        range:
+          min: 0
+          max: 86400
         mapping:
-          - invert: true
-      - id: 28
-        name: control_data
-        type: hex
-        optional: true
+          - scale: 60
+            step: 60
   - entity: switch
-    name: Beep
-    icon: "mdi:bell"
+    name: Do not disturb
     category: config
     dps:
-      - id: 66
+      - id: 34
         type: boolean
         name: switch
 

@@ -43,7 +43,6 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         self._control_dp = dps_map.pop("control", None)
         self._action_dp = dps_map.pop("action", None)
         self._open_dp = dps_map.pop("open", None)
-        self._reversed_dp = dps_map.pop("reversed", None)
         self._init_end(dps_map)
 
         self._support_flags = 0
@@ -57,14 +56,6 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
             if "close" in self._control_dp.values(self._device):
                 self._support_flags |= CoverEntityFeature.CLOSE
         # Tilt not yet supported, as no test devices known
-
-    @property
-    def _is_reversed(self):
-        return self._reversed_dp and self._reversed_dp.get_value(self._device)
-
-    def _maybe_reverse(self, percent):
-        """Reverse the percentage if it should be, otherwise leave it alone"""
-        return 100 - percent if self._is_reversed else percent
 
     @property
     def device_class(self):
@@ -97,11 +88,11 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         if self._currentpos_dp:
             pos = self._currentpos_dp.get_value(self._device)
             if pos is not None:
-                return self._maybe_reverse(pos)
+                return pos
 
         if self._position_dp:
             pos = self._position_dp.get_value(self._device)
-            return self._maybe_reverse(pos)
+            return pos
 
         if self._open_dp:
             state = self._open_dp.get_value(self._device)
@@ -113,54 +104,86 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
             return self._state_to_percent(state)
 
     @property
-    def is_opening(self):
-        """Return if the cover is opening or not."""
-        # If dps is available to inform current action, use that
+    def _current_state(self):
+        """Return the current state of the cover if it can be determined,
+        or None if it is inconclusive.
+        """
         if self._action_dp:
             action = self._action_dp.get_value(self._device)
-            if action is not None:
-                return action == "opening"
-        # Otherwise use last command and check it hasn't completed
+            if action in ["opening", "closing", "open", "closed"]:
+                return action
+
+        if self._currentpos_dp:
+            pos = self._currentpos_dp.get_value(self._device)
+            # we have a current pos dp, but it isn't telling us where the
+            # curtain is... we can't tell the state.
+            if pos is None:
+                return None
+            if pos < 5:
+                return "closed"
+            elif pos > 95:
+                return "open"
+            if self._position_dp:
+                setpos = self._position_dp.get_value(self._device)
+                if setpos == pos:
+                    # if the current position is around the set position,
+                    # probably the curtain is as set, somewhere in the middle
+                    # so none of open, closed, opening or closing
+                    return None
         if self._control_dp:
             cmd = self._control_dp.get_value(self._device)
             pos = self.current_cover_position
             if pos is not None:
-                return (
-                    cmd != "close"
-                    and cmd != "stop"
-                    and self.current_cover_position < 95
-                )
+                if cmd == "open":
+                    if pos > 95:
+                        return "open"
+                    else:
+                        return "opening"
+                elif cmd == "close":
+                    if pos < 5:
+                        return "closed"
+                    else:
+                        return "closing"
+
+    @property
+    def is_opening(self):
+        """Return if the cover is opening or not."""
+        state = self._current_state
+        if state is None:
+            # If we return false, and is_closing and is_opening are also false,
+            # HA assumes open.  If we don't know, return None.
+            return None
+        else:
+            return state == "opening"
 
     @property
     def is_closing(self):
         """Return if the cover is closing or not."""
-        # If dps is available to inform current action, use that
-        if self._action_dp:
-            action = self._action_dp.get_value(self._device)
-            if action is not None:
-                return action == "closing"
-        # Otherwise use last command and check it hasn't completed
-        if self._control_dp:
-            closed = self.is_closed
-            cmd = self._control_dp.get_value(self._device)
-            if closed is not None:
-                return cmd != "open" and cmd != "stop" and not closed
+        state = self._current_state
+        if state is None:
+            # If we return false, and is_closing and is_opening are also false,
+            # HA assumes open.  If we don't know, return None.
+            return None
+        else:
+            return state == "closing"
 
     @property
     def is_closed(self):
         """Return if the cover is closed or not, if it can be determined."""
-        # Only use position if it is reliable, otherwise curtain can become
-        # stuck in "open" state when we don't actually know what state it is.
-        pos = self.current_cover_position
-        if isinstance(pos, int):
-            return pos < 5
+        state = self._current_state
+        if state is None:
+            # If we return false, and is_closing and is_opening are also false,
+            # HA assumes open.  If we don't know, return None.
+            return None
+        else:
+            return state == "closed"
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         if self._control_dp and "open" in self._control_dp.values(self._device):
             await self._control_dp.async_set_value(self._device, "open")
         elif self._position_dp:
-            pos = self._maybe_reverse(100)
+            pos = 100
             await self._position_dp.async_set_value(self._device, pos)
         else:
             raise NotImplementedError()
@@ -170,7 +193,7 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         if self._control_dp and "close" in self._control_dp.values(self._device):
             await self._control_dp.async_set_value(self._device, "close")
         elif self._position_dp:
-            pos = self._maybe_reverse(0)
+            pos = 0
             await self._position_dp.async_set_value(self._device, pos)
         else:
             raise NotImplementedError()
@@ -180,7 +203,6 @@ class TuyaLocalCover(TuyaLocalEntity, CoverEntity):
         if position is None:
             raise AttributeError()
         if self._position_dp:
-            position = self._maybe_reverse(position)
             await self._position_dp.async_set_value(self._device, position)
         else:
             raise NotImplementedError()

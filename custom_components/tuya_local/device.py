@@ -24,7 +24,9 @@ from .const import (
     CONF_POLL_ONLY,
     CONF_PROTOCOL_VERSION,
     DOMAIN,
+    CONF_DEVICE_CID,
 )
+from .helpers.config import get_device_id
 from .helpers.device_config import possible_matches
 from .helpers.log import log_json
 
@@ -40,6 +42,7 @@ class TuyaLocalDevice(object):
         address,
         local_key,
         protocol_version,
+        dev_cid,
         hass: HomeAssistant,
         poll_only=False,
     ):
@@ -51,6 +54,7 @@ class TuyaLocalDevice(object):
             address (str): The network address.
             local_key (str): The encryption key.
             protocol_version (str | number): The protocol version.
+            dev_cid (str): The sub device id.
             hass (HomeAssistant): The Home Assistant instance.
             poll_only (bool): True if the device should be polled only
         """
@@ -63,7 +67,15 @@ class TuyaLocalDevice(object):
         self._api_protocol_version_index = None
         self._api_protocol_working = False
         try:
-            self._api = tinytuya.Device(dev_id, address, local_key)
+            if dev_cid is not None:
+                self._api = tinytuya.Device(
+                    dev_id,
+                    cid=dev_cid,
+                    parent=tinytuya.Device(dev_id, address, local_key),
+                )
+            else:
+                self._api = tinytuya.Device(dev_id, address, local_key)
+            self.dev_cid = dev_cid
         except Exception as e:
             _LOGGER.error(
                 "%s: %s while initialising device %s",
@@ -75,6 +87,9 @@ class TuyaLocalDevice(object):
 
         # we handle retries at a higher level so we can rotate protocol version
         self._api.set_socketRetryLimit(1)
+        if self._api.parent:
+            self._api.parent.set_socketRetryLimit(1)
+
         self._refresh_task = None
         self._protocol_configured = protocol_version
         self._poll_only = poll_only
@@ -104,8 +119,8 @@ class TuyaLocalDevice(object):
 
     @property
     def unique_id(self):
-        """Return the unique id for this device (the dev_id)."""
-        return self._api.id
+        """Return the unique id for this device (the dev_id or dev_cid)."""
+        return self.dev_cid or self._api.id
 
     @property
     def device_info(self):
@@ -197,7 +212,7 @@ class TuyaLocalDevice(object):
                             for dp in entity._config.dps():
                                 if not dp.persist and dp.id not in poll:
                                     self._cached_state.pop(dp.id, None)
-                        entity.async_schedule_update_ha_state()
+                        entity.async_write_ha_state()
                 else:
                     _LOGGER.debug(
                         "%s received non data %s",
@@ -231,6 +246,9 @@ class TuyaLocalDevice(object):
         dps_updated = False
 
         self._api.set_socketPersistent(persist)
+        if self._api.parent:
+            self._api.parent.set_socketPersistent(persist)
+
         while self._running:
             try:
                 last_cache = self._cached_state.get("updated_at", 0)
@@ -243,6 +261,8 @@ class TuyaLocalDevice(object):
                     # connection.
                     persist = not self.should_poll
                     self._api.set_socketPersistent(persist)
+                    if self._api.parent:
+                        self._api.parent.set_socketPersistent(persist)
 
                 if now - last_cache > self._CACHE_TIMEOUT:
                     if (
@@ -297,6 +317,8 @@ class TuyaLocalDevice(object):
                 self._running = False
                 # Close the persistent connection when exiting the loop
                 self._api.set_socketPersistent(False)
+                if self._api.parent:
+                    self._api.parent.set_socketPersistent(False)
                 raise
             except Exception as t:
                 _LOGGER.exception(
@@ -309,6 +331,8 @@ class TuyaLocalDevice(object):
 
         # Close the persistent connection when exiting the loop
         self._api.set_socketPersistent(False)
+        if self._api.parent:
+            self._api.parent.set_socketPersistent(False)
 
     async def async_possible_types(self):
         cached_state = self._get_cached_state()
@@ -391,7 +415,7 @@ class TuyaLocalDevice(object):
                     # Clear non-persistant dps that were not in the poll
                     if not dp.persist and dp.id not in new_state.get("dps", {}):
                         self._cached_state.pop(dp.id, None)
-                entity.async_schedule_update_ha_state()
+                entity.async_write_ha_state()
         _LOGGER.debug(
             "%s refreshed device state: %s",
             self.name,
@@ -559,6 +583,11 @@ class TuyaLocalDevice(object):
             self._api.set_version,
             new_version,
         )
+        if self._api.parent:
+            await self._hass.async_add_executor_job(
+                self._api.parent.set_version,
+                new_version,
+            )
 
     @staticmethod
     def get_key_for_value(obj, value, fallback=None):
@@ -570,7 +599,7 @@ class TuyaLocalDevice(object):
 def setup_device(hass: HomeAssistant, config: dict):
     """Setup a tuya device based on passed in config."""
 
-    _LOGGER.info("Creating device: %s", config[CONF_DEVICE_ID])
+    _LOGGER.info("Creating device: %s", get_device_id(config))
     hass.data[DOMAIN] = hass.data.get(DOMAIN, {})
     device = TuyaLocalDevice(
         config[CONF_NAME],
@@ -578,15 +607,17 @@ def setup_device(hass: HomeAssistant, config: dict):
         config[CONF_HOST],
         config[CONF_LOCAL_KEY],
         config[CONF_PROTOCOL_VERSION],
+        config.get(CONF_DEVICE_CID),
         hass,
         config[CONF_POLL_ONLY],
     )
-    hass.data[DOMAIN][config[CONF_DEVICE_ID]] = {"device": device}
+    hass.data[DOMAIN][get_device_id(config)] = {"device": device}
 
     return device
 
 
 async def async_delete_device(hass: HomeAssistant, config: dict):
-    _LOGGER.info("Deleting device: %s", config[CONF_DEVICE_ID])
-    await hass.data[DOMAIN][config[CONF_DEVICE_ID]]["device"].async_stop()
-    del hass.data[DOMAIN][config[CONF_DEVICE_ID]]["device"]
+    device_id = get_device_id(config)
+    _LOGGER.info("Deleting device: %s", device_id)
+    await hass.data[DOMAIN][device_id]["device"].async_stop()
+    del hass.data[DOMAIN][device_id]["device"]
