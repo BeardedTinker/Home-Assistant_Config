@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
+from typing import Any
 
 import homeassistant.helpers.device_registry as dr
 import homeassistant.helpers.entity_registry as er
@@ -28,7 +28,7 @@ from .const import (
     CalculationStrategy,
     PowercalcDiscoveryType,
 )
-from .errors import ModelNotSupported
+from .errors import ModelNotSupportedError
 from .power_profile.factory import get_power_profile
 from .power_profile.library import ModelInfo
 from .power_profile.power_profile import DEVICE_DOMAINS, PowerProfile
@@ -37,10 +37,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def autodiscover_model(
-    hass: HomeAssistant, entity_entry: er.RegistryEntry | None
+    hass: HomeAssistant,
+    entity_entry: er.RegistryEntry | None,
 ) -> ModelInfo | None:
-    """Try to auto discover manufacturer and model from the known device information"""
-    if not entity_entry:
+    """Try to auto discover manufacturer and model from the known device information."""
+    if not entity_entry or not entity_entry.device_id:
         return None
 
     if not await has_manufacturer_and_model_information(hass, entity_entry):
@@ -52,17 +53,23 @@ async def autodiscover_model(
 
     device_registry = dr.async_get(hass)
     device_entry = device_registry.async_get(entity_entry.device_id)
-    model_id = device_entry.model
+    if not device_entry:
+        return None
 
+    model_id = device_entry.model
     manufacturer = device_entry.manufacturer
-    if MANUFACTURER_ALIASES.get(manufacturer):
+    if manufacturer is None or model_id is None:
+        return None
+
+    if manufacturer in MANUFACTURER_ALIASES:
         manufacturer = MANUFACTURER_ALIASES.get(manufacturer)
 
-    # Make sure we don't have a literal / in model_id, so we don't get issues with sublut directory matching down the road
+    # Make sure we don't have a literal / in model_id,
+    # so we don't get issues with sublut directory matching down the road
     # See github #658
     model_id = str(model_id).replace("/", "#slash#")
 
-    model_info = ModelInfo(manufacturer, model_id)
+    model_info = ModelInfo(str(manufacturer), str(model_id))
 
     _LOGGER.debug(
         "%s: Auto discovered model (manufacturer=%s, model=%s)",
@@ -74,10 +81,12 @@ async def autodiscover_model(
 
 
 async def has_manufacturer_and_model_information(
-    hass: HomeAssistant, entity_entry: er.RegistryEntry
+    hass: HomeAssistant,
+    entity_entry: er.RegistryEntry,
 ) -> bool:
-    """See if we have enough information in device registry to automatically setup the power sensor"""
-
+    """See if we have enough information in device registry to automatically setup the power sensor."""
+    if entity_entry.device_id is None:
+        return False
     device_registry = dr.async_get(hass)
     device_entry = device_registry.async_get(entity_entry.device_id)
     if device_entry is None:
@@ -90,20 +99,18 @@ async def has_manufacturer_and_model_information(
 
 
 class DiscoveryManager:
-    """
-    This class is responsible for scanning the HA instance for entities and their manufacturer / model info
+    """This class is responsible for scanning the HA instance for entities and their manufacturer / model info
     It checks if any of these devices is supported in the powercalc library
-    When entities are found it will dispatch a discovery flow, so the user can add them to their HA instance
+    When entities are found it will dispatch a discovery flow, so the user can add them to their HA instance.
     """
 
-    def __init__(self, hass: HomeAssistant, ha_config: ConfigType):
+    def __init__(self, hass: HomeAssistant, ha_config: ConfigType) -> None:
         self.hass = hass
         self.ha_config = ha_config
         self.manually_configured_entities: list[str] | None = None
 
     async def start_discovery(self) -> None:
-        """Start the discovery procedure"""
-
+        """Start the discovery procedure."""
         _LOGGER.debug("Start auto discovering entities")
         entity_registry = er.async_get(self.hass)
         for entity_entry in list(entity_registry.entities.values()):
@@ -115,7 +122,8 @@ class DiscoveryManager:
                 continue
 
             source_entity = await create_source_entity(
-                entity_entry.entity_id, self.hass
+                entity_entry.entity_id,
+                self.hass,
             )
 
             if (
@@ -140,16 +148,20 @@ class DiscoveryManager:
 
             try:
                 power_profile = await get_power_profile(
-                    self.hass, {}, model_info=model_info
+                    self.hass,
+                    {},
+                    model_info=model_info,
                 )
-            except ModelNotSupported:
+            except ModelNotSupportedError:
                 _LOGGER.debug(
                     "%s: Model not found in library, skipping discovery",
                     entity_entry.entity_id,
                 )
                 continue
 
-            if not power_profile.is_entity_domain_supported(source_entity):
+            if power_profile and not power_profile.is_entity_domain_supported(
+                source_entity,
+            ):
                 continue
 
             self._init_entity_discovery(source_entity, power_profile, {})
@@ -157,7 +169,7 @@ class DiscoveryManager:
         _LOGGER.debug("Done auto discovering entities")
 
     def should_process_entity(self, entity_entry: er.RegistryEntry) -> bool:
-        """Do some validations on the registry entry to see if it qualifies for discovery"""
+        """Do some validations on the registry entry to see if it qualifies for discovery."""
         if entity_entry.disabled:
             return False
 
@@ -185,9 +197,9 @@ class DiscoveryManager:
         self,
         source_entity: SourceEntity,
         power_profile: PowerProfile | None,
-        extra_discovery_data: Optional[dict],
+        extra_discovery_data: dict | None,
     ) -> None:
-        """Dispatch the discovery flow for a given entity"""
+        """Dispatch the discovery flow for a given entity."""
         existing_entries = [
             entry
             for entry in self.hass.config_entries.async_entries(DOMAIN)
@@ -196,11 +208,11 @@ class DiscoveryManager:
         ]
         if existing_entries:
             _LOGGER.debug(
-                f"{source_entity.entity_id}: Already setup with discovery, skipping new discovery"
+                f"{source_entity.entity_id}: Already setup with discovery, skipping new discovery",
             )
             return
 
-        discovery_data = {
+        discovery_data: dict[str, Any] = {
             CONF_ENTITY_ID: source_entity.entity_id,
             DISCOVERY_SOURCE_ENTITY: source_entity,
         }
@@ -230,13 +242,16 @@ class DiscoveryManager:
             }
             self.hass.async_create_task(
                 discovery.async_load_platform(
-                    self.hass, SENSOR_DOMAIN, DOMAIN, discovery_info, self.ha_config
-                )
+                    self.hass,
+                    SENSOR_DOMAIN,
+                    DOMAIN,
+                    discovery_info,
+                    self.ha_config,
+                ),
             )
 
     def _is_user_configured(self, entity_id: str) -> bool:
-        """
-        Check if user have setup powercalc sensors for a given entity_id.
+        """Check if user have setup powercalc sensors for a given entity_id.
         Either with the YAML or GUI method.
         """
         if not self.manually_configured_entities:
@@ -247,7 +262,7 @@ class DiscoveryManager:
         return entity_id in self.manually_configured_entities
 
     def _load_manually_configured_entities(self) -> list[str]:
-        """Looks at the YAML and GUI config entries for all the configured entity_id's"""
+        """Looks at the YAML and GUI config entries for all the configured entity_id's."""
         entities = []
 
         # Find entity ids in yaml config
@@ -255,7 +270,7 @@ class DiscoveryManager:
             sensor_config = self.ha_config.get(SENSOR_DOMAIN)
             platform_entries = [
                 item
-                for item in sensor_config
+                for item in sensor_config or {}
                 if isinstance(item, dict) and item.get(CONF_PLATFORM) == DOMAIN
             ]
             for entry in platform_entries:
@@ -267,18 +282,17 @@ class DiscoveryManager:
                 entry.data.get(CONF_ENTITY_ID)
                 for entry in self.hass.config_entries.async_entries(DOMAIN)
                 if entry.source == SOURCE_USER
-            ]
+            ],
         )
 
         return entities
 
-    def _find_entity_ids_in_yaml_config(self, search_dict: dict):
-        """
-        Takes a dict with nested lists and dicts,
+    def _find_entity_ids_in_yaml_config(self, search_dict: dict) -> list[str]:
+        """Takes a dict with nested lists and dicts,
         and searches all dicts for a key of the field
         provided.
         """
-        found_entity_ids = []
+        found_entity_ids: list[str] = []
 
         for key, value in search_dict.items():
             if key == "entity_id":

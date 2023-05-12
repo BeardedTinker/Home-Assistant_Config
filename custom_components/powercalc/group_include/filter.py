@@ -13,8 +13,8 @@ class FilterOperator(StrEnum):
 
 
 def create_filter(filter_config: dict) -> IncludeEntityFilter:
-    """Create filter class"""
-    filters = []
+    """Create filter class."""
+    filters: list[IncludeEntityFilter] = []
     if CONF_DOMAIN in filter_config:
         domain_config = filter_config.get(CONF_DOMAIN)
         if type(domain_config) == list:
@@ -22,9 +22,9 @@ def create_filter(filter_config: dict) -> IncludeEntityFilter:
                 CompositeFilter(
                     [DomainFilter(domain) for domain in domain_config],
                     FilterOperator.OR,
-                )
+                ),
             )
-        else:
+        elif type(domain_config) == str:
             filters.append(DomainFilter(domain_config))
 
     return CompositeFilter(filters, FilterOperator.AND)
@@ -32,12 +32,12 @@ def create_filter(filter_config: dict) -> IncludeEntityFilter:
 
 class IncludeEntityFilter(Protocol):
     def is_valid(self, entity: RegistryEntry) -> bool:
-        """Return True when the entity should be included, False when it should be discarded"""
-        pass
+        """Return True when the entity should be included, False when it should be discarded."""
+        ...
 
 
 class DomainFilter(IncludeEntityFilter):
-    def __init__(self, domain: str):
+    def __init__(self, domain: str) -> None:
         self.domain: str = domain
 
     def is_valid(self, entity: RegistryEntry) -> bool:
@@ -50,7 +50,11 @@ class NullFilter(IncludeEntityFilter):
 
 
 class CompositeFilter(IncludeEntityFilter):
-    def __init__(self, filters: list[IncludeEntityFilter], operator: FilterOperator):
+    def __init__(
+        self,
+        filters: list[IncludeEntityFilter],
+        operator: FilterOperator,
+    ) -> None:
         self.filters = filters
         self.operator = operator
 
