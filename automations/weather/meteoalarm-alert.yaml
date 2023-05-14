@@ -60,4 +60,4 @@ action:
           data:
             message: 'Meteorological warning. {{state_attr("binary_sensor.meteoalarm", "event")}}. {{state_attr("binary_sensor.meteoalarm", "description")}}'
           extra:
-            volume: 0.5
+            volume: 0.4
