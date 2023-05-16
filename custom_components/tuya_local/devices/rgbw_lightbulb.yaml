@@ -1,7 +1,9 @@
-name: RGBCW lightbulb
+name: RGBW lightbulb
 products:
-  - id: bqkefojbmb8ovvws
-    name: A60 RGBW smart bulb
+  - id: cqekgipywslyavsr
+    name: Merkury BW904 Smart Bulb
+  - id: p2i2oapbnxftdukj
+    name: Merkury BW904 Smart Bulb
 primary_entity:
   entity: light
   dps:
@@ -13,7 +15,7 @@ primary_entity:
       type: string
       mapping:
         - dps_val: white
-          value: color_temp
+          value: white
         - dps_val: colour
           value: hs
     - id: 3
@@ -21,12 +23,6 @@ primary_entity:
       type: integer
       range:
         min: 25
-        max: 255
-    - id: 4
-      name: color_temp
-      type: integer
-      range:
-        min: 0
         max: 255
     - id: 5
       name: rgbhsv
@@ -56,15 +52,20 @@ primary_entity:
     - id: 6
       name: scene
       type: hex
+      optional: true
     - id: 7
       name: flash_scene1
       type: hex
+      optional: true
     - id: 8
       name: flash_scene2
       type: hex
+      optional: true
     - id: 9
       name: flash_scene3
       type: hex
+      optional: true
     - id: 10
       name: flash_scene4
       type: hex
+      optional: true
