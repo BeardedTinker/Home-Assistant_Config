@@ -8,5 +8,6 @@ logger:
   logs:
 #    homeassistant.components.cast: debug
 #    homeassistant.components.cast.media_player: debug
-    custom_components.youtube: debug
-    custom_components.powercalc: debug
+#    custom_components.youtube: debug
+#    custom_components.powercalc: debug
+    custom_components.tuya_local: debug
