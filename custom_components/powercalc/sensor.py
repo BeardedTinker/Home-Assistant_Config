@@ -119,8 +119,7 @@ from .power_profile.factory import get_power_profile
 from .sensors.abstract import BaseEntity
 from .sensors.daily_energy import (
     DAILY_FIXED_ENERGY_SCHEMA,
-    create_daily_fixed_energy_power_sensor,
-    create_daily_fixed_energy_sensor,
+    create_daily_fixed_energy_sensors,
 )
 from .sensors.energy import EnergySensor, create_energy_sensor
 from .sensors.group import (
@@ -343,19 +342,16 @@ def save_entity_ids_on_config_entry(
     power_entities = [
         e.entity_id for e in entities.all() if isinstance(e, VirtualPowerSensor)
     ]
-    energy_entities = [
-        e.entity_id for e in entities.all() if isinstance(e, EnergySensor)
-    ]
     new_data = config_entry.data.copy()
-    if not power_entities:
-        raise SensorConfigurationError(
-            f"No power sensor created for config_entry {config_entry.entry_id}",
-        )
-    new_data.update({ENTRY_DATA_POWER_ENTITY: power_entities[0]})
+    if power_entities:
+        new_data.update({ENTRY_DATA_POWER_ENTITY: power_entities[0]})
 
     if CONF_CREATE_ENERGY_SENSOR not in config_entry.data or config_entry.data.get(
         CONF_CREATE_ENERGY_SENSOR,
     ):
+        energy_entities = [
+            e.entity_id for e in entities.all() if isinstance(e, EnergySensor)
+        ]
         if not energy_entities:
             raise SensorConfigurationError(
                 f"No energy sensor created for config_entry {config_entry.entry_id}",
@@ -539,14 +535,10 @@ async def create_sensors(
             _LOGGER.error(error)
 
     if not entities_to_add.has_entities():
+        exception_message = "Could not resolve any entities"
         if CONF_CREATE_GROUP in config:
-            raise SensorConfigurationError(
-                f"Could not resolve any entities in group '{config.get(CONF_CREATE_GROUP)}'",
-            )
-        if not sensor_configs:
-            raise SensorConfigurationError(
-                "Could not resolve any entities for non-group sensor",
-            )
+            exception_message += f" in group '{config.get(CONF_CREATE_GROUP)}'"
+        raise SensorConfigurationError(exception_message)
 
     # Create group sensors (power, energy, utility)
     if CONF_CREATE_GROUP in config:
@@ -594,23 +586,15 @@ async def create_individual_sensors(
         raise error
 
     entities_to_add: list[Entity] = []
-
     energy_sensor: EnergySensor | None = None
     if CONF_DAILY_FIXED_ENERGY in sensor_config:
-        energy_sensor = await create_daily_fixed_energy_sensor(
-            hass,
-            sensor_config,
-            source_entity,
+        entities_to_add.extend(
+            await create_daily_fixed_energy_sensors(
+                hass,
+                sensor_config,
+                source_entity,
+            ),
         )
-        entities_to_add.append(energy_sensor)
-        daily_fixed_sensor = await create_daily_fixed_energy_power_sensor(
-            hass,
-            sensor_config,
-            source_entity,
-        )
-        if daily_fixed_sensor:
-            entities_to_add.append(daily_fixed_sensor)
-
     else:
         try:
             power_sensor = await create_power_sensor(
@@ -619,10 +603,10 @@ async def create_individual_sensors(
                 source_entity,
                 discovery_info,
             )
+
+            entities_to_add.append(power_sensor)
         except PowercalcSetupError:
             return EntitiesBucket()
-
-        entities_to_add.append(power_sensor)
 
         # Create energy sensor which integrates the power sensor
         if sensor_config.get(CONF_CREATE_ENERGY_SENSOR):
@@ -649,14 +633,11 @@ async def create_individual_sensors(
     )
 
     # Update several registries
-    if discovery_info:
-        hass.data[DOMAIN][DATA_DISCOVERED_ENTITIES].update(
-            {source_entity.entity_id: entities_to_add},
-        )
-    else:
-        hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES].update(
-            {source_entity.entity_id: entities_to_add},
-        )
+    hass.data[DOMAIN][
+        DATA_DISCOVERED_ENTITIES if discovery_info else DATA_CONFIGURED_ENTITIES
+    ].update(
+        {source_entity.entity_id: entities_to_add},
+    )
 
     if source_entity.domain not in hass.data[DOMAIN][DATA_DOMAIN_ENTITIES]:
         hass.data[DOMAIN][DATA_DOMAIN_ENTITIES][source_entity.domain] = []
@@ -734,7 +715,7 @@ async def check_entity_not_already_configured(
     )
 
     unique_id = sensor_config.get(CONF_UNIQUE_ID) or source_entity.unique_id
-    if unique_id and unique_id in used_unique_ids:
+    if unique_id in used_unique_ids:
         raise SensorAlreadyConfiguredError(source_entity.entity_id, existing_entities)
 
     entity_id = source_entity.entity_id
@@ -776,13 +757,16 @@ class EntitiesBucket:
     existing: list[Entity] = field(default_factory=list)
 
     def extend_items(self, bucket: EntitiesBucket) -> None:
+        """Append current entity bucket with new one"""
         self.new.extend(bucket.new)
         self.existing.extend(bucket.existing)
 
     def all(self) -> list[Entity]:  # noqa: A003
+        """Return all entities both new and existing"""
         return self.new + self.existing
 
     def has_entities(self) -> bool:
+        """Check whether the entity bucket is not empty"""
         return bool(self.new) or bool(self.existing)
 
 

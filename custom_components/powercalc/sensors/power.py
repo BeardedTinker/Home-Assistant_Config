@@ -144,7 +144,7 @@ async def create_virtual_power_sensor(
                 if power_profile and power_profile.sub_profile_select:
                     sub_profile_selector = SubProfileSelector(
                         hass,
-                        power_profile,
+                        power_profile.sub_profile_select,
                         source_entity,
                     )
                     power_profile.select_sub_profile(
@@ -404,7 +404,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
             await self._update_power_sensor(self._source_entity.entity_id, new_state)
             async_dispatcher_send(self.hass, SIGNAL_POWER_SENSOR_STATE_CHANGE)
 
-        async def template_change_listener(*args: Any) -> None:
+        async def template_change_listener(*_: Any) -> None:  # noqa: ANN401
             state = self.hass.states.get(self._source_entity.entity_id)
             await self._update_power_sensor(self._source_entity.entity_id, state)
             async_dispatcher_send(self.hass, SIGNAL_POWER_SENSOR_STATE_CHANGE)
@@ -424,10 +424,10 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
         if not track_entities:
             track_entities = [self._source_entity.entity_id]
 
-        if self._power_profile:
+        if self._power_profile and self._power_profile.sub_profile_select:
             self._sub_profile_selector = SubProfileSelector(
                 self.hass,
-                self._power_profile,
+                self._power_profile.sub_profile_select,
                 self._source_entity,
             )
             track_entities.extend(self._sub_profile_selector.get_tracking_entities())
@@ -582,7 +582,7 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
             delay = sleep_power.get(CONF_DELAY)
 
             @callback
-            def _update_sleep_power(_: Any) -> None:
+            def _update_sleep_power(*_: Any) -> None:  # noqa: ANN401
                 power = Decimal(sleep_power.get(CONF_POWER) or 0)
                 if self._multiply_factor_standby and self._multiply_factor:
                     power *= Decimal(self._multiply_factor)
