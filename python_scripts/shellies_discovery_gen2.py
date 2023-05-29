@@ -149,8 +149,10 @@ MODEL_PRO_1PM = "shellypro1pm"
 MODEL_PRO_2 = "shellypro2"
 MODEL_PRO_2PM = "shellypro2pm"
 MODEL_PRO_3 = "shellypro3"
+MODEL_PRO_EM = "shellyproem50"
 MODEL_PRO_3EM = "shellypro3em"
 MODEL_PRO_4PM = "shellypro4pm"
+MODEL_WALL_DISPLAY = "ShellyWallDisplay"
 
 SENSOR_ACTIVE_POWER = "active_power"
 SENSOR_APPARENT_POWER = "apparent_power"
@@ -1305,6 +1307,41 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20220308,
     },
+    MODEL_PRO_EM: {
+        ATTR_NAME: "Shelly Pro EM",
+        ATTR_MODEL_ID: "SPEM-002CEBEU50",
+        ATTR_EMETERS: 1,
+        ATTR_EMETER_PHASES: ["a", "b"],
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_SENSORS: {
+            SENSOR_ETH_IP: DESCRIPTION_SENSOR_ETH_IP,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+            SENSOR_DEVICE_TEMPERATURE: DESCRIPTION_SENSOR_DEVICE_TEMPERATURE,
+            SENSOR_TOTAL_CURRENT: DESCRIPTION_SENSOR_TOTAL_CURRENT,
+            SENSOR_TOTAL_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_POWER,
+            SENSOR_TOTAL_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_TOTAL_APPARENT_POWER,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY,
+        },
+        ATTR_EMETER_SENSORS: {
+            SENSOR_ACTIVE_POWER: DESCRIPTION_SENSOR_EMETER_ACTIVE_POWER,
+            SENSOR_APPARENT_POWER: DESCRIPTION_SENSOR_EMETER_APPARENT_POWER,
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_EMETER_CURRENT,
+            SENSOR_POWER_FACTOR: DESCRIPTION_SENSOR_EMETER_POWER_FACTOR,
+            SENSOR_TOTAL_ACTIVE_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_ENERGY,
+            SENSOR_TOTAT_ACTIVE_RETURNED_ENERGY: DESCRIPTION_SENSOR_EMETER_PHASE_TOTAL_ACTIVE_RETURNED_ENERGY,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_EMETER_VOLTAGE,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20230202,
+    },
     MODEL_PRO_3EM: {
         ATTR_NAME: "Shelly Pro 3EM",
         ATTR_MODEL_ID: "SPEM-003CEBEU",
@@ -1380,6 +1417,18 @@ SUPPORTED_MODELS = {
             UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
         },
         ATTR_MIN_FIRMWARE_DATE: 20230209,
+    },
+    MODEL_WALL_DISPLAY: {
+        ATTR_NAME: "Shelly Wall Display",
+        ATTR_MODEL_ID: "SAWD-0A1XX10EU1",
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_RELAYS: 1,
+        ATTR_RELAY_BINARY_SENSORS: {
+            SENSOR_OVERPOWER: DESCRIPTION_SENSOR_OVERPOWER,
+            SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP,
+            SENSOR_OVERVOLTAGE: DESCRIPTION_SENSOR_OVERVOLTAGE,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20230526,
     },
 }
 
@@ -1465,7 +1514,7 @@ def get_switch(relay_id, relay_type, profile):
         return topic, payload
 
     relay_name = (
-        device_config[f"switch:{relay_id}"][ATTR_NAME]
+        device_config[f"switch:{relay_id}"].get(ATTR_NAME)
         or f"{device_name} Relay {relay_id}"
     )
     payload = {
@@ -1615,7 +1664,7 @@ def get_sensor(
         sensor_name = f"{switch_name} {description[KEY_NAME]}"
     elif relay_id is not None:
         switch_name = (
-            device_config[f"switch:{relay_id}"][ATTR_NAME]
+            device_config[f"switch:{relay_id}"].get(ATTR_NAME, {})
             or f"{device_name} Relay {relay_id}"
         )
         unique_id = f"{device_id}-{relay_id}-{sensor}".lower()
@@ -1709,7 +1758,7 @@ def get_binary_sensor(
         )
     elif entity_id is not None:
         name = (
-            device_config[f"switch:{entity_id}"][ATTR_NAME]
+            device_config[f"switch:{entity_id}"].get(ATTR_NAME, {})
             or f"{device_name} Relay {entity_id}"
         )
     if entity_id is not None:
@@ -1883,7 +1932,9 @@ def configure_device():
     for relay_id in range(relays):
         consumption_types = [
             item.lower()
-            for item in device_config["sys"]["ui_data"].get("consumption_types", [])
+            for item in device_config["sys"]
+            .get("ui_data", {})
+            .get("consumption_types", [])
         ]
         relay_type = get_consumption_type(consumption_types, relay_id)
 
@@ -2101,7 +2152,10 @@ if script_prefix and (script_prefix[-1] == "/" or " " in script_prefix):
 
 source_topic = f"{script_prefix}/{HOME_ASSISTANT}" if script_prefix else HOME_ASSISTANT
 
-if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE) and script_installed() is False:
+if (
+    model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE, MODEL_WALL_DISPLAY)
+    and script_installed() is False
+):
     removed = remove_old_script_versions()
     if not removed:
         script_id = get_script_id()
@@ -2155,12 +2209,15 @@ else:
             KEY_TOPIC: TOPIC_ONLINE,
             KEY_PAYLOAD_AVAILABLE: "true",
             KEY_PAYLOAD_NOT_AVAILABLE: "false",
-        },
-        {
-            KEY_TOPIC: TOPIC_STATUS_RPC,
-            KEY_VALUE_TEMPLATE: TPL_MQTT_CONNECTED,
-        },
+        }
     ]
+    if model not in (MODEL_PLUS_HT, MODEL_PLUS_SMOKE, MODEL_WALL_DISPLAY):
+        availability.append(
+            {
+                KEY_TOPIC: TOPIC_STATUS_RPC,
+                KEY_VALUE_TEMPLATE: TPL_MQTT_CONNECTED,
+            }
+        )
     expire_after = None
 
 inputs = SUPPORTED_MODELS[model].get(ATTR_INPUTS, 0)
