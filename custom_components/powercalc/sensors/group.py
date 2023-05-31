@@ -643,6 +643,11 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
         self._attr_last_reset = dt_util.utcnow()
         self.async_write_ha_state()
 
+    async def async_calibrate(self, value: str) -> None:
+        _LOGGER.debug(f"{self.entity_id}: Calibrate group energy sensor to: {value}")
+        self._attr_native_value = Decimal(value)
+        self.async_write_ha_state()
+
     def calculate_new_state(
         self,
         member_available_states: list[State],
@@ -678,9 +683,13 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
             )
 
             delta = cur_state_value - prev_state_value
-            _LOGGER.debug(
-                f"delta for entity {entity_state.entity_id}: {delta}, prev={prev_state_value}, cur={cur_state_value}",
-            )
+            if _LOGGER.isEnabledFor(logging.DEBUG):  # pragma: no cover
+                rounded_delta = round(delta, self._rounding_digits)
+                rounded_prev = round(prev_state_value, self._rounding_digits)
+                rounded_cur = round(cur_state_value, self._rounding_digits)
+                _LOGGER.debug(
+                    f"delta for entity {entity_state.entity_id}: {rounded_delta}, prev={rounded_prev}, cur={rounded_cur}",
+                )
             if delta < 0:
                 _LOGGER.warning(
                     f"skipping state for {entity_state.entity_id}, probably erroneous value or sensor was reset",
@@ -689,7 +698,9 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
 
             group_sum += delta
 
-        _LOGGER.debug(f"{self.entity_id}: New value: {group_sum}")
+        _LOGGER.debug(
+            f"{self.entity_id}: New value: {round(group_sum, self._rounding_digits)}",
+        )
         return group_sum
 
 
@@ -781,4 +792,4 @@ class PreviousStateStoreStore(Store):
         """Migrate to the new version."""
         if old_major_version == 1:
             return {}
-        return old_data
+        return old_data  # pragma: no cover

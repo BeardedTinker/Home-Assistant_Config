@@ -72,29 +72,6 @@ DAILY_FIXED_ENERGY_SCHEMA = vol.Schema(
 _LOGGER = logging.getLogger(__name__)
 
 
-async def create_daily_fixed_energy_sensors(
-    hass: HomeAssistant,
-    sensor_config: ConfigType,
-    source_entity: SourceEntity | None = None,
-) -> list[SensorEntity]:
-    entities: list[SensorEntity] = []
-    energy_sensor = await create_daily_fixed_energy_sensor(
-        hass,
-        sensor_config,
-        source_entity,
-    )
-    entities.append(energy_sensor)
-    if source_entity:
-        daily_fixed_sensor = await create_daily_fixed_energy_power_sensor(
-            hass,
-            sensor_config,
-            source_entity,
-        )
-        if daily_fixed_sensor:
-            entities.append(daily_fixed_sensor)
-    return entities
-
-
 async def create_daily_fixed_energy_sensor(
     hass: HomeAssistant,
     sensor_config: ConfigType,
@@ -297,7 +274,12 @@ class DailyEnergySensor(RestoreEntity, SensorEntity, EnergySensor):
         self._attr_last_reset = dt_util.utcnow()
         self.async_write_ha_state()
 
-    def async_increase(self, value: str) -> None:
+    async def async_increase(self, value: str) -> None:
         _LOGGER.debug(f"{self.entity_id}: Increasing energy sensor with {value}")
         self._state += Decimal(value)
+        self.async_write_ha_state()
+
+    async def async_calibrate(self, value: str) -> None:
+        _LOGGER.debug(f"{self.entity_id}: Calibrate energy sensor with {value}")
+        self._state = Decimal(value)
         self.async_write_ha_state()

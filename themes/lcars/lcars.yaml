@@ -204,6 +204,8 @@
   mdc-theme-text-secondary-on-background: black
   data-table-background-color: black
   rgb-state-media-player-color: var(--paper-item-icon-color)
+  state-color: var(--lcars-ui-secondary)
+  mdc-shape-small: var(--ha-card-border-radius)
 
 (DO NOT USE/MODIFY)=== card-mod CSS: &card-mod-css # Card modifications
   card-mod-card-yaml: &card-mod-card |
@@ -367,6 +369,10 @@
         background: black;
         box-sizing: border-box;
       }
+      ha-card.footer > .header,
+      ha-card.footer > .info {
+        background: black !important;
+      }
       /* Border on the right */
       ha-card.footer-right {
         background: var(--lcars-card-bottom-color) !important;
@@ -402,7 +408,7 @@
       ha-card.footer-right.type-thermostat > .content {
         border-radius: 0px 0px 20px 0px;
       }
-      ha-card.footer.type-picture-entity {
+      ha-card.footer-right.type-picture-entity {
         border-radius: 0px 0px 20px 0px;
       }
       ha-card.footer-right > img {
@@ -410,6 +416,10 @@
         border-bottom-right-radius: 20px;
         background: black;
         box-sizing: border-box;
+      }
+      ha-card.footer-right > .header,
+      ha-card.footer-right > .info {
+        background: black !important;
       }
       /* Border on both sides */
       ha-card.footer-contained {
@@ -459,6 +469,10 @@
         background: black;
         box-sizing: border-box;
       }
+      ha-card.footer-contained > .header,
+      ha-card.footer-contained > .info {
+        background: black !important;
+      }
       /* Border on neither side */
       ha-card.footer-open {
         background: var(--lcars-card-bottom-color) !important;
@@ -495,6 +509,10 @@
         height: 100%;
         display: flex;
         align-items: flex-end;
+      }
+      ha-card.footer-open > .header,
+      ha-card.footer-open > .info {
+        background: black !important;
       }
       
       /* Fixes across card types */
@@ -563,7 +581,8 @@
       ha-card.button-small {
         display: flex;
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         border-radius: 0px !important;
         position: relative;
         flex-direction: column;
@@ -587,8 +606,6 @@
         margin-top: -24px;
         position: relative;
       }
-      ha-card.button-small > ha-state-icon { /*wat*/
-      }
       ha-card.button-small > span {
         box-sizing: border-box;
         text-align: right;
@@ -610,12 +627,14 @@
       /* Large button class and fixes for specific cards */
       ha-card.button-large {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
       }
       /* Lozenge, bullet, and capped button classes and fixes for specific cards */
       ha-card.button-lozenge {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         display: flex;
         align-items: flex-end;
@@ -623,7 +642,8 @@
       }
       ha-card.button-bullet {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         border-radius: 0px var(--ha-card-border-radius) var(--ha-card-border-radius) 0px !important;
         display: flex;
@@ -632,7 +652,8 @@
       }
       ha-card.button-capped {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         border-radius: var(--ha-card-border-radius) 0px 0px var(--ha-card-border-radius) !important;
         display: flex;
@@ -684,7 +705,8 @@
       }
       ha-card.button-lozenge-right {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         display: flex;
         align-items: flex-start;
@@ -692,7 +714,8 @@
       }
       ha-card.button-bullet-right {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         border-radius: var(--ha-card-border-radius) 0px 0px var(--ha-card-border-radius) !important;
         display: flex;
@@ -701,7 +724,8 @@
       }
       ha-card.button-capped-right {
         text-transform: uppercase;
-        color: black;
+        --primary-text-color: black !important;
+        --secondary-text-color: black !important;
         min-height: 60px;
         border-radius: 0px var(--ha-card-border-radius) var(--ha-card-border-radius) 0px !important;
         display: flex;
@@ -833,7 +857,7 @@
         background: var(--lcars-ui-primary);
         border-radius: var(--ha-card-border-radius) !important;
         --primary-text-color: black;
-        --mdc-theme-primary: black;
+        --mdc-theme-primary: purple;
       }
       .panel > ha-card {
         border-radius: var(--ha-card-border-radius) !important;
@@ -853,8 +877,8 @@
       .MailImg {
         margin-top: 0;
         border-radius: 0px !important;
-        padding: 0px 6px 6px 6px !important;
-        width: 98%;
+        padding: 0px 0px 6px 6px !important;
+        width: 100%;
       }
       .details > .title {
         margin-left: 15px;
@@ -874,6 +898,8 @@
         padding: 0px !important;
         border-top-right-radius: var(--ha-card-border-radius) !important;
         border-top-left-radius: var(--ha-card-border-radius) !important;
+        --mdc-theme-primary: var(--lcars-ui-secondary) !important;
+        --state-color: var(--lcars-ui-tertiary) !important;
       }
       ha-card > .name {
         color: black;
@@ -914,6 +940,35 @@
         flex-direction: column-reverse !important;
         border-radius: 0 0 0 0 !important;
       }
+      /* Apply font to all cards if theme is not selected globally */
+      ha-card > * {
+        font-family: var(--lcars-font) !important;
+      }
+      /* Mushroom Cards */
+      ha-card.type-custom-mushroom-chips-card > * {
+        --primary-text-color: black !important;
+        --chip-border-radius: 40px;
+        text-transform: uppercase;
+      }
+      /* Mushroom Select Card */
+      ha-card.type-custom-mushroom-select-card > * {
+        --mdc-shape-small: 0px;
+      }
+      ha-card.type-custom-mushroom-select-card {
+        border-radius: 22px !important;
+      }
+      /* Mushroom Lock Card */
+      ha-card.type-custom-mushroom-lock-card {
+        border-radius: 22px !important;
+      }
+      /* Mushroom Number Card */
+      ha-card.type-custom-mushroom-number-card > * {
+        --control-border-radius: 0px !important;
+      }
+      ha-card.type-custom-mushroom-number-card {
+        border-radius: 22px !important;
+      }
+
   # Toolbar and dashboard modifications
   card-mod-root-yaml: &card-mod-root |
     .: |
