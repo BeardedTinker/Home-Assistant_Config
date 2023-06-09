@@ -1,0 +1,10 @@
+#####
+# This sensor checks if Storagenode from Storj is responding 
+# to HTTP request on port
+#####
+
+sensor:
+#   platform: command_line
+  command: curl -I http://192.168.1.35:14002/ 2>/dev/null | head -n 1 | cut -d$' ' -f2
+  name: Storj Node status
+  scan_interval: 300

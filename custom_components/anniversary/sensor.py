@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import re
@@ -68,8 +67,7 @@ def _get_anniversary_date(self, i, year):
 
     return mydate_p
 
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     name = config.get(CONF_NAME)
     anniversaries = config.get(CONF_ANNIVERSARIES)
     date_format = config.get(CONF_DATE_FORMAT)
@@ -167,7 +165,6 @@ class AnniversarySensor(Entity):
 
         return attr
 
-    @asyncio.coroutine
     async def async_update(self):
         first_anni = 367
         today = datetime.today().strftime(self._date_format)

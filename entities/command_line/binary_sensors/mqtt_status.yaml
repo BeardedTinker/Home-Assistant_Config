@@ -1,0 +1,14 @@
+#####
+# Checks if MQTT is open or closed
+# If port is closed this is trouble for all services that work with MQTT
+#####
+
+binary_sensor:
+#  platform: command_line
+  name: MQTT status
+  unique_id: 44b85908-2738-4b54-8ded-fb6314c06c5b
+  command: /bin/bash -c "(echo > /dev/tcp/192.168.1.35/1883) > /dev/null 2>&1 && echo open || echo closed"
+  payload_off: "closed"
+  payload_on: "open"
+  scan_interval: 300
+  device_class: 'problem'

@@ -1,0 +1,10 @@
+#####
+# Command Line was changed in 2023.6
+#
+# This loads up my binary_sensors, sensors and switches from 
+# command_line integration
+#
+# https://www.home-assistant.io/integrations/command_line/
+#####
+
+command_line: !include_dir_merge_list ../entities/command_line

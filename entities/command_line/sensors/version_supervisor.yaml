@@ -1,0 +1,16 @@
+#####
+# Sensor that checks if there are updates available for Supervisor or Add-On's
+# https://community.home-assistant.io/t/update-notifications-core-hacs-supervisor-and-addons/182295
+#####
+
+sensor:
+#platform: command_line
+  name: Supervisor updates
+  command: 'curl http://supervisor/supervisor/info -H "Authorization: Bearer $(printenv SUPERVISOR_TOKEN)" | jq ''{"newest_version":.data.version_latest,"current_version":.data.version,"update_available":.data.update_available,"addons":[.data.addons[] | select(.update_available)]}'''
+  value_template: "{{ value_json.addons | length }}"
+  unit_of_measurement: pending update(s)
+  json_attributes:
+  - update_available
+  - newest_version
+  - current_version
+  - addons
