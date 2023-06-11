@@ -12,7 +12,7 @@
     icon: mdi:solar-power-variant
     state: >
       {% if states('sensor.solar_energy_production') not in ['unavailable', 'unknown'] %}
-        {{ (states('sensor.smart_inverter_power')| float | round(2))}}
+        {{ (states('sensor.smart_inverter_energy')| float | round(2))}}
       {% else %}
         0
       {% endif %}        
