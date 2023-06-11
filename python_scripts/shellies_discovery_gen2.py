@@ -231,6 +231,7 @@ TOPIC_STATUS_SYS = "~status/sys"
 TOPIC_STATUS_WIFI = "~status/wifi"
 TOPIC_SWITCH_RELAY = "~status/switch:{relay}"
 TOPIC_TEMPERATURE = "~status/temperature:{sensor}"
+TOPIC_VOLTMETER = "~status/voltmeter:{sensor}"
 
 TPL_BATTERY = "{{value_json.battery.percent}}"
 TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
@@ -816,6 +817,15 @@ DESCRIPTION_EXTERNAL_SENSOR_INPUT = {
     KEY_STATE_TOPIC: TOPIC_INPUT,
     KEY_VALUE_TEMPLATE: TPL_INPUT,
 }
+DESCRIPTION_EXTERNAL_SENSOR_VOLTMETER = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_VOLTAGE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Voltmeter {sensor}",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_VOLTMETER,
+    KEY_UNIT: UNIT_VOLT,
+    KEY_VALUE_TEMPLATE: TPL_VOLTAGE,
+}
 
 SUPPORTED_MODELS = {
     MODEL_PLUS_1: {
@@ -832,6 +842,7 @@ SUPPORTED_MODELS = {
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
+        ATTR_RELAY_SENSORS: {SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_RELAY_TEMPERATURE},
         ATTR_RELAY_BINARY_SENSORS: {SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP},
         ATTR_SENSORS: {
             SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
@@ -2027,6 +2038,14 @@ def configure_device():
                 topic, payload = get_sensor(
                     "humidity",
                     DESCRIPTION_EXTERNAL_SENSOR_HUMIDITY,
+                    sensor_id=sensor_id,
+                )
+                config[topic] = payload
+
+            if device_config.get(f"voltmeter:{sensor_id}"):
+                topic, payload = get_sensor(
+                    "voltmeter",
+                    DESCRIPTION_EXTERNAL_SENSOR_VOLTMETER,
                     sensor_id=sensor_id,
                 )
                 config[topic] = payload
