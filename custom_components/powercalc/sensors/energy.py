@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 from decimal import Decimal
-from typing import Any
 
 import homeassistant.helpers.entity_registry as er
-import homeassistant.util.dt as dt_util
 from homeassistant.components.integration.sensor import IntegrationSensor
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import CONF_NAME, ENERGY_KILO_WATT_HOUR, TIME_HOURS, UnitOfTime
+from homeassistant.const import (
+    ATTR_UNIT_OF_MEASUREMENT,
+    CONF_NAME,
+    ENERGY_KILO_WATT_HOUR,
+    TIME_HOURS,
+    UnitOfPower,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.typing import ConfigType
@@ -25,6 +29,7 @@ from custom_components.powercalc.const import (
     CONF_ENERGY_SENSOR_ID,
     CONF_ENERGY_SENSOR_PRECISION,
     CONF_ENERGY_SENSOR_UNIT_PREFIX,
+    CONF_FORCE_ENERGY_SENSOR_CREATION,
     CONF_POWER_SENSOR_ID,
     DEFAULT_ENERGY_INTEGRATION_METHOD,
     UnitPrefix,
@@ -68,17 +73,26 @@ async def create_energy_sensor(
         power_sensor,
         RealPowerSensor,
     ):
-        real_energy_sensor = find_related_real_energy_sensor(hass, power_sensor)
-        if real_energy_sensor:
+        # User can force the energy sensor creation with "force_energy_sensor_creation" option.
+        # If they did, don't look for an energy sensor
+        if (
+            CONF_FORCE_ENERGY_SENSOR_CREATION not in sensor_config
+            or not sensor_config.get(CONF_FORCE_ENERGY_SENSOR_CREATION)
+        ):
+            real_energy_sensor = find_related_real_energy_sensor(hass, power_sensor)
+            if real_energy_sensor:
+                _LOGGER.debug(
+                    f"Found existing energy sensor '{real_energy_sensor.entity_id}' "
+                    f"for the power sensor '{power_sensor.entity_id}'",
+                )
+                return real_energy_sensor
             _LOGGER.debug(
-                f"Found existing energy sensor '{real_energy_sensor.entity_id}' "
-                f"for the power sensor '{power_sensor.entity_id}'",
+                f"No existing energy sensor found for the power sensor '{power_sensor.entity_id}'",
             )
-            return real_energy_sensor
-
-        _LOGGER.debug(
-            f"No existing energy sensor found for the power sensor '{power_sensor.entity_id}'",
-        )
+        else:
+            _LOGGER.debug(
+                f"Forced energy sensor generation for the power sensor '{power_sensor.entity_id}'",
+            )
 
     # Create an energy sensor based on riemann integral integration, which uses the virtual powercalc sensor as source.
     name = generate_energy_sensor_name(
@@ -98,9 +112,7 @@ async def create_energy_sensor(
     )
     entity_category = sensor_config.get(CONF_ENERGY_SENSOR_CATEGORY)
 
-    unit_prefix = sensor_config.get(CONF_ENERGY_SENSOR_UNIT_PREFIX)
-    if unit_prefix == UnitPrefix.NONE:
-        unit_prefix = None
+    unit_prefix = get_unit_prefix(hass, sensor_config, power_sensor)
 
     _LOGGER.debug("Creating energy sensor: %s", name)
     return VirtualEnergySensor(
@@ -118,6 +130,28 @@ async def create_energy_sensor(
         powercalc_source_domain=source_entity.domain,
         sensor_config=sensor_config,
     )
+
+
+def get_unit_prefix(
+    hass: HomeAssistant,
+    sensor_config: ConfigType,
+    power_sensor: PowerSensor,
+) -> str | None:
+    unit_prefix = sensor_config.get(CONF_ENERGY_SENSOR_UNIT_PREFIX)
+
+    power_unit = power_sensor.unit_of_measurement
+    power_state = hass.states.get(power_sensor.entity_id)
+    if power_unit is None and power_state:
+        power_unit = power_state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
+
+    # When the power sensor is in kW, we don't want to add an extra k prefix.
+    # As this would result in an energy sensor having kkWh unit, which is obviously invalid
+    if power_unit == UnitOfPower.KILO_WATT and unit_prefix == UnitPrefix.KILO:
+        unit_prefix = UnitPrefix.NONE
+
+    if unit_prefix == UnitPrefix.NONE:
+        unit_prefix = None
+    return unit_prefix
 
 
 @callback
@@ -187,7 +221,7 @@ class VirtualEnergySensor(IntegrationSensor, EnergySensor):
             self._attr_entity_category = EntityCategory(entity_category)
 
     @property
-    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+    def extra_state_attributes(self) -> dict[str, str] | None:
         """Return the state attributes of the energy sensor."""
         if self._sensor_config.get(CONF_DISABLE_EXTENDED_ATTRIBUTES):
             return super().extra_state_attributes
@@ -209,7 +243,6 @@ class VirtualEnergySensor(IntegrationSensor, EnergySensor):
     def async_reset(self) -> None:
         _LOGGER.debug(f"{self.entity_id}: Reset energy sensor")
         self._state = 0
-        self._attr_last_reset = dt_util.utcnow()
         self.async_write_ha_state()
 
     async def async_calibrate(self, value: str) -> None:
