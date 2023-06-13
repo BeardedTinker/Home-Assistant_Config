@@ -65,7 +65,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     scan_interval = config.get(CONF_SCAN_INTERVAL)
 
     verify_ssl = config.get(CONF_VERIFY_SSL)
-    
 
     resource = config.get(CONF_RESOURCE).format(host)
 

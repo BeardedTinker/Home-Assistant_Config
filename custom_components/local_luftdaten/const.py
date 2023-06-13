@@ -8,7 +8,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     PERCENTAGE,
-    PRESSURE_PA,
+    UnitOfPressure,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     TEMP_CELSIUS,
 )
@@ -48,6 +48,12 @@ SENSOR_SPS30_P0 = 'SPS30_P0'
 SENSOR_SPS30_P1 = 'SPS30_P1'
 SENSOR_SPS30_P2 = 'SPS30_P2'
 SENSOR_SPS30_P4 = 'SPS30_P4'
+SENSOR_SEN5X_P0 = 'SEN5X_P0'
+SENSOR_SEN5X_P1 = 'SEN5X_P1'
+SENSOR_SEN5X_P2 = 'SEN5X_P2'
+SENSOR_SEN5X_P4 = 'SEN5X_P4'
+SENSOR_SEN5X_NOX = 'SEN5X_NOX'
+SENSOR_SEN5X_VOC = 'SEN5X_VOC'
 SENSOR_TEMPERATURE = 'temperature'
 SENSOR_WIFI_SIGNAL = 'signal'
 
@@ -63,7 +69,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.PRESSURE,
         key=SENSOR_BME280_PRESSURE,
         name='Pressure',
-        native_unit_of_measurement=PRESSURE_PA,
+        native_unit_of_measurement=UnitOfPressure.PA,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_BME280_TEMPERATURE: SensorEntityDescription(
@@ -77,7 +83,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.PRESSURE,
         key=SENSOR_BMP_PRESSURE,
         name='Pressure',
-        native_unit_of_measurement=PRESSURE_PA,
+        native_unit_of_measurement=UnitOfPressure.PA,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_BMP_TEMPERATURE: SensorEntityDescription(
@@ -98,7 +104,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.PRESSURE,
         key=SENSOR_BMP280_PRESSURE,
         name='Pressure',
-        native_unit_of_measurement=PRESSURE_PA,
+        native_unit_of_measurement=UnitOfPressure.PA,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_DS18B20_TEMPERATURE: SensorEntityDescription(
@@ -232,6 +238,50 @@ SENSOR_DESCRIPTIONS = {
         key=SENSOR_SPS30_P4,
         name='PM4',
         native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_P0: SensorEntityDescription(
+        device_class=SensorDeviceClass.PM1,
+        key=SENSOR_SEN5X_P0,
+        name='PM1',
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_P1: SensorEntityDescription(
+        device_class=SensorDeviceClass.PM10,
+        key=SENSOR_SEN5X_P1,
+        name='PM10',
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_P2: SensorEntityDescription(
+        device_class=SensorDeviceClass.PM25,
+        key=SENSOR_SEN5X_P2,
+        name='PM2.5',
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_P4: SensorEntityDescription(
+        device_class=SensorDeviceClass.PM25, # SensorDeviceClass.PM4 not supported.
+        key=SENSOR_SEN5X_P4,
+        name='PM4',
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_NOX: SensorEntityDescription(
+        device_class=SensorDeviceClass.AQI,
+        # SensorDeviceClass.NOX_INDEX is not supported
+        # SensorDeviceClass.NITROGEN_MONOXIDE and .NITROGEN_DIOXIDE are supported, but require a unit of ug/m3 which is not appropriate for a unitless index
+        key=SENSOR_SEN5X_NOX,
+        name='NOX',
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SENSOR_SEN5X_VOC: SensorEntityDescription(
+        device_class=SensorDeviceClass.AQI, 
+        # SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_INDEX is not supported
+        # SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS is supported, but requires a unit of ug/m3 which is not appropriate for a unitless index
+        key=SENSOR_SEN5X_VOC,
+        name='VOC',
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_TEMPERATURE: SensorEntityDescription(
