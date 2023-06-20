@@ -23,13 +23,11 @@ from homeassistant.const import (
     CONF_ENTITIES,
     CONF_NAME,
     CONF_UNIQUE_ID,
-    ENERGY_KILO_WATT_HOUR,
-    ENERGY_MEGA_WATT_HOUR,
-    ENERGY_WATT_HOUR,
     EVENT_HOMEASSISTANT_STOP,
-    POWER_WATT,
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
+    UnitOfEnergy,
+    UnitOfPower,
 )
 from homeassistant.core import CoreState, HomeAssistant, State, callback
 from homeassistant.exceptions import HomeAssistantError
@@ -239,6 +237,8 @@ async def remove_power_sensor_from_associated_groups(
 
     for group_entry in group_entries:
         member_sensors = group_entry.data.get(CONF_GROUP_MEMBER_SENSORS) or []
+        if config_entry.entry_id not in member_sensors:
+            continue
         member_sensors.remove(config_entry.entry_id)
 
         hass.config_entries.async_update_entry(
@@ -294,9 +294,12 @@ async def add_to_associated_group(
         return None
 
     member_sensors = set(group_entry.data.get(CONF_GROUP_MEMBER_SENSORS) or [])
-    if config_entry.entry_id not in member_sensors:
-        member_sensors.add(config_entry.entry_id)
 
+    # Config entry has already been added to associated group. just skip adding it again
+    if config_entry.entry_id in member_sensors:
+        return None
+
+    member_sensors.add(config_entry.entry_id)
     hass.config_entries.async_update_entry(
         group_entry,
         data={**group_entry.data, CONF_GROUP_MEMBER_SENSORS: list(member_sensors)},
@@ -496,7 +499,11 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
 
         self._prev_state_store = await PreviousStateStore.async_get_instance(self.hass)
 
-        async_track_state_change_event(self.hass, self._entities, self.on_state_change)
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass, self._entities, self.on_state_change
+            ),
+        )
 
         self._async_hide_members(self._sensor_config.get(CONF_HIDE_MEMBERS) or False)
 
@@ -581,7 +588,7 @@ class GroupedPowerSensor(GroupedSensor, PowerSensor):
 
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = POWER_WATT
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
 
     def calculate_new_state(
         self,
@@ -620,11 +627,11 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
         )
         unit_prefix = sensor_config.get(CONF_ENERGY_SENSOR_UNIT_PREFIX)
         if unit_prefix == UnitPrefix.KILO:
-            self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+            self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         elif unit_prefix == UnitPrefix.NONE:
-            self._attr_native_unit_of_measurement = ENERGY_WATT_HOUR
+            self._attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
         elif unit_prefix == UnitPrefix.MEGA:
-            self._attr_native_unit_of_measurement = ENERGY_MEGA_WATT_HOUR
+            self._attr_native_unit_of_measurement = UnitOfEnergy.MEGA_WATT_HOUR
 
     async def async_reset(self) -> None:
         """Reset the group sensor and underlying member sensor when supported."""
