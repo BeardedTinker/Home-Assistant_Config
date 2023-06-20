@@ -10,7 +10,7 @@ description: 'Request iPhone location update'
 
 trigger:
 - platform: time_pattern
-  minutes: "15"
+  minutes: "/20"
 
 action:
   - service: notify.mobile_app_luka_iphone

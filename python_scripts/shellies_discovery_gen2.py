@@ -149,6 +149,7 @@ MODEL_PRO_1PM = "shellypro1pm"
 MODEL_PRO_2 = "shellypro2"
 MODEL_PRO_2PM = "shellypro2pm"
 MODEL_PRO_3 = "shellypro3"
+MODEL_PRO_DUAL_COVER_PM = "shellypro2cover"
 MODEL_PRO_EM = "shellyproem50"
 MODEL_PRO_3EM = "shellypro3em"
 MODEL_PRO_4PM = "shellypro4pm"
@@ -1318,6 +1319,41 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20220308,
     },
+    MODEL_PRO_DUAL_COVER_PM: {
+        ATTR_NAME: "Shelly Pro Dual Cover PM",
+        ATTR_MODEL_ID: "SPSH-002PE16EU",
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_INPUTS: 4,
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [
+            EVENT_SINGLE_PUSH,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
+        ATTR_COVERS: 2,
+        ATTR_COVER_SENSORS: {
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_CURRENT_COVER,
+            SENSOR_ENERGY: DESCRIPTION_SENSOR_ENERGY_COVER,
+            SENSOR_POWER: DESCRIPTION_SENSOR_POWER_COVER,
+            SENSOR_POWER_FACTOR: DESCRIPTION_SENSOR_POWER_FACTOR_COVER,
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_COVER_TEMPERATURE,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_VOLTAGE_COVER,
+        },
+        ATTR_SENSORS: {
+            SENSOR_ETH_IP: DESCRIPTION_SENSOR_ETH_IP,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20230425,
+    },
     MODEL_PRO_EM: {
         ATTR_NAME: "Shelly Pro EM",
         ATTR_MODEL_ID: "SPEM-002CEBEU50",
@@ -1916,7 +1952,10 @@ def configure_device():
     """Create configuration for the device."""
     config = {}
 
-    profile = device_config["sys"]["device"].get("profile", ATTR_SWITCH)
+    if model == MODEL_PRO_DUAL_COVER_PM:
+        profile = ATTR_COVER
+    else:
+        profile = device_config["sys"]["device"].get("profile", ATTR_SWITCH)
 
     for cover_id in range(covers):
         topic, payload = get_cover(cover_id, profile)
