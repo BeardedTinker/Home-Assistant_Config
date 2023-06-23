@@ -1,0 +1,10 @@
+name: CO2 box
+primary_entity:
+  entity: sensor
+  class: carbon_dioxide
+  dps:
+    - id: 2
+      type: integer
+      class: measurement
+      name: sensor
+      unit: ppm
