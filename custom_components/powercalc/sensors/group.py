@@ -7,14 +7,13 @@ from datetime import timedelta
 from decimal import Decimal, DecimalException
 from typing import Any
 
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import (
-    ATTR_STATE_CLASS,
     RestoreSensor,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -237,8 +236,6 @@ async def remove_power_sensor_from_associated_groups(
 
     for group_entry in group_entries:
         member_sensors = group_entry.data.get(CONF_GROUP_MEMBER_SENSORS) or []
-        if config_entry.entry_id not in member_sensors:
-            continue
         member_sensors.remove(config_entry.entry_id)
 
         hass.config_entries.async_update_entry(
@@ -329,35 +326,10 @@ def resolve_entity_ids_recursively(
             if device_class == SensorDeviceClass.POWER
             else ENTRY_DATA_ENERGY_ENTITY
         )
-        if key in member_entry.data:
-            resolved_ids.extend([member_entry.data.get(key)])
-        else:
-            # Below is the old logic for entity resolving.
-            # May be removed in the future when all config entries of users have been migrated
-            # In the new situation we save the power and energy entity id's on the config entry
-            # So we don't have to use a hacky way to get the entities from the entity registry anymore.
-            if device_class == SensorDeviceClass.POWER:
-                _LOGGER.warning("Using legacy resolve_entity_ids_recursively method")
-            entity_reg = er.async_get(hass)
-            state_class = (
-                SensorStateClass.MEASUREMENT
-                if device_class == SensorDeviceClass.POWER
-                else SensorStateClass.TOTAL_INCREASING
-            )
-            entities = [
-                entity_entry.entity_id
-                for entity_entry in entity_reg.entities.values()
-                if entity_entry.config_entry_id == member_entry_id
-                and entity_entry.capabilities
-                and entity_entry.capabilities.get(ATTR_STATE_CLASS) in state_class  # type: ignore
-            ]
-            if not entities:
-                _LOGGER.error(
-                    f"No power or energy sensor found for config entry: {member_entry.title}, skipping these from the group",
-                )
-                continue
-            sorted_entities = sorted(entities)
-            resolved_ids.extend([sorted_entities[0]])
+        if key not in member_entry.data:  # pragma: no cover
+            continue
+
+        resolved_ids.extend([member_entry.data.get(key)])
 
     # Include the additional power/energy sensors the user specified
     conf_key = (
@@ -477,6 +449,7 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
         """Register state listeners."""
         await super().async_added_to_hass()
 
+        state_listener = self.on_state_change
         if isinstance(self, GroupedEnergySensor):
             last_state = await self.async_get_last_state()
             last_sensor_state = await self.async_get_last_sensor_data()
@@ -497,13 +470,16 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
             except DecimalException as err:
                 _LOGGER.warning("Could not restore last state: %s", err)
 
+            # throttle group energy updates to only once each 30 seconds
+            state_listener = Throttle(timedelta(seconds=30))(state_listener)
+
         self._prev_state_store = await PreviousStateStore.async_get_instance(self.hass)
 
         self.async_on_remove(
             async_track_state_change_event(
                 self.hass,
                 self._entities,
-                self.on_state_change,
+                state_listener,
             ),
         )
 
@@ -533,7 +509,6 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
             registry.async_update_entity(entity_id, hidden_by=hidden_by)
 
     @callback
-    @Throttle(timedelta(seconds=30))
     def on_state_change(self, event: Event) -> None:
         """Triggered when one of the group entities changes state."""
         if self.hass.state != CoreState.running:  # pragma: no cover
@@ -727,7 +702,7 @@ class PreviousStateStore:
 
         try:
             _LOGGER.debug("Load previous energy sensor states from store")
-            stored_states = await instance.store.async_load() or {}  # type: ignore
+            stored_states = await instance.store.async_load() or {}
             for group, entities in stored_states.items():
                 instance.states[group] = {
                     entity_id: State.from_dict(json_state)
