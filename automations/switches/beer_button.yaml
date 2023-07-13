@@ -1,0 +1,23 @@
+#####
+# Bring dad a beer
+#
+#####
+
+id: '1689276686584'
+alias: Bring me beer
+description: ''
+trigger:
+- platform: device
+  domain: mqtt
+  device_id: ded6b3c686235047b95cd4532e5505b9
+  type: action
+  subtype: brightness_move_up
+  discovery_id: 0x04cd15fffe799da0 action_brightness_move_up
+condition: []
+action:
+- service: tts.google_translate_say
+  data:
+    cache: false
+    entity_id: media_player.all_speakers
+    message: Bring beer to dad. Cold one!
+mode: single
