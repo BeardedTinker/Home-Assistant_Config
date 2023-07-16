@@ -244,22 +244,13 @@ class MoldRiskLimitSensor(MoldRiskBaseSensor):
         self._mold_calc.async_event_receiver(event)
         
         if self._mold_calc.humidity_limit_level_1 != self._limit_level_1:
-            if self._mold_calc.humidity_limit_level_1 is None:
-                self._limit_level_1 = STATE_UNKNOWN
-            else: 
-                self._limit_level_1 = self._mold_calc.humidity_limit_level_1
+            self._limit_level_1 = self._mold_calc.humidity_limit_level_1
             updated = True
         if self._mold_calc.humidity_limit_level_2 != self._limit_level_2:
-            if self._mold_calc.humidity_limit_level_2 is None:
-                self._limit_level_2 = STATE_UNKNOWN
-            else: 
-                self._limit_level_2 = self._mold_calc.humidity_limit_level_2
+            self._limit_level_2 = self._mold_calc.humidity_limit_level_2
             updated = True
         if self._mold_calc.humidity_limit_level_3 != self._limit_level_3:
-            if self._mold_calc.humidity_limit_level_3 is None:
-                self._limit_level_3 = STATE_UNKNOWN
-            else: 
-                self._limit_level_3 = self._mold_calc.humidity_limit_level_3
+            self._limit_level_3 = self._mold_calc.humidity_limit_level_3
             updated = True
         
         if updated:
@@ -313,10 +304,7 @@ class MoldRiskIndexSensor(MoldRiskBaseSensor):
         """ Listen for sensor state changes. """
         self._mold_calc.async_event_receiver(event)
         if self._mold_calc.risk != self._risk:
-            if self._mold_calc.risk is None:
-                self._risk = STATE_UNKNOWN
-            else:
-                self._risk = self._mold_calc.risk
+            self._risk = self._mold_calc.risk
             self.async_write_ha_state()
     
     @property
