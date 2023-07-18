@@ -11,7 +11,7 @@ from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import SOURCE_INTEGRATION_DISCOVERY, SOURCE_USER
 from homeassistant.const import CONF_ENTITY_ID, CONF_PLATFORM
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import discovery, discovery_flow
+from homeassistant.helpers import discovery_flow
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.typing import ConfigType
 
@@ -21,12 +21,11 @@ from .const import (
     CONF_MANUFACTURER,
     CONF_MODE,
     CONF_MODEL,
+    CONF_SENSORS,
     DISCOVERY_POWER_PROFILE,
     DISCOVERY_SOURCE_ENTITY,
-    DISCOVERY_TYPE,
     DOMAIN,
     CalculationStrategy,
-    PowercalcDiscoveryType,
 )
 from .errors import ModelNotSupportedError
 from .power_profile.factory import get_power_profile
@@ -232,24 +231,6 @@ class DiscoveryManager:
             data=discovery_data,
         )
 
-        # Code below if for legacy discovery routine, will be removed somewhere in the future
-        if power_profile and not power_profile.is_additional_configuration_required:
-            discovery_info = {
-                CONF_ENTITY_ID: source_entity.entity_id,
-                DISCOVERY_SOURCE_ENTITY: source_entity,
-                DISCOVERY_POWER_PROFILE: power_profile,
-                DISCOVERY_TYPE: PowercalcDiscoveryType.LIBRARY,
-            }
-            self.hass.async_create_task(
-                discovery.async_load_platform(
-                    self.hass,
-                    SENSOR_DOMAIN,
-                    DOMAIN,
-                    discovery_info,
-                    self.ha_config,
-                ),
-            )
-
     def _is_user_configured(self, entity_id: str) -> bool:
         """Check if user have setup powercalc sensors for a given entity_id.
         Either with the YAML or GUI method.
@@ -265,7 +246,7 @@ class DiscoveryManager:
         """Looks at the YAML and GUI config entries for all the configured entity_id's."""
         entities = []
 
-        # Find entity ids in yaml config
+        # Find entity ids in yaml config (Legacy)
         if SENSOR_DOMAIN in self.ha_config:
             sensor_config = self.ha_config.get(SENSOR_DOMAIN)
             platform_entries = [
@@ -275,6 +256,13 @@ class DiscoveryManager:
             ]
             for entry in platform_entries:
                 entities.extend(self._find_entity_ids_in_yaml_config(entry))
+
+        # Find entity ids in yaml config (New)
+        domain_config: ConfigType = self.ha_config.get(DOMAIN, {})
+        if CONF_SENSORS in domain_config:
+            sensors = domain_config[CONF_SENSORS]
+            for sensor_config in sensors:
+                entities.extend(self._find_entity_ids_in_yaml_config(sensor_config))
 
         # Add entities from existing config entries
         entities.extend(
