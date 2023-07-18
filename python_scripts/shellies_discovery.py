@@ -7,6 +7,8 @@ ATTR_RELAY = "relay"
 ATTR_ROLLER = "roller"
 ATTR_SHELLY = "Shelly"
 
+ATTR_AVAILABILITY_EXTRA = "availability_extra"
+
 BUTTON_MUTE = "mute"
 BUTTON_RESTART = "restart"
 BUTTON_SELF_TEST = "self_test"
@@ -392,10 +394,12 @@ SENSOR_INPUT_1 = "input 1"
 SENSOR_INPUT_2 = "input 2"
 SENSOR_INPUT_3 = "input 3"
 SENSOR_IP = "ip"
+SENSOR_IX_SUM_CURRENT = "ix_sum_current"
 SENSOR_LAST_RESTART = "last_restart"
 SENSOR_LOADERROR = "loaderror"
 SENSOR_LUX = "lux"
 SENSOR_MOTION = "motion"
+SENSOR_N_CURRENT = "n_current"
 SENSOR_OPENING = "opening"
 SENSOR_OPERATION = "operation"
 SENSOR_OVERLOAD = "overload"
@@ -450,6 +454,7 @@ TOPIC_INPUT_0 = "~input/0"
 TOPIC_INPUT_1 = "~input/1"
 TOPIC_INPUT_2 = "~input/2"
 TOPIC_INPUT_3 = "~input/3"
+TOPIC_IX_SUM_CURRENT = "~emeter_n/ixsum"
 TOPIC_LIGHT_ENERGY = "~light/{light_id}/energy"
 TOPIC_LIGHT_ENERGY_RGBW2_COLOR = "~color/{light_id}/energy"
 TOPIC_LIGHT_ENERGY_RGBW2_WHITE = "~white/{light_id}/energy"
@@ -470,6 +475,7 @@ TOPIC_METER_TOTAL = "~emeter/{meter_id}/total"
 TOPIC_METER_TOTAL_RETURNED = "~emeter/{meter_id}/total_returned"
 TOPIC_METER_VOLTAGE = "~emeter/{meter_id}/voltage"
 TOPIC_MUTE = "~sensor/mute"
+TOPIC_N_CURRENT = "~emeter_n/current"
 TOPIC_ONLINE = "~online"
 TOPIC_OVERLOAD = "~overload"
 TOPIC_OVERPOWER = "~overpower"
@@ -511,14 +517,17 @@ TOPIC_WHITE_STATUS = "~white/{light_id}/status"
 TPL_ACCELERATED_HEATING = "{{value_json.thermostats.0.target_t.accelerated_heating}}"
 TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
 TPL_AUTOMATIC_TEMPERATURE_CONTROL = (
-    "{%if value_json.target_t.enabled==true%}ON{%else%}OFF{%endif%}"
+    "{%if value_json.target_t.enabled%}ON{%else%}OFF{%endif%}"
 )
 TPL_BATTERY_FROM_INFO = "{{value_json.bat.value}}"
 TPL_BATTERY_FROM_JSON = "{{value_json.bat}}"
 TPL_BOOST_MINUTES = "{{value_json.thermostats.0.boost_minutes}}"
-TPL_CALIBRATED = "{%if value_json.calibrated==true%}ON{%else%}OFF{%endif%}"
-TPL_CHARGER = "{%if value_json.charger==true%}ON{%else%}OFF{%endif%}"
-TPL_CLOUD = "{%if value_json.cloud.connected==true%}ON{%else%}OFF{%endif%}"
+TPL_CALIBRATED = "{%if value_json.calibrated%}ON{%else%}OFF{%endif%}"
+TPL_CALIBRATED_AVAILABILITY = (
+    "{%if value_json.calibrated%}online{%else%}offline{%endif%}"
+)
+TPL_CHARGER = "{%if value_json.charger%}ON{%else%}OFF{%endif%}"
+TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
 TPL_COLOR_TEMP_WHITE_LIGHT = (
     "{{((1000000/(value_json.temp|int,2700)|max)|round(0,^floor^))}}"
 )
@@ -542,26 +551,26 @@ TPL_IP_FROM_INFO = "{{value_json.wifi_sta.ip}}"
 TPL_LATEST_VERSION = "{%if value_json[^update^].new_version%}{{value_json[^update^].new_version}}{%else%}{{value_json[^update^].old_version}}{%endif%}"
 TPL_MODE = "{%if value_json.thermostats.0.target_t.value==4%}off{%else%}heat{%endif%}"
 TPL_MODE_SET = "{{{{^4^ if value==^off^ else ^{default_heat_temp}^}}}}"
-TPL_MOTION = "{%if value_json.motion==true%}ON{%else%}OFF{%endif%}"
-TPL_MOTION_MOTION = "{%if value_json.sensor.motion==true%}ON{%else%}OFF{%endif%}"
+TPL_MOTION = "{%if value_json.motion%}ON{%else%}OFF{%endif%}"
+TPL_MOTION_MOTION = "{%if value_json.sensor.motion%}ON{%else%}OFF{%endif%}"
 TPL_MQTT_CONNECTED = "{%if value_json.mqtt.connected%}online{%else%}offline{%endif%}"
-TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw==true%}ON{%else%}OFF{%endif%}"
+TPL_NEW_FIRMWARE_FROM_ANNOUNCE = "{%if value_json.new_fw%}ON{%else%}OFF{%endif%}"
 TPL_PROFILES = "profile {{value_json.thermostats.0.schedule_profile}}"
 TPL_REPORTED_WINDOW_STATE = (
-    "{%if value_json.thermostats.0.window_open==true%}ON{%else%}OFF{%endif%}"
+    "{%if value_json.thermostats.0.window_open%}ON{%else%}OFF{%endif%}"
 )
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
 TPL_VALVE = "{{value.replace(^_^,^ ^)}}"
 TPL_VALVE_MIN_POSITION = "{{value_json.thermostats.0.valve_min_percent}}"
 TPL_VALVE_POSITION = "{{value_json.thermostats.0.pos}}"
 TPL_WINDOW_STATE_REPORTING = (
-    "{%if value_json.thermostats.0.open_window_report==true%}ON{%else%}OFF{%endif%}"
+    "{%if value_json.thermostats.0.open_window_report%}ON{%else%}OFF{%endif%}"
 )
 
 TPL_NEW_FIRMWARE_FROM_INFO = (
-    "{%if value_json[^update^].has_update==true%}ON{%else%}OFF{%endif%}"
+    "{%if value_json[^update^].has_update%}ON{%else%}OFF{%endif%}"
 )
-TPL_OVERPOWER = "{%if value_json.overpower==true%}ON{%else%}OFF{%endif%}"
+TPL_OVERPOWER = "{%if value_json.overpower%}ON{%else%}OFF{%endif%}"
 TPL_OVERPOWER_RELAY = "{%if value==^overpower^%}ON{%else%}OFF{%endif%}"
 TPL_OVERPOWER_VALUE_TO_JSON = "{{{^overpower_value^:value}|tojson}}"
 TPL_POSITION = "{%if value!=-1%}{{value}}{%endif%}"
@@ -577,8 +586,8 @@ TPL_TEMPERATURE_EXT = "{%if is_number(value) and -100<value|int<999%}{{value}}{%
 TPL_TEMPERATURE_STATUS = "{{value|lower}}"
 TPL_UPDATE_TO_JSON = "{{value_json[^update^]|tojson}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.uptime)|timestamp_local}}"
-TPL_VIBRATION = "{%if value_json.vibration==true%}ON{%else%}OFF{%endif%}"
-TPL_VIBRATION_MOTION = "{%if value_json.sensor.vibration==true%}ON{%else%}OFF{%endif%}"
+TPL_VIBRATION = "{%if value_json.vibration%}ON{%else%}OFF{%endif%}"
+TPL_VIBRATION_MOTION = "{%if value_json.sensor.vibration%}ON{%else%}OFF{%endif%}"
 
 UNIT_AMPERE = "A"
 UNIT_CELSIUS = "°C"
@@ -670,6 +679,10 @@ OPTIONS_NUMBER_VALVE_POSITION = {
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_VALUE_TEMPLATE: TPL_VALVE_POSITION,
     KEY_UNIT: UNIT_PERCENT,
+    ATTR_AVAILABILITY_EXTRA: {
+        KEY_TOPIC: TOPIC_INFO,
+        KEY_VALUE_TEMPLATE: TPL_CALIBRATED_AVAILABILITY,
+    },
 }
 OPTIONS_NUMBER_MINIMAL_VALVE_POSITION = {
     KEY_COMMAND_TOPIC: TOPIC_COMMAND_VALVE_MIN,
@@ -902,6 +915,22 @@ OPTIONS_SENSOR_CURRENT_METER = {
     KEY_ENABLED_BY_DEFAULT: False,
     KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     KEY_STATE_TOPIC: TOPIC_METER_CURRENT,
+    KEY_UNIT: UNIT_AMPERE,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
+}
+OPTIONS_SENSOR_N_CURRENT = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_CURRENT,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_N_CURRENT,
+    KEY_UNIT: UNIT_AMPERE,
+    KEY_SUGGESTED_DISPLAY_PRECISION: 1,
+}
+OPTIONS_SENSOR_IX_SUM_CURRENT = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_CURRENT,
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_IX_SUM_CURRENT,
     KEY_UNIT: UNIT_AMPERE,
     KEY_SUGGESTED_DISPLAY_PRECISION: 1,
 }
@@ -2275,6 +2304,8 @@ if model_id == MODEL_SHELLY3EM_ID or dev_id_prefix == MODEL_SHELLY3EM_PREFIX:
         SENSOR_RSSI: OPTIONS_SENSOR_RSSI,
         SENSOR_SSID: OPTIONS_SENSOR_SSID,
         SENSOR_UPTIME: OPTIONS_SENSOR_UPTIME,
+        SENSOR_N_CURRENT: OPTIONS_SENSOR_N_CURRENT,
+        SENSOR_IX_SUM_CURRENT: OPTIONS_SENSOR_IX_SUM_CURRENT,
     }
     buttons = {BUTTON_RESTART: OPTIONS_BUTTON_RESTART}
     updates = {UPDATE_FIRMWARE: OPTIONS_UPDATE_FIRMWARE}
@@ -2466,6 +2497,9 @@ for number, number_options in numbers.items():
         "ascii", "ignore"
     ).decode("utf-8")
 
+    if number_options.get(ATTR_AVAILABILITY_EXTRA):
+        availability.append(number_options[ATTR_AVAILABILITY_EXTRA])
+
     payload = {
         KEY_NAME: f"{device_name} {format_entity_name(number)}",
         KEY_COMMAND_TOPIC: number_options[KEY_COMMAND_TOPIC],
@@ -2600,6 +2634,13 @@ if climate_entity_option:
     config_topic = f"{disc_prefix}/climate/{dev_id}/config".encode(
         "ascii", "ignore"
     ).decode("utf-8")
+
+    availability.append(
+        {
+            KEY_TOPIC: TOPIC_INFO,
+            KEY_VALUE_TEMPLATE: TPL_CALIBRATED_AVAILABILITY,
+        }
+    )
 
     payload = {
         KEY_NAME: device_name,
@@ -2850,6 +2891,8 @@ for sensor, sensor_options in sensors.items():
         unique_id = f"{dev_id}-{sensor}".lower()
     if sensor in (SENSOR_SSID, SENSOR_ADC, SENSOR_IP):
         sensor_name = f"{device_name} {sensor.upper()}"
+    elif sensor == SENSOR_IX_SUM_CURRENT:
+        sensor_name = f"{device_name} IX sum current"
     elif sensor == SENSOR_UPTIME:
         sensor_name = f"{device_name} Last restart"
     elif sensor == SENSOR_RSSI:
