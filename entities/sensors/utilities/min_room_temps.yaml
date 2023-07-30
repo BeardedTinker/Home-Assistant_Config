@@ -6,7 +6,10 @@ platform: min_max
 entity_ids:
   - sensor.luka_room_temperature
   - sensor.living_room_temperature
-  - sensor.dining_room_temperature
   - sensor.zita_room_temperature
+  - sensor.dining_room_temperature
+  - sensor.bedroom_temperature_2
+  - sensor.hall_temperature
+  - sensor.bathroom_temperature
 name: min_temp_rooms
 type: min

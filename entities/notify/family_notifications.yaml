@@ -7,6 +7,7 @@ platform: group
 name: family
 services:
   - service: mobile_app_pixel_7_pro
+  - service: mobile_app_google_pixel_watch
   - service: mobile_app_oppo
   - service: mobile_app_fig_lx1
   - service: mobile_app_luka_iphone

@@ -1,8 +1,0 @@
-#####
-# Tile - tracker
-# https://www.home-assistant.io/integrations/tile/
-#####
-
-platform: tile
-username: !secret tile_user
-password: !secret tile_pass

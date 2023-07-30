@@ -10,7 +10,7 @@ sensors:
     unique_id: switches_2nd_floor
     value_template: >
       {%- set search_state = 'on' %}
-      {%- set search_areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+      {%- set search_areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room', 'Ledge'] %}
       {%- set ns = namespace(switch=[]) %}
       {%- for switch in states.switch | selectattr('state','eq', search_state) %}
         {%- for area in search_areas %}

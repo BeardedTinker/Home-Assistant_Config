@@ -10,7 +10,7 @@ sensors:
     unique_id: lights_1st_floor
     value_template: >
       {%- set search_state = 'on' %}
-      {%- set search_areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall'] %}
+      {%- set search_areas = ['Kitchen', 'Dining room', 'Living room', 'Coridor', 'Hall', 'Balcony'] %}
       {%- set ns = namespace(lights=[]) %}
       {%- for light in states.light | selectattr('state','eq', search_state) %}
         {%- for area in search_areas %}

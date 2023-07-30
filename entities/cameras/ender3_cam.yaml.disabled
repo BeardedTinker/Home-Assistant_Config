@@ -1,9 +1,0 @@
-#####
-# Create camera for Ender 3 Pro
-# Mjpeg to be removed in 2022.5
-#####
-
-platform: mjpeg
-name: Ender 3 Pro
-still_image_url: !secret octopi_image_url
-mjpeg_url: !secret octopi_mjpeg_url

@@ -1,9 +1,0 @@
-#####
-# Discord bot
-# https://www.home-assistant.io/integrations/discord
-# TB
-#####
-
-platform: discord
-name: discord_bot
-token: !secret discord_token

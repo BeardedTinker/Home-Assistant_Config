@@ -9,5 +9,5 @@ peak_energy_cost:
   min: 0
   max: 100
   initial: 0.95
-  unit_of_measurement: "HRK/kWh"
+  unit_of_measurement: "EUR/kWh"
   icon: mdi:currency-eur-off

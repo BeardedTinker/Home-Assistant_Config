@@ -7,9 +7,9 @@
   - name: Upstairs lights on
     icon: mdi:lightbulb
     state: >-
-      {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+      {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room', 'Ledge'] %}
       {{ states.light | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | list | count }}
     attributes:
       areas: >-
-        {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room'] %}
+        {% set areas = ['Loft', 'Bedroom', 'Bathroom', 'Zita room', 'Luka room', 'Ledge'] %}
         {{ states.light | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | map('area_name') | select('in', areas) | unique | list }}

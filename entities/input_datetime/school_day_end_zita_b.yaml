@@ -7,4 +7,4 @@ school_day_end_zita_b:
   name: Zita School Day End Week B
   has_date: false
   has_time: true
-  initial: '11:45:00'
+  initial: '13:10:00'

@@ -1,9 +1,0 @@
-#####
-# Version component for local copy
-# https://www.home-assistant.io/integrations/version/
-# Deprecated YAML configuration
-#####
-
-platform: version
-name: Current Version
-source: local
