@@ -7,7 +7,7 @@ alias: WiFi connect Mirta
 id: a6e89460-682b-4be2-a019-fb3698936d1f
 
 trigger:
-  entity_id: sensor.eml_l29_wifi_connection
+  entity_id: sensor.oppo_wifi_connection
   platform: state
   from: '<not connected>'
 
@@ -16,7 +16,7 @@ action:
   data:
     who: 'mirta'
     title: '📶 *WiFi Connected*'
-    value1: ' {{ states("sensor.eml_l29_wifi_connection") }} WiFi is connected - well done!'
+    value1: ' {{ states("sensor.oppo_wifi_connection") }} WiFi is connected - well done!'
     group: home
     tag_id: 'information'
     importance_id: default

@@ -7,7 +7,7 @@ id: ec1db421-14dc-4b33-a5ed-094923459df4
 
 trigger:
   platform: time
-  at: '10:30:00'
+  at: '11:30:00'
 
 condition: 
   condition: and
@@ -17,6 +17,9 @@ condition:
   - condition: state
     entity_id: input_boolean.audio_notifications
     state: 'on'  
+  - condition: state
+    entity_id: binary_sensor.people_home
+    state: 'on'
 
 action:
 - service: script.notify_engine

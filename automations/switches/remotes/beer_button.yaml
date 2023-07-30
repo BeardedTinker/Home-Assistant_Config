@@ -6,6 +6,7 @@
 id: '1689276686584'
 alias: Bring me beer
 description: ''
+
 trigger:
 - platform: device
   domain: mqtt
@@ -13,7 +14,9 @@ trigger:
   type: action
   subtype: brightness_move_up
   discovery_id: 0x04cd15fffe799da0 action_brightness_move_up
+
 condition: []
+
 action:
 - service: tts.google_translate_say
   data:

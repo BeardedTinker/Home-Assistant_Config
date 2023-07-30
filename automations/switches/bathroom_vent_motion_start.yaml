@@ -14,11 +14,11 @@ trigger:
 
 condition:
   - condition: time
-    after: '06:00:00'
-    before: '23:45:00'
+    after: '06:30:00'
+    before: '23:30:00'
 
 action:
   - service: switch.turn_on
-    entity_id: switch.bathroom_vent_relay_0
+    entity_id: switch.bathroom_vent_2
 
 mode: single

@@ -7,10 +7,12 @@ id: e6328644-d123-44f1-944a-bc100fdc0117
 
 trigger:
   event: sunset
-  offset: 00:45:00
+  offset: 01:15:00
   platform: sun
 
 condition:
+  condition: and
+  conditions:
   - alias: "People home"
     condition: state
     entity_id: binary_sensor.people_home

@@ -19,9 +19,12 @@ condition:
   - condition: numeric_state
     entity_id: sensor.bedroom_humidity
     below: 63.5
-
+  - condition: state
+    alias: "People home"
+    entity_id: binary_sensor.people_home
+    state: 'on'
 action:
   - service: switch.turn_on
-    entity_id: switch.bathroom_vent_relay_0
+    entity_id: switch.bathroom_vent_2
 
 mode: single

@@ -8,7 +8,7 @@ id: 0520f620-9799-41e6-ac17-1db09f26709a
 
 trigger:
   platform: state
-  entity_id: switch.bathroom_vent_relay_0
+  entity_id: switch.bathroom_vent_2
   from: 'off'
   to: 'on'
   for: 00:15:00
@@ -17,6 +17,6 @@ condition: []
 
 action:
   - service: switch.turn_off
-    entity_id: switch.bathroom_vent_relay_0
+    entity_id: switch.bathroom_vent_2
 
 mode: single

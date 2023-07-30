@@ -11,6 +11,16 @@ trigger:
   event: sunrise
   offset: '+00:00:00'
 
+condition:
+  condition: and
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.people_home
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.audio_notifications
+    state: 'on'  
+
 action:
 - service: script.notify_engine
   data:

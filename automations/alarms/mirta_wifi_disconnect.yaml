@@ -7,7 +7,7 @@ alias: WiFi disconnect Mirta
 id: f406feed-b43a-4e55-a1f5-a8d9d91d254a
 
 trigger:
-  entity_id: sensor.eml_l29_wifi_connection
+  entity_id: sensor.oppo_wifi_connection
   platform: state
   to: '<not connected>'
 

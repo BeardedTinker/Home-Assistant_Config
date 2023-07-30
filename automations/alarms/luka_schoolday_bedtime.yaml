@@ -10,12 +10,12 @@ trigger:
   platform: template
   value_template: >
     {% 
-      if states('sensor.time') == "22:30" 
+      if states('sensor.time') == "23:30" 
       and is_state('input_boolean.luka_school_online','on') 
     %}
       true
     {% 
-      elif states('sensor.time') == "22:00" 
+      elif states('sensor.time') == "23:30" 
       and is_state('input_boolean.luka_school_online','off')  
     %}
       true
