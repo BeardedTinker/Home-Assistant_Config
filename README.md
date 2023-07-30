@@ -27,21 +27,21 @@ Contents
 
 ### Intro
 
-Here you can find all of the configuration files from my Home Assistant installation - production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows.<br>
+Here you can find all of the configuration files from my Home Assistant installation - main system or if you prefer to call it production enviroment. Updates are pushed whenever there is a change and I do try to work on the system as much as time allows. But lately it's been slow<br>
 I wish to thank all of the Home Assistant community for being inspiration for lot of the things I did here.<br>
-Where ever I could I listed original authors of the code or parts of the code I used.
+I tried to list original authors of the code or parts of the code I used, but if something is missing, I appologise.
 
 
 ## YouTube Channel?
 
-A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - more than 300 videos as of Today, with at least 150 of them being Home Assistant How To's. 
+A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - almost 300 videos as of Today, with at least 200 of them being Home Assistant How To's. 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6). 
 
 Also, if you have time you can try and join me while streaming and there should be at 1 or 2 streams each month!
 
 > **Note**
-> If you want to support me, you can do so by becoming my YouTube Channel member - just click [link here](https://www.youtube.com/channel/UCuqokNoK8ZFNQdXxvlE129g/join) and select one of the membership levels.
+> If you want to support me, you can do so by becoming my YouTube Channel member - just click [link here](https://www.youtube.com/channel/UCuqokNoK8ZFNQdXxvlE129g/join) and select one of the membership levels - or go to my merchandise store and get something there!
 
 
 ### Hardware
@@ -126,7 +126,7 @@ From other devices that I use, here is a list:
   + various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
-  - Tile [Mate 2020](https://amzn.to/3KRYM8f)
+  ~~- Tile [Mate 2020](https://amzn.to/3KRYM8f)~~
   - Elgato [Key Light Air](https://amzn.to/3IOe8Ib)
   - [Roborock S5 max](https://amzn.to/3kBFw49)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
@@ -269,13 +269,13 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   192 |
-| Binary sensors       |   33¸5 |
-| Cameras              |    17 |
+| Automations          |   193 |
+| Binary sensors       |   318 |
+| Cameras              |    15 |
 | Climates             |    15 |
 | Counters             |     4 |
-| Device trackers      |   140 |
-| Entities             |  3625 |
+| Device trackers      |   154 |
+| Entities             |  3688 |
 | Groups               |    17 |
 | Image Processing     |     0 |
 | Input Boolean        |    19 |
@@ -283,21 +283,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
-| Lights               |    46 |
+| Lights               |    51 |
 | Lines of code (YAML) |107524 |
 | Locks                |     5 |
-| Media players        |    31 |
+| Media players        |    40 |
 | Persons              |     6 |
 | Plants               |     8 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  2227 |
-| Switches             |   159 |
+| Sensors              |  2209 |
+| Switches             |   174 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 30.04.2023 11:45 PM
+* Updated: 30.07.2023 11:30 AM
 
 ### Missing files
 
