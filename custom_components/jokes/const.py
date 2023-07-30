@@ -1,3 +1,0 @@
-"""Jokes constants."""
-
-DOMAIN = "jokes"
