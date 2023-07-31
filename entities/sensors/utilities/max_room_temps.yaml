@@ -12,3 +12,4 @@ entity_ids:
   - sensor.hall_temperature
   - sensor.bathroom_temperature
 name: max_temp_rooms
+type: max

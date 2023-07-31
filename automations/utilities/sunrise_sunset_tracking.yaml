@@ -25,7 +25,7 @@ action:
     timeout: 300
 - service: notify.energy_log
   data:
-    message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ state_attr('sensor.power_stats','min_value') }},{{ state_attr('sensor.power_stats','max_value') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }}"
+    message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ states('sensor.power_usage_minimum_24h') }},{{ states('sensor.power_usage_maximum_24h') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }},{{ states('sensor.smart_inverter_max_power') }},{{ states('sensor.smart_inverter_daily') }}"
 - service: google_sheets.append_sheet
   data:
     config_entry: 51c0f06b0f810b83d19af8dc1fe65bad
@@ -36,7 +36,9 @@ action:
       Daylight energy: "{{ states('sensor.sun_energy_day') }}"
       Night Time Energy: "{{ states('sensor.sun_energy_night') }}"
       Power Stats: "{{ states('sensor.power_stats') }}"
-      Minimum Power: "{{ state_attr('sensor.power_stats','min_value') }}"
-      Maximum Power: "{{ state_attr('sensor.power_stats','max_value') }}"
+      Minimum Power: "{{ states('sensor.power_usage_minimum_24h') }}"
+      Maximum Power: "{{ states('sensor.power_usage_maximum_24h') }}"
       Cost HRK: "{{ states('sensor.daily_total_energy_cost') }}"
       #Cost EUR: "{{ states('sensor.daily_total_energy_cost') }}"
+      Solar Maximum Power: "{{ states('sensor.smart_inverter_max_power') }}"
+      Solar Runtime: "{{ states('sensor.smart_inverter_daily') }}"
