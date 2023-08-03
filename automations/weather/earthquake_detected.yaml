@@ -8,7 +8,7 @@ id: 3a4e8f05-1526-4341-a675-e15bacfa0955
 trigger:
   - platform: geo_location
     source: usgs_earthquakes_feed
-    zone: zone.home
+    zone: zone.warning
     event: enter
 
 action:
