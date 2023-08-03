@@ -16,7 +16,7 @@ trigger:
     - sensor.github_checkrun_home_assistant_beta
     -  sensor.github_checkrun_home_assistant_dev
   platform: state
-  to: errored
+  to: failure
 
 condition: []
 
