@@ -25,6 +25,6 @@ condition:
     state: 'on'
 action:
   - service: switch.turn_on
-    entity_id: switch.bathroom_vent_2
+    entity_id: switch.bathroom_vent
 
 mode: single

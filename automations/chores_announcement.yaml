@@ -24,11 +24,11 @@ action:
     title: '✅ *Daily Chores*'
     value1: 'Today, {{ states("input_text.chores_dog") }} will take the dog out.'
     value2: '{{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.'
-    value3: >
-     {% if is_state("sensor.paper_waste", "today") %} {{ states("input_text.chores_trash") }} will take paper for recycling.
-     {% elif is_state("sensor.bio_waste", "today") %} {{ states("input_text.chores_trash") }} will take bio waste for recycling.
-     {% elif is_state("sensor.plastic_waste", "today") %} {{ states("input_text.chores_trash") }} will take plastic bag for recycling.
-     {% endif %}
+#    value3: >
+#     {% if is_state("sensor.paper_waste", "today") %} {{ states("input_text.chores_trash") }} will take paper for recycling.
+#     {% elif is_state("sensor.bio_waste", "today") %} {{ states("input_text.chores_trash") }} will take bio waste for recycling.
+#     {% elif is_state("sensor.plastic_waste", "today") %} {{ states("input_text.chores_trash") }} will take plastic bag for recycling.
+#     {% endif %}
     target_id: !secret telegram_bot_chat_id
     group: duties
     tag_id: 'information'
