@@ -263,7 +263,7 @@ TPL_EMETER_TOTAL_ACTIVE_RETURNED_ENERGY = "{{value_json.total_act_ret}}"
 TPL_EMETER_TOTAL_APPARENT_POWER = "{{value_json.total_aprt_power}}"
 TPL_EMETER_TOTAL_CURRENT = "{{value_json.total_current}}"
 TPL_EMETER_VOLTAGE = "{{{{value_json.{phase}_voltage}}}}"
-TPL_EVENT = "{{{^event_type^:value_json.params.events.0.event}|to_json}}"
+TPL_EVENT = "{{%if value_json.params.events.0.id=={input_id}%}}{{{{{{^event_type^:value_json.params.events.0.event}}|to_json}}}}{{%endif%}}"
 TPL_FREQUENCY = "{{value_json.freq}}"
 TPL_ENERGY = "{{value_json.aenergy.total}}"
 TPL_ETH_IP = "{{value_json.eth.ip}}"
@@ -2057,7 +2057,7 @@ def get_event(input_id, input_type):
         KEY_NAME: input_name,
         KEY_STATE_TOPIC: TOPIC_EVENTS_RPC,
         KEY_EVENT_TYPES: input_events,
-        KEY_VALUE_TEMPLATE: TPL_EVENT,
+        KEY_VALUE_TEMPLATE: TPL_EVENT.format(input_id=input_id),
         KEY_UNIQUE_ID: f"{device_id}-{input_id}".lower(),
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
