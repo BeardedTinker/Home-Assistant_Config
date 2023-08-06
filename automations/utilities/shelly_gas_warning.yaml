@@ -1,6 +1,6 @@
 #####
 # Warning when Shelly Gas detects ppm increase
-# Nuber for trigger is aboce zero
+# Number for trigger is above zero
 #####
 
 alias: Gas Warning

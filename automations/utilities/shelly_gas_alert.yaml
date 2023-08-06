@@ -10,10 +10,20 @@ trigger:
     entity_id: binary_sensor.shelly_gas_10521cef4a01_gas
     from: 'off'
 
-condition: "{{ states('binary_sensor.shelly_gas_10521cef4a01_gas') != 'unavailable' }}"
+#condition: "{{ states('binary_sensor.shelly_gas_10521cef4a01_gas') != 'unavailable' }}"
 #  - condition: template
 #    value_template: >
 #      "{{ states('binary_sensor.shelly_gas_10521cef4a01_gas') != 'unavailable' }}"
+
+condition:
+  condition: not
+  conditions:
+    - condition: state
+      entity_id: binary_sensor.shelly_gas_10521cef4a01_gas
+      state: unavailable
+    - condition: state
+      entity_id: binary_sensor.shelly_gas_10521cef4a01_gas
+      state: unknown
 
 action:
 - service: script.notify_engine
