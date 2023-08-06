@@ -14,7 +14,7 @@ trigger:
   allowed_methods:
     - POST
     - PUT
-  local_only: true
+  local_only: false
 
 condition: '{{trigger.json.check_run.check_suite.head_branch == "master"}}'
 
