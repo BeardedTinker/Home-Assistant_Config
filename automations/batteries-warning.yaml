@@ -25,4 +25,4 @@ action:
     importance_id: default
     color: 'yellow'
     sticky: 'false'
-#    timeout: ''
+    timeout: 300

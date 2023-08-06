@@ -18,15 +18,16 @@ condition: "{{ not (trigger.to_state.state == trigger.from_state.state) }}"
 action:
 - service: script.notify_engine
   data:
-    who: 'parents'
+    who: 'family'
     title: '🧹 *Return Roborock to dock*'
     value1: '{{ trigger.to_state.name }} is {{ trigger.to_state.state }} - please return it to dock'
     target_id: !secret telegram_bot_chat_id
     group: home
     tag_id: 'information'
     importance_id: default
-    color: 'green'
+    color: 'yellow'
     sticky: 'false'
+    timeout: 1800
 - service: script.turn_on
   target:
     entity_id: script.google_home_resume

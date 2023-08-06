@@ -26,7 +26,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
-    timeout: 300
+    timeout: 60
 - service: light.turn_on
   target:
     entity_id: light.living_room_lights

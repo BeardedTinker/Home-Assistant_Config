@@ -32,9 +32,9 @@ action:
     group: information
     tag_id: 'information'
     importance_id: default
-    color: 'true'
+    color: 'red'
     sticky: 'false'
-#    timeout: ''
+    timeout: 600
 
 # - service: media_player.volume_set
 #   data:

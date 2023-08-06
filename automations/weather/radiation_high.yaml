@@ -26,6 +26,7 @@ action:
     importance_id: default
     color: 'red'
     sticky: 'true'
+    timeout: 1800
 
 # - data:
 #     entity_id:

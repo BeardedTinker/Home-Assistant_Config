@@ -27,6 +27,7 @@ action:
     importance_id: default
     color: 'yellow'
     sticky: 'false'
+    timeout: 1800
 # - data:
 #     entity_id: media_player.display_me
 #     volume_level: 0.5

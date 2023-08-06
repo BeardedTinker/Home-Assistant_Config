@@ -28,6 +28,7 @@ action:
     importance_id: default
     sticky: 'false'
     color: 'green'
+    timeout: 1800
 - service: input_boolean.turn_off
   data: {}
   entity_id: input_boolean.washing_on

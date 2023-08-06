@@ -20,10 +20,11 @@ action:
     value1: "Power Failure! UPS running!"
     target_id: !secret telegram_bot_chat_id
     group: system
-    tag_id: 'warning'
+    tag_id: 'emergency'
     importance_id: default
-    color: 'yellow'
+    color: 'red'
     sticky: 'false'
+    timeout: 1800
 - service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.ups_on_batteries

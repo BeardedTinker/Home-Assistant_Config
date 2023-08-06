@@ -53,6 +53,7 @@ action:
           importance_id: default
           color: 'green'
           sticky: 'true'
+          timeout: 600
       #    channel_id: ''
       #- service: script.notify_engine
       #  data:
@@ -104,6 +105,7 @@ action:
           importance_id: default
           color: 'green'
           sticky: 'true'
+          timeout: 600
       #    channel_id: ''
       #- service: script.notify_engine
       #  data:

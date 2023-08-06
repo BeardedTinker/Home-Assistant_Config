@@ -45,3 +45,5 @@ action:
       tag_id: 'information'
       importance_id: default
       color: 'green'
+      sticky: 'true'
+      timeout: 300

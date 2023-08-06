@@ -25,8 +25,9 @@ action:
     group: home
     tag_id: 'emergency'
     importance_id: default
-    color: 'green'
+    color: 'red'
     sticky: 'true'
+    timeout: 1800
 # - data:
 #     entity_id:
 #       - media_player.display_me

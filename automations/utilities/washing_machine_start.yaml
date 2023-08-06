@@ -28,6 +28,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
+    timeout: 300
 
 - service: input_boolean.turn_on
   data: {}

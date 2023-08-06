@@ -33,7 +33,7 @@ action:
     importance_id: default
     color: 'true'
     sticky: 'false'
-#    timeout: ''
+    timeout: 600
 
 #- service: media_player.volume_set
 #  data:

@@ -43,6 +43,7 @@ action:
     color: 'green'
     sticky: 'true'
     clickAction: /hassio/dashboard
+    timeout: 300
 
 - service: persistent_notification.create
   data:
@@ -84,6 +85,7 @@ action:
     color: 'green'
     sticky: 'true'
     clickAction: /hassio/dashboard
+    timeout: 300
 
 - service: persistent_notification.create
   data:
@@ -109,6 +111,7 @@ action:
     color: 'green'
     sticky: 'true'
     clickAction: '/hassio/dashboard'
+    timeout: 300
 
 - service: persistent_notification.create
   data:

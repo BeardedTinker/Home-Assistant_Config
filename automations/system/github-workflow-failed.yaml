@@ -30,8 +30,8 @@ action:
     group: system
     tag_id: 'warning'
     importance_id: default
-    color: 'yellow'
+    color: 'red'
     sticky: 'false'
-    timeout: 300
+    timeout: 600
 
 mode: single

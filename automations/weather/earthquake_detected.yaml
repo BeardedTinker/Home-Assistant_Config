@@ -18,11 +18,12 @@ action:
     title: '⚠ *Earthquake Alert!*'
     value1: 'Earthquake detected! Stay calm!'
     target_id: !secret telegram_bot_chat_id
-    group: weather   
+    group: emergency   
     tag_id: 'warning'
     importance_id: default
     color: 'red'
     sticky: 'true'
+    timeout: 1800
 
 # - data:
 #     entity_id:

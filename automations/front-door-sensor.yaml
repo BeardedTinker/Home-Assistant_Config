@@ -40,7 +40,7 @@ action:
             importance_id: default
             color: 'red'
             sticky: 'true'
-            #timeout: 
+            timeout: 1800
 
         - service: media_player.volume_set
           target:
@@ -70,6 +70,7 @@ action:
             importance_id: default
             color: 'yellow'
             sticky: 'false'
+            timeout: 300
 #        - service: media_player.volume_set
 #          data:
 #            entity_id: media_player.display_me

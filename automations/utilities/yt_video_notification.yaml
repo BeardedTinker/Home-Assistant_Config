@@ -31,5 +31,6 @@ action:
     tag_id: 'information'
     importance_id: default
     color: 'green'
-
+    timeout: 600
+    
     mode: queued
