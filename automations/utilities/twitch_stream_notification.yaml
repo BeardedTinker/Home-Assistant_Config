@@ -16,24 +16,28 @@ trigger:
     - sensor.drzzs
     - sensor.xisuma
     - sensor.frenck
-    - ensor.tangotek
+    - sensor.tangotek
 
 condition: 
-  condition: template
+  condition: and
+  conditions:
+  - condition: template
 #  value_template: '{{ trigger.to_state.attributes.live == "streaming" }}'
-  value_template: '{{trigger.to_state.state == "streaming"}}'
+    value_template: '{{ trigger.to_state.state == "streaming" }}'
+  - condition: template
+    value_template: '{{ trigger.to_state.state != trigger.from_state.state }}'
 
 action:
 - service: script.notify_engine
   data:
     who: 'andrej'
     title: '🗣 Streaming'
-    value1: "Looks like {{ trigger.to_state.attributes.friendly_name }} is streaming {{trigger.to_state.attributes.title}}"
+    value1: "Looks like {{ trigger.to_state.attributes.friendly_name }} is streaming {{ trigger.to_state.attributes.title }}"
     target_id: !secret telegram_bot_chat_id
     group: information
     tag_id: 'information'
     importance_id: default
     color: 'green'
-    timeout: 600
+    timeout_sec: 60
 
     mode: queued

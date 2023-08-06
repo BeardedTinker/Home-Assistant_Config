@@ -34,7 +34,7 @@ action:
     tag_id: 'emergency'
     color: 'red'
     sticky: 'true'
-    timeout: 1800
+    timeout_sec: 1800
 #- data:
 #     entity_id:
 #       - media_player.display_me

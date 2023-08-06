@@ -20,7 +20,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
-    timeout: 150
+    timeout_sec: 180
 - service: media_player.volume_set
   target: 
     entity_id: media_player.display_me

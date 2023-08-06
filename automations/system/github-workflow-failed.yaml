@@ -32,6 +32,6 @@ action:
     importance_id: default
     color: 'red'
     sticky: 'false'
-    timeout: 600
+    timeout_sec: 600
 
 mode: single

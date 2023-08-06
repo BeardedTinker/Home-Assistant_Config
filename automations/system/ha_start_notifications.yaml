@@ -20,7 +20,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
-    timeout: 300
+    timeout_sec: 300
 - timeout: 00:01:00
   wait_template: ''
 - service: media_player.volume_set

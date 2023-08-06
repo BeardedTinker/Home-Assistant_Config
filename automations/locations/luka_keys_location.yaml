@@ -34,6 +34,6 @@ action:
       importance_id: default
       color: 'green'
       sticky: 'true'
-      timeout: 600
+      timeout_sec: 1200
 
 mode: single

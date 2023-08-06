@@ -27,7 +27,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
-    timeout: 300
+    timeout_sec: 300
 # - data:
 #     entity_id:
 #       - media_player.display_me

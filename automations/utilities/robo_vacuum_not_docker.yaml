@@ -27,7 +27,7 @@ action:
     importance_id: default
     color: 'yellow'
     sticky: 'false'
-    timeout: 1800
+    timeout_sec: 1800
 - service: script.turn_on
   target:
     entity_id: script.google_home_resume

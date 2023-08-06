@@ -31,7 +31,7 @@ action:
     tag_id: 'information'
     importance_id: default
     color: 'green'
-    timeout: 300
+    timeout_sec: 300
 
 # - service: media_player.volume_set
 #   data:

@@ -32,7 +32,7 @@ action:
     importance_id: default
     color: 'yellow'
     sticky: 'true'
-    timeout: 1800
+    timeout_sec: 1800
 
 # - service: media_player.volume_set
 #   data:

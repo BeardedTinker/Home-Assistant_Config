@@ -34,7 +34,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'false'
-    timeout: 60
+    timeout_sec: 60
 - service: input_boolean.turn_off
   entity_id: input_boolean.audio_notifications
 - service: input_boolean.turn_off

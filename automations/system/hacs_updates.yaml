@@ -30,7 +30,7 @@ action:
     color: 'green'
     sticky: 'true'
     clickAction: '/hacs/entry'
-    timeout: 600
+    timeout_sec: 600
 - service: rest_command.github_issue_state
   data:
     status: 'open'

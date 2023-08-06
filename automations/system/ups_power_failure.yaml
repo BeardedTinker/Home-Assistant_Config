@@ -24,7 +24,7 @@ action:
     importance_id: default
     color: 'red'
     sticky: 'false'
-    timeout: 1800
+    timeout_sec: 1800
 - service: input_boolean.turn_on
   data: {}
   entity_id: input_boolean.ups_on_batteries

@@ -28,7 +28,7 @@ action:
     importance_id: default
     color: 'green'
     sticky: 'true'
-    timeout: 1800
+    timeout_sec: 1800
 - service: persistent_notification.dismiss
   data:
     notification_id: update_ha
