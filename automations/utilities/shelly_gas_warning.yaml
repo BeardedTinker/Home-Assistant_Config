@@ -6,13 +6,19 @@
 alias: Gas Warning
 id: 3f1049e1-6fc5-41b2-90d2-8d16c773f8a4
 trigger:
-  - platform: state
-    entity_id: sensor.shelly_gas_10521cef4a01_concentration
-
-condition:
-  - condition: numeric_state
+  - platform: numeric_state
     entity_id: sensor.shelly_gas_10521cef4a01_concentration
     above: 0
+
+condition:
+  condition: not
+  conditions:
+    - condition: state
+      entity_id: sensor.shelly_gas_10521cef4a01_concentration
+      state: unavailable
+    - condition: state
+      entity_id: sensor.shelly_gas_10521cef4a01_concentration
+      state: unknown
 
 action:
 - service: script.notify_engine
