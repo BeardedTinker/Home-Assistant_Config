@@ -8,19 +8,19 @@ id: f8aaaec4-748e-4732-9f6a-9efecca7a0b6
 
 trigger:
   - platform: template
-    value_template: '{{ now().date() | string == "2021-11-02" }}'
+    value_template: '{{ now().date() | string == "2023-11-02" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2021-11-18" }}'
+    value_template: '{{ now().date() | string == "2023-11-18" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2021-12-24" }}'
+    value_template: '{{ now().date() | string == "2023-12-24" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2022-02-23" }}'
+    value_template: '{{ now().date() | string == "2024-02-23" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2022-04-02" }}'
+    value_template: '{{ now().date() | string == "2024-04-02" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2022-06-03" }}'
+    value_template: '{{ now().date() | string == "2024-06-03" }}'
   - platform: template
-    value_template: '{{ now().date() | string == "2022-06-18" }}'
+    value_template: '{{ now().date() | string == "2024-06-18" }}'
 
 condition: []
 
