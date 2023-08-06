@@ -26,7 +26,8 @@ trigger:
 
 condition: 
   condition: template
-  value_template: '{{ trigger.to_state.attributes.live == "streaming" }}'
+#  value_template: '{{ trigger.to_state.attributes.live == "streaming" }}'
+  value_template: '{{trigger.to_state.state == "streaming"}}'
 
 action:
 - service: script.notify_engine
