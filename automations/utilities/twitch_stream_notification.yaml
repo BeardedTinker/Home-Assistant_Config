@@ -17,12 +17,6 @@ trigger:
     - sensor.xisuma
     - sensor.frenck
     - ensor.tangotek
-#  attribute: live
-#  to: true
-#  for:
-#    hours: 0
-#    minutes: 0
-#    seconds: 1
 
 condition: 
   condition: template
@@ -34,7 +28,7 @@ action:
   data:
     who: 'andrej'
     title: '🗣 Streaming'
-    value1: "Looks like '{{ trigger.state.attributes.friendly_name }}' is streaming {{trigger.platform}}"
+    value1: "Looks like {{ trigger.to_state.attributes.friendly_name }} is streaming {{trigger.to_state.attributes.title}}"
     target_id: !secret telegram_bot_chat_id
     group: information
     tag_id: 'information'
