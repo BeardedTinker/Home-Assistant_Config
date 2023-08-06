@@ -27,6 +27,8 @@ action:
             entity_id:
               - light.left
               - light.right
+          data:
+            brightness: 190
     - conditions:
       - condition: trigger
         id: turn_off

@@ -30,6 +30,8 @@ action:
               - light.ceiling_three
               - light.ceiling_four
               - light.ceiling_five
+          data:
+            brightness: 190
     - conditions:
       - condition: trigger
         id: turn_off

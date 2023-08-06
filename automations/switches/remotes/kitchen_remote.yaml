@@ -29,6 +29,8 @@ action:
               - light.sink
               - light.oven
               - light.kitchen_countertop
+          data:
+            brightness: 190
     - conditions:
       - condition: trigger
         id: turn_off
