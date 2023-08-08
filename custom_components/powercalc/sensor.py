@@ -156,7 +156,7 @@ SENSOR_CONFIG = {
     vol.Optional(CONF_MODEL): cv.string,
     vol.Optional(CONF_MANUFACTURER): cv.string,
     vol.Optional(CONF_MODE): vol.In([cls.value for cls in CalculationStrategy]),
-    vol.Optional(CONF_STANDBY_POWER): vol.Coerce(float),
+    vol.Optional(CONF_STANDBY_POWER): vol.Any(vol.Coerce(float), cv.template),
     vol.Optional(CONF_DISABLE_STANDBY_POWER): cv.boolean,
     vol.Optional(CONF_CUSTOM_MODEL_DIRECTORY): cv.string,
     vol.Optional(CONF_POWER_SENSOR_ID): cv.entity_id,
@@ -502,9 +502,14 @@ def register_entity_services() -> None:
 def convert_config_entry_to_sensor_config(config_entry: ConfigEntry) -> ConfigType:
     """Convert the config entry structure to the sensor config which we use to create the entities."""
     sensor_config = dict(config_entry.data.copy())
+    sensor_type = sensor_config.get(CONF_SENSOR_TYPE)
 
-    if sensor_config.get(CONF_SENSOR_TYPE) == SensorType.GROUP:
+    if sensor_type == SensorType.GROUP:
         sensor_config[CONF_CREATE_GROUP] = sensor_config.get(CONF_NAME)
+
+    if sensor_type == SensorType.REAL_POWER:
+        sensor_config[CONF_POWER_SENSOR_ID] = sensor_config.get(CONF_ENTITY_ID)
+        sensor_config[CONF_FORCE_ENERGY_SENSOR_CREATION] = True
 
     if CONF_DAILY_FIXED_ENERGY in sensor_config:
         daily_fixed_config: dict[str, Any] = copy.copy(sensor_config.get(CONF_DAILY_FIXED_ENERGY))  # type: ignore

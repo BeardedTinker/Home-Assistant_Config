@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from homeassistant.core import State
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.event import TrackTemplate
 
 
@@ -18,3 +18,6 @@ class PowerCalculationStrategyInterface:
 
     def can_calculate_standby(self) -> bool:
         return False
+
+    async def on_start(self, hass: HomeAssistant) -> None:
+        """Called after HA has started"""

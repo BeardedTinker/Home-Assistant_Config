@@ -16,7 +16,11 @@ from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt
 
-from custom_components.powercalc.const import CONF_PLAYBOOKS
+from custom_components.powercalc.const import (
+    CONF_AUTOSTART,
+    CONF_PLAYBOOKS,
+    CONF_REPEAT,
+)
 from custom_components.powercalc.errors import StrategyConfigurationError
 
 from .strategy_interface import PowerCalculationStrategyInterface
@@ -26,6 +30,8 @@ CONFIG_SCHEMA = vol.Schema(
         vol.Optional(CONF_PLAYBOOKS): vol.Schema(
             {cv.string: cv.string},
         ),
+        vol.Optional(CONF_AUTOSTART): cv.string,
+        vol.Optional(CONF_REPEAT, default=False): cv.boolean,
     },
 )
 
@@ -46,6 +52,8 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
         self._start_time: datetime = dt.utcnow()
         self._cancel_timer: CALLBACK_TYPE | None = None
         self._config = config
+        self._repeat: bool = bool(config.get(CONF_REPEAT))
+        self._autostart: str | None = config.get(CONF_AUTOSTART)
         self._power = Decimal(0)
         if not playbook_directory:
             self._playbook_directory: str = os.path.join(
@@ -62,6 +70,10 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
 
     async def calculate(self, entity_state: State) -> Decimal | None:
         return self._power
+
+    async def on_start(self, hass: HomeAssistant) -> None:
+        if self._autostart:
+            await self.activate_playbook(self._autostart)
 
     async def activate_playbook(self, playbook_id: str) -> None:
         """Activate and execute a given playbook"""
@@ -99,6 +111,13 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
 
         queue = self._active_playbook.queue
         if len(queue) == 0:
+            if self._repeat:
+                _LOGGER.debug(f"Playbook {self._active_playbook.key} repeating")
+                self._start_time = dt.utcnow()
+                queue.reset()
+                self._execute_playbook_entry()
+                return
+
             _LOGGER.debug(f"Playbook {self._active_playbook.key} completed")
             self._active_playbook = None
             return
@@ -138,29 +157,35 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
             )
 
         with open(file_path) as csv_file:
-            queue = PlaybookQueue()
-
             csv_reader = csv.reader(csv_file)
+            entries = []
             for row in csv_reader:
-                queue.enqueue(PlaybookEntry(time=float(row[0]), power=Decimal(row[1])))
+                if len(row) != 2:
+                    raise StrategyConfigurationError(
+                        f"Playbook file '{file_path}' has invalid structure, please see the documentation.",
+                    )
+                entries.append(PlaybookEntry(time=float(row[0]), power=Decimal(row[1])))
 
-            self._loaded_playbooks[playbook_id] = Playbook(key=playbook_id, queue=queue)
+            self._loaded_playbooks[playbook_id] = Playbook(
+                key=playbook_id, queue=PlaybookQueue(entries)
+            )
 
         return self._loaded_playbooks[playbook_id]
 
 
 class PlaybookQueue:
-    def __init__(self) -> None:
-        self._entries: deque[PlaybookEntry] = deque()
-
-    def enqueue(self, entry: PlaybookEntry) -> None:
-        self._entries.append(entry)
+    def __init__(self, items: list[PlaybookEntry]) -> None:
+        self._items = items
+        self._queue: deque[PlaybookEntry] = deque(items)
 
     def dequeue(self) -> PlaybookEntry:
-        return self._entries.popleft()
+        return self._queue.popleft()
+
+    def reset(self) -> None:
+        self._queue = deque(self._items)
 
     def __len__(self) -> int:
-        return len(self._entries)
+        return len(self._queue)
 
 
 @dataclass
