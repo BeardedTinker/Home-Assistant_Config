@@ -22,6 +22,10 @@ trigger:
   entity_id: sensor.zita_switch_action
   to: quadruple
   id: quadruple
+- platform: state
+  entity_id: sensor.zita_switch_action
+  to: hold
+  id: hold
 
 action:
   - choose:
