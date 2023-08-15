@@ -17,7 +17,7 @@ condition:
   conditions:
   - condition: numeric_state
     entity_id: sensor.kitchen_motion_luminosity
-    below: 150  
+    below: 200  
   - alias: "People home"
     condition: state
     entity_id: binary_sensor.people_home

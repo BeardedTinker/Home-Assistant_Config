@@ -4,7 +4,6 @@ products:
     name: Yinmik WF-3188
 primary_entity:
   entity: sensor
-  name: Temperature
   icon: "mdi:pool-thermometer"
   class: temperature
   dps:
@@ -17,7 +16,6 @@ primary_entity:
         - scale: 10
 secondary_entities:
   - entity: sensor
-    name: Battery
     class: battery
     category: diagnostic
     dps:
@@ -25,6 +23,7 @@ secondary_entities:
         type: integer
         name: sensor
         unit: "%"
+        optional: true
   - entity: sensor
     name: pH
     icon: "mdi:ph"
@@ -46,6 +45,7 @@ secondary_entities:
         name: sensor
         unit: mS/cm
         class: measurement
+        optional: true
         mapping:
           - scale: 1000
   - entity: sensor
@@ -202,10 +202,10 @@ secondary_entities:
         type: integer
         name: sensor
         class: measurement
+        optional: true
         mapping:
           - scale: 10
   - entity: sensor
-    name: Humidity
     class: humidity
     dps:
       - id: 114
