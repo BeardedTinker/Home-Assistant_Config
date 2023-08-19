@@ -11,32 +11,32 @@ trigger:
   event: sunset
   offset: '+00:30:00'
 
+variables:
+  plants:
+    - sensor.dracena_marginata_soil_moisture
+    - sensor.dypsis_lutescenes_soil_moisture
+    - sensor.ficus_benjamina_natasja_soil
+    - sensor.ficus_benjamina_soil_moisture
+    - sensor.parthenocissus_small_soil_moisture
+    - sensor.schefflera_arboricola_soil_moisture
+    - sensor.test_plant_soil_moisture_2
+  thirsty_plants: >
+    {%- set ns = namespace(thirsty=[]) %}
+    {%- for p in plants %}
+      {%- if states(p) | float(100) < 30 %}
+        {%- set ns.thirsty = ns.thirsty + [ states[p].name ] %}
+      {%- endif %}
+    {%- endfor %}
+    {{ ns.thirsty }}
+  plants_for_message: >
+    {{
+      thirsty_plants[:-1] | join(', ') ~ '  and ' ~ thirsty_plants[-1]
+      if thirsty_plants | count > 2
+      else thirsty_plants | join(' and ')
+    }}
+
 condition:
-  - or:
-    - condition: numeric_state
-      entity_id: sensor.dracena_marginata_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.dypsis_lutescenes_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.ficus_benjamina_natasja_soil
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.ficus_benjamina_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.parthenocissus_small_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.parthenocissus_small_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.schefflera_arboricola_soil_moisture
-      below: 30
-    - condition: numeric_state
-      entity_id: sensor.test_plant_soil_moisture_2
-      below: 30
+  - "{{ ns.thirsty | count > 0 }}"
 
 action:
 - service: script.notify_engine
@@ -63,6 +63,6 @@ action:
               - media_player.display_me
               - media_player.clock_me
           data:
-            message: '{{ trigger.to_state.attributes.friendly_name }} needs watering'
+            message: '{{ plants_for_message }} need{{"s" if thirsty_plants | count == 1 }} watering'
           extra:
             volume: 0.5
