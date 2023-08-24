@@ -4,6 +4,7 @@ Config parser for Tuya Local devices.
 import logging
 from base64 import b64decode, b64encode
 from collections.abc import Sequence
+from datetime import datetime
 from fnmatch import fnmatch
 from numbers import Number
 from os import walk
@@ -330,6 +331,7 @@ class TuyaDpsConfig:
             "json": str,
             "base64": str,
             "hex": str,
+            "unixtime": int,
         }
         return types.get(t)
 
@@ -430,6 +432,12 @@ class TuyaDpsConfig:
                     self.name,
                 )
                 return None
+        elif self.rawtype == "unixtime" and isinstance(v, int):
+            try:
+                return datetime.fromtimestamp(v)
+            except:
+                _LOGGER.warning("Invalid timestamp %d", v)
+                return None
         else:
             return v
 
@@ -438,6 +446,8 @@ class TuyaDpsConfig:
             return v.hex()
         elif self.rawtype == "base64":
             return b64encode(v).decode("utf-8")
+        elif self.rawtype == "unixtime" and isinstance(v, datetime):
+            return v.timestamp()
         else:
             return v
 
@@ -884,7 +894,7 @@ class TuyaDpsConfig:
         if r and isinstance(result, Number):
             mn = r["min"]
             mx = r["max"]
-            if result < mn or result > mx:
+            if round(result) < mn or round(result) > mx:
                 # Output scaled values in the error message
                 r = self.range(device, scaled=True)
                 mn = r["min"]
@@ -898,7 +908,7 @@ class TuyaDpsConfig:
             mask = int(mask, 16)
             mask_scale = mask & (1 + ~mask)
             current_value = int.from_bytes(self.decoded_value(device), endianness)
-            result = (current_value & ~mask) | (mask & (result * mask_scale))
+            result = (current_value & ~mask) | (mask & int(result * mask_scale))
             result = self.encode_value(result.to_bytes(length, endianness))
 
         dps_map[self.id] = self._correct_type(result)
