@@ -20,8 +20,8 @@ trigger:
 
 condition:
   - condition: state
-    entity_id: light.corner
-    state: "on"
+    entity_id: light.standing
+    state: 'on'
 
 action:
   - service: scene.create
