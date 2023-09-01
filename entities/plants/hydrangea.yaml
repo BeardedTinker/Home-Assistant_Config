@@ -6,7 +6,7 @@
 hydrangea:
   sensors:
     moisture: sensor.hydrangea_soil_moisture
-    battery: sensor.hydrangea_battery_state
+    battery: sensor.hydrangea_battery
     temperature: sensor.hydrangea_temperature
 #    conductivity: sensor.ficus_benjamina_salt
 #    brightness: sensor.ficus_benjamina_lux
