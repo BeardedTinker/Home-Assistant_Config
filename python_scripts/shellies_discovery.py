@@ -1,4 +1,5 @@
 """This script adds MQTT discovery support for Shellies devices."""
+VERSION = "4.5.0"
 
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
@@ -156,6 +157,7 @@ KEY_NAME = "name"
 KEY_OFF_DELAY = "off_dly"
 KEY_OPTIMISTIC = "opt"
 KEY_OPTIONS = "options"
+KEY_ORIGIN = "o"
 KEY_PAYLOAD = "pl"
 KEY_PAYLOAD_AVAILABLE = "pl_avail"
 KEY_PAYLOAD_CLOSE = "pl_cls"
@@ -191,6 +193,7 @@ KEY_STATE_VALUE_TEMPLATE = "stat_val_tpl"
 KEY_STEP = "step"
 KEY_SUBTYPE = "stype"
 KEY_SUGGESTED_DISPLAY_PRECISION = "sug_dsp_prc"
+KEY_SUPPORT_URL = "url"
 KEY_SW_VERSION = "sw"
 KEY_TEMP_STEP = "temp_step"
 KEY_TEMPERATURE_COMMAND_TEMPLATE = "temp_cmd_tpl"
@@ -2413,6 +2416,11 @@ device_info = {
     KEY_MANUFACTURER: ATTR_MANUFACTURER,
     KEY_CONFIGURATION_URL: f"http://{host}/",
 }
+origin_info = {
+    KEY_NAME: "Shellies Discovery",
+    KEY_SW_VERSION: VERSION,
+    KEY_SUPPORT_URL: "https://github.com/bieniu/ha-shellies-discovery",
+}
 
 default_topic = f"shellies/{dev_id}/"
 
@@ -2476,6 +2484,7 @@ for update, update_options in updates.items():
         KEY_UNIQUE_ID: f"{dev_id}-{update}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if battery_powered and model not in (MODEL_SHELLYDW, MODEL_SHELLYDW2):
@@ -2515,6 +2524,7 @@ for number, number_options in numbers.items():
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if number_options.get(KEY_ENTITY_CATEGORY):
@@ -2548,6 +2558,7 @@ for switch, switch_options in switches.items():
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if switch_options.get(KEY_ENTITY_CATEGORY):
@@ -2579,6 +2590,7 @@ for select, select_options in selectors.items():
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if select_options.get(KEY_ENTITY_CATEGORY):
@@ -2607,6 +2619,7 @@ for button, button_options in buttons.items():
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if button_options.get(KEY_ENTITY_CATEGORY):
@@ -2666,6 +2679,7 @@ if climate_entity_option:
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     payload.update(climate_entity_option)
@@ -2718,6 +2732,7 @@ for roller_id in range(rollers):
             KEY_OPTIMISTIC: str(optimistic).lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if set_position_template:
@@ -2758,6 +2773,7 @@ for relay_id in range(relays):
                 KEY_UNIQUE_ID: f"{dev_id}-relay-{relay_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
+                KEY_ORIGIN: origin_info,
                 "~": default_topic,
             }
         else:
@@ -2787,6 +2803,7 @@ for relay_id in range(relays):
             KEY_UNIQUE_ID: f"{dev_id}-relay-{sensor}-{relay_id}".lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if sensor_options.get(KEY_SUGGESTED_DISPLAY_PRECISION):
@@ -2836,6 +2853,7 @@ for relay_id in range(relays):
                 KEY_UNIQUE_ID: f"{dev_id}-{make_id(sensor)}-{relay_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
+                KEY_ORIGIN: origin_info,
                 "~": default_topic,
             }
             if sensor_options.get(KEY_ENTITY_CATEGORY):
@@ -2912,6 +2930,7 @@ for sensor, sensor_options in sensors.items():
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if sensor_options.get(KEY_SUGGESTED_DISPLAY_PRECISION):
@@ -3014,6 +3033,7 @@ for input_id in range(inputs):
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
 
@@ -3049,6 +3069,7 @@ for sensor_id in range(ext_temp_sensors):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
     else:
@@ -3085,6 +3106,7 @@ for sensor_id in range(ext_humi_sensors):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
     else:
@@ -3113,6 +3135,7 @@ for sensor, sensor_options in binary_sensors.items():
         KEY_UNIQUE_ID: f"{dev_id}-{make_id(sensor)}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
     if sensor_options.get(KEY_ICON):
@@ -3197,6 +3220,7 @@ for light_id in range(rgbw_lights):
             KEY_UNIQUE_ID: unique_id,
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
     else:
@@ -3221,6 +3245,7 @@ for light_id in range(rgbw_lights):
                 KEY_UNIQUE_ID: f"{dev_id}-color-{sensor}-{light_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
+                KEY_ORIGIN: origin_info,
                 "~": default_topic,
             }
             if sensor_options.get(KEY_ENTITY_CATEGORY):
@@ -3259,6 +3284,7 @@ for light_id in range(rgbw_lights):
             KEY_UNIQUE_ID: f"{dev_id}-color-{sensor}-{light_id}".lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if sensor_options.get(KEY_SUGGESTED_DISPLAY_PRECISION):
@@ -3317,6 +3343,7 @@ for light_id, light_options in white_lights.items():
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: str(qos),
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
 
@@ -3351,6 +3378,7 @@ for light_id, light_options in white_lights.items():
                 KEY_UNIQUE_ID: f"{dev_id}-white-{sensor}-{light_id}".lower(),
                 KEY_QOS: qos,
                 KEY_DEVICE: device_info,
+                KEY_ORIGIN: origin_info,
                 "~": default_topic,
             }
             if sensor_options.get(KEY_ENTITY_CATEGORY):
@@ -3389,6 +3417,7 @@ for light_id, light_options in white_lights.items():
             KEY_UNIQUE_ID: f"{dev_id}-white-{sensor}-{light_id}".lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if sensor_options.get(KEY_SUGGESTED_DISPLAY_PRECISION):
@@ -3439,6 +3468,7 @@ for light_id, light_options in white_lights.items():
             KEY_QOS: qos,
             KEY_AVAILABILITY: availability,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if number_options.get(KEY_ENTITY_CATEGORY):
@@ -3473,6 +3503,7 @@ for meter_id in range(meters):
             KEY_UNIQUE_ID: f"{dev_id}-emeter-{sensor}-{meter_id}".lower(),
             KEY_QOS: qos,
             KEY_DEVICE: device_info,
+            KEY_ORIGIN: origin_info,
             "~": default_topic,
         }
         if sensor_options.get(KEY_SUGGESTED_DISPLAY_PRECISION):

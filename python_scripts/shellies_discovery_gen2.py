@@ -1,4 +1,5 @@
 """This script adds MQTT discovery support for Shellies Gen2 devices."""
+VERSION = "2.18.0"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -63,6 +64,8 @@ DEVICE_CLASS_VOLTAGE = "voltage"
 ENTITY_CATEGORY_CONFIG = "config"
 ENTITY_CATEGORY_DIAGNOSTIC = "diagnostic"
 
+EVENT_BUTTON_DOWN = "btn_down"
+EVENT_BUTTON_UP = "btn_up"
 EVENT_DOUBLE_PUSH = "double_push"
 EVENT_LONG_PUSH = "long_push"
 EVENT_SINGLE_PUSH = "single_push"
@@ -100,6 +103,7 @@ KEY_MAC = "mac"
 KEY_MANUFACTURER = "mf"
 KEY_MODEL = "mdl"
 KEY_NAME = "name"
+KEY_ORIGIN = "o"
 KEY_PAYLOAD = "pl"
 KEY_PAYLOAD_AVAILABLE = "pl_avail"
 KEY_PAYLOAD_CLOSE = "pl_cls"
@@ -128,6 +132,7 @@ KEY_STATE_TOPIC = "stat_t"
 KEY_STATE_VALUE_TEMPLATE = "stat_val_tpl"
 KEY_SUBTYPE = "stype"
 KEY_SUGGESTED_DISPLAY_PRECISION = "sug_dsp_prc"
+KEY_SUPPORT_URL = "url"
 KEY_SW_VERSION = "sw"
 KEY_TITLE = "tit"
 KEY_TOPIC = "t"
@@ -307,9 +312,11 @@ TPL_WIFI_SSID = "{{value_json.wifi.ssid}}"
 TPL_WIFI_SSID_INDEPENDENT = "{{value_json.ssid}}"
 
 TRIGGER_BUTTON_DOUBLE_PRESS = "button_double_press"
+TRIGGER_BUTTON_DOWN = "button_down"
 TRIGGER_BUTTON_LONG_PRESS = "button_long_press"
 TRIGGER_BUTTON_SHORT_PRESS = "button_short_press"
 TRIGGER_BUTTON_TRIPLE_PRESS = "button_triple_press"
+TRIGGER_BUTTON_UP = "button_up"
 
 UNIT_AMPERE = "A"
 UNIT_CELSIUS = "°C"
@@ -330,6 +337,8 @@ DEVICE_TRIGGER_MAP = {
     EVENT_LONG_PUSH: TRIGGER_BUTTON_LONG_PRESS,
     EVENT_SINGLE_PUSH: TRIGGER_BUTTON_SHORT_PRESS,
     EVENT_TRIPLE_PUSH: TRIGGER_BUTTON_TRIPLE_PRESS,
+    EVENT_BUTTON_UP: TRIGGER_BUTTON_UP,
+    EVENT_BUTTON_DOWN: TRIGGER_BUTTON_DOWN,
 }
 
 DESCRIPTION_BUTTON_MUTE_ALARM = {
@@ -920,9 +929,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 1,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -948,9 +959,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 1,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -976,9 +989,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 1,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -1014,9 +1029,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 1,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -1062,9 +1079,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 2,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 2,
@@ -1121,9 +1140,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 4,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_SENSORS: {
@@ -1325,9 +1346,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 2,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -1353,9 +1376,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 2,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 1,
@@ -1393,9 +1418,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 2,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 2,
@@ -1430,9 +1457,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 2,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 2,
@@ -1470,9 +1499,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 3,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 3,
@@ -1499,9 +1530,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 4,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_COVERS: 2,
@@ -1606,9 +1639,11 @@ SUPPORTED_MODELS = {
         ATTR_INPUTS: 4,
         ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
         ATTR_INPUT_EVENTS: [
-            EVENT_SINGLE_PUSH,
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
             EVENT_DOUBLE_PUSH,
             EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
             EVENT_TRIPLE_PUSH,
         ],
         ATTR_RELAYS: 4,
@@ -1717,6 +1752,7 @@ def get_cover(cover_id, profile):
         KEY_UNIQUE_ID: f"{device_id}-{cover_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     return topic, payload
@@ -1746,6 +1782,7 @@ def get_switch(relay_id, relay_type, profile):
         KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     return topic, payload
@@ -1772,6 +1809,7 @@ def get_relay_light(relay_id, relay_type, profile):
         KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     return topic, payload
@@ -1796,6 +1834,7 @@ def get_relay_fan(relay_id, relay_type, profile):
         KEY_UNIQUE_ID: f"{device_id}-{relay_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     return topic, payload
@@ -1819,6 +1858,7 @@ def get_light(light_id):
         KEY_UNIQUE_ID: f"{device_id}-{light_id}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     return topic, payload
@@ -1893,6 +1933,7 @@ def get_sensor(
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
 
@@ -1984,6 +2025,7 @@ def get_binary_sensor(
         KEY_UNIQUE_ID: unique_id,
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
 
@@ -2062,6 +2104,7 @@ def get_event(input_id, input_type):
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
         KEY_DEVICE_CLASS: DEVICE_CLASS_BUTTON,
     }
@@ -2081,6 +2124,7 @@ def get_button(button, description):
         KEY_UNIQUE_ID: f"{device_id}-{button}".lower(),
         KEY_QOS: qos,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
 
@@ -2117,6 +2161,7 @@ def get_update(update, description):
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
         KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
         KEY_DEFAULT_TOPIC: default_topic,
     }
     if description.get(KEY_PAYLOAD_INSTALL):
@@ -2445,6 +2490,11 @@ device_info = {
     KEY_HW_VERSION: f"gen2 ({SUPPORTED_MODELS[model].get(ATTR_MODEL_ID)})",
     KEY_MANUFACTURER: ATTR_MANUFACTURER,
     KEY_CONFIGURATION_URL: device_url,
+}
+origin_info = {
+    KEY_NAME: "Shellies Discovery Gen2",
+    KEY_SW_VERSION: VERSION,
+    KEY_SUPPORT_URL: "https://github.com/bieniu/ha-shellies-discovery-gen2",
 }
 
 if wakeup_period > 0:
