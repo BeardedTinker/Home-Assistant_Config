@@ -1,4 +1,6 @@
 """Definitions for Mikrotik Router switch entities."""
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import List
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
@@ -127,6 +129,7 @@ DEVICE_ATTRIBUTES_PPP_SECRET = [
 ]
 
 DEVICE_ATTRIBUTES_KIDCONTROL = [
+    "blocked",
     "rate-limit",
     "mon",
     "tue",
@@ -163,25 +166,25 @@ class MikrotikSwitchEntityDescription(SwitchEntityDescription):
 
     device_class: str = SwitchDeviceClass.SWITCH
 
-    icon_enabled: str = ""
-    icon_disabled: str = ""
-    ha_group: str = ""
-    ha_connection: str = ""
-    ha_connection_value: str = ""
-    data_path: str = ""
+    icon_enabled: str | None = None
+    icon_disabled: str | None = None
+    ha_group: str | None = None
+    ha_connection: str | None = None
+    ha_connection_value: str | None = None
+    data_path: str | None = None
     data_attribute: str = "enabled"
-    data_switch_path: str = ""
+    data_switch_path: str | None = None
     data_switch_parameter: str = "disabled"
-    data_name: str = ""
+    data_name: str | None = None
     data_name_comment: bool = False
-    data_uid: str = ""
-    data_reference: str = ""
+    data_uid: str | None = None
+    data_reference: str | None = None
     data_attributes_list: List = field(default_factory=lambda: [])
     func: str = "MikrotikSwitch"
 
 
-SENSOR_TYPES = {
-    "interface": MikrotikSwitchEntityDescription(
+SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
+    MikrotikSwitchEntityDescription(
         key="interface",
         name="Port",
         icon_enabled="mdi:lan-connect",
@@ -198,7 +201,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_IFACE,
         func="MikrotikPortSwitch",
     ),
-    "nat": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="nat",
         name="",
         icon_enabled="mdi:network-outline",
@@ -216,7 +219,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_NAT,
         func="MikrotikNATSwitch",
     ),
-    "mangle": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="mangle",
         name="",
         icon_enabled="mdi:bookmark-outline",
@@ -234,7 +237,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_MANGLE,
         func="MikrotikMangleSwitch",
     ),
-    "filter": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="filter",
         name="",
         icon_enabled="mdi:filter-variant",
@@ -252,7 +255,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_FILTER,
         func="MikrotikFilterSwitch",
     ),
-    "ppp_secret": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="ppp_secret",
         name="PPP Secret",
         icon_enabled="mdi:account-outline",
@@ -268,7 +271,7 @@ SENSOR_TYPES = {
         data_reference="name",
         data_attributes_list=DEVICE_ATTRIBUTES_PPP_SECRET,
     ),
-    "queue": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="queue",
         name="",
         icon_enabled="mdi:leaf",
@@ -285,7 +288,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_QUEUE,
         func="MikrotikQueueSwitch",
     ),
-    "kidcontrol_enable": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="kidcontrol_enable",
         name="",
         icon_enabled="mdi:account",
@@ -301,7 +304,7 @@ SENSOR_TYPES = {
         data_reference="name",
         data_attributes_list=DEVICE_ATTRIBUTES_KIDCONTROL,
     ),
-    "kidcontrol_pause": MikrotikSwitchEntityDescription(
+    MikrotikSwitchEntityDescription(
         key="kidcontrol_paused",
         name="paused",
         icon_enabled="mdi:account-outline",
@@ -319,6 +322,6 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_KIDCONTROL,
         func="MikrotikKidcontrolPauseSwitch",
     ),
-}
+)
 
 SENSOR_SERVICES = {}

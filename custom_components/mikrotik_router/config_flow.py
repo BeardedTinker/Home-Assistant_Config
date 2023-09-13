@@ -12,7 +12,6 @@ from homeassistant.const import (
     CONF_NAME,
     CONF_HOST,
     CONF_PORT,
-    CONF_UNIT_OF_MEASUREMENT,
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SSL,
@@ -55,8 +54,6 @@ from .const import (
     DEFAULT_SENSOR_ENVIRONMENT,
     CONF_TRACK_HOSTS_TIMEOUT,
     DEFAULT_TRACK_HOST_TIMEOUT,
-    LIST_UNIT_OF_MEASUREMENT,
-    DEFAULT_UNIT_OF_MEASUREMENT,
     DEFAULT_HOST,
     DEFAULT_USERNAME,
     DEFAULT_PORT,
@@ -184,6 +181,7 @@ class MikrotikControllerOptionsFlowHandler(OptionsFlow):
 
         return self.async_show_form(
             step_id="basic_options",
+            last_step=False,
             data_schema=vol.Schema(
                 {
                     vol.Optional(
@@ -192,12 +190,6 @@ class MikrotikControllerOptionsFlowHandler(OptionsFlow):
                             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
                         ),
                     ): int,
-                    vol.Optional(
-                        CONF_UNIT_OF_MEASUREMENT,
-                        default=self.config_entry.options.get(
-                            CONF_UNIT_OF_MEASUREMENT, DEFAULT_UNIT_OF_MEASUREMENT
-                        ),
-                    ): vol.In(LIST_UNIT_OF_MEASUREMENT),
                     vol.Optional(
                         CONF_TRACK_IFACE_CLIENTS,
                         default=self.config_entry.options.get(

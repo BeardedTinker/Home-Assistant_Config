@@ -1,19 +1,15 @@
 """Support for the Mikrotik Router binary sensor service."""
+from __future__ import annotations
 
-import logging
-from typing import Any
+from logging import getLogger
 from collections.abc import Mapping
-from homeassistant.components.binary_sensor import (
-    BinarySensorEntity,
-)
-from .helper import format_attribute
-from .const import (
-    CONF_SENSOR_PPP,
-    DEFAULT_SENSOR_PPP,
-    CONF_SENSOR_PORT_TRACKER,
-    DEFAULT_SENSOR_PORT_TRACKER,
-)
-from .model import model_async_setup_entry, MikrotikEntity
+from typing import Any
+
+from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from .binary_sensor_types import (
     SENSOR_TYPES,
     SENSOR_SERVICES,
@@ -21,28 +17,33 @@ from .binary_sensor_types import (
     DEVICE_ATTRIBUTES_IFACE_SFP,
     DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
+from .const import (
+    CONF_SENSOR_PPP,
+    DEFAULT_SENSOR_PPP,
+    CONF_SENSOR_PORT_TRACKER,
+    DEFAULT_SENSOR_PORT_TRACKER,
+)
+from .entity import MikrotikEntity, async_add_entities
+from .helper import format_attribute
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikBinarySensor": MikrotikBinarySensor,
         "MikrotikPPPSecretBinarySensor": MikrotikPPPSecretBinarySensor,
         "MikrotikPortBinarySensor": MikrotikPortBinarySensor,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
@@ -86,10 +87,10 @@ class MikrotikPPPSecretBinarySensor(MikrotikBinarySensor):
             else False
         )
 
-    @property
-    def available(self) -> bool:
-        """Return if controller is available."""
-        return self._ctrl.connected() if self.option_sensor_ppp else False
+    # @property
+    # def available(self) -> bool:
+    #     """Return if controller is available."""
+    #     return self._ctrl.connected() if self.option_sensor_ppp else False
 
 
 # ---------------------------
@@ -105,10 +106,10 @@ class MikrotikPortBinarySensor(MikrotikBinarySensor):
             CONF_SENSOR_PORT_TRACKER, DEFAULT_SENSOR_PORT_TRACKER
         )
 
-    @property
-    def available(self) -> bool:
-        """Return if controller is available."""
-        return self._ctrl.connected() if self.option_sensor_port_tracker else False
+    # @property
+    # def available(self) -> bool:
+    #     """Return if controller is available."""
+    #     return self._ctrl.connected() if self.option_sensor_port_tracker else False
 
     @property
     def icon(self) -> str:

@@ -1,12 +1,18 @@
 """Support for the Mikrotik Router switches."""
+from __future__ import annotations
 
-import logging
-from typing import Any, Optional
+from logging import getLogger
 from collections.abc import Mapping
+from typing import Any, Optional
+
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
+
+from .entity import MikrotikEntity, async_add_entities
 from .helper import format_attribute
-from .model import model_async_setup_entry, MikrotikEntity
 from .switch_types import (
     SENSOR_TYPES,
     SENSOR_SERVICES,
@@ -15,13 +21,17 @@ from .switch_types import (
     DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikSwitch": MikrotikSwitch,
@@ -32,14 +42,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         "MikrotikQueueSwitch": MikrotikQueueSwitch,
         "MikrotikKidcontrolPauseSwitch": MikrotikKidcontrolPauseSwitch,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
@@ -71,27 +74,27 @@ class MikrotikSwitch(MikrotikEntity, SwitchEntity, RestoreEntity):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
-        await self._ctrl.force_update()
+        self.coordinator.set_value(path, param, value, mod_param, False)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
-        await self._ctrl.async_update()
+        self.coordinator.set_value(path, param, value, mod_param, True)
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -137,7 +140,7 @@ class MikrotikPortSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> Optional[str]:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
@@ -149,17 +152,17 @@ class MikrotikPortSwitch(MikrotikSwitch):
             param = "name"
         value = self._data[self.entity_description.data_reference]
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
+        self.coordinator.set_value(path, param, value, mod_param, False)
 
         if "poe-out" in self._data and self._data["poe-out"] == "off":
             path = "/interface/ethernet"
-            self._ctrl.set_value(path, param, value, "poe-out", "auto-on")
+            self.coordinator.set_value(path, param, value, "poe-out", "auto-on")
 
-        await self._ctrl.force_update()
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> Optional[str]:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
@@ -171,13 +174,13 @@ class MikrotikPortSwitch(MikrotikSwitch):
             param = "name"
         value = self._data[self.entity_description.data_reference]
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
+        self.coordinator.set_value(path, param, value, mod_param, True)
 
         if "poe-out" in self._data and self._data["poe-out"] == "auto-on":
             path = "/interface/ethernet"
-            self._ctrl.set_value(path, param, value, "poe-out", "off")
+            self.coordinator.set_value(path, param, value, "poe-out", "off")
 
-        await self._ctrl.async_update()
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -188,43 +191,43 @@ class MikrotikNATSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["nat"]:
-            if self._ctrl.data["nat"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["nat"]:
+            if self.coordinator.data["nat"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},"
                 f"{self._data['in-interface']}:{self._data['dst-port']}-"
                 f"{self._data['out-interface']}:{self._data['to-addresses']}:{self._data['to-ports']}"
             ):
-                value = self._ctrl.data["nat"][uid][".id"]
+                value = self.coordinator.data["nat"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
-        await self._ctrl.force_update()
+        self.coordinator.set_value(path, param, value, mod_param, False)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["nat"]:
-            if self._ctrl.data["nat"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["nat"]:
+            if self.coordinator.data["nat"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},"
                 f"{self._data['in-interface']}:{self._data['dst-port']}-"
                 f"{self._data['out-interface']}:{self._data['to-addresses']}:{self._data['to-ports']}"
             ):
-                value = self._ctrl.data["nat"][uid][".id"]
+                value = self.coordinator.data["nat"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
-        await self._ctrl.async_update()
+        self.coordinator.set_value(path, param, value, mod_param, True)
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -235,45 +238,45 @@ class MikrotikMangleSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["mangle"]:
-            if self._ctrl.data["mangle"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["mangle"]:
+            if self.coordinator.data["mangle"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},"
                 f"{self._data['src-address']}:{self._data['src-port']}-"
                 f"{self._data['dst-address']}:{self._data['dst-port']},"
                 f"{self._data['src-address-list']}-{self._data['dst-address-list']}"
             ):
-                value = self._ctrl.data["mangle"][uid][".id"]
+                value = self.coordinator.data["mangle"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
-        await self._ctrl.force_update()
+        self.coordinator.set_value(path, param, value, mod_param, False)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["mangle"]:
-            if self._ctrl.data["mangle"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["mangle"]:
+            if self.coordinator.data["mangle"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},"
                 f"{self._data['src-address']}:{self._data['src-port']}-"
                 f"{self._data['dst-address']}:{self._data['dst-port']},"
                 f"{self._data['src-address-list']}-{self._data['dst-address-list']}"
             ):
-                value = self._ctrl.data["mangle"][uid][".id"]
+                value = self.coordinator.data["mangle"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
-        await self._ctrl.async_update()
+        self.coordinator.set_value(path, param, value, mod_param, True)
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -284,43 +287,43 @@ class MikrotikFilterSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["filter"]:
-            if self._ctrl.data["filter"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["filter"]:
+            if self.coordinator.data["filter"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},{self._data['layer7-protocol']},"
                 f"{self._data['in-interface']},{self._data['in-interface-list']}:{self._data['src-address']},{self._data['src-address-list']}:{self._data['src-port']}-"
                 f"{self._data['out-interface']},{self._data['out-interface-list']}:{self._data['dst-address']},{self._data['dst-address-list']}:{self._data['dst-port']}"
             ):
-                value = self._ctrl.data["filter"][uid][".id"]
+                value = self.coordinator.data["filter"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
-        await self._ctrl.force_update()
+        self.coordinator.set_value(path, param, value, mod_param, False)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["filter"]:
-            if self._ctrl.data["filter"][uid]["uniq-id"] == (
+        for uid in self.coordinator.data["filter"]:
+            if self.coordinator.data["filter"][uid]["uniq-id"] == (
                 f"{self._data['chain']},{self._data['action']},{self._data['protocol']},{self._data['layer7-protocol']},"
                 f"{self._data['in-interface']},{self._data['in-interface-list']}:{self._data['src-address']},{self._data['src-address-list']}:{self._data['src-port']}-"
                 f"{self._data['out-interface']},{self._data['out-interface-list']}:{self._data['dst-address']},{self._data['dst-address-list']}:{self._data['dst-port']}"
             ):
-                value = self._ctrl.data["filter"][uid][".id"]
+                value = self.coordinator.data["filter"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
-        await self._ctrl.async_update()
+        self.coordinator.set_value(path, param, value, mod_param, True)
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -331,35 +334,35 @@ class MikrotikQueueSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["queue"]:
-            if self._ctrl.data["queue"][uid]["name"] == f"{self._data['name']}":
-                value = self._ctrl.data["queue"][uid][".id"]
+        for uid in self.coordinator.data["queue"]:
+            if self.coordinator.data["queue"][uid]["name"] == f"{self._data['name']}":
+                value = self.coordinator.data["queue"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, False)
-        await self._ctrl.force_update()
+        self.coordinator.set_value(path, param, value, mod_param, False)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = ".id"
         value = None
-        for uid in self._ctrl.data["queue"]:
-            if self._ctrl.data["queue"][uid]["name"] == f"{self._data['name']}":
-                value = self._ctrl.data["queue"][uid][".id"]
+        for uid in self.coordinator.data["queue"]:
+            if self.coordinator.data["queue"][uid]["name"] == f"{self._data['name']}":
+                value = self.coordinator.data["queue"][uid][".id"]
 
         mod_param = self.entity_description.data_switch_parameter
-        self._ctrl.set_value(path, param, value, mod_param, True)
-        await self._ctrl.async_update()
+        self.coordinator.set_value(path, param, value, mod_param, True)
+        await self.coordinator.async_refresh()
 
 
 # ---------------------------
@@ -370,24 +373,24 @@ class MikrotikKidcontrolPauseSwitch(MikrotikSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn on the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
         command = "resume"
-        self._ctrl.execute(path, command, param, value)
-        await self._ctrl.force_update()
+        self.coordinator.execute(path, command, param, value)
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self) -> None:
         """Turn off the switch."""
-        if "write" not in self._ctrl.data["access"]:
+        if "write" not in self.coordinator.data["access"]:
             return
 
         path = self.entity_description.data_switch_path
         param = self.entity_description.data_reference
         value = self._data[self.entity_description.data_reference]
         command = "pause"
-        self._ctrl.execute(path, command, param, value)
-        await self._ctrl.async_update()
+        self.coordinator.execute(path, command, param, value)
+        await self.coordinator.async_refresh()

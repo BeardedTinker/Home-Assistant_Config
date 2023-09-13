@@ -1,11 +1,14 @@
 """Definitions for Mikrotik Router button entities."""
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import List
+
 from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
-from .const import DOMAIN
 
+from .const import DOMAIN
 
 DEVICE_ATTRIBUTES_SCRIPT = [
     "last-started",
@@ -17,21 +20,21 @@ DEVICE_ATTRIBUTES_SCRIPT = [
 class MikrotikButtonEntityDescription(SensorEntityDescription):
     """Class describing mikrotik entities."""
 
-    ha_group: str = ""
-    ha_connection: str = ""
-    ha_connection_value: str = ""
-    data_path: str = ""
-    data_attribute: str = ""
-    data_name: str = ""
+    ha_group: str | None = None
+    ha_connection: str | None = None
+    ha_connection_value: str | None = None
+    data_path: str | None = None
+    data_attribute: str | None = None
+    data_name: str | None = None
     data_name_comment: bool = False
-    data_uid: str = ""
-    data_reference: str = ""
+    data_uid: str | None = None
+    data_reference: str | None = None
     data_attributes_list: List = field(default_factory=lambda: [])
     func: str = "MikrotikButton"
 
 
-SENSOR_TYPES = {
-    "script": MikrotikButtonEntityDescription(
+SENSOR_TYPES: tuple[MikrotikButtonEntityDescription, ...] = (
+    MikrotikButtonEntityDescription(
         key="script",
         name="",
         icon="mdi:script-text-outline",
@@ -47,6 +50,6 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_SCRIPT,
         func="MikrotikScriptButton",
     ),
-}
+)
 
 SENSOR_SERVICES = {}

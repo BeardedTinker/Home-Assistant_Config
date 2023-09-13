@@ -1,40 +1,45 @@
 """Support for the Mikrotik Router update service."""
+from __future__ import annotations
 
-import logging
-from typing import Any
+from logging import getLogger
 from requests import get as requests_get
+from typing import Any
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from homeassistant.components.update import (
     UpdateEntity,
     UpdateDeviceClass,
     UpdateEntityFeature,
 )
-from .model import model_async_setup_entry, MikrotikEntity
+
+from .coordinator import MikrotikCoordinator
+from .entity import MikrotikEntity, async_add_entities
 from .update_types import (
     SENSOR_TYPES,
     SENSOR_SERVICES,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 DEVICE_UPDATE = "device_update"
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikRouterOSUpdate": MikrotikRouterOSUpdate,
         "MikrotikRouterBoardFWUpdate": MikrotikRouterBoardFWUpdate,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
@@ -45,13 +50,12 @@ class MikrotikRouterOSUpdate(MikrotikEntity, UpdateEntity):
 
     def __init__(
         self,
-        inst,
-        uid: "",
-        mikrotik_controller,
+        coordinator: MikrotikCoordinator,
         entity_description,
+        uid: str | None = None,
     ):
         """Set up device update entity."""
-        super().__init__(inst, uid, mikrotik_controller, entity_description)
+        super().__init__(coordinator, entity_description, uid)
 
         self._attr_supported_features = UpdateEntityFeature.INSTALL
         self._attr_supported_features |= UpdateEntityFeature.BACKUP
@@ -79,14 +83,14 @@ class MikrotikRouterOSUpdate(MikrotikEntity, UpdateEntity):
     async def async_install(self, version: str, backup: bool, **kwargs: Any) -> None:
         """Install an update."""
         if backup:
-            self._ctrl.execute("/system/backup", "save", None, None)
+            self.coordinator.execute("/system/backup", "save", None, None)
 
-        self._ctrl.execute("/system/package/update", "install", None, None)
+        self.coordinator.execute("/system/package/update", "install", None, None)
 
     async def async_release_notes(self) -> str:
         """Return the release notes."""
         try:
-            response = await self._ctrl.hass.async_add_executor_job(
+            response = await self.coordinator.hass.async_add_executor_job(
                 requests_get,
                 f"https://mikrotik.com/download/changelogs?ax=loadLog&val={self._data['latest-version']}",
             )
@@ -116,13 +120,12 @@ class MikrotikRouterBoardFWUpdate(MikrotikEntity, UpdateEntity):
 
     def __init__(
         self,
-        inst,
-        uid: "",
-        mikrotik_controller,
+        coordinator: MikrotikCoordinator,
         entity_description,
+        uid: str | None = None,
     ):
         """Set up device update entity."""
-        super().__init__(inst, uid, mikrotik_controller, entity_description)
+        super().__init__(coordinator, entity_description, uid)
 
         self._attr_supported_features = UpdateEntityFeature.INSTALL
         self._attr_title = self.entity_description.title
@@ -150,5 +153,5 @@ class MikrotikRouterBoardFWUpdate(MikrotikEntity, UpdateEntity):
 
     async def async_install(self, version: str, backup: bool, **kwargs: Any) -> None:
         """Install an update."""
-        self._ctrl.execute("/system/routerboard", "upgrade", None, None)
-        self._ctrl.execute("/system", "reboot", None, None)
+        self.coordinator.execute("/system/routerboard", "upgrade", None, None)
+        self.coordinator.execute("/system", "reboot", None, None)

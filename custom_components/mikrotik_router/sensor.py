@@ -1,11 +1,21 @@
-"""Implementation of Mikrotik Router sensor entities."""
+"""Mikrotik sensor platform."""
+from __future__ import annotations
 
-import logging
-from typing import Any, Optional
+from logging import getLogger
 from collections.abc import Mapping
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Any
+
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .coordinator import MikrotikCoordinator
+from .entity import MikrotikEntity, async_add_entities
 from .helper import format_attribute
-from .model import model_async_setup_entry, MikrotikEntity
 from .sensor_types import (
     SENSOR_TYPES,
     SENSOR_SERVICES,
@@ -14,52 +24,56 @@ from .sensor_types import (
     DEVICE_ATTRIBUTES_IFACE_WIRELESS,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikSensor": MikrotikSensor,
         "MikrotikInterfaceTrafficSensor": MikrotikInterfaceTrafficSensor,
-        "MikrotikClientTrafficSensor": MikrotikClientTrafficSensor,
+        # "MikrotikClientTrafficSensor": MikrotikClientTrafficSensor,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
 #   MikrotikSensor
 # ---------------------------
 class MikrotikSensor(MikrotikEntity, SensorEntity):
-    """Define an Mikrotik Controller sensor."""
+    """Define an Mikrotik sensor."""
+
+    def __init__(
+        self,
+        coordinator: MikrotikCoordinator,
+        entity_description,
+        uid: str | None = None,
+    ):
+        super().__init__(coordinator, entity_description, uid)
+        self._attr_suggested_unit_of_measurement = (
+            self.entity_description.suggested_unit_of_measurement
+        )
 
     @property
-    def state(self) -> Optional[str]:
-        """Return the state."""
-        if self.entity_description.data_attribute:
-            return self._data[self.entity_description.data_attribute]
-        else:
-            return "unknown"
+    def native_value(self) -> StateType | date | datetime | Decimal:
+        """Return the value reported by the sensor."""
+        return self._data[self.entity_description.data_attribute]
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         if self.entity_description.native_unit_of_measurement:
             if self.entity_description.native_unit_of_measurement.startswith("data__"):
                 uom = self.entity_description.native_unit_of_measurement[6:]
                 if uom in self._data:
-                    uom = self._data[uom]
-                    return uom
+                    return self._data[uom]
 
             return self.entity_description.native_unit_of_measurement
 
@@ -95,27 +109,27 @@ class MikrotikInterfaceTrafficSensor(MikrotikSensor):
         return attributes
 
 
-# ---------------------------
-#   MikrotikClientTrafficSensor
-# ---------------------------
-class MikrotikClientTrafficSensor(MikrotikSensor):
-    """Define an Mikrotik MikrotikClientTrafficSensor sensor."""
-
-    @property
-    def name(self) -> str:
-        """Return the name."""
-        return f"{self.entity_description.name}"
-
-    @property
-    def available(self) -> bool:
-        """Return if controller and accounting feature in Mikrotik is available.
-        Additional check for lan-tx/rx sensors
-        """
-        if self.entity_description.data_attribute in ["lan-tx", "lan-rx"]:
-            return (
-                self._ctrl.connected()
-                and self._data["available"]
-                and self._data["local_accounting"]
-            )
-        else:
-            return self._ctrl.connected() and self._data["available"]
+# # ---------------------------
+# #   MikrotikClientTrafficSensor
+# # ---------------------------
+# class MikrotikClientTrafficSensor(MikrotikSensor):
+#     """Define an Mikrotik MikrotikClientTrafficSensor sensor."""
+#
+#     @property
+#     def name(self) -> str:
+#         """Return the name."""
+#         return f"{self.entity_description.name}"
+#
+#     # @property
+#     # def available(self) -> bool:
+#     #     """Return if controller and accounting feature in Mikrotik is available.
+#     #     Additional check for lan-tx/rx sensors
+#     #     """
+#     #     if self.entity_description.data_attribute in ["lan-tx", "lan-rx"]:
+#     #         return (
+#     #             self.coordinator.connected()
+#     #             and self._data["available"]
+#     #             and self._data["local_accounting"]
+#     #         )
+#     #     else:
+#     #         return self.coordinator.connected() and self._data["available"]

@@ -1,33 +1,36 @@
 """Support for the Mikrotik Router buttons."""
+from __future__ import annotations
 
-import logging
+from logging import getLogger
+
 from homeassistant.components.button import ButtonEntity
-from .model import model_async_setup_entry, MikrotikEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .entity import MikrotikEntity, async_add_entities
 from .button_types import (
     SENSOR_TYPES,
     SENSOR_SERVICES,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikButton": MikrotikButton,
         "MikrotikScriptButton": MikrotikScriptButton,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
@@ -51,5 +54,4 @@ class MikrotikScriptButton(MikrotikButton):
 
     async def async_press(self) -> None:
         """Process the button press."""
-        self._ctrl.run_script(self._data["name"])
-        await self._ctrl.force_update()
+        self.coordinator.run_script(self._data["name"])

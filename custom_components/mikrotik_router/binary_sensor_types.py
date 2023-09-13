@@ -1,4 +1,6 @@
 """Definitions for Mikrotik Router binary sensor entities."""
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import List
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
@@ -111,23 +113,23 @@ DEVICE_ATTRIBUTES_UPS = [
 class MikrotikBinarySensorEntityDescription(BinarySensorEntityDescription):
     """Class describing mikrotik entities."""
 
-    icon_enabled: str = ""
-    icon_disabled: str = ""
-    ha_group: str = ""
-    ha_connection: str = ""
-    ha_connection_value: str = ""
-    data_path: str = ""
+    icon_enabled: str | None = None
+    icon_disabled: str | None = None
+    ha_group: str | None = None
+    ha_connection: str | None = None
+    ha_connection_value: str | None = None
+    data_path: str | None = None
     data_attribute: str = "available"
-    data_name: str = ""
+    data_name: str | None = None
     data_name_comment: bool = False
-    data_uid: str = ""
-    data_reference: str = ""
+    data_uid: str | None = None
+    data_reference: str | None = None
     data_attributes_list: List = field(default_factory=lambda: [])
     func: str = "MikrotikBinarySensor"
 
 
-SENSOR_TYPES = {
-    "system_ups": MikrotikBinarySensorEntityDescription(
+SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
+    MikrotikBinarySensorEntityDescription(
         key="system_ups",
         name="UPS",
         icon_enabled="",
@@ -141,7 +143,7 @@ SENSOR_TYPES = {
         data_reference="",
         data_attributes_list=DEVICE_ATTRIBUTES_UPS,
     ),
-    "ppp_tracker": MikrotikBinarySensorEntityDescription(
+    MikrotikBinarySensorEntityDescription(
         key="ppp_tracker",
         name="PPP",
         icon_enabled="mdi:account-network-outline",
@@ -158,7 +160,7 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_PPP_SECRET,
         func="MikrotikPPPSecretBinarySensor",
     ),
-    "interface": MikrotikBinarySensorEntityDescription(
+    MikrotikBinarySensorEntityDescription(
         key="interface",
         name="Connection",
         icon_enabled="mdi:lan-connect",
@@ -175,6 +177,6 @@ SENSOR_TYPES = {
         data_attributes_list=DEVICE_ATTRIBUTES_IFACE,
         func="MikrotikPortBinarySensor",
     ),
-}
+)
 
 SENSOR_SERVICES = {}

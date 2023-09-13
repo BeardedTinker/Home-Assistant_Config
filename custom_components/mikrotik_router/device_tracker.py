@@ -1,42 +1,113 @@
 """Support for the Mikrotik Router device tracker."""
-import logging
-from typing import Any
+from __future__ import annotations
+
+from logging import getLogger
 from collections.abc import Mapping
 from datetime import timedelta
+from typing import Any
+
 from homeassistant.components.device_tracker.config_entry import ScannerEntity
-from homeassistant.components.device_tracker.const import SOURCE_TYPE_ROUTER
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.const import STATE_NOT_HOME
+from homeassistant.helpers import (
+    entity_platform as ep,
+    entity_registry as er,
+)
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import slugify
 from homeassistant.util.dt import utcnow
+
+from homeassistant.components.device_tracker.const import SourceType
+
+from .device_tracker_types import SENSOR_TYPES, SENSOR_SERVICES
+from .entity import _skip_sensor, MikrotikEntity
 from .helper import format_attribute
 from .const import (
+    DOMAIN,
     CONF_TRACK_HOSTS,
     DEFAULT_TRACK_HOSTS,
     CONF_TRACK_HOSTS_TIMEOUT,
     DEFAULT_TRACK_HOST_TIMEOUT,
 )
-from .model import model_async_setup_entry, MikrotikEntity
-from .device_tracker_types import SENSOR_TYPES, SENSOR_SERVICES
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = getLogger(__name__)
+
+
+async def async_add_entities(
+    hass: HomeAssistant, config_entry: ConfigEntry, dispatcher: dict[str, Callable]
+):
+    """Add entities."""
+    platform = ep.async_get_current_platform()
+    services = platform.platform.SENSOR_SERVICES
+    descriptions = platform.platform.SENSOR_TYPES
+
+    for service in services:
+        platform.async_register_entity_service(service[0], service[1], service[2])
+
+    @callback
+    async def async_update_controller(coordinator):
+        """Update the values of the controller."""
+
+        async def async_check_exist(obj, coordinator, uid: None) -> None:
+            """Check entity exists."""
+            entity_registry = er.async_get(hass)
+            if uid:
+                unique_id = f"{obj._inst.lower()}-{obj.entity_description.key}-{slugify(str(obj._data[obj.entity_description.data_reference]).lower())}"
+            else:
+                unique_id = f"{obj._inst.lower()}-{obj.entity_description.key}"
+
+            entity_id = entity_registry.async_get_entity_id(
+                platform.domain, DOMAIN, unique_id
+            )
+            entity = entity_registry.async_get(entity_id)
+            if entity is None or (
+                (entity_id not in platform.entities) and (entity.disabled is False)
+            ):
+                _LOGGER.debug("Add entity %s", entity_id)
+                await platform.async_add_entities([obj])
+
+        for entity_description in descriptions:
+            data = coordinator.data[entity_description.data_path]
+            if not entity_description.data_reference:
+                if data.get(entity_description.data_attribute) is None:
+                    continue
+                obj = dispatcher[entity_description.func](
+                    coordinator, entity_description
+                )
+                await async_check_exist(obj, coordinator, None)
+            else:
+                for uid in data:
+                    if _skip_sensor(config_entry, entity_description, data, uid):
+                        continue
+                    obj = dispatcher[entity_description.func](
+                        coordinator, entity_description, uid
+                    )
+                    await async_check_exist(obj, coordinator, uid)
+
+    await async_update_controller(
+        hass.data[DOMAIN][config_entry.entry_id].tracker_coordinator
+    )
+
+    unsub = async_dispatcher_connect(hass, "update_sensors", async_update_controller)
+    config_entry.async_on_unload(unsub)
 
 
 # ---------------------------
 #   async_setup_entry
 # ---------------------------
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    _async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up entry for component"""
     dispatcher = {
         "MikrotikDeviceTracker": MikrotikDeviceTracker,
         "MikrotikHostDeviceTracker": MikrotikHostDeviceTracker,
     }
-    await model_async_setup_entry(
-        hass,
-        config_entry,
-        async_add_entities,
-        SENSOR_SERVICES,
-        SENSOR_TYPES,
-        dispatcher,
-    )
+    await async_add_entities(hass, config_entry, dispatcher)
 
 
 # ---------------------------
@@ -74,7 +145,7 @@ class MikrotikDeviceTracker(MikrotikEntity, ScannerEntity):
     @property
     def source_type(self) -> str:
         """Return the source type of the port."""
-        return SOURCE_TYPE_ROUTER
+        return SourceType.ROUTER
 
 
 # ---------------------------
@@ -136,7 +207,7 @@ class MikrotikHostDeviceTracker(MikrotikDeviceTracker):
     @property
     def state(self) -> str:
         """Return the state of the device."""
-        return self._ctrl.option_zone if self.is_connected else STATE_NOT_HOME
+        return self.coordinator.option_zone if self.is_connected else STATE_NOT_HOME
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any]:
