@@ -13,7 +13,7 @@ from pyuptimekuma import UptimeKumaMonitor
 from . import UptimeKumaDataUpdateCoordinator
 from .const import DOMAIN
 from .entity import UptimeKumaEntity
-from .utils import format_entity_name
+from .utils import format_entity_name, sensor_name_from_url
 
 
 class StatusValue(TypedDict):
@@ -22,6 +22,11 @@ class StatusValue(TypedDict):
     value: str
     icon: str
 
+SYSTEM_INFO = {
+    0.0: StatusValue(value="degraded", icon="mdi:alert"),
+    1.0: StatusValue(value="up", icon="mdi:check-circle-outline"),
+    2.0: StatusValue(value="down", icon="mdi:alpha-x-circle-outline"),
+}
 
 SENSORS_INFO = {
     0.0: StatusValue(value="down", icon="mdi:television-off"),
@@ -50,6 +55,17 @@ async def async_setup_entry(
         )
         for monitor in coordinator.data
     )
+    async_add_entities(
+        [UptimeKumaSummarySensor(
+            coordinator,
+            SensorEntityDescription(
+                key=sensor_name_from_url(coordinator.api._base_url)+"system_summary",
+                name=sensor_name_from_url(coordinator.api._base_url)+"system_summary",
+                entity_category=EntityCategory.DIAGNOSTIC,
+                device_class="uptimekuma__monitor_status",
+            )
+        )]
+    )
 
 
 class UptimeKumaSensor(UptimeKumaEntity, SensorEntity):
@@ -76,3 +92,67 @@ class UptimeKumaSensor(UptimeKumaEntity, SensorEntity):
     def icon(self) -> str:
         """Return the status of the monitor."""
         return SENSORS_INFO[self.monitor.monitor_status]["icon"]
+
+
+class UptimeKumaSummarySensor(SensorEntity):
+    """Representation of a UptimeKuma sensor."""
+
+    def __init__(
+        self,
+        coordinator: UptimeKumaDataUpdateCoordinator,
+        description: EntityDescription
+    ) -> None:
+        """Set entity ID."""
+        super().__init__()
+        self.description=description
+        self.coordinator=coordinator
+        self.ups=0
+        self.downs=0
+        self.pendings=0
+        self.ukstate=0.0
+        self.entity_id = ("sensor.uptimekuma_"+sensor_name_from_url(coordinator.api._base_url))
+
+        self._attr_extra_state_attributes = {
+            "monitors": len(self.coordinator.data),
+            "monitors_up": self.ups,
+            "monitors_down": self.downs,
+            "monitors_pending": self.pendings,
+        }
+
+    def determine_status(self):
+        self.downs=0
+        self.ups=0
+        self.pendings=0
+        for m in self.coordinator.data:
+            if m.monitor_status == 0.0:
+                self.downs+=1
+            elif m.monitor_status == 1.0:
+                self.ups+=1
+            elif m.monitor_status == 2.0:
+                self.pendings+=1
+
+        self._attr_extra_state_attributes = {
+            "monitors": len(self.coordinator.data),
+            "monitors_up": self.ups,
+            "monitors_down": self.downs,
+            "monitors_pending": self.pendings,
+        }
+
+        if self.downs==0 and self.pendings==0:
+            self.ukstate=1.0
+        elif self.ups==0 and self.pendings==0:
+            self.ukstate=2.0
+        else:
+            self.ukstate=0.0
+
+        return self.ukstate
+
+    @property
+    def native_value(self) -> str:
+        """Return the status of the monitor."""    
+        return SYSTEM_INFO[self.determine_status()]["value"]
+
+    @property
+    def icon(self) -> str:
+        """Return the status of the monitor."""
+        return SYSTEM_INFO[self.determine_status()]["icon"]
