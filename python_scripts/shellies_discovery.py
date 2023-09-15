@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies devices."""
-VERSION = "4.5.2"
+VERSION = "4.5.3"
 
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
@@ -544,7 +544,9 @@ TPL_COMMAND_PROFILES = "{{value.split(^ ^)[-1]}}"
 TPL_CONCENTRATION = "{%if is_number(value) and 0<=value|int<=65535%}{{value}}{%endif%}"
 TPL_CURRENT_TEMPERATURE = "{{value_json.thermostats.0.tmp.value}}"
 TPL_ENERGY_WMIN = "{{value|float/60}}"
-TPL_EVENT = "{{{^event_type^:value_json.event}|to_json}}"
+TPL_EVENT = (
+    "{%if value_json.event%}{{{^event_type^:value_json.event}|to_json}}{%endif%}"
+)
 TPL_GAS = "{%if value in [^mild^,^heavy^]%}ON{%else%}OFF{%endif%}"
 TPL_GAS_TO_JSON = "{{{^status^:value}|tojson}}"
 TPL_HUMIDITY = "{%if is_number(value) and 0<value|int<999%}{{value}}{%endif%}"
