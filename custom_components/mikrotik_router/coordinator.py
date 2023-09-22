@@ -487,6 +487,7 @@ class MikrotikCoordinator(DataUpdateCoordinator[None]):
                 },
             ],
         )
+        print(packages)
 
         if 0 < self.major_fw_version < 7:
             if "ppp" in packages:
@@ -786,7 +787,7 @@ class MikrotikCoordinator(DataUpdateCoordinator[None]):
                 {"name": "default-name"},
                 {"name": "name", "default_val": "default-name"},
                 {"name": "poe-out", "default": "N/A"},
-                {"name": "sfp-shutdown-temperature", "default": ""},
+                {"name": "sfp-shutdown-temperature", "default": 0},
             ],
             skip=[
                 {"name": "type", "value": "bridge"},
@@ -829,7 +830,7 @@ class MikrotikCoordinator(DataUpdateCoordinator[None]):
                             {"name": "auto-negotiation", "default": "unknown"},
                             {"name": "advertising", "default": "unknown"},
                             {"name": "link-partner-advertising", "default": "unknown"},
-                            {"name": "sfp-temperature", "default": "unknown"},
+                            {"name": "sfp-temperature", "default": 0},
                             {"name": "sfp-supply-voltage", "default": "unknown"},
                             {"name": "sfp-module-present", "default": "unknown"},
                             {"name": "sfp-tx-bias-current", "default": "unknown"},
@@ -1357,13 +1358,13 @@ class MikrotikCoordinator(DataUpdateCoordinator[None]):
                 data=self.ds["health"],
                 source=self.api.query("/system/health"),
                 vals=[
-                    {"name": "temperature", "default": "unknown"},
-                    {"name": "voltage", "default": "unknown"},
-                    {"name": "cpu-temperature", "default": "unknown"},
-                    {"name": "power-consumption", "default": "unknown"},
-                    {"name": "board-temperature1", "default": "unknown"},
-                    {"name": "fan1-speed", "default": "unknown"},
-                    {"name": "fan2-speed", "default": "unknown"},
+                    {"name": "temperature", "default": 0},
+                    {"name": "voltage", "default": 0},
+                    {"name": "cpu-temperature", "default": 0},
+                    {"name": "power-consumption", "default": 0},
+                    {"name": "board-temperature1", "default": 0},
+                    {"name": "fan1-speed", "default": 0},
+                    {"name": "fan2-speed", "default": 0},
                 ],
             )
         elif 0 < self.major_fw_version >= 7:

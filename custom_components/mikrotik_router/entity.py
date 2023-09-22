@@ -174,6 +174,8 @@ class MikrotikEntity(CoordinatorEntity[_MikrotikCoordinatorT], Entity):
         if self._uid:
             self._data = coordinator.data[self.entity_description.data_path][self._uid]
 
+        self._attr_name = self.custom_name
+
     @callback
     def _handle_coordinator_update(self) -> None:
         self._data = self.coordinator.data[self.entity_description.data_path]
@@ -184,7 +186,7 @@ class MikrotikEntity(CoordinatorEntity[_MikrotikCoordinatorT], Entity):
         super()._handle_coordinator_update()
 
     @property
-    def name(self) -> str:
+    def custom_name(self) -> str:
         """Return the name for this entity"""
         if not self._uid:
             if self.entity_description.data_name_comment and self._data["comment"]:

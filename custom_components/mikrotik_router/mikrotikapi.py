@@ -196,7 +196,7 @@ class MikrotikAPI:
             try:
                 response = list(response)
             except Exception as e:
-                self.disconnect("building list for path", e)
+                self.disconnect(f"building list for path {path}", e)
                 self.lock.release()
                 return None
         elif response and command:

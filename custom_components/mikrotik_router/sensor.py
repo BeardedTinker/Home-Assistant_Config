@@ -39,7 +39,7 @@ async def async_setup_entry(
     dispatcher = {
         "MikrotikSensor": MikrotikSensor,
         "MikrotikInterfaceTrafficSensor": MikrotikInterfaceTrafficSensor,
-        # "MikrotikClientTrafficSensor": MikrotikClientTrafficSensor,
+        "MikrotikClientTrafficSensor": MikrotikClientTrafficSensor,
     }
     await async_add_entities(hass, config_entry, dispatcher)
 
@@ -109,27 +109,27 @@ class MikrotikInterfaceTrafficSensor(MikrotikSensor):
         return attributes
 
 
-# # ---------------------------
-# #   MikrotikClientTrafficSensor
-# # ---------------------------
-# class MikrotikClientTrafficSensor(MikrotikSensor):
-#     """Define an Mikrotik MikrotikClientTrafficSensor sensor."""
-#
-#     @property
-#     def name(self) -> str:
-#         """Return the name."""
-#         return f"{self.entity_description.name}"
-#
-#     # @property
-#     # def available(self) -> bool:
-#     #     """Return if controller and accounting feature in Mikrotik is available.
-#     #     Additional check for lan-tx/rx sensors
-#     #     """
-#     #     if self.entity_description.data_attribute in ["lan-tx", "lan-rx"]:
-#     #         return (
-#     #             self.coordinator.connected()
-#     #             and self._data["available"]
-#     #             and self._data["local_accounting"]
-#     #         )
-#     #     else:
-#     #         return self.coordinator.connected() and self._data["available"]
+# ---------------------------
+#   MikrotikClientTrafficSensor
+# ---------------------------
+class MikrotikClientTrafficSensor(MikrotikSensor):
+    """Define an Mikrotik MikrotikClientTrafficSensor sensor."""
+
+    @property
+    def custom_name(self) -> str:
+        """Return the name for this entity"""
+        return f"{self.entity_description.name}"
+
+    # @property
+    # def available(self) -> bool:
+    #     """Return if controller and accounting feature in Mikrotik is available.
+    #     Additional check for lan-tx/rx sensors
+    #     """
+    #     if self.entity_description.data_attribute in ["lan-tx", "lan-rx"]:
+    #         return (
+    #             self.coordinator.connected()
+    #             and self._data["available"]
+    #             and self._data["local_accounting"]
+    #         )
+    #     else:
+    #         return self.coordinator.connected() and self._data["available"]

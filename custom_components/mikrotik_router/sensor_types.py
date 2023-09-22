@@ -505,7 +505,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="client_traffic_lan_rx",
@@ -526,7 +526,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="client_traffic_wan_tx",
@@ -547,7 +547,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="client_traffic_wan_rx",
@@ -568,7 +568,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="client_traffic_tx",
@@ -589,7 +589,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="client_traffic_rx",
@@ -610,7 +610,7 @@ SENSOR_TYPES: tuple[MikrotikSensorEntityDescription, ...] = (
         data_uid="",
         data_reference="mac-address",
         data_attributes_list=DEVICE_ATTRIBUTES_CLIENT_TRAFFIC,
-        # func="MikrotikClientTrafficSensor",
+        func="MikrotikClientTrafficSensor",
     ),
     MikrotikSensorEntityDescription(
         key="environment",

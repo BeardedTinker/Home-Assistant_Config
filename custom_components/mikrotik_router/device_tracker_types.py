@@ -33,6 +33,7 @@ class MikrotikDeviceTrackerEntityDescription(SwitchEntityDescription):
     data_path: str | None = None
     data_attribute: str = "available"
     data_name: str | None = None
+    data_name_comment: bool = False
     data_uid: str | None = None
     data_reference: str | None = None
     data_attributes_list: List = field(default_factory=lambda: [])
