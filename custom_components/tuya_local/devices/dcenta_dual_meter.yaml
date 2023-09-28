@@ -1,7 +1,7 @@
-name: Bidirectional energy meter
+name: Dual meter 
 products:
-  - id: z95s7p3z54xbsjnl
-    name: MatSee Plus bidirectional 2 channel clamp meter
+  - id: bfa88129148596f2f0oeht
+    name: Dcenta dual clamp meter
 primary_entity:
   entity: sensor
   name: Energy consumed
@@ -26,6 +26,20 @@ secondary_entities:
         class: total_increasing
         mapping:
           - scale: 100
+  - entity: sensor
+    name: Energy flow A
+    category: diagnostic
+    dps:
+      - id: 102
+        type: string
+        name: sensor
+  - entity: sensor
+    name: Energy flow B
+    category: diagnostic
+    dps:
+      - id: 104
+        type: string
+        name: sensor
   - entity: sensor
     name: Power A
     class: power
