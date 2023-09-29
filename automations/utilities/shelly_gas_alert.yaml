@@ -8,7 +8,7 @@ id: 3bf68253-1b4a-4aec-b5c6-aa19815cb709
 trigger:
   - platform: state
     entity_id: binary_sensor.shelly_gas_10521cef4a01_gas
-    from: 'off'
+    to: 'on'
 
 #condition: "{{ states('binary_sensor.shelly_gas_10521cef4a01_gas') != 'unavailable' }}"
 #  - condition: template

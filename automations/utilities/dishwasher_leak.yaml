@@ -8,7 +8,7 @@ id: edd5b0f3-c59b-4f09-862b-b6eb5b0c81d0
 trigger:
   - platform: state
     entity_id: binary_sensor.leak_sensor_water_leak
-    from: 'off'
+    to: 'on'
 
 #condition: "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
 #  - condition: template
