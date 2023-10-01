@@ -838,12 +838,12 @@ async def setup_alexa(hass, config_entry, login_obj: AlexaLogin):
                 )
                 return
             http2 = HTTP2EchoClient(
-                hass,
                 login_obj,
                 msg_callback=http2_handler,
                 open_callback=http2_open_handler,
                 close_callback=http2_close_handler,
                 error_callback=http2_error_handler,
+                loop=hass.loop,
             )
             _LOGGER.debug("%s: HTTP2 created: %s", hide_email(email), http2)
             await http2.async_run()
@@ -1121,8 +1121,8 @@ async def setup_alexa(hass, config_entry, login_obj: AlexaLogin):
 
         This should attempt to reconnect up to 5 times
         """
-
         email: str = login_obj.email
+        hass.data[DATA_ALEXAMEDIA]["accounts"][email]["http2"] = None
         if login_obj.close_requested:
             _LOGGER.debug(
                 "%s: Close requested; will not reconnect http2", hide_email(email)
@@ -1191,10 +1191,14 @@ async def setup_alexa(hass, config_entry, login_obj: AlexaLogin):
         )
         hass.data[DATA_ALEXAMEDIA]["accounts"][email]["http2"] = None
         if not login_obj.close_requested and (
-            login_obj.session.closed or message == "<class 'aiohttp.streams.EofStream'>"
+            login_obj.session.closed or isinstance(message, AlexapyLoginError)
         ):
             hass.data[DATA_ALEXAMEDIA]["accounts"][email]["http2error"] = 5
-            _LOGGER.debug("%s: Immediate abort on EoFstream", hide_email(email))
+            _LOGGER.debug("%s: Login error detected.", hide_email(email))
+            hass.bus.async_fire(
+                "alexa_media_relogin_required",
+                event_data={"email": hide_email(email), "url": login_obj.url},
+            )
             return
         hass.data[DATA_ALEXAMEDIA]["accounts"][email]["http2error"] = errors + 1
 
