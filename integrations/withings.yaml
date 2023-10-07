@@ -1,8 +1,0 @@
-#####
-# Withings integration TEST
-#####
-
-withings:
-#  client_id: !secret withings_id
-#  client_secret: !secret withings_secret
-  use_webhook: true
