@@ -14,4 +14,4 @@ def format_entity_name(string: str) -> str:
 def sensor_name_from_url(url: str) -> str:
     parsed_url = urlparse(url)
     clean_url = parsed_url.netloc.replace(":"+str(parsed_url.port), "")
-    return clean_url.replace(".", "_")
+    return re.sub(r"\W+", "_", clean_url)
