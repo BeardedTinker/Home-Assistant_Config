@@ -70,5 +70,6 @@ action:
           target:
             entity_id:
               - light.zita_desk_matrix
+              - light.zita_desk_lights
     default: []
 mode: parallel

@@ -1,0 +1,190 @@
+esphome:
+  name: m5stack-atom-echo
+  friendly_name: M5Stack Atom Echo
+  name_add_mac_suffix: true
+  project:
+    name: m5stack.atom-echo-voice-assistant
+    version: "1.0"
+  min_version: 2023.10.0b1
+  on_boot:
+    - priority: -100
+      then:
+        - wait_until: api.connected
+        - delay: 1s
+        - if:
+            condition:
+              switch.is_on: use_wake_word
+            then:
+              - voice_assistant.start_continuous:
+
+esp32:
+  board: m5stack-atom
+  framework:
+    type: esp-idf
+
+logger:
+api:
+ota:
+
+dashboard_import:
+  package_import_url: github://esphome/firmware/voice-assistant/m5stack-atom-echo.yaml@main
+
+wifi:
+  ap:
+
+improv_serial:
+
+i2s_audio:
+  i2s_lrclk_pin: GPIO33
+  i2s_bclk_pin: GPIO19
+
+microphone:
+  - platform: i2s_audio
+    id: echo_microphone
+    i2s_din_pin: GPIO23
+    adc_type: external
+    pdm: true
+
+speaker:
+  - platform: i2s_audio
+    id: echo_speaker
+    i2s_dout_pin: GPIO22
+    dac_type: external
+    mode: mono
+
+voice_assistant:
+  id: va
+  microphone: echo_microphone
+  speaker: echo_speaker
+  noise_suppression_level: 2
+  auto_gain: 31dBFS
+  volume_multiplier: 2.0
+  vad_threshold: 3
+  on_listening:
+    - light.turn_on:
+        id: led
+        blue: 100%
+        red: 0%
+        green: 0%
+        brightness: 100%
+        effect: pulse
+  on_tts_start:
+    - light.turn_on:
+        id: led
+        blue: 0%
+        red: 0%
+        green: 100%
+        brightness: 100%
+        effect: pulse
+  on_end:
+    - delay: 100ms
+    - wait_until:
+        not:
+          speaker.is_playing:
+    - script.execute: reset_led
+  on_error:
+    - light.turn_on:
+        id: led
+        blue: 0%
+        red: 100%
+        green: 0%
+        brightness: 100%
+        effect: none
+    - delay: 1s
+    - script.execute: reset_led
+    - script.wait: reset_led
+    - lambda: |-
+        if (code == "wake-provider-missing" || code == "wake-engine-missing") {
+          id(use_wake_word).turn_off();
+        }
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO39
+      inverted: true
+    name: Button
+    disabled_by_default: true
+    entity_category: diagnostic
+    id: echo_button
+    on_click:
+      - if:
+          condition:
+            switch.is_off: use_wake_word
+          then:
+            - if:
+                condition: voice_assistant.is_running
+                then:
+                  - voice_assistant.stop:
+                  - script.execute: reset_led
+                else:
+                  - voice_assistant.start:
+          else:
+            - voice_assistant.stop
+            - delay: 1s
+            - script.execute: reset_led
+            - script.wait: reset_led
+            - voice_assistant.start_continuous:
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: led
+    name: None
+    disabled_by_default: true
+    entity_category: config
+    pin: GPIO27
+    default_transition_length: 0s
+    chipset: SK6812
+    num_leds: 1
+    rgb_order: grb
+    rmt_channel: 0
+    effects:
+      - pulse:
+          transition_length: 250ms
+          update_interval: 250ms
+
+script:
+  - id: reset_led
+    then:
+      - if:
+          condition:
+            switch.is_on: use_wake_word
+          then:
+            - light.turn_on:
+                id: led
+                blue: 100%
+                red: 100%
+                green: 0%
+                brightness: 100%
+                effect: none
+          else:
+            - light.turn_off: led
+
+switch:
+  - platform: template
+    name: Use wake word
+    id: use_wake_word
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    on_turn_on:
+      - lambda: id(va).set_use_wake_word(true);
+      - if:
+          condition:
+            not:
+              - voice_assistant.is_running
+          then:
+            - voice_assistant.start_continuous
+      - script.execute: reset_led
+    on_turn_off:
+      - voice_assistant.stop
+      - lambda: id(va).set_use_wake_word(false);
+      - script.execute: reset_led
+
+external_components:
+  - source: github://pr#5230
+    components:
+      - esp_adf
+    refresh: 0s
+
+esp_adf:
