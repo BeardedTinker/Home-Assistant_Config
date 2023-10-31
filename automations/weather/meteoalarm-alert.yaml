@@ -57,7 +57,7 @@ action:
           target:
             entity_id: 
               - media_player.display_me
-              - media_player.clock_me
+#              - media_player.clock_me
           data:
             message: 'Meteorological warning. {{state_attr("binary_sensor.meteoalarm", "event")}}. {{state_attr("binary_sensor.meteoalarm", "description")}}'
           extra:
