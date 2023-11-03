@@ -12,7 +12,7 @@ trigger:
 - platform: numeric_state
   entity_id:
   - proximity.school
-  above: '100'
+  above: 100
 
 condition:
   condition: template

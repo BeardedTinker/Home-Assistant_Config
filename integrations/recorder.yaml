@@ -17,3 +17,8 @@ recorder:
 #      - sensor.next_launch_countdown
       - sensor.blitzortung_lightning_azimuth
       - sensor.blitzortung_lightning_distance
+# exceed maximum size of      
+      - sensor.pixel_7_pro_active_notification_count
+      - sensor.oppo_active_notification_count
+      - sensor.watchman_missing_entities
+      - sensor.ele_l29_active_notification_count

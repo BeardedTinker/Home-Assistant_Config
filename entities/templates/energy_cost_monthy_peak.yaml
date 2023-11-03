@@ -6,5 +6,5 @@
     - name: Monthly Peak Energy Cost
       state: "{{ ((states('sensor.monthly_energy_peak')|float ) * states('input_number.peak_energy_cost')|float) }}"
       unit_of_measurement: "EUR"
-      state_class: measurement
+      #state_class: measurement
       device_class: monetary

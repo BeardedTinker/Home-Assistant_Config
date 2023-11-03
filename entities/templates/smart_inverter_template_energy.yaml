@@ -7,7 +7,7 @@
   - name: "Solar Energy Production"
     unique_id: 2fc1895e-5ad8-4d7e-94ec-bfb18b49c6db
     unit_of_measurement: kWh
-    state_class: measurement
+    state_class: total_increasing
     device_class: energy
     icon: mdi:solar-power-variant
     state: >
