@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies devices."""
-VERSION = "4.5.3"
+VERSION = "4.5.4"
 
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
@@ -1422,7 +1422,7 @@ OPTIONS_SENSOR_REPORTED_WINDOW_STATE = {
 
 OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
     KEY_ENABLED_BY_DEFAULT: False,
-    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_NAME: "Window state reporting",
     KEY_STATE_TOPIC: TOPIC_SETTINGS,
     KEY_VALUE_TEMPLATE: TPL_WINDOW_STATE_REPORTING,
@@ -1430,7 +1430,7 @@ OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
 
 OPTIONS_SENSOR_AUTOMATIC_TEMPERATURE_CONTROL = {
     KEY_ENABLED_BY_DEFAULT: True,
-    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_NAME: "Automatic temperature control",
     KEY_STATE_TOPIC: TOPIC_STATUS,
     KEY_VALUE_TEMPLATE: TPL_AUTOMATIC_TEMPERATURE_CONTROL,
@@ -1532,7 +1532,8 @@ if mode == "roller":
     roller_mode = True
 
 ignored = [
-    element.lower() for element in data.get(CONF_IGNORED_DEVICES, [])  # noqa: F821
+    element.lower()
+    for element in data.get(CONF_IGNORED_DEVICES, [])  # noqa: F821
 ]
 mac = data.get(CONF_MAC)  # noqa: F821
 
@@ -2838,9 +2839,7 @@ for relay_id in range(relays):
     for sensor, sensor_options in relay_binary_sensors.items():
         config_topic = f"{disc_prefix}/binary_sensor/{dev_id}-{make_id(sensor)}-{relay_id}/config".encode(
             "ascii", "ignore"
-        ).decode(
-            "utf-8"
-        )
+        ).decode("utf-8")
         if device_config.get(f"relay-{relay_id}-name"):
             sensor_name = f"{device_config[f'relay-{relay_id}-name']} {format_entity_name(sensor)}"
         else:
@@ -2982,9 +2981,7 @@ for sensor, sensor_options in sensors.items():
 for input_id in range(inputs):
     config_topic = f"{disc_prefix}/device_automation/{dev_id}-input-{input_id}/button_release/config".encode(
         "ascii", "ignore"
-    ).decode(
-        "utf-8"
-    )
+    ).decode("utf-8")
     topic = f"shellies/{dev_id}/input/{input_id}"
     payload = {
         KEY_AUTOMATION_TYPE: VALUE_TRIGGER,
@@ -3004,9 +3001,7 @@ for input_id in range(inputs):
     for event in inputs_types:
         config_topic = f"{disc_prefix}/device_automation/{dev_id}-input-{input_id}/{event}/config".encode(
             "ascii", "ignore"
-        ).decode(
-            "utf-8"
-        )
+        ).decode("utf-8")
         payload = {
             KEY_AUTOMATION_TYPE: VALUE_TRIGGER,
             KEY_TOPIC: topic,
@@ -3239,9 +3234,7 @@ for light_id in range(rgbw_lights):
     for sensor, sensor_options in light_binary_sensors.items():
         config_topic = f"{disc_prefix}/binary_sensor/{dev_id}-color-{sensor}-{light_id}/config".encode(
             "ascii", "ignore"
-        ).decode(
-            "utf-8"
-        )
+        ).decode("utf-8")
         if mode == LIGHT_COLOR:
             payload = {
                 KEY_NAME: f"{format_entity_name(sensor)} {light_id}",
@@ -3370,9 +3363,7 @@ for light_id, light_options in white_lights.items():
     for sensor, sensor_options in light_binary_sensors.items():
         config_topic = f"{disc_prefix}/binary_sensor/{dev_id}-white-{sensor}-{light_id}/config".encode(
             "ascii", "ignore"
-        ).decode(
-            "utf-8"
-        )
+        ).decode("utf-8")
         if mode != LIGHT_COLOR:
             payload = {
                 KEY_NAME: f"{format_entity_name(sensor)} {light_id}",
