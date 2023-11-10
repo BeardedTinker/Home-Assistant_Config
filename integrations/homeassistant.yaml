@@ -3,7 +3,7 @@
 # Basically, everything that doesn't have to be in the
 # main configuration.yaml.
 #
-# homeassistant:
+homeassistant:
 
   # Lets me customize individual entities
 #  customize: !include_dir_merge_named ../customizations/entities
@@ -14,5 +14,6 @@
   # Lets me custimize entities based on a matching pattern
 #  customize_glob: !include_dir_merge_named ../customizations/globs
 
-#  allowlist_external_dirs:
-#    - /tmp
+  allowlist_external_dirs:
+    - "/config"
+    - "/tmp"
