@@ -5,6 +5,7 @@
 
 sensor:
 #   platform: command_line
-  command: curl -I http://192.168.1.35:14002/ 2>/dev/null | head -n 1 | cut -d$' ' -f2
   name: Storj Node status
+  unique_id: e32f525d-87e8-473b-a11a-b74efd46c52c
+  command: curl -I http://192.168.1.35:14002/ 2>/dev/null | head -n 1 | cut -d$' ' -f2
   scan_interval: 300

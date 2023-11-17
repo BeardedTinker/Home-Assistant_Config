@@ -6,6 +6,7 @@
 sensor:
 #platform: command_line
   name: Supervisor updates
+  unique_id: 0eb63401-8154-4e3c-bf39-7f6c6d8fc008  
   command: 'curl http://supervisor/supervisor/info -H "Authorization: Bearer $(printenv SUPERVISOR_TOKEN)" | jq ''{"newest_version":.data.version_latest,"current_version":.data.version,"update_available":.data.update_available,"addons":[.data.addons[] | select(.update_available)]}'''
   value_template: "{{ value_json.addons | length }}"
   unit_of_measurement: pending update(s)
