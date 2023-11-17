@@ -34,7 +34,7 @@ I tried to list original authors of the code or parts of the code I used, but if
 
 ## YouTube Channel?
 
-A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - almost 300 videos as of Today, with at least 200 of them being Home Assistant How To's. 
+A lot of integrations and automations have videos on my [YouTube channel](https://YouTube.com/BeardedTinker) - neraly 400 videos, with at least 250 of them being Home Assistant How To's. 
 
 If you want to get in touch, you can always find me on Discord Server - [BeardedHome](https://discord.gg/HkxDRN6). 
 
@@ -102,6 +102,8 @@ From other devices that I use, here is a list:
   + [SwitchBot Humidifier](https://switchbot.vip/3FtfULt)
   + [SwitchBot Hub Mini](https://bit.ly/3kAoIuo)
   + [SwichBot Curtain Rod 2](https://bit.ly/3YhMWqI)
+  + [SwitchBot Hub 2](https://bit.ly/3kAoIuo)
+  + [SwitchBot K10+](https://bit.ly/3kAoIuo)
 
 ##### SMART SPEAKERS, DISPLAYS AND SIMILAR
   + ~~Google [Chromcast devices](https://store.google.com/gb/product/chromecast?hl=en-GB)~~
@@ -133,7 +135,7 @@ From other devices that I use, here is a list:
   - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
   - [Nuki Opener](https://amzn.to/41Jnb5V/) for intercom
-  - [Voron 2.4](https://vorondesign.com/voron2.4) 3D printer (Klipper)
+  - [Voron 2.4 R2](https://vorondesign.com/voron2.4) 3D printer (Klipper)
   - LilyGo TTgo HiGrow boards (with @peasor and ESPHome firmware)
   - HP DeskJest All-in-on printer
   - [Withings Thermo](https://amzn.to/3YhQJEs) Smart thermometer
@@ -145,12 +147,15 @@ As I'm running this on Synology, I have mix of Docker containers and Home Assist
 
 Add-ons:
   - ESPHome - [link](https://esphome.io/) 
+  - openWakeWorkd
+  - Piper
   ~~- Rhasspy Junior - [link](https://github.com/rhasspy/rhasspy-junior)~~
   - Samba share - [link](https://github.com/home-assistant/hassio-addons/tree/master/samba)
   - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
   - Studio Code Server - [link](https://github.com/hassio-addons/addon-vscode)
   - Terminal & SSH - [link](https://github.com/home-assistant/hassio-addons/tree/master/ssh)
   - Uptime Kuma - [link](https://github.com/hassio-addons/addon-uptime-kuma)
+  - Whisper
   - Zigbee2MQTT -[link](https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt)
 
 Containers:
@@ -183,53 +188,59 @@ Following is a list of active Integrations that are visible at Configuration->In
   - AccuWeather
   - AirVisual
   - Alexa Media Player
-  - Android TV
+  - Android Debug Bridge
+  - Android TV Remote (*)
   - Anniversaries
+  - Apple TV (*)
   - Blitzortung (HACS)
   - Certificate Expiry
-  - CO2Signal
+  - Cloudflare (*)
+  - ColorExtractor
+  ~~- CO2Signal~~
   ~~- COVID-19~~
   - Discord
   - DLNA server
   ~~- Dwains Dashboard~~
+  - Electricity maps
   - Elgato Key Light
   - ESPHome
   - Forcast Solar
-  - Garbage collection
+  ~~- Garbage collection~~
   - Generic camera
   - GitHub
   - GDACS
+  - Google Assistant 
   - Google Assistant SDK
-  - Google Assistant
   - Google Calendar
   - Google Cast
   - Google Sheets
   - HACS
   - HASS Agent
   - Home Assistant Supervisor
-  - HomeKit controller
-  - iBeacon
+  - HomeKit Devices
+  - iBeacon Tracker
   - International Space Station
   - Internet Printing Protocol
+  - Jellyfin (*)
   - Launch library
-  - LG TV
+  - LG webOS Smart TV
   - Met.No
   ~~- Local Tuya~~
   - Mikrotik
   - Minecraft Server
   - MJPEG IP Camera
   - Mobile App
-  - Mold Risk Index
+  ~~- Mold Risk Index~~
   - Moon
   - MQTT
   ~~- Music Assistant~~
   - Network UPS Tool
-  - Nuki
+  - Nuki lock
   - ONVIF
   - OpenUV
   - PowerCalc
   - Radio Browser
-  - Reolink
+  - Reolink IP/NVR Camera
   - Season
   - Sensor Community
   - Shelly
@@ -241,20 +252,26 @@ Following is a list of active Integrations that are visible at Configuration->In
   - SwitchBot
   - Synology DSM
   - Tado
+  - Thread (*)
   - Tile
   ~~- Tuya~~
   - Tuya Local 
-  - Ubiquity UniFi
+  - Twitch (*)
+  - UniFi Network
+  - Uptime 
   - Uptime Kuma
-  - Uptime
   - Version
-  - Watchan
+  - Voice over IP (*)
+  - Watchman
   - Withings
   - WLED on [QuinLED Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) boards
+  - Workday (*)
+  - Wyoming Protocol (*)
   - Xiaomi BLE
   - Xiaomi Miio
   - yTubeMusic
 
+(*) marks new since last update
 
 ## Folder and files
 
@@ -272,10 +289,10 @@ Up-to-date count of various things in Home Assistant
 | Automations          |   193 |
 | Binary sensors       |   318 |
 | Cameras              |    15 |
-| Climates             |    15 |
+| Climates             |    17 |
 | Counters             |     4 |
-| Device trackers      |   154 |
-| Entities             |  3688 |
+| Device trackers      |   157 |
+| Entities             |  3825 |
 | Groups               |    17 |
 | Image Processing     |     0 |
 | Input Boolean        |    19 |
@@ -283,21 +300,21 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
-| Lights               |    51 |
-| Lines of code (YAML) |107524 |
-| Locks                |     5 |
-| Media players        |    40 |
+| Lights               |    50 |
+| Lines of code (YAML) | 94649 |
+| Locks                |     6 |
+| Media players        |    33 |
 | Persons              |     6 |
-| Plants               |     8 |
+| Plants               |     9 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  2209 |
-| Switches             |   174 |
+| Sensors              |  2294 |
+| Switches             |   191 |
 | Timers               |     4 |
 | Utility Meters       |     5 |
 | Vacuums              |     1 |
 | Weather              |     3 |
-* Updated: 30.07.2023 11:30 AM
+* Updated: 17.11.2023 11:30 AM
 
 ### Missing files
 

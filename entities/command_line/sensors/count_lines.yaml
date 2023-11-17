@@ -3,8 +3,8 @@
 #
 #####
 
-sensor:
+  - sensor:
 #  platform: command_line
-  name: "Number of Lines of Code (YAML)"
-  unique_id: f5717183-2f92-4a3b-b81d-244e1cc4e095
-  command: " find /config/ -name '*.yaml' | xargs cat | wc -l"
+      name: "Number of Lines of Code (YAML)"
+      unique_id: f5717183-2f92-4a3b-b81d-244e1cc4e095
+      command: " find /config/ -name '*.yaml' | xargs cat | wc -l"
