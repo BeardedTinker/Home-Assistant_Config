@@ -1,20 +1,20 @@
 {
   "domain": "ytube_music_player",
   "name": "YouTube Music Player",
-  "documentation": "https://github.com/KoljaWindeler/ytube_music_player",
-  "config_flow": true,
-  "issue_tracker": "https://github.com/KoljaWindeler/ytube_music_player/issues",
-  "requirements": [
-    "ytmusicapi==0.25.0",
-    "pytube==10.5.1",
-    "integrationhelper==0.2.2"
-  ],
-  "dependencies": [
-    "persistent_notification"
-  ],
   "codeowners": [
     "@KoljaWindeler"
   ],
+  "config_flow": true,
+  "dependencies": [
+    "persistent_notification"
+  ],
+  "documentation": "https://github.com/KoljaWindeler/ytube_music_player",
   "iot_class": "cloud_polling",
-  "version": "20230321.01"
+  "issue_tracker": "https://github.com/KoljaWindeler/ytube_music_player/issues",
+  "requirements": [
+    "ytmusicapi==1.3.2",
+    "pytube==10.5.1",
+    "integrationhelper==0.2.2"
+  ],
+  "version": "20231128.01"
 }

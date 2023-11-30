@@ -455,6 +455,8 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
         unique_id: str | None = None,
     ) -> None:
         self._attr_name = name
+        # Remove own entity from entities, when it happens to be there. To prevent recursion
+        entities.discard(entity_id)
         self._entities = entities
         if not sensor_config.get(CONF_DISABLE_EXTENDED_ATTRIBUTES):
             self._attr_extra_state_attributes = {
@@ -497,7 +499,6 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
                     "%s: Could not restore last state: %s", self.entity_id, err,
                 )
 
-            # throttle group energy updates to only once each 30 seconds
             state_listener = Throttle(timedelta(seconds=30))(state_listener)
 
         self._prev_state_store = await PreviousStateStore.async_get_instance(self.hass)

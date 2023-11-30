@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies Gen2 devices."""
-VERSION = "2.20.0"
+VERSION = "2.21.0"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -30,6 +30,10 @@ ATTR_RELAY_SENSORS = "relay_sensors"
 ATTR_RELAYS = "relays"
 ATTR_SENSORS = "sensors"
 ATTR_SWITCH = "switch"
+ATTR_TEMPERATURE_MAX = "temperature_max"
+ATTR_TEMPERATURE_MIN = "temperature_min"
+ATTR_TEMPERATURE_STEP = "temperature_step"
+ATTR_THERMOSTATS = "thermostats"
 ATTR_UPDATES = "updates"
 
 BUTTON_MUTE_ALARM = "mute_alarm"
@@ -50,6 +54,7 @@ DEVICE_CLASS_CURRENT = "current"
 DEVICE_CLASS_ENERGY = "energy"
 DEVICE_CLASS_FREQUENCY = "frequency"
 DEVICE_CLASS_HUMIDITY = "humidity"
+DEVICE_CLASS_ILLUMINANCE = "illuminance"
 DEVICE_CLASS_POWER = "power"
 DEVICE_CLASS_POWER_FACTOR = "power_factor"
 DEVICE_CLASS_PROBLEM = "problem"
@@ -73,6 +78,22 @@ EVENT_TRIPLE_PUSH = "triple_push"
 
 HOME_ASSISTANT = "home-assistant"
 
+KEY_ACTION_TEMPLATE = "act_tpl"
+KEY_CURRENT_TEMPERATURE_TOPIC = "curr_temp_t"
+KEY_CURRENT_TEMPERATURE_TEMPLATE = "curr_temp_tpl"
+KEY_TEMPERATURE_STATE_TEMPLATE = "temp_stat_tpl"
+KEY_TEMPERATURE_STATE_TOPIC = "temp_stat_t"
+KEY_TEMPERATURE_COMMAND_TEMPLATE = "temp_cmd_tpl"
+KEY_TEMPERATURE_COMMAND_TOPIC = "temp_cmd_t"
+KEY_TEMP_STEP = "temp_step"
+KEY_MIN_TEMP = "min_temp"
+KEY_MAX_TEMP = "max_temp"
+KEY_MODES = "modes"
+KEY_MODE_STATE_TOPIC = "mode_stat_t"
+KEY_ACTION_TOPIC = "act_t"
+KEY_MODE_COMMAND_TOPIC = "mode_cmd_t"
+KEY_MODE_COMMAND_TEMPLATE = "mode_cmd_tpl"
+KEY_MODE_STATE_TEMPLATE = "mode_stat_tpl"
 KEY_AUTOMATION_TYPE = "atype"
 KEY_AVAILABILITY = "avty"
 KEY_AVAILABILITY_MODE = "avty_mode"
@@ -178,6 +199,7 @@ SENSOR_EXTERNAL_POWER = "external_power"
 SENSOR_FIRMWARE = "firmware"
 SENSOR_FREQUENCY = "frequency"
 SENSOR_HUMIDITY = "humidity"
+SENSOR_ILLUMINANCE = "illuminance"
 SENSOR_INPUT = "input"
 SENSOR_LAST_RESTART = "last_restart"
 SENSOR_N_CURRENT = "n_current"
@@ -234,6 +256,7 @@ TOPIC_EMETER = "~status/em:{emeter_id}"
 TOPIC_EMETER1 = "~status/em1:{emeter_id}"
 TOPIC_EVENTS_RPC = "~events/rpc"
 TOPIC_HUMIDITY = "~status/humidity:{sensor}"
+TOPIC_ILLUMINANCE = "~status/illuminance:{sensor}"
 TOPIC_INPUT = "~status/input:{relay}"
 TOPIC_LIGHT = "~status/light:{light}"
 TOPIC_ONLINE = "~online"
@@ -248,12 +271,15 @@ TOPIC_STATUS_SYS = "~status/sys"
 TOPIC_STATUS_WIFI = "~status/wifi"
 TOPIC_SWITCH_RELAY = "~status/switch:{relay}"
 TOPIC_TEMPERATURE = "~status/temperature:{sensor}"
+TOPIC_THERMOSTAT = "~status/thermostat:{thermostat}"
 TOPIC_VOLTMETER = "~status/voltmeter:{sensor}"
 
+TPL_ACTION_TEMPLATE = "{{%if value_json.output%}}{action}{{%else%}}idle{{%endif%}}"
 TPL_BATTERY = "{{value_json.battery.percent}}"
 TPL_CLOUD = "{%if value_json.cloud.connected%}ON{%else%}OFF{%endif%}"
 TPL_CLOUD_INDEPENDENT = "{%if value_json.connected%}ON{%else%}OFF{%endif%}"
 TPL_CURRENT = "{{value_json.current}}"
+TPL_CURRENT_TEMPERATURE = "{{value_json.current_C}}"
 TPL_EMETER_ACTIVE_POWER = "{{value_json.act_power}}"
 TPL_EMETER_PHASE_ACTIVE_POWER = "{{{{value_json.{phase}_act_power}}}}"
 TPL_EMETER_APPARENT_POWER = "{{value_json.aprt_power}}"
@@ -281,7 +307,9 @@ TPL_ENERGY = "{{value_json.aenergy.total}}"
 TPL_ETH_IP = "{{value_json.eth.ip}}"
 TPL_EXTERNAL_POWER = "{%if value_json.external.present%}ON{%else%}OFF{%endif%}"
 TPL_FIRMWARE_BETA = "{%if value_json.sys.available_updates.beta is defined%}{{value_json.sys.available_updates.beta.version}}{%else%}{{value_json.sys.installed_version}}{%endif%}"
+TPL_FIRMWARE_BETA_SYS = "{%if value_json.available_updates.beta is defined%}{{value_json.available_updates.beta.version}}{%else%}{{value_json.ver}}{%endif%}"
 TPL_FIRMWARE_STABLE = "{%if value_json.sys.available_updates.stable is defined%}{{value_json.sys.available_updates.stable.version}}{%else%}{{value_json.sys.installed_version}}{%endif%}"
+TPL_FIRMWARE_STABLE_SYS = "{%if value_json.available_updates.stable is defined%}{{value_json.available_updates.stable.version}}{%else%}{{value_json.ver}}{%endif%}"
 TPL_FIRMWARE_STABLE_INDEPENDENT = (
     "{%if value_json.available_updates.stable is defined%}ON{%else%}OFF{%endif%}"
 )
@@ -290,8 +318,10 @@ TPL_FIRMWARE_STABLE_ATTRS_INDEPENDENT = (
     "{{value_json.available_updates.get(^stable^,{})|to_json}}"
 )
 TPL_HUMIDITY = "{{value_json.rh}}"
+TPL_ILLUMINANCE = "{{value_json.lux}}"
 TPL_INPUT = "{%if value_json.state%}ON{%else%}OFF{%endif%}"
 TPL_INSTALLED_FIRMWARE = "{{value_json.sys.installed_version}}"
+TPL_INSTALLED_FIRMWARE_SYS = "{{value_json.ver}}"
 TPL_MQTT_CONNECTED = "{%if value_json.mqtt.connected%}online{%else%}offline{%endif%}"
 TPL_POWER = "{{value_json.apower}}"
 TPL_POWER_FACTOR = "{{value_json.pf*100}}"
@@ -305,10 +335,14 @@ TPL_RELAY_OVERVOLTAGE = (
     "{%if ^overvoltage^ in value_json.get(^errors^,[])%}ON{%else%}OFF{%endif%}"
 )
 TPL_RELAY_TEMPERATURE = "{{{{value_json[^switch:{relay}^].temperature.tC}}}}"
+TPL_SET_TARGET_TEMPERATURE = "{{{{{{^id^:1,^src^:^{source}^,^method^:^Thermostat.SetConfig^,^params^:{{^config^:{{^id^:{thermostat},^target_C^:value}}}}}}|tojson}}}}"
+TPL_SET_THERMOSTAT_MODE = "{{%if value==^off^%}}{{%set enable=false%}}{{%else%}}{{%set enable=true%}}{{%endif%}}{{{{{{^id^:1,^src^:^{source}^,^method^:^Thermostat.SetConfig^,^params^:{{^config^:{{^id^:{thermostat},^enable^:enable}}}}}}|tojson}}}}"
 TPL_SMOKE = "{%if value_json.alarm%}ON{%else%}OFF{%endif%}"
+TPL_TARGET_TEMPERATURE = "{{value_json.target_C}}"
 TPL_TEMPERATURE = "{{value_json.temperature.tC}}"
 TPL_TEMPERATURE_0 = "{{value_json[^temperature:0^].tC}}"
 TPL_TEMPERATURE_INDEPENDENT = "{{value_json.tC}}"
+TPL_THERMOSTAT_MODE = "{{%if value_json.enable%}}{action}{{%else%}}off{{%endif%}}"
 TPL_UPTIME = "{{(as_timestamp(now())-value_json.sys.uptime)|timestamp_local}}"
 TPL_UPTIME_INDEPENDENT = "{{(as_timestamp(now())-value_json.uptime)|timestamp_local}}"
 TPL_VOLTAGE = "{{value_json.voltage}}"
@@ -330,6 +364,7 @@ UNIT_AMPERE = "A"
 UNIT_CELSIUS = "°C"
 UNIT_DBM = "dBm"
 UNIT_HERTZ = "Hz"
+UNIT_LUX = "lx"
 UNIT_PERCENT = "%"
 UNIT_VOLT = "V"
 UNIT_VA = "VA"
@@ -500,7 +535,6 @@ DESCRIPTION_SENSOR_ETH_IP = {
 }
 DESCRIPTION_SENSOR_INPUT = {
     KEY_ENABLED_BY_DEFAULT: False,
-    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_STATE_TOPIC: TOPIC_INPUT,
     KEY_VALUE_TEMPLATE: TPL_INPUT,
 }
@@ -907,7 +941,17 @@ DESCRIPTION_SLEEPING_SENSOR_FIRMWARE = {
     KEY_JSON_ATTRIBUTES_TOPIC: TOPIC_STATUS_SYS,
     KEY_JSON_ATTRIBUTES_TEMPLATE: TPL_FIRMWARE_STABLE_ATTRS_INDEPENDENT,
 }
-DESCRIPTION_SLEEPING_SENSOR_HUMIDITY = {
+DESCRIPTION_SENSOR_HUMIDITY = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_ILLUMINANCE,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_NAME: "Illuminance",
+    KEY_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    KEY_STATE_TOPIC: TOPIC_ILLUMINANCE.format(sensor=0),
+    KEY_SUGGESTED_DISPLAY_PRECISION: 0,
+    KEY_UNIT: UNIT_LUX,
+    KEY_VALUE_TEMPLATE: TPL_ILLUMINANCE,
+}
+DESCRIPTION_SENSOR_ILLUMINANCE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_NAME: "Humidity",
@@ -917,7 +961,7 @@ DESCRIPTION_SLEEPING_SENSOR_HUMIDITY = {
     KEY_UNIT: UNIT_PERCENT,
     KEY_VALUE_TEMPLATE: TPL_HUMIDITY,
 }
-DESCRIPTION_SLEEPING_SENSOR_TEMPERATURE = {
+DESCRIPTION_SENSOR_TEMPERATURE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_NAME: "Temperature",
@@ -972,6 +1016,17 @@ DESCRIPTION_UPDATE_FIRMWARE = {
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE,
 }
+DESCRIPTION_UPDATE_FIRMWARE_SYS = {
+    KEY_DEVICE_CLASS: "firmware",
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_LATEST_VERSION_TEMPLATE: TPL_FIRMWARE_STABLE_SYS,
+    KEY_LATEST_VERSION_TOPIC: TOPIC_STATUS_SYS,
+    KEY_NAME: "Firmware",
+    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Update^,^params^:{{^stage^:^stable^}}}}",
+    KEY_STATE_TOPIC: TOPIC_STATUS_SYS,
+    KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE_SYS,
+}
 DESCRIPTION_UPDATE_FIRMWARE_BETA = {
     KEY_DEVICE_CLASS: "firmware",
     KEY_ENABLED_BY_DEFAULT: False,
@@ -982,6 +1037,17 @@ DESCRIPTION_UPDATE_FIRMWARE_BETA = {
     KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Update^,^params^:{{^stage^:^beta^}}}}",
     KEY_STATE_TOPIC: TOPIC_STATUS_RPC,
     KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE,
+}
+DESCRIPTION_UPDATE_FIRMWARE_BETA_SYS = {
+    KEY_DEVICE_CLASS: "firmware",
+    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
+    KEY_LATEST_VERSION_TEMPLATE: TPL_FIRMWARE_BETA_SYS,
+    KEY_LATEST_VERSION_TOPIC: TOPIC_STATUS_SYS,
+    KEY_NAME: "Firmware beta",
+    KEY_PAYLOAD_INSTALL: "{{^id^:1,^src^:^{source}^,^method^:^Shelly.Update^,^params^:{{^stage^:^beta^}}}}",
+    KEY_STATE_TOPIC: TOPIC_STATUS_SYS,
+    KEY_VALUE_TEMPLATE: TPL_INSTALLED_FIRMWARE_SYS,
 }
 DESCRIPTION_EXTERNAL_SENSOR_TEMPERATURE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
@@ -1016,6 +1082,11 @@ DESCRIPTION_EXTERNAL_SENSOR_VOLTMETER = {
     KEY_STATE_TOPIC: TOPIC_VOLTMETER,
     KEY_UNIT: UNIT_VOLT,
     KEY_VALUE_TEMPLATE: TPL_VOLTAGE,
+}
+DESCRIPTION_THERMOSTAT = {
+    ATTR_TEMPERATURE_MIN: 5,
+    ATTR_TEMPERATURE_MAX: 35,
+    ATTR_TEMPERATURE_STEP: 0.5,
 }
 
 SUPPORTED_MODELS = {
@@ -1227,10 +1298,10 @@ SUPPORTED_MODELS = {
         },
         ATTR_SENSORS: {
             SENSOR_BATTERY: DESCRIPTION_BATTERY,
-            SENSOR_HUMIDITY: DESCRIPTION_SLEEPING_SENSOR_HUMIDITY,
+            SENSOR_HUMIDITY: DESCRIPTION_SENSOR_HUMIDITY,
             SENSOR_LAST_RESTART: DESCRIPTION_SLEEPING_SENSOR_LAST_RESTART,
             SENSOR_SSID: DESCRIPTION_SLEEPING_SENSOR_SSID,
-            SENSOR_TEMPERATURE: DESCRIPTION_SLEEPING_SENSOR_TEMPERATURE,
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_TEMPERATURE,
             SENSOR_WIFI_IP: DESCRIPTION_SLEEPING_SENSOR_WIFI_IP,
             SENSOR_WIFI_SIGNAL: DESCRIPTION_SLEEPING_SENSOR_WIFI_SIGNAL,
         },
@@ -1788,13 +1859,34 @@ SUPPORTED_MODELS = {
         ATTR_NAME: "Shelly Wall Display",
         ATTR_MODEL_ID: "SAWD-0A1XX10EU1",
         ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_INPUTS: 1,
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
         ATTR_RELAYS: 1,
         ATTR_RELAY_BINARY_SENSORS: {
             SENSOR_OVERPOWER: DESCRIPTION_SENSOR_OVERPOWER,
             SENSOR_OVERTEMP: DESCRIPTION_SENSOR_OVERTEMP,
             SENSOR_OVERVOLTAGE: DESCRIPTION_SENSOR_OVERVOLTAGE,
         },
-        ATTR_MIN_FIRMWARE_DATE: 20230526,
+        ATTR_SENSORS: {
+            SENSOR_HUMIDITY: DESCRIPTION_SENSOR_HUMIDITY,
+            SENSOR_ILLUMINANCE: DESCRIPTION_SENSOR_ILLUMINANCE,
+            SENSOR_LAST_RESTART: DESCRIPTION_SLEEPING_SENSOR_LAST_RESTART,
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_TEMPERATURE,
+        },
+        ATTR_THERMOSTATS: {0: DESCRIPTION_THERMOSTAT},
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE_SYS,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA_SYS,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20231117,
     },
 }
 
@@ -1843,8 +1935,7 @@ def get_cover(cover_id, profile):
     topic = encode_config_topic(f"{disc_prefix}/cover/{device_id}-{cover_id}/config")
 
     if profile != ATTR_COVER:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     cover_name = device_config[f"cover:{cover_id}"][ATTR_NAME] or f"Cover {cover_id}"
     payload = {
@@ -1869,13 +1960,71 @@ def get_cover(cover_id, profile):
     return topic, payload
 
 
+def get_climate(thermostat_id, description):
+    """Create configuration for Shelly climate entity."""
+    topic = encode_config_topic(
+        f"{disc_prefix}/climate/{device_id}-{thermostat_id}/config"
+    )
+
+    if f"thermostat:{thermostat_id}" not in device_config:
+        return topic, ""
+
+    thermostat_type = device_config.get(f"thermostat:{thermostat_id}", {}).get(
+        "type", "heating"
+    )
+    thermostat_default_mode = "cool" if thermostat_type == "cooling" else "heat"
+
+    thermostat_name = (
+        device_config.get(f"thermostat:{thermostat_id}", {}).get(ATTR_NAME)
+        or f"Thermostat {thermostat_id}"
+    )
+
+    thermostat_topic = TOPIC_THERMOSTAT.format(thermostat=thermostat_id)
+    payload = {
+        KEY_NAME: thermostat_name,
+        KEY_ACTION_TOPIC: thermostat_topic,
+        KEY_ACTION_TEMPLATE: TPL_ACTION_TEMPLATE.format(action=thermostat_type),
+        KEY_CURRENT_TEMPERATURE_TOPIC: thermostat_topic,
+        KEY_CURRENT_TEMPERATURE_TEMPLATE: TPL_CURRENT_TEMPERATURE,
+        KEY_TEMPERATURE_STATE_TOPIC: thermostat_topic,
+        KEY_TEMPERATURE_STATE_TEMPLATE: TPL_TARGET_TEMPERATURE,
+        KEY_TEMPERATURE_COMMAND_TOPIC: TOPIC_RPC,
+        KEY_TEMPERATURE_COMMAND_TEMPLATE: TPL_SET_TARGET_TEMPERATURE.format(
+            source=source_topic, thermostat=thermostat_id
+        ),
+        KEY_TEMP_STEP: description[ATTR_TEMPERATURE_STEP],
+        KEY_MIN_TEMP: description[ATTR_TEMPERATURE_MIN],
+        KEY_MAX_TEMP: description[ATTR_TEMPERATURE_MAX],
+        KEY_MODES: ["off", thermostat_default_mode],
+        KEY_MODE_STATE_TOPIC: thermostat_topic,
+        KEY_MODE_STATE_TEMPLATE: TPL_THERMOSTAT_MODE.format(
+            action=thermostat_default_mode
+        ),
+        KEY_MODE_COMMAND_TOPIC: TOPIC_RPC,
+        KEY_MODE_COMMAND_TEMPLATE: TPL_SET_THERMOSTAT_MODE.format(
+            source=source_topic, thermostat=thermostat_id
+        ),
+        KEY_AVAILABILITY: availability,
+        KEY_UNIQUE_ID: f"{device_id}-{thermostat_id}".lower(),
+        KEY_QOS: qos,
+        KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
+        KEY_DEFAULT_TOPIC: default_topic,
+    }
+    return topic, payload
+
+
 def get_switch(relay_id, relay_type, profile):
     """Create configuration for Shelly switch entity."""
     topic = encode_config_topic(f"{disc_prefix}/switch/{device_id}-{relay_id}/config")
 
+    if f"{device_id}/c/switch:{relay_id}".lower() in device_config.get(
+        f"thermostat:{relay_id}", {}
+    ).get("actuator", ""):
+        return topic, ""
+
     if relay_type != ATTR_SWITCH or profile == ATTR_COVER:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     relay_name = (
         device_config.get(f"switch:{relay_id}", {}).get(ATTR_NAME)
@@ -1905,8 +2054,7 @@ def get_relay_light(relay_id, relay_type, profile):
     topic = encode_config_topic(f"{disc_prefix}/light/{device_id}-{relay_id}/config")
 
     if relay_type != ATTR_LIGHT or profile == ATTR_COVER:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     relay_name = device_config[f"switch:{relay_id}"][ATTR_NAME] or f"Relay {relay_id}"
     payload = {
@@ -1932,8 +2080,7 @@ def get_relay_fan(relay_id, relay_type, profile):
     topic = encode_config_topic(f"{disc_prefix}/fan/{device_id}-{relay_id}/config")
 
     if relay_type != ATTR_FAN or profile == ATTR_COVER:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     relay_name = device_config[f"switch:{relay_id}"][ATTR_NAME] or f"Relay {relay_id}"
     payload = {
@@ -2011,12 +2158,10 @@ def get_sensor(
         topic = encode_config_topic(f"{disc_prefix}/sensor/{device_id}-{sensor}/config")
 
     if profile == ATTR_COVER and cover_id is None:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     if profile == ATTR_SWITCH and relay_id is None:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     if cover_id is not None:
         switch_name = (
@@ -2121,8 +2266,7 @@ def get_binary_sensor(
         )
 
     if profile == ATTR_COVER:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     if is_input:
         name = device_config[f"input:{entity_id}"][ATTR_NAME] or f"Input {entity_id}"
@@ -2141,8 +2285,7 @@ def get_binary_sensor(
         sensor_name = description[KEY_NAME]
 
     if is_input and input_type != ATTR_SWITCH:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     payload = {
         KEY_NAME: sensor_name,
@@ -2190,8 +2333,7 @@ def get_input(input_id, input_type, event):
     )
 
     if input_type != ATTR_BUTTON:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     payload = {
         KEY_AUTOMATION_TYPE: VALUE_TRIGGER,
@@ -2214,8 +2356,7 @@ def get_event(input_id, input_type):
     )
 
     if input_type != ATTR_BUTTON:
-        payload = ""
-        return topic, payload
+        return topic, ""
 
     input_name = (
         device_config[f"input:{input_id}"].get(ATTR_NAME) or f"Button {input_id}"
@@ -2340,6 +2481,10 @@ def configure_device():
             for sensor, description in emeter_sensors.items():
                 topic, payload = get_sensor(sensor, description, emeter_id=emeter_id)
                 config[topic] = payload
+
+    for thermostat_id, description in thermostats.items():
+        topic, payload = get_climate(thermostat_id, description)
+        config[topic] = payload
 
     for relay_id in range(relays):
         consumption_types = [
@@ -2549,6 +2694,7 @@ def remove_old_script_versions():
         script_id = script_id + 1
 
 
+logger.info("Shellies Discovery Gen2 version: %s", VERSION)  # noqa: F821
 device_id = data[ATTR_ID]  # noqa: F821
 if device_id is None:
     raise ValueError("id value None is not valid, check script configuration")
@@ -2659,6 +2805,8 @@ emeter_sensors = SUPPORTED_MODELS[model].get(ATTR_EMETER_SENSORS, {})
 relays = SUPPORTED_MODELS[model].get(ATTR_RELAYS, 0)
 relay_sensors = SUPPORTED_MODELS[model].get(ATTR_RELAY_SENSORS, {})
 relay_binary_sensors = SUPPORTED_MODELS[model].get(ATTR_RELAY_BINARY_SENSORS, {})
+
+thermostats = SUPPORTED_MODELS[model].get(ATTR_THERMOSTATS, {})
 
 lights = SUPPORTED_MODELS[model].get(ATTR_LIGHTS, 0)
 

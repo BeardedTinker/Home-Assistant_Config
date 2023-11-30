@@ -1787,8 +1787,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			self._name = self._org_name + " - " + str(self._attributes['likeStatus'])
 			self.log_me('debug', "Showing like status in name until restart")
 		elif(command == SERVICE_CALL_GOTO_TRACK):
-			self.log_me('debug', "Going to Track " + str(all_params[0]) + ".")
-			self._next_track_no = min(max(int(all_params[0]) - 1 - 1, -1), len(self._tracks) - 1)
+			self.log_me('debug', "Going to Track " + str(parameters) + ".")
+			self._next_track_no = min(max(int(parameters) - 1 - 1, -1), len(self._tracks) - 1)
 			prev_shuffle = self._shuffle  # store current shuffle setting
 			self._shuffle = False  # set false, otherwise async_get_track will override next_track
 			await self.async_get_track()
