@@ -1,6 +1,7 @@
 """The Next Rocket Launch integration."""
 
-from datetime import datetime, timedelta, timezone
+import asyncio
+from datetime import UTC, datetime, timedelta
 import logging
 
 from ics import Calendar
@@ -8,12 +9,11 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_ATTRIBUTION
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
-import async_timeout
+from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,11 +32,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Create the launch sensor."""
+
     session = async_create_clientsession(hass)
     ics_data_provider = GetICSData(ICS_URL, session, hass)
 
     async def async_update_data():
-        async with async_timeout.timeout(10):
+        async with asyncio.timeout(10):
             return await ics_data_provider.ics_update()
 
     coordinator = DataUpdateCoordinator(
@@ -57,7 +58,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 class GetICSData:
-
     """The class for handling the data retrieval."""
 
     def __init__(self, url, session, hass):
@@ -73,7 +73,7 @@ class GetICSData:
         """Get the latest data from ics."""
         _LOGGER.debug("Get the latest data from ics")
 
-        async with async_timeout.timeout(10):
+        async with asyncio.timeout(10):
             resp = await self.session.get(self.url)
 
             if resp.status != 200:
@@ -106,7 +106,6 @@ class GetICSData:
 
 
 class GetNextLaunch(Entity):
-
     """The class for handling the data."""
 
     def __init__(self, coordinator, rocket_name, ics_data_provider):
@@ -122,6 +121,7 @@ class GetNextLaunch(Entity):
 
     async def async_update(self):
         """Process data."""
+
         _LOGGER.debug("Start async update for %s", self.name)
 
         self.have_futur = False
@@ -145,12 +145,11 @@ class GetNextLaunch(Entity):
             ]
 
         for event in selected_events:
-            if event.begin < datetime.now(timezone.utc):
+            if event.begin < datetime.now(UTC):
                 last_passed = event
-            else:
-                if not self.have_futur:
-                    last_futur = event
-                    self.have_futur = True
+            elif not self.have_futur:
+                last_futur = event
+                self.have_futur = True
 
         if last_futur is not None:
             self._state = last_futur.begin.isoformat()
@@ -207,8 +206,3 @@ class GetNextLaunch(Entity):
         self.async_on_remove(
             self.coordinator.async_add_listener(self.async_write_ha_state)
         )
-
-    # @property
-    # def should_poll(self):
-    #     """No need to poll. Coordinator notifies entity of updates."""
-    #     return False

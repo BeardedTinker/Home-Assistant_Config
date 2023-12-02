@@ -5,10 +5,14 @@
   "issue_tracker": "https://github.com/Verbalinsurection/next_rocket_launch/issues",
   "version": "v1.0.5",
   "config_flow": false,
-  "requirements": ["ics==0.7"],
+  "requirements": [
+    "ics==0.7.2"
+  ],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
   "dependencies": [],
-  "codeowners": ["@Verbalinsurection"]
+  "codeowners": [
+    "@Verbalinsurection"
+  ]
 }
