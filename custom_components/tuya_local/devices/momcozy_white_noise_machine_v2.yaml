@@ -179,7 +179,6 @@ secondary_entities:
       - id: 101
         name: lock
         type: boolean
-        optional: true
         mapping:
           - dps_val: true
             icon: "mdi:hand-back-right-off"
@@ -192,6 +191,5 @@ secondary_entities:
     dps:
       - id: 104
         name: sensor
-        type: string
+        type: integer
         unit: "s"
-        optional: true
