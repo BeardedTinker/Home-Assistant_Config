@@ -12,9 +12,11 @@ trigger:
   below: 10
 
 action:
-- service: shopping_list.add_item
+- service: todo.add_item
+  target:
+    entity_id: todo.shopping_list
   data:
-    name: Dishwasher pods
+    item: Dishawasher pods recording
 - service: script.notify_engine
   data:
     who: 'parents'
