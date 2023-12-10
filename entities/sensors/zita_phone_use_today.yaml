@@ -5,7 +5,7 @@
 
 platform: history_stats
 name: Zita's Phone use today
-entity_id: binary_sensor.fig_lx1_interactive
+entity_id: binary_sensor.ele_l29_interactive
 state: 'on'
 type: time
 start: '{{ now().replace(hour=0, minute=0, second=0) }}'

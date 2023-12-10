@@ -8,4 +8,4 @@
     - name: "Zita distance"
       unit_of_measurement: km
       state_class: measurement
-      state: "{{ distance('device_tracker.fig_lx1', 'zone.home')|round(1) }}"
+      state: "{{ distance('device_tracker.ele_l29', 'zone.home')|round(1) }}"

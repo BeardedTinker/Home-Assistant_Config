@@ -7,7 +7,7 @@ alias: WiFi connect Zita
 id: 36762fab-017b-427b-a0be-3ff75f35f202
 
 trigger:
-  entity_id: sensor.fig_lx1_wifi_connection
+  entity_id: sensor.ele_l29_wifi_connection
   platform: state
   from: '<not connected>'
 
@@ -16,7 +16,7 @@ action:
   data:
     who: 'zita'
     title: '📶 *WiFi Connected*'
-    value1: ' {{ states("sensor.fig_lx1_wifi_connection") }} WiFi is connected - well done!'
+    value1: ' {{ states("sensor.ele_l29_wifi_connection") }} WiFi is connected - well done!'
     group: home
     tag_id: 'information'
     importance_id: default
