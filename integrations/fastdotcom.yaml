@@ -1,8 +1,0 @@
-#####
-# fast.com - check Internet speed
-# https://www.home-assistant.io/integrations/fastdotcom/
-#####
-
-fastdotcom:
-  scan_interval:
-      minutes: 30

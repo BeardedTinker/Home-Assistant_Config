@@ -16,7 +16,7 @@ action:
   target:
     entity_id: todo.shopping_list
   data:
-    item: Dishawasher pods recording
+    item: Dishwasher pods recording
 - service: script.notify_engine
   data:
     who: 'parents'

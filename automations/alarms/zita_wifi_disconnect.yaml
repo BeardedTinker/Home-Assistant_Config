@@ -7,7 +7,7 @@ alias: WiFi disconnect Zita
 id: 894d71e8-6a55-4229-b141-347328589a4a
 
 trigger:
-  entity_id: sensor.fig_lx1_wifi_connection
+  entity_id: sensor.ele_l29_wifi_connection
   platform: state
   to: '<not connected>'
 

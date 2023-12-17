@@ -7,5 +7,5 @@ platform: group
 name: kids
 services:
   - service: mobile_app_luka_iphone
-  - service: mobile_app_fig_lx1
+  - service: mobile_app_ele_l29
   - service: ebroz_bot
