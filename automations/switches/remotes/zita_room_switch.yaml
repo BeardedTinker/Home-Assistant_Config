@@ -61,6 +61,7 @@ action:
         - service: light.toggle
           target:
             entity_id:
+              - light.zita_desk_matrix
               - light.zita_desk_lights
     - conditions:
       - condition: trigger
@@ -69,7 +70,6 @@ action:
         - service: light.toggle
           target:
             entity_id:
-              - light.zita_desk_matrix
-              - light.zita_desk_lights
+              - light.zita_room_lights
     default: []
 mode: parallel
