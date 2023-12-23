@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies devices."""
-VERSION = "4.5.4"
+VERSION = "4.6.0"
 
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
@@ -35,6 +35,7 @@ CONF_ID = "id"
 CONF_IGNORE_DEVICE_MODEL = "ignore_device_model"
 CONF_IGNORED_DEVICES = "ignored_devices"
 CONF_MAC = "mac"
+CONF_MINIMAL_VALVE_POSITION = "minimal_valve_position"
 CONF_MODE = "mode"
 CONF_MODEL_ID = "model"
 CONF_OPTIMISTIC = "optimistic"
@@ -225,8 +226,8 @@ MIN_MOTION_FIRMWARE_DATE = 20220517
 # Firmware 2.1.4-rc1 release date
 MIN_MOTION2_FIRMWARE_DATE = 20220301
 
-# Firmware 2.1.6 release date
-MIN_VALVE_FIRMWARE_DATE = 20220612
+# Firmware 2.2.1 release date
+MIN_VALVE_FIRMWARE_DATE = 20231009
 
 # Firmware 1.11.7 release date
 MIN_DIMMER_FIRMWARE_DATE = 20211109
@@ -521,7 +522,7 @@ TOPIC_WHITE_SET = "~white/{light_id}/set"
 TOPIC_WHITE_STATUS = "~white/{light_id}/status"
 
 TPL_ACCELERATED_HEATING = "{{value_json.thermostats.0.target_t.accelerated_heating}}"
-TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos==0%}}idle{{%else%}}heating{{%endif%}}"
+TPL_ACTION_TEMPLATE = "{{%if value_json.thermostats.0.target_t.value<={min_temp}%}}off{{%elif value_json.thermostats.0.pos=={min_pos}%}}idle{{%else%}}heating{{%endif%}}"
 TPL_AUTOMATIC_TEMPERATURE_CONTROL = (
     "{%if value_json.target_t.enabled%}ON{%else%}OFF{%endif%}"
 )
@@ -2642,6 +2643,11 @@ for button, button_options in buttons.items():
 # climate entities
 if climate_entity_option:
     default_heat_temp = 20
+    minimal_valve_position = device_config.get(CONF_MINIMAL_VALVE_POSITION, 0)
+    if not isinstance(minimal_valve_position, int):
+        raise TypeError(
+            f"minimal_valve_position value {minimal_valve_position} is not an integer, check script configuration"
+        )
     if device_config.get(CONF_DEFAULT_HEAT_TEMP):
         value = device_config[CONF_DEFAULT_HEAT_TEMP]
         if (
@@ -2665,7 +2671,8 @@ if climate_entity_option:
     payload = {
         KEY_ACTION_TOPIC: TOPIC_INFO,
         KEY_ACTION_TEMPLATE: TPL_ACTION_TEMPLATE.format(
-            min_temp=climate_entity_option[KEY_MIN_TEMP]
+            min_temp=climate_entity_option[KEY_MIN_TEMP],
+            min_pos=minimal_valve_position,
         ),
         KEY_CURRENT_TEMPERATURE_TOPIC: TOPIC_INFO,
         KEY_CURRENT_TEMPERATURE_TEMPLATE: TPL_CURRENT_TEMPERATURE,
