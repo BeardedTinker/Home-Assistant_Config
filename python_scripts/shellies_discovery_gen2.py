@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies Gen2 devices."""
-VERSION = "2.22.1"
+VERSION = "2.24.0"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -186,7 +186,8 @@ MODEL_PRO_2PM = "shellypro2pm"
 MODEL_PRO_3 = "shellypro3"
 MODEL_PRO_3EM = "shellypro3em"
 MODEL_PRO_4PM = "shellypro4pm"
-MODEL_PRO_DIMMER_2 = "shellyprodimmer2"
+MODEL_PRO_DIMMER_1PM = "shellyprodm1pm"
+MODEL_PRO_DIMMER_2PM = "shellyprodm2pm"
 MODEL_PRO_DUAL_COVER_PM = "shellypro2cover"
 MODEL_PRO_EM = "shellyproem50"
 MODEL_WALL_DISPLAY = "ShellyWallDisplay"
@@ -1864,8 +1865,44 @@ SUPPORTED_MODELS = {
         },
         ATTR_MIN_FIRMWARE_DATE: 20230803,
     },
-    MODEL_PRO_DIMMER_2: {
-        ATTR_NAME: "Shelly Pro Dimmer 2",
+    MODEL_PRO_DIMMER_1PM: {
+        ATTR_NAME: "Shelly Pro Dimmer 1PM",
+        ATTR_MODEL_ID: "SPDM-001PE01EU",
+        ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
+        ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
+        ATTR_INPUTS: 2,
+        ATTR_INPUT_BINARY_SENSORS: {SENSOR_INPUT: DESCRIPTION_SENSOR_INPUT},
+        ATTR_INPUT_EVENTS: [
+            EVENT_BUTTON_DOWN,
+            EVENT_BUTTON_UP,
+            EVENT_DOUBLE_PUSH,
+            EVENT_LONG_PUSH,
+            EVENT_SINGLE_PUSH,
+            EVENT_TRIPLE_PUSH,
+        ],
+        ATTR_LIGHTS: 1,
+        ATTR_LIGHT_SENSORS: {
+            SENSOR_CURRENT: DESCRIPTION_SENSOR_LIGHT_CURRENT,
+            SENSOR_ENERGY: DESCRIPTION_SENSOR_LIGHT_ENERGY,
+            SENSOR_POWER: DESCRIPTION_SENSOR_LIGHT_POWER,
+            SENSOR_TEMPERATURE: DESCRIPTION_SENSOR_LIGHT_TEMPERATURE,
+            SENSOR_VOLTAGE: DESCRIPTION_SENSOR_LIGHT_VOLTAGE,
+        },
+        ATTR_SENSORS: {
+            SENSOR_ETH_IP: DESCRIPTION_SENSOR_ETH_IP,
+            SENSOR_LAST_RESTART: DESCRIPTION_SENSOR_LAST_RESTART,
+            SENSOR_SSID: DESCRIPTION_SENSOR_SSID,
+            SENSOR_WIFI_IP: DESCRIPTION_SENSOR_WIFI_IP,
+            SENSOR_WIFI_SIGNAL: DESCRIPTION_SENSOR_WIFI_SIGNAL,
+        },
+        ATTR_UPDATES: {
+            UPDATE_FIRMWARE: DESCRIPTION_UPDATE_FIRMWARE,
+            UPDATE_FIRMWARE_BETA: DESCRIPTION_UPDATE_FIRMWARE_BETA,
+        },
+        ATTR_MIN_FIRMWARE_DATE: 20231005,
+    },
+    MODEL_PRO_DIMMER_2PM: {
+        ATTR_NAME: "Shelly Pro Dimmer 2PM",
         ATTR_MODEL_ID: "SPDM-002PE01EU",
         ATTR_BINARY_SENSORS: {SENSOR_CLOUD: DESCRIPTION_SENSOR_CLOUD},
         ATTR_BUTTONS: {BUTTON_RESTART: DESCRIPTION_BUTTON_RESTART},
@@ -2726,6 +2763,12 @@ def configure_device():
                 binary_sensor, description, relay_id, profile=profile
             )
             config[topic] = payload
+
+    if device_config["sys"]["device"].get("addon_type") == "prooutput":
+        for switch_id in range(100, 200):
+            if device_config.get(f"switch:{switch_id}"):
+                topic, payload = get_switch(switch_id, ATTR_SWITCH, ATTR_SWITCH)
+                config[topic] = payload
 
     for input_id in range(inputs):
         input_type = device_config[f"input:{input_id}"]["type"]
