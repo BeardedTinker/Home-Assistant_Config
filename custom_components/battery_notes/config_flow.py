@@ -13,7 +13,8 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.config_entries import ConfigEntry, OptionsFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.typing import DiscoveryInfoType
-
+from homeassistant.const import Platform
+from homeassistant.components.sensor import SensorDeviceClass
 import homeassistant.helpers.device_registry as dr
 
 from homeassistant.const import (
@@ -30,14 +31,38 @@ from .const import (
     CONF_MANUFACTURER,
     CONF_MODEL,
     DATA_UPDATE_COORDINATOR,
+    DOMAIN_CONFIG,
+    CONF_SHOW_ALL_DEVICES,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
+DEVICE_SCHEMA_ALL = vol.Schema(
+    {
+        vol.Required(CONF_DEVICE_ID): selector.DeviceSelector(
+            config=selector.DeviceFilterSelectorConfig()
+        ),
+        vol.Optional(CONF_NAME): selector.TextSelector(
+            selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT),
+        ),
+    }
+)
+
 DEVICE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_DEVICE_ID): selector.DeviceSelector(
-            # selector.DeviceSelectorConfig(model="otgw-nodo")
+            config=selector.DeviceSelectorConfig(
+                entity=[
+                    selector.EntityFilterSelectorConfig(
+                        domain=Platform.SENSOR,
+                        device_class=SensorDeviceClass.BATTERY,
+                    ),
+                    selector.EntityFilterSelectorConfig(
+                        domain=Platform.BINARY_SENSOR,
+                        device_class=SensorDeviceClass.BATTERY,
+                    ),
+                ]
+            )
         ),
         vol.Optional(CONF_NAME): selector.TextSelector(
             selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT),
@@ -85,9 +110,10 @@ class BatteryNotesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             device_id = user_input[CONF_DEVICE_ID]
 
-            coordinator = self.hass.data[DOMAIN][DATA_UPDATE_COORDINATOR]
-
-            await coordinator.async_refresh()
+            if DOMAIN in self.hass.data:
+                if DATA_UPDATE_COORDINATOR in self.hass.data[DOMAIN]:
+                    coordinator = self.hass.data[DOMAIN][DATA_UPDATE_COORDINATOR]
+                    await coordinator.async_refresh()
 
             device_registry = dr.async_get(self.hass)
             device_entry = device_registry.async_get(device_id)
@@ -103,18 +129,27 @@ class BatteryNotesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
             if device_battery_details:
-                _LOGGER.debug(
-                    "Found device %s %s", device_entry.manufacturer, device_entry.model
-                )
-                self.data[
-                    CONF_BATTERY_TYPE
-                ] = device_battery_details.battery_type_and_quantity
+                if not device_battery_details.is_manual:
+                    _LOGGER.debug(
+                        "Found device %s %s", device_entry.manufacturer, device_entry.model
+                    )
+                    self.data[
+                        CONF_BATTERY_TYPE
+                    ] = device_battery_details.battery_type_and_quantity
 
             return await self.async_step_battery()
 
+        schema = DEVICE_SCHEMA
+        # If show_all_devices = is specified and true, don't filter
+        if DOMAIN in self.hass.data:
+            if DOMAIN_CONFIG in self.hass.data[DOMAIN]:
+                domain_config = self.hass.data[DOMAIN][DOMAIN_CONFIG]
+                if domain_config.get(CONF_SHOW_ALL_DEVICES, False):
+                    schema = DEVICE_SCHEMA_ALL
+
         return self.async_show_form(
             step_id="user",
-            data_schema=DEVICE_SCHEMA,
+            data_schema=schema,
             errors=_errors,
             last_step=False,
         )

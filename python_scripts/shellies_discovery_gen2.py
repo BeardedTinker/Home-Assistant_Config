@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies Gen2 devices."""
-VERSION = "2.24.0"
+VERSION = "2.24.1"
 
 ATTR_BATTERY_POWERED = "battery_powered"
 ATTR_BINARY_SENSORS = "binary_sensors"
@@ -37,6 +37,7 @@ ATTR_TEMPERATURE_MIN = "temperature_min"
 ATTR_TEMPERATURE_STEP = "temperature_step"
 ATTR_THERMOSTATS = "thermostats"
 ATTR_UPDATES = "updates"
+ATTR_WAKEUP_PERIOD = "wakeup_period"
 
 BUTTON_MUTE_ALARM = "mute_alarm"
 BUTTON_RESTART = "restart"
@@ -1441,6 +1442,7 @@ SUPPORTED_MODELS = {
             SENSOR_WIFI_SIGNAL: DESCRIPTION_SLEEPING_SENSOR_WIFI_SIGNAL,
         },
         ATTR_MIN_FIRMWARE_DATE: 20230803,
+        ATTR_WAKEUP_PERIOD: 7200,
     },
     MODEL_PLUS_I4: {
         ATTR_NAME: "Shelly Plus I4",
@@ -1652,6 +1654,7 @@ SUPPORTED_MODELS = {
             SENSOR_WIFI_SIGNAL: DESCRIPTION_SLEEPING_SENSOR_WIFI_SIGNAL,
         },
         ATTR_MIN_FIRMWARE_DATE: 20230803,
+        ATTR_WAKEUP_PERIOD: 86400,
     },
     MODEL_PLUS_WALL_DIMMER: {
         ATTR_NAME: "Shelly Plus Wall Dimmer",
@@ -3002,7 +3005,6 @@ if mac is None:
 
 device_name = device_config["sys"]["device"].get(ATTR_NAME)
 device_url = f"http://{device_id}.local/"
-wakeup_period = device_config["sys"].get("sleep", {}).get("wakeup_period", 0)
 
 if not device_name:
     device_name = SUPPORTED_MODELS[model][ATTR_NAME]
@@ -3029,6 +3031,7 @@ origin_info = {
     KEY_SUPPORT_URL: "https://github.com/bieniu/ha-shellies-discovery-gen2",
 }
 
+wakeup_period = SUPPORTED_MODELS[model].get(ATTR_WAKEUP_PERIOD, 0)
 if wakeup_period > 0:
     availability = None
     expire_after = wakeup_period * 1.2

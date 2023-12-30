@@ -42,10 +42,10 @@ class Library:  # pylint: disable=too-few-public-methods
         _LOGGER.debug("Using library file at %s", json_path)
 
         try:
-            with open(json_path, encoding="utf-8") as file:
-                json_data = json.load(file)
-
+            with open(json_path, encoding="utf-8") as myfile:
+                json_data = json.load(myfile)
                 self._devices = json_data["devices"]
+                myfile.close()
 
         except FileNotFoundError:
             _LOGGER.error(
@@ -104,6 +104,13 @@ class DeviceBatteryDetails(NamedTuple):
     model: str
     battery_type: str
     battery_quantity: int
+
+    @property
+    def is_manual(self):
+        """Return whether the device should be discovered or battery type suggested."""
+        if self.battery_type.casefold() == "manual".casefold():
+            return True
+        return False
 
     @property
     def battery_type_and_quantity(self):
