@@ -1,5 +1,7 @@
 from homeassistant.components.sensor import PLATFORM_SCHEMA, ENTITY_ID_FORMAT
 import homeassistant.helpers.config_validation as cv
+from homeassistant.components.media_player import MediaPlayerState, MediaPlayerEntityFeature
+from homeassistant.components.media_player.const import MediaClass, MediaType, RepeatMode
 import voluptuous as vol
 import logging
 import datetime
@@ -23,30 +25,6 @@ from homeassistant.const import (
 	ATTR_COMMAND,
 )
 
-from homeassistant.components.media_player.const import (
-    MEDIA_CLASS_ALBUM,
-    MEDIA_CLASS_ARTIST,
-    MEDIA_CLASS_CHANNEL,
-    MEDIA_CLASS_DIRECTORY,
-    MEDIA_CLASS_EPISODE,
-    MEDIA_CLASS_MOVIE,
-    MEDIA_CLASS_MUSIC,
-    MEDIA_CLASS_PLAYLIST,
-    MEDIA_CLASS_SEASON,
-    MEDIA_CLASS_TRACK,
-    MEDIA_CLASS_TV_SHOW,
-    MEDIA_TYPE_ALBUM,
-    MEDIA_TYPE_ARTIST,
-    MEDIA_TYPE_CHANNEL,
-    MEDIA_TYPE_EPISODE,
-    MEDIA_TYPE_MOVIE,
-    MEDIA_TYPE_PLAYLIST,
-    MEDIA_TYPE_SEASON,
-    MEDIA_TYPE_TRACK,
-    MEDIA_TYPE_TVSHOW,
-)
-
-
 from homeassistant.components.media_player import (
 	MediaPlayerEntity,
 	PLATFORM_SCHEMA,
@@ -69,28 +47,6 @@ from homeassistant.components.input_boolean import (
 	DOMAIN as DOMAIN_IB,
 )
 
-from homeassistant.components.media_player.const import (
-	SUPPORT_STOP,
-	SUPPORT_PLAY,
-	SUPPORT_PAUSE,
-	SUPPORT_PLAY_MEDIA,
-	SUPPORT_PREVIOUS_TRACK,
-	SUPPORT_NEXT_TRACK,
-	SUPPORT_VOLUME_MUTE,
- 	SUPPORT_VOLUME_SET,
-	SUPPORT_VOLUME_STEP,
-	SUPPORT_TURN_ON,
-	SUPPORT_TURN_OFF,
-	SUPPORT_SHUFFLE_SET,
-	SUPPORT_BROWSE_MEDIA,
-	SUPPORT_REPEAT_SET,
-	SUPPORT_SELECT_SOURCE,
-	SUPPORT_SEEK,
-	MEDIA_TYPE_MUSIC,
-	REPEAT_MODE_ALL,
-    REPEAT_MODE_OFF,
-)
-
 import homeassistant.components.input_select as input_select
 import homeassistant.components.input_boolean as input_boolean
 
@@ -99,22 +55,22 @@ PLATFORMS = {"media_player", "sensor"}
 DOMAIN = "ytube_music_player"
 
 SUPPORT_YTUBEMUSIC_PLAYER = (
-	SUPPORT_TURN_ON
-	| SUPPORT_TURN_OFF
-	| SUPPORT_PLAY
-	| SUPPORT_PLAY_MEDIA
-	| SUPPORT_PAUSE
-	| SUPPORT_STOP
-	| SUPPORT_VOLUME_SET
-	| SUPPORT_VOLUME_STEP
-	| SUPPORT_VOLUME_MUTE
-	| SUPPORT_PREVIOUS_TRACK
-	| SUPPORT_NEXT_TRACK
-	| SUPPORT_SHUFFLE_SET
-	| SUPPORT_REPEAT_SET
-	| SUPPORT_BROWSE_MEDIA
-	| SUPPORT_SELECT_SOURCE
-	| SUPPORT_SEEK
+	MediaPlayerEntityFeature.TURN_ON
+	| MediaPlayerEntityFeature.TURN_OFF
+	| MediaPlayerEntityFeature.PLAY
+	| MediaPlayerEntityFeature.PLAY_MEDIA
+	| MediaPlayerEntityFeature.PAUSE
+	| MediaPlayerEntityFeature.STOP
+	| MediaPlayerEntityFeature.VOLUME_SET
+	| MediaPlayerEntityFeature.VOLUME_STEP
+	| MediaPlayerEntityFeature.VOLUME_MUTE
+	| MediaPlayerEntityFeature.PREVIOUS_TRACK
+	| MediaPlayerEntityFeature.NEXT_TRACK
+	| MediaPlayerEntityFeature.SHUFFLE_SET
+	| MediaPlayerEntityFeature.REPEAT_SET
+	| MediaPlayerEntityFeature.BROWSE_MEDIA
+	| MediaPlayerEntityFeature.SELECT_SOURCE
+	| MediaPlayerEntityFeature.SEEK
 )
 
 SERVICE_SEARCH = "search"
@@ -369,4 +325,21 @@ def ensure_config(user_input):
 	return out
 
 
+def find_thumbnail(item):
+    item_thumbnail = ""
+    try:
+        thumbnail_list = ""
+        if 'thumbnails' in item:
+            if 'thumbnail' in item['thumbnails']:
+                thumbnail_list = item['thumbnails']['thumbnail']
+            else:
+                thumbnail_list = item['thumbnails']
+        elif 'thumbnail' in item:
+            thumbnail_list = item['thumbnail']
 
+        if isinstance(thumbnail_list, list):
+            if 'url' in thumbnail_list[-1]:
+                item_thumbnail = thumbnail_list[-1]['url']
+    except:
+        pass
+    return item_thumbnail

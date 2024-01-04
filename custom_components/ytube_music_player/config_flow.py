@@ -2,6 +2,7 @@
 from homeassistant.core import callback
 from homeassistant import config_entries
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.selector import selector
 import voluptuous as vol
 import logging
 from .const import *
@@ -137,11 +138,6 @@ async def async_create_form(hass, user_input, page=1):
 	"""Create form for UI setup."""
 	user_input = ensure_config(user_input)
 	data_schema = OrderedDict()
-	all_media_player = dict()
-	all_entities = await hass.async_add_executor_job(hass.states.all) 
-	for e in all_entities:
-		if(e.entity_id.startswith(DOMAIN_MP) and not(e.entity_id.startswith(DOMAIN_MP+"."+DOMAIN))):
-			all_media_player.update({e.entity_id: e.entity_id.replace(DOMAIN_MP+".","")})
 	
 
 	if(page == 1):
@@ -149,7 +145,13 @@ async def async_create_form(hass, user_input, page=1):
 		
 	elif(page == 2):
 		data_schema[vol.Required(CONF_NAME, default=user_input[CONF_NAME])] = str # name of the component without domain
-		data_schema[vol.Required(CONF_RECEIVERS,default=user_input[CONF_RECEIVERS])] = cv.multi_select(all_media_player)
+		data_schema[vol.Required(CONF_RECEIVERS,default=user_input[CONF_RECEIVERS])] = selector({
+				"entity": {
+					"multiple": "true",
+					"filter": [{"domain": DOMAIN_MP}],
+					"exclude_entities": [DOMAIN_MP+"."+user_input[CONF_NAME]]
+                }
+            })
 		data_schema[vol.Required(CONF_HEADER_PATH, default=user_input[CONF_HEADER_PATH])] = str # file path of the header
 		data_schema[vol.Required(CONF_ADVANCE_CONFIG, default=user_input[CONF_ADVANCE_CONFIG])] = vol.Coerce(bool) # show page 2
 

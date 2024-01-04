@@ -16,5 +16,5 @@
     "pytube==10.5.1",
     "integrationhelper==0.2.2"
   ],
-  "version": "20231128.01"
+  "version": "20240103.01"
 }

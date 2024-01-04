@@ -24,11 +24,11 @@ class yTubeMusicSensor(Entity):
 		# Initialize the sensor.
 		self.hass = hass
 		self._state = STATE_OFF
-		self._unique_id = config.entry_id
-		self._name = config.data.get(CONF_NAME)+"_extra"
-		
-		self.hass.data[DOMAIN][self._unique_id]['extra_sensor'] = self
-
+		self._attr_unique_id = config.entry_id
+		self._device_name = config.data.get(CONF_NAME)
+		self._attr_name = config.data.get(CONF_NAME) + "_extra"
+		self._attr_icon = 'mdi:information-outline'
+		self.hass.data[DOMAIN][self._attr_unique_id]['extra_sensor'] = self
 		self._attr = {'tracks', 'search', 'lyrics', 'playlists', 'total_tracks'}
 		self._attributes = {}
 		for attr in self._attr:
@@ -37,9 +37,18 @@ class yTubeMusicSensor(Entity):
 		_LOGGER.debug("init ytube sensor done")
 
 	@property
+	def device_info(self):
+		return {
+			'identifiers': {(DOMAIN, self._attr_unique_id)},
+			'name': self._device_name,
+			'manufacturer': "Google Inc.",
+			'model': DOMAIN
+		}
+		
+	@property
 	def name(self):
 		# Return the name of the sensor.
-		return self._name
+		return self._attr_name
 
 	@property
 	def state(self):
@@ -58,8 +67,8 @@ class yTubeMusicSensor(Entity):
 
 		# update all attributes from the data var
 		for attr in self._attr:
-			if attr in self.hass.data[DOMAIN][self._unique_id]:
-				self._attributes[attr] = self.hass.data[DOMAIN][self._unique_id][attr]
+			if attr in self.hass.data[DOMAIN][self._attr_unique_id]:
+				self._attributes[attr] = self.hass.data[DOMAIN][self._attr_unique_id][attr]
 
 		try:
 			self.async_schedule_update_ha_state()

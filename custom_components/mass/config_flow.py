@@ -15,10 +15,10 @@ from homeassistant.components.hassio import (
     is_hassio,
 )
 from homeassistant.const import CONF_URL
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import AbortFlow, FlowResult
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers import aiohttp_client, selector
 from music_assistant.client import MusicAssistantClient
 from music_assistant.client.exceptions import CannotConnect, InvalidServerVersion
 from music_assistant.common.models.api import ServerInfoMessage
@@ -26,7 +26,9 @@ from music_assistant.common.models.api import ServerInfoMessage
 from .addon import get_addon_manager, install_repository
 from .const import (
     ADDON_HOSTNAME,
+    CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
     CONF_INTEGRATION_CREATED_ADDON,
+    CONF_OPENAI_AGENT_ID,
     CONF_USE_ADDON,
     DOMAIN,
     LOGGER,
@@ -37,13 +39,42 @@ ADDON_SETUP_TIMEOUT_ROUNDS = 40
 DEFAULT_URL = "http://mass.local:8095"
 ADDON_URL = f"http://{ADDON_HOSTNAME}:8095"
 DEFAULT_TITLE = "Music Assistant"
-ON_SUPERVISOR_SCHEMA = vol.Schema({vol.Optional(CONF_USE_ADDON, default=True): bool})
+
+ON_SUPERVISOR_SCHEMA = vol.Schema(
+    {
+        vol.Optional(CONF_USE_ADDON, default=True): bool,
+        vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+            selector.ConversationAgentSelectorConfig(language="en")
+        ),
+        vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
+    }
+)
 
 
 def get_manual_schema(user_input: dict[str, Any]) -> vol.Schema:
     """Return a schema for the manual step."""
     default_url = user_input.get(CONF_URL, DEFAULT_URL)
-    return vol.Schema({vol.Required(CONF_URL, default=default_url): str})
+    return vol.Schema(
+        {
+            vol.Required(CONF_URL, default=default_url): str,
+            vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+                selector.ConversationAgentSelectorConfig(language="en")
+            ),
+            vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
+        }
+    )
+
+
+def get_zeroconf_schema() -> vol.Schema:
+    """Return a schema for the zeroconf step."""
+    return vol.Schema(
+        {
+            vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+                selector.ConversationAgentSelectorConfig(language="en")
+            ),
+            vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
+        }
+    )
 
 
 async def get_server_info(hass: HomeAssistant, url: str) -> ServerInfoMessage:
@@ -63,6 +94,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Set up flow instance."""
         self.server_info: ServerInfoMessage | None = None
+        self.openai_agent_id: str | None = None
+        self.expose_players_assist: bool | None = None
         # If we install the add-on we should uninstall it on entry remove.
         self.integration_created_addon = False
         self.install_task: asyncio.Task | None = None
@@ -182,6 +215,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             self.server_info = await get_server_info(self.hass, user_input[CONF_URL])
+            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+            self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
             await self.async_set_unique_id(self.server_info.server_id)
         except CannotConnect:
             errors["base"] = "cannot_connect"
@@ -223,12 +258,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Check that we can connect to the address.
             try:
+                self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+                self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
                 await get_server_info(self.hass, self.server_info.base_url)
             except CannotConnect:
                 return self.async_abort(reason="cannot_connect")
             return await self._async_create_entry_or_abort()
         return self.async_show_form(
             step_id="discovery_confirm",
+            data_schema=get_zeroconf_schema(),
             description_placeholders={"url": self.server_info.base_url},
         )
 
@@ -261,6 +299,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Check that we can connect to the address.
             try:
                 self.server_info = await get_server_info(self.hass, ADDON_URL)
+                self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+                self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
             except CannotConnect:
                 return self.async_abort(reason="cannot_connect")
         return await self._async_create_entry_or_abort()
@@ -279,6 +319,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_URL: self.server_info.base_url,
                     CONF_USE_ADDON: self.use_addon,
                     CONF_INTEGRATION_CREATED_ADDON: self.integration_created_addon,
+                    CONF_OPENAI_AGENT_ID: self.openai_agent_id,
+                    CONF_ASSIST_AUTO_EXPOSE_PLAYERS: self.expose_players_assist,
                 },
                 title=DEFAULT_TITLE,
             )
@@ -295,8 +337,70 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_URL: self.server_info.base_url,
                 CONF_USE_ADDON: self.use_addon,
                 CONF_INTEGRATION_CREATED_ADDON: self.integration_created_addon,
+                CONF_OPENAI_AGENT_ID: self.openai_agent_id,
+                CONF_ASSIST_AUTO_EXPOSE_PLAYERS: self.expose_players_assist,
             },
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler(config_entry)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Class to handle options flow."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None) -> FlowResult:
+        """Manage the options."""
+        LOGGER.debug(
+            "OptionsFlowHandler:async_step_init user_input [%s] data [%s]",
+            user_input,
+            self.config_entry.data,
+        )
+        if user_input is not None:
+            if CONF_USE_ADDON in self.config_entry.data:
+                user_input[CONF_USE_ADDON] = self.config_entry.data[CONF_USE_ADDON]
+            if CONF_INTEGRATION_CREATED_ADDON in self.config_entry.data:
+                user_input[CONF_INTEGRATION_CREATED_ADDON] = self.config_entry.data[
+                    CONF_INTEGRATION_CREATED_ADDON
+                ]
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=user_input, options=self.config_entry.options
+            )
+            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            return self.async_create_entry(title="", data={})
+
+        schema = self.mass_config_option_schema(self.config_entry)
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(schema),
+        )
+
+    def mass_config_option_schema(self, config_entry: config_entries.ConfigEntry) -> vol.Schema:
+        """Return a schema for MusicAssistant completion options."""
+        return {
+            vol.Required(
+                CONF_URL,
+                default=config_entry.data.get(CONF_URL),
+            ): str,
+            vol.Optional(
+                CONF_OPENAI_AGENT_ID,
+                default=config_entry.data.get(CONF_OPENAI_AGENT_ID),
+            ): selector.ConversationAgentSelector(
+                selector.ConversationAgentSelectorConfig(language="en")
+            ),
+            vol.Optional(
+                CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
+                default=config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS),
+            ): bool,
+        }
 
 
 class FailedConnect(HomeAssistantError):

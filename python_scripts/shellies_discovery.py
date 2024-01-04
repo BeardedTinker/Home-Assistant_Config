@@ -1,5 +1,5 @@
 """This script adds MQTT discovery support for Shellies devices."""
-VERSION = "4.6.0"
+VERSION = "5.0.0"
 
 ATTR_ICON = "icon"
 ATTR_MANUFACTURER = "Allterco Robotics"
@@ -44,6 +44,7 @@ CONF_POWERED = "powered"
 CONF_QOS = "qos"
 CONF_SET_POSITION_TEMPLATE = "set_position_template"
 CONF_USE_FAHRENHEIT = "use_fahrenheit"
+CONF_VALVE_CONNECTED = "valve_connected"
 
 DEFAULT_DISC_PREFIX = "homeassistant"
 
@@ -174,6 +175,7 @@ KEY_POSITION_TOPIC = "pos_t"
 KEY_PRECISION = "precision"
 KEY_QOS = "qos"
 KEY_RELEASE_URL = "rel_u"
+KEY_REPORTS_POSITION = "pos"
 KEY_RETAIN = "ret"
 KEY_RGBW_COMMAND_TEMPLATE = "rgbw_cmd_tpl"
 KEY_RGBW_COMMAND_TOPIC = "rgbw_cmd_t"
@@ -437,6 +439,8 @@ SENSOR_WINDOW_STATE_REPORTING = "window_state_reporting"
 
 UPDATE_FIRMWARE = "firmware"
 
+VALVE_GAS = "gas"
+
 STATE_CLASS_MEASUREMENT = "measurement"
 STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 
@@ -571,6 +575,8 @@ TPL_REPORTED_WINDOW_STATE = (
 )
 TPL_SCHEDULE = "{{value_json.thermostats.0.schedule}}"
 TPL_VALVE = "{{value.replace(^_^,^ ^)}}"
+TPL_VALVE_STATE = "{%if value==^opened^%}open{%elif value in (^closed^,^closing^,^opening^)%}{{value}}{%endif%}"
+TPL_VALVE_AVAILABILITY = "{%if value in (^closed^,^closing^,^opened^,^opening^)%}online{%else%}offline{%endif%}"
 TPL_VALVE_MIN_POSITION = "{{value_json.thermostats.0.valve_min_percent}}"
 TPL_VALVE_POSITION = (
     "{%if value_json.thermostats.0.pos!=-1%}{{value_json.thermostats.0.pos}}{%endif%}"
@@ -667,18 +673,6 @@ OPTIONS_BUTTON_RESTART = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_DEVICE_CLASS: DEVICE_CLASS_RESTART,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_CONFIG,
-}
-OPTIONS_BUTTON_VALVE_CLOSE = {
-    KEY_COMMAND_TOPIC: TOPIC_VALVE_COMMAND,
-    KEY_PAYLOAD_PRESS: PL_CLOSE,
-    KEY_ENABLED_BY_DEFAULT: False,
-    KEY_ICON: "mdi:progress-close",
-}
-OPTIONS_BUTTON_VALVE_OPEN = {
-    KEY_COMMAND_TOPIC: TOPIC_VALVE_COMMAND,
-    KEY_PAYLOAD_PRESS: PL_OPEN,
-    KEY_ENABLED_BY_DEFAULT: False,
-    KEY_ICON: "mdi:progress-check",
 }
 OPTIONS_NUMBER_VALVE_POSITION = {
     KEY_COMMAND_TOPIC: TOPIC_COMMAND_VALVE_POSITION,
@@ -972,7 +966,7 @@ OPTIONS_SENSOR_UPTIME = {
 }
 OPTIONS_SENSOR_VALVE = {
     KEY_DEVICE_CLASS: DEVICE_CLASS_ENUM,
-    KEY_ENABLED_BY_DEFAULT: False,
+    KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
     KEY_ICON: "mdi:pipe-valve",
     KEY_STATE_TOPIC: TOPIC_VALVE,
@@ -1420,7 +1414,6 @@ OPTIONS_SENSOR_REPORTED_WINDOW_STATE = {
     KEY_STATE_TOPIC: TOPIC_INFO,
     KEY_VALUE_TEMPLATE: TPL_REPORTED_WINDOW_STATE,
 }
-
 OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
     KEY_ENABLED_BY_DEFAULT: False,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
@@ -1428,7 +1421,6 @@ OPTIONS_SENSOR_WINDOW_STATE_REPORTING = {
     KEY_STATE_TOPIC: TOPIC_SETTINGS,
     KEY_VALUE_TEMPLATE: TPL_WINDOW_STATE_REPORTING,
 }
-
 OPTIONS_SENSOR_AUTOMATIC_TEMPERATURE_CONTROL = {
     KEY_ENABLED_BY_DEFAULT: True,
     KEY_ENTITY_CATEGORY: ENTITY_CATEGORY_DIAGNOSTIC,
@@ -1436,6 +1428,22 @@ OPTIONS_SENSOR_AUTOMATIC_TEMPERATURE_CONTROL = {
     KEY_STATE_TOPIC: TOPIC_STATUS,
     KEY_VALUE_TEMPLATE: TPL_AUTOMATIC_TEMPERATURE_CONTROL,
     KEY_ICON: "mdi:thermostat-auto",
+}
+
+OPTIONS_VALVE_GAS = {
+    KEY_DEVICE_CLASS: DEVICE_CLASS_GAS,
+    KEY_ENABLED_BY_DEFAULT: True,
+    KEY_STATE_TOPIC: TOPIC_VALVE,
+    KEY_VALUE_TEMPLATE: TPL_VALVE_STATE,
+    KEY_NAME: "Valve",
+    KEY_COMMAND_TOPIC: TOPIC_VALVE_COMMAND,
+    KEY_PAYLOAD_OPEN: VALUE_OPEN,
+    KEY_PAYLOAD_CLOSE: VALUE_CLOSE,
+    KEY_REPORTS_POSITION: False,
+    ATTR_AVAILABILITY_EXTRA: {
+        KEY_TOPIC: TOPIC_VALVE,
+        KEY_VALUE_TEMPLATE: TPL_VALVE_AVAILABILITY,
+    },
 }
 
 ROLLER_DEVICE_CLASSES = [
@@ -1629,6 +1637,7 @@ numbers = {}
 selectors = {}
 sensors = {}
 switches = {}
+valves = {}
 white_lights = {}
 
 if model_id == MODEL_SHELLY1_ID or dev_id_prefix == MODEL_SHELLY1_PREFIX:
@@ -1982,10 +1991,11 @@ if model_id == MODEL_SHELLYGAS_ID or dev_id_prefix == MODEL_SHELLYGAS_PREFIX:
         BUTTON_RESTART: OPTIONS_BUTTON_RESTART,
         BUTTON_SELF_TEST: OPTIONS_BUTTON_SELF_TEST,
         BUTTON_UNMUTE: OPTIONS_BUTTON_UNMUTE,
-        BUTTON_VALVE_CLOSE: OPTIONS_BUTTON_VALVE_CLOSE,
-        BUTTON_VALVE_OPEN: OPTIONS_BUTTON_VALVE_OPEN,
+        BUTTON_VALVE_CLOSE: {},
+        BUTTON_VALVE_OPEN: {},
     }
     updates = {UPDATE_FIRMWARE: OPTIONS_UPDATE_FIRMWARE}
+    valves = {VALVE_GAS: OPTIONS_VALVE_GAS}
 
 if (
     model_id in (MODEL_SHELLYBUTTON1_ID, MODEL_SHELLYBUTTON1V2_ID)
@@ -2534,6 +2544,7 @@ for number, number_options in numbers.items():
         KEY_ORIGIN: origin_info,
         "~": default_topic,
     }
+
     if number_options.get(KEY_ENTITY_CATEGORY):
         payload[KEY_ENTITY_CATEGORY] = number_options[KEY_ENTITY_CATEGORY]
     if number_options.get(KEY_DEVICE_CLASS):
@@ -2619,9 +2630,11 @@ for button, button_options in buttons.items():
 
     payload = {
         KEY_NAME: format_entity_name(button),
-        KEY_COMMAND_TOPIC: button_options[KEY_COMMAND_TOPIC],
-        KEY_PAYLOAD_PRESS: button_options[KEY_PAYLOAD_PRESS],
-        KEY_ENABLED_BY_DEFAULT: str(button_options[KEY_ENABLED_BY_DEFAULT]).lower(),
+        KEY_COMMAND_TOPIC: button_options.get(KEY_COMMAND_TOPIC),
+        KEY_PAYLOAD_PRESS: button_options.get(KEY_PAYLOAD_PRESS),
+        KEY_ENABLED_BY_DEFAULT: str(
+            button_options.get(KEY_ENABLED_BY_DEFAULT, False)
+        ).lower(),
         KEY_UNIQUE_ID: f"{dev_id}-{button}".lower(),
         KEY_QOS: qos,
         KEY_AVAILABILITY: availability,
@@ -2636,6 +2649,8 @@ for button, button_options in buttons.items():
     if button_options.get(ATTR_ICON):
         payload[KEY_ICON] = button_options[ATTR_ICON]
     if dev_id.lower() in ignored:
+        payload = ""
+    if not button_options:
         payload = ""
 
     mqtt_publish(config_topic, payload, retain)
@@ -2978,6 +2993,8 @@ for sensor, sensor_options in sensors.items():
         and sensor in (SENSOR_ENERGY, SENSOR_POWER)
         and not roller_mode
     ):
+        payload = ""
+    if sensor == SENSOR_VALVE and not device_config.get(CONF_VALVE_CONNECTED, False):
         payload = ""
     if dev_id.lower() in ignored:
         payload = ""
@@ -3529,3 +3546,42 @@ for meter_id in range(meters):
             payload = ""
 
         mqtt_publish(config_topic, payload, retain)
+
+# valves
+for valve, valve_options in valves.items():
+    config_topic = f"{disc_prefix}/valve/{dev_id}-{make_id(valve)}/config".encode(
+        "ascii", "ignore"
+    ).decode("utf-8")
+
+    if valve_options.get(ATTR_AVAILABILITY_EXTRA):
+        availability.append(valve_options[ATTR_AVAILABILITY_EXTRA])
+
+    payload = {
+        KEY_NAME: valve_options.get(KEY_NAME),
+        KEY_COMMAND_TOPIC: valve_options.get(KEY_COMMAND_TOPIC),
+        KEY_STATE_TOPIC: valve_options.get(KEY_STATE_TOPIC),
+        KEY_VALUE_TEMPLATE: valve_options.get(KEY_VALUE_TEMPLATE),
+        KEY_PAYLOAD_OPEN: valve_options.get(KEY_PAYLOAD_OPEN),
+        KEY_PAYLOAD_CLOSE: valve_options.get(KEY_PAYLOAD_CLOSE),
+        KEY_REPORTS_POSITION: str(
+            valve_options.get(KEY_REPORTS_POSITION, False)
+        ).lower(),
+        KEY_ENABLED_BY_DEFAULT: str(sensor_options[KEY_ENABLED_BY_DEFAULT]).lower(),
+        KEY_AVAILABILITY: availability,
+        KEY_UNIQUE_ID: f"{dev_id}-{valve}".lower(),
+        KEY_QOS: qos,
+        KEY_DEVICE: device_info,
+        KEY_ORIGIN: origin_info,
+        "~": default_topic,
+    }
+
+    if valve_options.get(KEY_DEVICE_CLASS):
+        payload[KEY_DEVICE_CLASS] = valve_options[KEY_DEVICE_CLASS]
+    if model == MODEL_SHELLYGAS and not device_config.get(CONF_VALVE_CONNECTED, False):
+        payload = ""
+    if not valve_options:
+        payload = ""
+    if dev_id.lower() in ignored:
+        payload = ""
+
+    mqtt_publish(config_topic, payload, retain)

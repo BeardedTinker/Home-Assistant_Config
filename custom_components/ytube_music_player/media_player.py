@@ -73,21 +73,21 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 		async_add_entities([yTubeMusicComponent(hass, config, "_yaml")], update_before_add=True)
 
 
-async def async_setup_entry(hass, config, async_add_devices):
+async def async_setup_entry(hass, config, async_add_entities):
 	# Run setup via Storage
 	_LOGGER.debug("Config via Storage/UI")
 	if(len(config.data) > 0):
-		async_add_devices([yTubeMusicComponent(hass, config, "")], update_before_add=True)
+		async_add_entities([yTubeMusicComponent(hass, config, "")], update_before_add=True)
 
 
 class yTubeMusicComponent(MediaPlayerEntity):
 	def __init__(self, hass, config, name_add):
 		self.hass = hass
-		self._unique_id = config.entry_id
+		self._attr_unique_id = config.entry_id
 		self._debug_log_concat = ""
 		self._debug_as_error = config.data.get(CONF_DEBUG_AS_ERROR, DEFAULT_DEBUG_AS_ERROR)
 		self._org_name = config.data.get(CONF_NAME, DOMAIN + name_add)
-		self._name = self._org_name
+		self._attr_name = self._org_name
 		self._init_extra_sensor = config.data.get(CONF_INIT_EXTRA_SENSOR, DEFAULT_INIT_EXTRA_SENSOR)
 
 		# confgurations can be either the full entity_id or just the name
@@ -304,11 +304,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self._attributes['_media_type'] = None
 		self._attributes['_media_id'] = None
 
-		self.hass.data[DOMAIN][self._unique_id]['lyrics'] = ""
-		self.hass.data[DOMAIN][self._unique_id]['search'] = ""
-		self.hass.data[DOMAIN][self._unique_id]['tracks'] = ""
-		self.hass.data[DOMAIN][self._unique_id]['playlists'] = ""
-		self.hass.data[DOMAIN][self._unique_id]['total_tracks'] = ""
+		self.hass.data[DOMAIN][self._attr_unique_id]['lyrics'] = ""
+		self.hass.data[DOMAIN][self._attr_unique_id]['search'] = ""
+		self.hass.data[DOMAIN][self._attr_unique_id]['tracks'] = ""
+		self.hass.data[DOMAIN][self._attr_unique_id]['playlists'] = ""
+		self.hass.data[DOMAIN][self._attr_unique_id]['total_tracks'] = ""
 
 
 	async def async_update(self):
@@ -371,18 +371,26 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self.log_me('debug', "[E] async_check_api")
 		return True
 
+	@property
+	def device_info(self):
+		return {
+			'identifiers': {(DOMAIN, self._attr_unique_id)},
+			'name': self._attr_name,
+			'manufacturer': "Google Inc.",
+			'model': DOMAIN
+		}
 
 	@property
 	def name(self):
 		# Return the name of the player.
-		return self._name
+		return self._attr_name
 
 	@property
 	def icon(self):
 		return 'mdi:music-circle'
 
 	@property
-	def supported_features(self):
+	def supported_features(self) -> media_player.MediaPlayerEntityFeature:
 		# Flag media player features that are supported.
 		return SUPPORT_YTUBEMUSIC_PLAYER
 
@@ -414,7 +422,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 	@property
 	def media_content_type(self):
 		# Content type of current playing media.
-		return MEDIA_TYPE_MUSIC
+		return MediaType.MUSIC
 
 	@property
 	def media_title(self):
@@ -471,14 +479,14 @@ class yTubeMusicComponent(MediaPlayerEntity):
 	def repeat(self):
 		# Return current repeat mode.
 		if(self._playContinuous):
-			return REPEAT_MODE_ALL
-		return REPEAT_MODE_OFF
+			return RepeatMode.ALL
+		return RepeatMode.OFF
 
 	async def async_set_repeat(self, repeat: str):
 		self.log_me('debug', "[S] set_repeat: " + repeat)
 		# Set repeat mode.
 		data = {ATTR_ENTITY_ID: self._select_playContinuous}
-		if repeat != REPEAT_MODE_OFF:
+		if repeat != RepeatMode.OFF:
 			self._playContinuous = True
 			if(self._select_playContinuous != ""):
 				await self.hass.services.async_call(DOMAIN_IB, IB_ON, data)
@@ -535,11 +543,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				self.log_me('debug', "[E] (fail) TURNON")
 				return
 			if(_source.state == "Playlist"):
-				self._attributes['_media_type'] = MEDIA_TYPE_PLAYLIST
+				self._attributes['_media_type'] = MediaType.PLAYLIST
 			else:
 				self._attributes['_media_type'] = CHANNEL
 		else:
-			self._attributes['_media_type'] = MEDIA_TYPE_PLAYLIST
+			self._attributes['_media_type'] = MediaType.PLAYLIST
 
 		# store id and start play_media
 		self._attributes['_media_id'] = self._playlists[idx]['playlistId']
@@ -621,7 +629,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		# Fire the off action.
 		self.reset_attributs()
 		if(self._like_in_name):
-			self._name = self._org_name
+			self._attr_name = self._org_name
 		self.async_schedule_update_ha_state()
 		if(self._remote_player == ""):
 			if(not(await self.async_update_remote_player())):
@@ -1080,6 +1088,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			return
 
 		self._playlist_to_index = {}
+		playlists_to_extra = {}
 		try:
 			try:
 				self._playlists = await self.hass.async_add_executor_job(lambda: self._api.get_library_playlists(limit=self._trackLimit))
@@ -1111,13 +1120,14 @@ class yTubeMusicComponent(MediaPlayerEntity):
 							self.log_me('debug', "- Failed to get_playlist, no playlist ID")
 						self.exc()
 						self._playlists[idx]['count'] = 25
+				playlists_to_extra[playlist['title']] = playlist['playlistId']
 
 			if(len(self._playlists) == 0):
 				self._playlist_to_index["No playlists found"] = 0
 
 			# sort with case-ignore
 			playlists = sorted(list(self._playlist_to_index.keys()), key=str.casefold)
-			await self.async_update_extra_sensor('playlists', playlists)  # update extra sensor
+			await self.async_update_extra_sensor('playlists', playlists_to_extra)  # update extra sensor
 
 			data = {"options": list(playlists), "entity_id": self._select_playlist}
 			await self.hass.services.async_call(input_select.DOMAIN, input_select.SERVICE_SET_OPTIONS, data)
@@ -1144,9 +1154,9 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		# update extra sensor
 		self.log_debug_later("[S] async_update_extra_sensor")
 		if(self._init_extra_sensor):
-			self.hass.data[DOMAIN][self._unique_id][attribute] = value
+			self.hass.data[DOMAIN][self._attr_unique_id][attribute] = value
 			try:
-				await self.hass.data[DOMAIN][self._unique_id]['extra_sensor'].async_update()
+				await self.hass.data[DOMAIN][self._attr_unique_id]['extra_sensor'].async_update()
 			except:
 				self.log_me('debug', "Update failed")
 				pass
@@ -1247,11 +1257,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		if('likeStatus' in _track):
 			self._attributes['likeStatus'] = _track['likeStatus']
 			if(self._like_in_name):
-				self._name = self._org_name + " - " + str(_track['likeStatus'])
+				self._attr_name = self._org_name + " - " + str(_track['likeStatus'])
 		else:
 			self._attributes['likeStatus'] = ""
 			if(self._like_in_name):
-				self._name = self._org_name
+				self._attr_name = self._org_name
 		# this will quickly update the information although the thumbnail might not super great, we'll update that later
 		info = self.extract_info(_track)
 		self._track_album_name = info['track_album_name']
@@ -1299,7 +1309,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self._last_auto_advance = datetime.datetime.now()  # avoid auto_advance
 		data = {
 			ATTR_MEDIA_CONTENT_ID: _url,
-			ATTR_MEDIA_CONTENT_TYPE: MEDIA_TYPE_MUSIC,
+			ATTR_MEDIA_CONTENT_TYPE: MediaType.MUSIC,
 			ATTR_ENTITY_ID: self._remote_player,
 			"extra": {
 				"metadata": {
@@ -1475,20 +1485,22 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		try:
 			crash_extra = ''
 			self._attributes['current_playlist_title'] = ""
-			if(media_type == MEDIA_TYPE_PLAYLIST):
+			if(media_type == MediaType.PLAYLIST):
 				crash_extra = 'get_playlist(playlistId=' + str(media_id) + ')'
 				playlist_info = await self.hass.async_add_executor_job(lambda: self._api.get_playlist(media_id, limit=self._trackLimit))
 				self._tracks = playlist_info['tracks'][:self._trackLimit]  # limit function doesn't really work ... seems like
 				self._attributes['current_playlist_title'] = str(playlist_info['title'])
-			elif(media_type == MEDIA_TYPE_ALBUM):
+			elif(media_type == MediaType.ALBUM):
 				crash_extra = 'get_album(browseId=' + str(media_id) + ')'
 				if media_id[:7] == "OLAK5uy": #Sharing over Android app sends 'bad' album id. Checking and converting.
 					media_id = await self.hass.async_add_executor_job(self._api.get_album_browse_id, media_id)
 				self._tracks = await self.hass.async_add_executor_job(self._api.get_album, media_id)  # no limit needed
+				thumbnail = find_thumbnail(self._tracks)
 				self._tracks = self._tracks['tracks'][:self._trackLimit]  # limit function doesn't really work ... seems like
 				for i in range(0, len(self._tracks)):
 					self._tracks[i].update({'album': {'id': media_id}})
-			elif(media_type == MEDIA_TYPE_TRACK):
+					self._tracks[i].update({'thumbnails': [{'url': thumbnail}]})
+			elif(media_type == MediaType.TRACK):
 				crash_extra = 'get_song(videoId=' + str(media_id) + ',signatureTimestamp=' + str(self._signatureTimestamp) + ')'
 				self._tracks = [await self.hass.async_add_executor_job(lambda: self._api.get_song(media_id, self._signatureTimestamp))]  # no limit needed
 				self._tracks[0] = self._tracks[0]['videoDetails']
@@ -1784,11 +1796,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			self.log_me('debug', "Posting debug messages as error until restart")
 		elif(command == SERVICE_CALL_LIKE_IN_NAME):
 			self._like_in_name = True
-			self._name = self._org_name + " - " + str(self._attributes['likeStatus'])
+			self._attr_name = self._org_name + " - " + str(self._attributes['likeStatus'])
 			self.log_me('debug', "Showing like status in name until restart")
 		elif(command == SERVICE_CALL_GOTO_TRACK):
-			self.log_me('debug', "Going to Track " + str(parameters) + ".")
-			self._next_track_no = min(max(int(parameters) - 1 - 1, -1), len(self._tracks) - 1)
+			self.log_me('debug', "Going to Track " + str(parameters[0]) + ".")
+			self._next_track_no = min(max(int(parameters[0]) - 1 - 1, -1), len(self._tracks) - 1)
 			prev_shuffle = self._shuffle  # store current shuffle setting
 			self._shuffle = False  # set false, otherwise async_get_track will override next_track
 			await self.async_get_track()
@@ -1844,7 +1856,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			else:
 				self.log_me('error', "no song_id given, but also currently not playing, so I don't know what to add/remove")
 		if(song_id != "" and playlist_id == ""):
-			if(self._attributes['_media_type'] in [MEDIA_TYPE_PLAYLIST, CHANNEL]):
+			if(self._attributes['_media_type'] in [MediaType.PLAYLIST, CHANNEL]):
 				playlist_id = self._attributes['_media_id']
 			else:
 				self.log_me('error', "No playlist Id provided and the current playmode isn't 'playlist' nor 'channel', so I don't know where to add/remove the track")
@@ -1941,7 +1953,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				await self.hass.async_add_executor_job(self._api.rate_song, song_id, arg)
 				self._attributes['likeStatus'] = arg
 				if(self._like_in_name):
-					self._name = self._org_name + " - " + arg
+					self._attr_name = self._org_name + " - " + arg
 				self.async_schedule_update_ha_state()
 				self._tracks[self._next_track_no]['likeStatus'] = arg
 			except:
