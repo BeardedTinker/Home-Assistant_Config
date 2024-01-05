@@ -21,7 +21,7 @@ action:
   - service: lock.open
     data:
       entity: lock.nuki_opener_lock
-  - service: notify.bt_desktop
+  - service: notify.ebroz_bot
     data:
       message: Door open
       title: Action response

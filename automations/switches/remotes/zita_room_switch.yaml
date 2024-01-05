@@ -67,7 +67,7 @@ action:
       - condition: trigger
         id: hold
       sequence:
-        - service: light.toggle
+        - service: light.turn_off
           target:
             entity_id:
               - light.zita_room_lights

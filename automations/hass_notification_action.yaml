@@ -18,10 +18,10 @@ trigger:
 condition: []
 
 action:
-- service: notify.bt_desktop
+- service: notify.ebroz_bot
   data:
-    title: Front Door
-    message: Someone on the front door
+    title: Elevator
+    message: Someone is at the elevator
     data:
       image: /api/camera_proxy/camera.ebroz920_lift
       actions:
