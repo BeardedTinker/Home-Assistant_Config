@@ -20,10 +20,10 @@ condition: []
 action:
 - service: notify.ebroz_bot
   data:
-    title: Elevator
-    message: Someone is at the elevator
+    title: Front Door
+    message: Front door was opened
     data:
-      image: /api/camera_proxy/camera.ebroz920_lift
+      camera_entity: /api/camera_proxy/camera.ebroz920_terasa2
       actions:
       - action: 'yes'
         title: 'Yes'
