@@ -1,46 +1,43 @@
 name: Robot vacuum
 products:
-  - id: 1zksgdnha6ln65md
-    name: TTEC Robi Pro
+  - id: lb3jihr6cvumqomi
+    name: Neatsvor X600
 primary_entity:
   entity: vacuum
   dps:
     - id: 1
       type: boolean
-      name: power
+      name: activate
       optional: true
-      mapping:
-        - dps_val: null
-          value: false
-          hidden: true
     - id: 2
       type: boolean
-      optional: true
       name: pause
+      optional: true
+    - id: 3
+      name: return_to_base
+      type: boolean
+      optional: true
     - id: 4
       type: string
       name: command
+      optional: true
       mapping:
-        - constraint: pause
-          conditions:
-            - dps_val: true
-              value: pause
-            - mapping:
-                - dps_val: smart
-                  value: smart
-                - dps_val: chargego
-                  value: return_to_base
-                - dps_val: zone
-                  value: zone
-                - dps_val: pose
-                  value: clean_spot
-                - dps_val: part
-                  value: partial
-                - dps_val: selectroom
-                  value: room
+        - dps_val: smart
+          value: Auto clean
+        - dps_val: zone
+          value: Zone cleaning
+        - dps_val: pose
+          value: pose
+        - dps_val: part
+          value: clean_spot
+        - dps_val: chargego
+          value: return_to_base
+        - dps_val: selectroom
+          value: Select room cleaning
     - id: 5
-      type: string
       name: status
+      type: string
+      optional: true
       mapping:
         - dps_val: standby
           value: standby
@@ -53,13 +50,13 @@ primary_entity:
         - dps_val: cleaning
           value: cleaning
         - dps_val: paused
-          value: paused
+          value: pause
         - dps_val: goto_pos
-          value: going_to_location
+          value: go to target point
         - dps_val: pos_arrived
-          value: on_location
+          value: arrived to target point
         - dps_val: pos_unarrive
-          value: cannot_find_location
+          value: cannot arrive to target point
         - dps_val: goto_charge
           value: returning
         - dps_val: charging
@@ -68,114 +65,100 @@ primary_entity:
           value: charged
         - dps_val: sleep
           value: sleep
+        - dps_val: mop_clean
+          value: mop_clean
+        - dps_val: manual_control
+          value: manual_control
         - dps_val: select_room
           value: select_room
-        - dps_val: mop_clean
-          value: cleaning
-        - dps_val: manual_control
-          value: direction_control
     - id: 9
-      type: string
       name: fan_speed
+      type: string
       mapping:
         - dps_val: closed
           value: "Off"
         - dps_val: gentle
-          value: Low
+          value: Gentle
         - dps_val: normal
-          value: Medium
+          value: Normal
         - dps_val: strong
-          value: High
+          value: Strong
+        - dps_val: max
+          value: Max
     - id: 11
+      name: locate
       type: boolean
       optional: true
-      name: locate
     - id: 12
+      name: direction_control
       type: string
       optional: true
-      name: direction_control
       mapping:
         - dps_val: forward
           value: forward
         - dps_val: backward
-          value: reverse
-        - dps_val: turn_left]
+          value: backward
+        - dps_val: turn_left
           value: left
         - dps_val: turn_right
           value: right
         - dps_val: stop
           value: stop
     - id: 14
-      type: string
-      optional: true
       name: path_data
+      type: string
+      optional: true
     - id: 15
-      type: string
+      name: command_trans
+      type: base64
       optional: true
-      name: command_tran
     - id: 16
-      type: string
-      optional: true
       name: request
-      mapping:
-        - dps_val: get_map
-          value: Get map
-        - dps_val: get_path
-          value: Get path
-        - dps_val: get_both
-          value: Get both
+      type: string
+      optional: true
     - id: 28
-      type: bitfield
       name: error
+      type: bitfield
     - id: 32
-      type: string
-      optional: true
       name: device_timer
+      type: string
+      optional: true
     - id: 33
-      type: string
+      name: disturb_time
+      type: base64
       optional: true
-      name: disturb_time_set
     - id: 34
-      type: string
-      optional: true
       name: device_info
+      type: base64
+      optional: true
     - id: 35
+      name: voice_data
+      type: base64
+      optional: true
+    - id: 36
+      name: language
       type: string
       optional: true
-      name: voice_data
 secondary_entities:
-  - entity: switch
-    name: Charge
-    icon: "mdi:lightning-bolt"
-    category: config
-    dps:
-      - id: 3
-        type: boolean
-        name: switch
-        optional: true
-        mapping:
-          - dps_val: null
-            value: false
-            hidden: true
   - entity: sensor
     name: Cleaning time
-    class: duration
     category: diagnostic
+    class: duration
+    icon: "mdi:timer-star"
     dps:
       - id: 6
-        type: integer
         name: sensor
+        type: integer
         unit: min
-        class: measurement
   - entity: sensor
     name: Cleaned area
     category: diagnostic
-    icon: "mdi:floor-plan"
+    icon: "mdi:vector-square-close"
     dps:
       - id: 7
-        type: integer
         name: sensor
-        unit: m2
+        type: integer
+        unit: m²
   - entity: sensor
     class: battery
     dps:
@@ -185,61 +168,60 @@ secondary_entities:
         unit: "%"
         class: measurement
   - entity: select
-    name: Mopping
-    icon: "mdi:cup-water"
-    category: config
+    name: Water setting
+    icon: "mdi:water"
     dps:
       - id: 10
-        type: string
         name: option
+        type: string
         mapping:
           - dps_val: closed
             value: "Off"
           - dps_val: low
             value: Low
-          - dps_val: middle]
+          - dps_val: medium
             value: Medium
           - dps_val: high
             value: High
-  - entity: button
-    name: Reset map
-    category: config
-    dps:
-      - id: 13
-        type: boolean
-        name: button
-        optional: true
   - entity: sensor
-    name: Edge brush life
-    class: duration
+    name: Side brush life
     category: diagnostic
+    class: duration
+    icon: "mdi:timer-sand"
     dps:
       - id: 17
-        type: integer
         name: sensor
+        type: integer
         unit: min
+        range:
+          min: 0
+          max: 12000
   - entity: button
-    name: Edge brush reset
-    class: restart
-    category: config
+    name: Side brush reset
+    category: diagnostic
+    icon: "mdi:autorenew"
     dps:
       - id: 18
         type: boolean
         name: button
         optional: true
   - entity: sensor
-    name: Roll brush life
-    class: duration
+    name: Main brush life
     category: diagnostic
+    class: duration
+    icon: "mdi:timer-sand"
     dps:
       - id: 19
-        type: integer
         name: sensor
+        type: integer
         unit: min
+        range:
+          min: 0
+          max: 18000
   - entity: button
-    name: Roll brush reset
-    class: restart
-    category: config
+    name: Main brush reset
+    category: diagnostic
+    icon: "mdi:autorenew"
     dps:
       - id: 20
         type: boolean
@@ -247,17 +229,21 @@ secondary_entities:
         optional: true
   - entity: sensor
     name: Filter life
-    class: duration
     category: diagnostic
+    class: duration
+    icon: "mdi:timer-sand"
     dps:
       - id: 21
-        type: integer
         name: sensor
+        type: integer
         unit: min
+        range:
+          min: 0
+          max: 9000
   - entity: button
     name: Filter reset
-    class: restart
-    category: config
+    category: diagnostic
+    icon: "mdi:autorenew"
     dps:
       - id: 22
         type: boolean
@@ -265,34 +251,26 @@ secondary_entities:
         optional: true
   - entity: sensor
     name: Mop life
-    class: duration
     category: diagnostic
+    class: duration
+    icon: "mdi:timer-sand"
     dps:
       - id: 23
-        type: integer
         name: sensor
+        type: integer
         unit: min
+        range:
+          min: 0
+          max: 9000
   - entity: button
     name: Mop reset
-    class: restart
-    category: config
+    category: diagnostic
+    icon: "mdi:autorenew"
     dps:
       - id: 24
         type: boolean
         name: button
         optional: true
-  - entity: switch
-    name: Do not disturb
-    category: config
-    dps:
-      - id: 25
-        type: boolean
-        name: switch
-        optional: true
-        mapping:
-          - dps_val: null
-            value: false
-            hidden: true
   - entity: number
     name: Volume
     category: config
@@ -304,27 +282,53 @@ secondary_entities:
         range:
           min: 0
           max: 10
-        unit: "%"
-        mapping:
-          - scale: 0.1
   - entity: select
-    name: Language
-    icon: "mdi:translate"
+    name: Dust collection frequency
     category: config
     dps:
-      - id: 36
-        type: string
+      - id: 37
         name: option
+        type: string
+        mapping:
+          - dps_val: 0
+            value: Never
+            icon: "mdi:numeric-0"
+          - dps_val: 1
+            value: After each clean
+            icon: "mdi:numeric-1"
+          - dps_val: 2
+            value: After 2 cleans
+            icon: "mdi:numeric-2"
+          - dps_val: 3
+            value: After 3 cleans
+            icon: "mdi:numeric-3"
+  - entity: button
+    name: Empty dustbin
+    category: config
+    icon: "mdi:delete-restore"
+    dps:
+      - id: 38
+        name: button
+        type: boolean
+        optional: true
+  - entity: button
+    name: Map reset
+    category: config
+    icon: "mdi:map"
+    dps:
+      - id: 13
+        name: button
+        type: boolean
+        optional: true
+  - entity: switch
+    name: Do not disturb
+    category: config
+    icon: "mdi:sleep"
+    dps:
+      - id: 25
+        name: switch
+        type: boolean
         optional: true
         mapping:
-          - dps_val: turkish
-            value: Türkçe
-          - dps_val: English
-            value: English
-          - dps_val: Russian
-            value: Русский
-          - dps_val: Spanish
-            value: Español
           - dps_val: null
-            value: unknown
-            hidden: true
+            value: false
