@@ -38,3 +38,8 @@ class DoorSecurityStates(BaseStates):
     CLOSED_AND_LOCKED = 1
     CLOSED_AND_UNLOCKED = 2
     OPEN = 3
+
+
+class LockModes(BaseStates):
+    DOOR_MODE = 2
+    CONTINUOUS_MODE = 3

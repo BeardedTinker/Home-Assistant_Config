@@ -5,7 +5,7 @@ import logging
 
 from . import NukiEntity, NukiBridge
 from .constants import DOMAIN
-from .states import DoorSensorStates, LockStates
+from .states import DoorSensorStates, LockStates, LockModes
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -117,9 +117,9 @@ class LockState(NukiEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        current = LockStates(self.last_state.get(
-            "state", LockStates.UNDEFINED.value))
-        return current != LockStates.LOCKED
+        currentMode = LockModes(self.last_state.get("mode", LockModes.DOOR_MODE.value))
+        currentState = LockStates(self.last_state.get("state", LockStates.UNDEFINED.value))
+        return currentState != LockStates.LOCKED or currentMode != LockModes.DOOR_MODE
 
     @property
     def extra_state_attributes(self):

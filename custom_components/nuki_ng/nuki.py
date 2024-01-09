@@ -5,6 +5,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.network import get_url
 from homeassistant.components import webhook
 from homeassistant.exceptions import HomeAssistantError
@@ -192,6 +193,41 @@ class NukiInterface:
     def can_bridge(self):
         return True if self.token and self.bridge else False
 
+    async def web_get_last_log(self, dev_id: str):
+        lock_actions_map = {
+            1: "unlock",
+            2: "lock",
+            3: "unlatch",
+            4: "lock_n_go",
+            5: "lock_n_go_unlatch",
+        }
+        device_actions_map = {
+            0: lock_actions_map,
+            2: {
+                1: "activate_rto",
+                2: "deactivate_rto",
+                3: "electric_strike_actuation",
+                6: "activate_continuous_mode",
+                7: "deactivate_continuous_mode",
+            },
+            3: lock_actions_map,
+            4: lock_actions_map,
+        }
+        device_actions_map[4] = device_actions_map[0]
+        response = await self.web_async_json(
+            lambda r, h: r.get(self.web_url(f"/smartlock/{dev_id}/log"), headers=h)
+        )
+        _LOGGER.debug(f"web_get_last_log ({dev_id}): {response}")
+        for item in response:
+            actions_map = device_actions_map.get(item.get("deviceType"), 0)
+            if item.get("action") in actions_map.keys():
+                return {
+                    "name": item.get("name"),
+                    "action": actions_map[item["action"]],
+                    "timestamp": item["date"].replace("Z", "+00:00"),
+                }
+        return dict()
+
     async def web_get_last_unlock_log(self, dev_id: str):
         actions_map = {
             1: "unlock",
@@ -201,8 +237,9 @@ class NukiInterface:
         response = await self.web_async_json(
             lambda r, h: r.get(self.web_url(f"/smartlock/{dev_id}/log"), headers=h)
         )
+        _LOGGER.debug(f"web_get_last_unlock_log ({dev_id}): {response}")
         for item in response:
-            if item.get("action") in (1, 3, 5):
+            if item.get("action") in actions_map.keys():
                 # unlock, unlatch, lock'n'go with unlatch
                 return {
                     "name": item.get("name"),
@@ -231,19 +268,20 @@ class NukiInterface:
             240: "removed",
             255: "unknown",
         }
+        lock_state_map = {
+            0: "uncalibrated",
+            1: "locked",
+            2: "unlocking",
+            3: "unlocked",
+            4: "locking",
+            5: "unlatched",
+            6: "unlocked (lock 'n' go)",
+            7: "unlatching",
+            254: "motor blocked",
+            255: "undefined",
+        }
         device_state_map = {
-            0: {
-                0: "uncalibrated",
-                1: "locked",
-                2: "unlocking",
-                3: "unlocked",
-                4: "locking",
-                5: "unlatched",
-                6: "unlocked (lock 'n' go)",
-                7: "unlatching",
-                254: "motor blocked",
-                255: "undefined",
-            },
+            0: lock_state_map,
             2: {
                 0: "untrained",
                 1: "online",
@@ -253,18 +291,8 @@ class NukiInterface:
                 253: "boot run",
                 255: "undefined",
             },
-            4: {
-                0: "uncalibrated",
-                1: "locked",
-                2: "unlocking",
-                3: "unlocked",
-                4: "locking",
-                5: "unlatched",
-                6: "unlocked (lock 'n' go)",
-                7: "unlatching",
-                254: "motor blocked",
-                255: "undefined",
-            },
+            3: lock_state_map,
+            4: lock_state_map,
         }
         resp = await self.web_async_json(
             lambda r, h: r.get(self.web_url(f"/smartlock"), headers=h)
@@ -368,6 +396,13 @@ class NukiCoordinator(DataUpdateCoordinator):
         previous["lastKnownState"] = last_state
         self.async_set_updated_data(data)
 
+        """Turn off ring_action binary sensor after 5 seconds"""
+        if update.get("ringactionState", False) == True:
+            async def _schedule_callback(_now):
+                last_state["ringactionState"] = False
+                self.async_set_updated_data(data)
+            async_call_later(self.hass, 5, _schedule_callback)    
+
     async def _update(self):
         try:
             callbacks_list = None
@@ -417,14 +452,22 @@ class NukiCoordinator(DataUpdateCoordinator):
                     item["webId"] = web_id
                     try:
                         item["web_auth"] = await self.api.web_list_all_auths(web_id)
-                    except HomeAssistantError:
+                    except HomeAssistantError as err:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
-                        _LOGGER.exception("Error while fetching auth:")
+                        _LOGGER.exception(f"Error while fetching auth: {err}")
+                        item["web_auth"] = self.device_data(dev_id).get("web_auth", {})
                     try:
-                        item["last_log"] = await self.api.web_get_last_unlock_log(web_id)
-                    except HomeAssistantError:
+                        item["last_unlock_log"] = await self.api.web_get_last_unlock_log(web_id)
+                    except HomeAssistantError as err:
                         _LOGGER.warning("Despite being configured, Web API request has failed")
-                        _LOGGER.exception("Error while fetching last log entry")
+                        _LOGGER.exception(f"Error while fetching last unlock log entry: {err}")
+                        item["last_unlock_log"] = self.device_data(dev_id).get("last_unlock_log", {})
+                    try:
+                        item["last_log"] = await self.api.web_get_last_log(web_id)
+                    except HomeAssistantError as err:
+                        _LOGGER.warning("Despite being configured, Web API request has failed")
+                        _LOGGER.exception(f"Error while fetching last log entry: {err}")
+                        item["last_log"] = self.device_data(dev_id).get("last_log", {})
                 if web_list:
                     item["config"] = web_list.get(web_id, {}).get("config")
                     item["advancedConfig"] = web_list.get(web_id, {}).get("advancedConfig")
@@ -499,7 +542,7 @@ class NukiCoordinator(DataUpdateCoordinator):
         return self.data.get("info", {})
 
     def is_lock(self, dev_id: str) -> bool:
-        return self.device_data(dev_id).get("deviceType") in (0, 4)
+        return self.device_data(dev_id).get("deviceType") in (0, 3, 4)
 
     def is_opener(self, dev_id: str) -> bool:
         return self.device_data(dev_id).get("deviceType") == 2

@@ -6,6 +6,7 @@ import logging
 
 from . import NukiEntity, NukiOpenerRingSuppressionEntity
 from .constants import DOMAIN
+from .states import LockModes
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ async def async_setup_entry(
             entities.append(OpenerRingSuppression(coordinator, dev_id))
             entities.append(OpenerRingSuppressionRTO(coordinator, dev_id))
             entities.append(OpenerRingSuppressionCM(coordinator, dev_id))
+        if coordinator.is_opener(dev_id):
+            entities.append(OpenerContinuousMode(coordinator, dev_id))
     async_add_entities(entities)
     return True
 
@@ -165,3 +168,29 @@ class OpenerRingSuppressionCM(OpenerRingSuppressionSwitch):
         self.set_id("switch", "ring_suppression_cm")
         self.set_name("Ring suppression (Continuous Mode)")
         self._attr_icon = "mdi:bell-cancel"
+
+
+class OpenerContinuousMode(NukiEntity, SwitchEntity):
+
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("switch", "continuous_mode")
+        self.set_name("Continuous Mode")
+
+    @property
+    def icon(self) -> str | None:
+        return "mdi:lock-open-check" if self.is_on else "mdi:lock-check"
+
+    @property
+    def is_on(self):
+        return LockModes(self.last_state.get("mode", LockModes.DOOR_MODE.value)) == LockModes.CONTINUOUS_MODE
+
+    @property
+    def entity_category(self):
+        return EntityCategory.CONFIG
+
+    async def async_turn_on(self, **kwargs):
+        await self.coordinator.action(self.device_id, "activate_continuous_mode")
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.action(self.device_id, "deactivate_continuous_mode")

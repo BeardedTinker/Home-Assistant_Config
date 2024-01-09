@@ -30,6 +30,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
             entities.append(DoorSensorState(coordinator, dev_id))
             entities.append(DoorSecurityState(coordinator, dev_id))
         if coordinator.info_field(dev_id, None, "last_log"):
+            entities.append(LastLog(coordinator, dev_id))
+        if coordinator.info_field(dev_id, None, "last_unlock_log"):
             entities.append(LastUnlockUser(coordinator, dev_id))
         
     async_add_entities(entities)
@@ -199,6 +201,30 @@ class LockVersion(NukiEntity, SensorEntity):
     def entity_category(self):
         return EntityCategory.DIAGNOSTIC
 
+class LastLog(NukiEntity, SensorEntity):
+
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("sensor", "last_log")
+        self.set_name("Last Log")
+        self._attr_icon = "mdi:history"
+
+    @property
+    def state(self):
+        return self.coordinator.info_field(self.device_id, "Unknown", "last_log", "name")
+
+    @property
+    def extra_state_attributes(self):
+        timestamp = self.coordinator.info_field(self.device_id, None, "last_log", "timestamp")
+        action = self.coordinator.info_field(self.device_id, "unknown", "last_log", "action")
+        return {
+            "timestamp": datetime.fromisoformat(timestamp) if isinstance(timestamp, str) else None,
+            "action": action,
+        }
+
+    @property
+    def entity_category(self):
+        return EntityCategory.DIAGNOSTIC
 
 class LastUnlockUser(NukiEntity, SensorEntity):
 
@@ -210,12 +236,12 @@ class LastUnlockUser(NukiEntity, SensorEntity):
 
     @property
     def state(self):
-        return self.coordinator.info_field(self.device_id, "Unknown", "last_log", "name")
+        return self.coordinator.info_field(self.device_id, "Unknown", "last_unlock_log", "name")
 
     @property
     def extra_state_attributes(self):
-        timestamp = self.coordinator.info_field(self.device_id, None, "last_log", "timestamp")
-        action = self.coordinator.info_field(self.device_id, "unknown", "last_log", "action")
+        timestamp = self.coordinator.info_field(self.device_id, None, "last_unlock_log", "timestamp")
+        action = self.coordinator.info_field(self.device_id, "unknown", "last_unlock_log", "action")
         return {
             "timestamp": datetime.fromisoformat(timestamp) if isinstance(timestamp, str) else None,
             "action": action,
