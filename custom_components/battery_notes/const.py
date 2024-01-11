@@ -49,10 +49,14 @@ SERVICE_BATTERY_REPLACED = "set_battery_replaced"
 ATTR_DEVICE_ID = "device_id"
 ATTR_DATE_TIME_REPLACED = "datetime_replaced"
 ATTR_REMOVE = "remove"
+ATTR_BATTERY_QUANTITY = "battery_quantity"
+ATTR_BATTERY_TYPE = "battery_type"
+
 
 SERVICE_BATTERY_REPLACED_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_DEVICE_ID): cv.string,
+        vol.Optional(ATTR_DATE_TIME_REPLACED): cv.datetime
     }
 )
 
