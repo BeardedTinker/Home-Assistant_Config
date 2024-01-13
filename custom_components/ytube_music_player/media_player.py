@@ -172,6 +172,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self._playContinuous = True
 		self._signatureTimestamp = 0
 		self._x_to_idle = None  # Some Mediaplayer don't transition to 'idle' but to 'off' on track end. This re-routes off to idle
+		self._ignore_paused_on_media_change = False	# RobinR1, OwnTone compatibility
+		self._ignore_next_remote_pause_state = False	# RobinR1, OwnTone compatibility: Some Mediaplayers temporarely switches to 'paused' during media changes (next/prev/seek)
 		self._search = {"query": "", "filter": None, "limit": 20}
 		self.reset_attributs()
 
@@ -781,11 +783,24 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			# chromecast quite frequently change from playing to idle twice, so we need some kind of time guard
 			if(old_state.state == STATE_PLAYING and new_state.state == STATE_IDLE and (datetime.datetime.now() - self._last_auto_advance).total_seconds() > 10):
 				self._allow_next = False
+				# add track to history
+				try:
+					response = await self.hass.async_add_executor_job(lambda: self._api.get_song(self._attributes['videoId'], self._signatureTimestamp))
+					await self.hass.async_add_executor_job(lambda: self._api.add_history_item(response))
+				except:
+					self.log_me('debug', "adding "+self._attributes['videoId']+" to history failed")
+
 				await self.async_get_track()
 			# turn this player off when the remote_player was shut down
 			elif((old_state.state == STATE_PLAYING or old_state.state == STATE_IDLE or old_state.state == STATE_PAUSED) and new_state.state == STATE_OFF):
 				if(self._x_to_idle == STATE_OFF or self._x_to_idle == STATE_OFF_1X):  # workaround for MPD (changes to OFF at the end of a track)
 					self._allow_next = False
+					# add track to history
+					try:
+						response = await self.hass.async_add_executor_job(lambda: self._api.get_song(self._attributes['videoId'], self._signatureTimestamp))
+						await self.hass.async_add_executor_job(lambda: self._api.add_history_item(response))
+					except:
+						self.log_me('debug', "adding "+self._attributes['videoId']+" to history failed")
 					await self.async_get_track()
 					if(self._x_to_idle == STATE_OFF_1X):
 						self._x_to_idle = None
@@ -797,11 +812,23 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			elif(old_state.state == STATE_PLAYING and new_state.state == STATE_PAUSED and  # noqa: W504
 								(datetime.datetime.now() - self._last_auto_advance).total_seconds() > 10 and  # noqa: W504
 								self._x_to_idle == STATE_PAUSED):
+				# add track to history
+				try:
+					response = await self.hass.async_add_executor_job(lambda: self._api.get_song(self._attributes['videoId'], self._signatureTimestamp))
+					await self.hass.async_add_executor_job(lambda: self._api.add_history_item(response))
+				except:
+					self.log_me('debug', "adding "+self._attributes['videoId']+" to history failed")
 				self._allow_next = False
 				await self.async_get_track()
-			# set this player in to pause state when the remote player does
+			# set this player in to pause state when the remote player does, or ignore when assumed it is a temporary state (as some players do while seeking/skipping track)
 			elif(old_state.state == STATE_PLAYING and new_state.state == STATE_PAUSED):
-				return await self.async_media_pause()
+				self.log_me('debug', "Remote Player changed from PLAYING to PAUSED.")
+				if(self._ignore_paused_on_media_change and self._ignore_next_remote_pause_state):	# RobinR1, OwnTone compatibility
+					self.log_me('debug', "Ignoring state change")					# RobinR1, OwnTone compatibility
+					self._ignore_next_remote_pause_state = False					# RobinR1, OwnTone compatibility
+					return										# RobinR1, OwnTone compatibility
+				else:											# RobinR1, OwnTone compatibility
+					return await self.async_media_pause()
 			# resume playback when the player does
 			elif(old_state.state == STATE_PAUSED and new_state.state == STATE_PLAYING and self._state == STATE_PAUSED):
 				return await self.async_media_play()
@@ -976,7 +1003,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			# seek, if possible
 			new_player = self.hass.states.get(self._remote_player)
 			if (all(a in old_player.attributes for a in ('media_position', 'media_position_updated_at', 'media_duration')) and 'supported_features' in new_player.attributes):
-				if(new_player.attributes['supported_features'] | SUPPORT_SEEK):
+				if(new_player.attributes['supported_features'] | MediaPlayerEntityFeature.SEEK):
 					now = datetime.datetime.now(datetime.timezone.utc)
 					delay = now - old_player.attributes['media_position_updated_at']
 					pos = delay.total_seconds() + old_player.attributes['media_position']
@@ -1487,9 +1514,13 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			self._attributes['current_playlist_title'] = ""
 			if(media_type == MediaType.PLAYLIST):
 				crash_extra = 'get_playlist(playlistId=' + str(media_id) + ')'
-				playlist_info = await self.hass.async_add_executor_job(lambda: self._api.get_playlist(media_id, limit=self._trackLimit))
-				self._tracks = playlist_info['tracks'][:self._trackLimit]  # limit function doesn't really work ... seems like
-				self._attributes['current_playlist_title'] = str(playlist_info['title'])
+				if(media_id == ALL_LIB_TRACKS):
+					self._tracks = await self.hass.async_add_executor_job(lambda: self._api.get_library_songs(limit=self._trackLimit))
+					self._attributes['current_playlist_title'] = ALL_LIB_TRACKS_TITLE
+				else:
+					playlist_info = await self.hass.async_add_executor_job(lambda: self._api.get_playlist(media_id, limit=self._trackLimit))
+					self._tracks = playlist_info['tracks'][:self._trackLimit]  # limit function doesn't really work ... seems like
+					self._attributes['current_playlist_title'] = str(playlist_info['title'])
 			elif(media_type == MediaType.ALBUM):
 				crash_extra = 'get_album(browseId=' + str(media_id) + ')'
 				if media_id[:7] == "OLAK5uy": #Sharing over Android app sends 'bad' album id. Checking and converting.
@@ -1638,12 +1669,14 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		if self._playing:
 			self._next_track_no = max(self._next_track_no - 2, -1)
 			self._allow_next = False
+			self._ignore_next_remote_pause_state = True	# RobinR1, OwnTone compatibility
 			await self.async_get_track()
 
 	async def async_media_next_track(self, **kwargs):
 		# Send next track command.
 		if self._playing:
 			self._allow_next = False
+			self._ignore_next_remote_pause_state = True	# RobinR1, OwnTone compatibility
 			await self.async_get_track()
 
 	async def async_media_stop(self, **kwargs):
@@ -1667,6 +1700,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 	async def async_media_seek(self, position):
 		# Seek the media to a specific location.
 		self.log_me('debug', "seek: " + str(position))
+		self._ignore_next_remote_pause_state = True			# RobinR1, OwnTone compatibility
 		data = {ATTR_ENTITY_ID: self._remote_player, 'seek_position': position}
 		await self.hass.services.async_call(DOMAIN_MP, 'media_seek', data)
 
@@ -1779,18 +1813,27 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			await self.async_get_track()
 			if('pos' in self._interrupt_data):
 				player = self.hass.states.get(self._remote_player)
-				if(player.attributes['supported_features'] | SUPPORT_SEEK):
+				if(player.attributes['supported_features'] | MediaPlayerEntityFeature.SEEK):
 					data = {'seek_position': self._interrupt_data['pos'], ATTR_ENTITY_ID: self._remote_player}
 					await self.hass.services.async_call(DOMAIN_MP, media_player.SERVICE_MEDIA_SEEK, data)
 				self._interrupt_data['pos'] = None
 		elif(command == SERVICE_CALL_RELOAD_DROPDOWNS):
 			await self.async_update_selects()
-		elif(command == SERVICE_CALL_OFF_IS_IDLE):  # needed for the MPD but for nobody else
+		elif(command == SERVICE_CALL_OFF_IS_IDLE):  # needed for the MPD and OwnTone server but for nobody else
 			self._x_to_idle = STATE_OFF
 			self.log_me('debug', "Setting x_is_idle to State Off")
 		elif(command == SERVICE_CALL_PAUSED_IS_IDLE):  # needed for the Sonos but for nobody else
 			self._x_to_idle = STATE_PAUSED
 			self.log_me('debug', "Setting x_is_idle to State Paused")
+		elif(command == SERVICE_CALL_IGNORE_PAUSED_ON_MEDIA_CHANGE):		# RobinR1, OwnTone compatibility
+			self._ignore_paused_on_media_change = True			# RobinR1, OwnTone compatibility
+			self.log_me('debug', "Setting to ignore remote player Paused state on Next/Prev track and Seek")
+		elif(command == SERVICE_CALL_DO_NOT_IGNORE_PAUSED_ON_MEDIA_CHANGE):	# RobinR1, OwnTone compatibility
+			self._ignore_paused_on_media_change = False			# RobinR1, OwnTone compatibility
+			self.log_me('debug', "Setting to NOT ignore remote player Paused state on Next/Prev track and Seek")
+		elif(command == SERVICE_CALL_IDLE_IS_IDLE): # reset idle detection to default behaviour
+			self._x_to_idle = None
+			self.log_me('debug', "Resetting x_is_idle")
 		elif(command == SERIVCE_CALL_DEBUG_AS_ERROR):
 			self._debug_as_error = True
 			self.log_me('debug', "Posting debug messages as error until restart")

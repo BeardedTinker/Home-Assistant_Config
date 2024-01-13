@@ -1,6 +1,5 @@
 """Platform for sensor integration."""
 import logging
-from homeassistant.const import TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import NoEntitySpecifiedError
 from . import DOMAIN

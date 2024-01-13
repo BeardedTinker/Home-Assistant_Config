@@ -97,6 +97,9 @@ SERVICE_CALL_INTERRUPT_RESUME = "interrupt_resume"
 SERVICE_CALL_RELOAD_DROPDOWNS = "reload_dropdowns"
 SERVICE_CALL_OFF_IS_IDLE = "off_is_idle"
 SERVICE_CALL_PAUSED_IS_IDLE = "paused_is_idle"
+SERVICE_CALL_IGNORE_PAUSED_ON_MEDIA_CHANGE = "ignore_paused_on_media_change"
+SERVICE_CALL_DO_NOT_IGNORE_PAUSED_ON_MEDIA_CHANGE = "do_not_ignore_paused_on_media_change"
+SERVICE_CALL_IDLE_IS_IDLE = "idle_is_idle"
 SERIVCE_CALL_DEBUG_AS_ERROR = "debug_as_error"
 SERVICE_CALL_LIKE_IN_NAME = "like_in_name"
 SERVICE_CALL_GOTO_TRACK = "goto_track"
@@ -126,12 +129,12 @@ CONF_SELECT_SPEAKERS = 'select_speakers'
 CONF_SELECT_PLAYMODE = 'select_playmode'
 CONF_SELECT_PLAYCONTINUOUS = 'select_playcontinuous'
 
-DEFAULT_SELECT_PLAYCONTINUOUS = input_boolean.DOMAIN + "." + DOMAIN + '_playcontinuous'
-DEFAULT_SELECT_SOURCE = input_select.DOMAIN + "." + DOMAIN + '_source'
-DEFAULT_SELECT_PLAYLIST = input_select.DOMAIN + "." + DOMAIN + '_playlist'
-DEFAULT_SELECT_PLAYMODE = input_select.DOMAIN + "." + DOMAIN + '_playmode'
-DEFAULT_SELECT_SPEAKERS = input_select.DOMAIN + "." + DOMAIN + '_speakers'
-DEFAULT_HEADER_FILENAME = 'ytube_header.json'
+DEFAULT_SELECT_PLAYCONTINUOUS = "" #input_boolean.DOMAIN + "." + DOMAIN + '_playcontinuous' # cleared defaults to avoid further issues with multiple instances
+DEFAULT_SELECT_SOURCE = "" #input_select.DOMAIN + "." + DOMAIN + '_source'     # cleared defaults to avoid further issues with multiple instances
+DEFAULT_SELECT_PLAYLIST = "" #input_select.DOMAIN + "." + DOMAIN + '_playlist' # cleared defaults to avoid further issues with multiple instances
+DEFAULT_SELECT_PLAYMODE = "" #input_select.DOMAIN + "." + DOMAIN + '_playmode' # cleared defaults to avoid further issues with multiple instances
+DEFAULT_SELECT_SPEAKERS = "" #input_select.DOMAIN + "." + DOMAIN + '_speakers' # cleared defaults to avoid further issues with multiple instances
+DEFAULT_HEADER_FILENAME = 'header_'
 DEFAULT_LIKE_IN_NAME = False
 DEFAULT_DEBUG_AS_ERROR = False
 DEFAULT_INIT_EXTRA_SENSOR = False
@@ -166,6 +169,8 @@ LIB_ALBUM_TITLE = "Library Albums"
 
 LIB_TRACKS = 'library_tracks'
 LIB_TRACKS_TITLE = "Library Songs"
+ALL_LIB_TRACKS = 'all_library_tracks'
+ALL_LIB_TRACKS_TITLE = 'All library tracks'
 
 HISTORY = 'history'
 HISTORY_TITLE = "Last played songs"
@@ -238,7 +243,7 @@ async def async_try_login(hass, path, brand_id):
 			_LOGGER.debug("- using brand ID: "+brand_id)
 			api = await hass.async_add_executor_job(YTMusic,path,brand_id)
 		else:
-			_LOGGER.debug("- login without brand ID")
+			_LOGGER.debug("- login without brand ID and credential at path "+path)
 			api = await hass.async_add_executor_job(YTMusic,path)
 	except KeyError as err:
 		_LOGGER.debug("- Key exception")
