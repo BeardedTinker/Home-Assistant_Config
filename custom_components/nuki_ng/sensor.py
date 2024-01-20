@@ -143,9 +143,9 @@ class DoorSecurityState(NukiEntity, SensorEntity):
         return str(self.get_state())
 
     def get_state(self) -> DoorSecurityStates:
-        lock_state = LockStates(self.last_state.get("state"))
+        lock_state = LockStates(self.last_state.get("state", LockStates.UNDEFINED.value))
         door_sensor_state = DoorSensorStates(
-            self.last_state.get("doorsensorState"))
+            self.last_state.get("doorsensorState"), DoorSensorStates.UNKNOWN.value)
 
         if lock_state == LockStates.LOCKED and door_sensor_state == DoorSensorStates.DOOR_CLOSED:
             return DoorSecurityStates.CLOSED_AND_LOCKED

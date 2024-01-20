@@ -25,6 +25,8 @@ async def async_setup_entry(
             entities.append(AuthEntry(coordinator, dev_id, auth_id))
         if coordinator.info_field(dev_id, None, "advancedConfig", "autoLock") != None:
             entities.append(LockAutoLock(coordinator, dev_id))
+        if coordinator.info_field(dev_id, None, "config", "buttonEnabled") != None:
+            entities.append(LockButtonEnabled(coordinator, dev_id))            
         if coordinator.info_field(dev_id, -1, "openerAdvancedConfig", "doorbellSuppression")  >= 0:
             entities.append(OpenerRingSuppression(coordinator, dev_id))
             entities.append(OpenerRingSuppressionRTO(coordinator, dev_id))
@@ -121,7 +123,33 @@ class LockAutoLock(NukiEntity, SwitchEntity):
     async def async_turn_off(self, **kwargs):
         await self.coordinator.update_config(self.device_id, "advancedConfig", dict(autoLock=False))
 
+class LockButtonEnabled(NukiEntity, SwitchEntity):
+    def __init__(self, coordinator, device_id):
+        super().__init__(coordinator, device_id)
+        self.set_id("switch", "button_enabled")
+        self.set_name("Button Enabled")
+        self._attr_icon = "mdi:lock-clock"
 
+    @property
+    def is_on(self):
+        return self.coordinator.info_field(
+            self.device_id, False, "config", "buttonEnabled"
+        )
+
+    @property
+    def entity_category(self):
+        return EntityCategory.CONFIG
+
+    async def async_turn_on(self, **kwargs):
+        await self.coordinator.update_config(
+            self.device_id, "config", dict(buttonEnabled=True)
+        )
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.update_config(
+            self.device_id, "config", dict(buttonEnabled=False)
+        )
+        
 class OpenerRingSuppressionSwitch(NukiOpenerRingSuppressionEntity, SwitchEntity):
     
     def __init__(self, coordinator, device_id, suppression):

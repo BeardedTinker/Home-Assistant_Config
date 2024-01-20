@@ -58,7 +58,7 @@ class NukiInterface:
     def bridge_url(self, path: str, extra=None) -> str:
         extra_str = "&%s" % (urlencode(extra)) if extra else ""
         url = f"http://{self.bridge}:8080"
-        if re.match(".+\\:\d+$", self.bridge):
+        if re.match(r".+:\d+$", self.bridge):
             # Port inside
             url = f"http://{self.bridge}"
         if self.use_hashed:

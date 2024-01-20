@@ -1,4 +1,4 @@
-from homeassistant.components.lock import LockEntity, SUPPORT_OPEN
+from homeassistant.components.lock import LockEntity, LockEntityFeature
 
 import logging
 
@@ -27,7 +27,7 @@ class Lock(NukiEntity, LockEntity):
 
     @property
     def supported_features(self):
-        return SUPPORT_OPEN
+        return LockEntityFeature.OPEN
 
     @property
     def lock_mode(self):
