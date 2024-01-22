@@ -148,6 +148,8 @@ async def async_setup_entry(
 class MassPlayer(MassBaseEntity, MediaPlayerEntity):
     """Representation of MediaPlayerEntity from Music Assistant Player."""
 
+    # pylint: disable=W0223
+
     _attr_name = None
 
     def __init__(self, mass: MusicAssistantClient, player_id: str) -> None:
@@ -270,7 +272,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         media_album_artist = None
         media_album_name = None
         media_title = player.active_source
-        media_content_id = player.current_url
+        media_content_id = player.current_item_id
         media_duration = None
         # Music Assistant is the active source and actually has a MediaItem loaded
         if queue and queue.current_item and queue.current_item.media_item:
@@ -397,13 +399,13 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
     async def async_play_media(
         self,
         media_type: str,
-        media_id: str,
+        media_id: str | list[str],
         enqueue: MediaPlayerEnqueue | None = None,
         announce: bool | None = None,
         **kwargs: Any,
     ) -> None:
         """Send the play_media command to the media player."""
-        if media_source.is_media_source_id(media_id):
+        if isinstance(media_id, str) and media_source.is_media_source_id(media_id):
             # Handle media_source
             sourced_media = await media_source.async_resolve_media(
                 self.hass, media_id, self.entity_id
@@ -413,7 +415,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
 
         # forward to our advanced play_media handler
         await self._async_play_media_advanced(
-            media_id=[media_id],
+            media_id=media_id if isinstance(media_id, list) else [media_id],
             enqueue=enqueue,
             announce=announce,
             media_type=media_type,

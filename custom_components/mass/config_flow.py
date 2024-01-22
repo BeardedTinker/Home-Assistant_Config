@@ -43,7 +43,7 @@ DEFAULT_TITLE = "Music Assistant"
 ON_SUPERVISOR_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_USE_ADDON, default=True): bool,
-        vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+        vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
             selector.ConversationAgentSelectorConfig(language="en")
         ),
         vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -57,7 +57,7 @@ def get_manual_schema(user_input: dict[str, Any]) -> vol.Schema:
     return vol.Schema(
         {
             vol.Required(CONF_URL, default=default_url): str,
-            vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+            vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
                 selector.ConversationAgentSelectorConfig(language="en")
             ),
             vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -69,7 +69,7 @@ def get_zeroconf_schema() -> vol.Schema:
     """Return a schema for the zeroconf step."""
     return vol.Schema(
         {
-            vol.Optional(CONF_OPENAI_AGENT_ID, default=None): selector.ConversationAgentSelector(
+            vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
                 selector.ConversationAgentSelectorConfig(language="en")
             ),
             vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -299,10 +299,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Check that we can connect to the address.
             try:
                 self.server_info = await get_server_info(self.hass, ADDON_URL)
-                self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
-                self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
             except CannotConnect:
                 return self.async_abort(reason="cannot_connect")
+        if user_input is not None:
+            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+            self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
         return await self._async_create_entry_or_abort()
 
     async def _async_create_entry_or_abort(self) -> FlowResult:
@@ -398,7 +399,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Optional(
                 CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
-                default=config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS),
+                default=config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
+                if config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS) is not None
+                else False,
             ): bool,
         }
 
