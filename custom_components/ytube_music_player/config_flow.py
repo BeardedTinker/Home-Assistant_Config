@@ -52,6 +52,7 @@ class yTubeMusicFlowHandler(config_entries.ConfigFlow):
 	async def async_step_oauth(self, user_input=None):   # pylint: disable=unused-argument
 		self._errors = {}
 		if user_input is not None:
+			user_input[CONF_NAME] = user_input[CONF_NAME].replace(DOMAIN_MP+".","") # make sure to erase "media_player.bla" -> bla
 			self.data = user_input
 		try:
 			self.token = await self.hass.async_add_executor_job(lambda: self.oauth.token_from_code(self.code["device_code"])) 

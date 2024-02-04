@@ -679,10 +679,11 @@ async def create_sensors(  # noqa: C901
             _LOGGER.error(error)
 
     if not entities_to_add.has_entities():
-        exception_message = "Could not resolve any entities"
+        log_message = "Could not resolve any entities"
         if CONF_CREATE_GROUP in config:
-            exception_message += f" in group '{config.get(CONF_CREATE_GROUP)}'"
-        raise SensorConfigurationError(exception_message)
+            log_message += f" in group '{config.get(CONF_CREATE_GROUP)}'"
+        _LOGGER.warning(log_message)
+        return entities_to_add
 
     # Create group sensors (power, energy, utility)
     if CONF_CREATE_GROUP in config:
@@ -864,7 +865,7 @@ class EntitiesBucket:
         self.new.extend(bucket.new)
         self.existing.extend(bucket.existing)
 
-    def all(self) -> list[Entity]:  # noqa: A003
+    def all(self) -> list[Entity]:
         """Return all entities both new and existing"""
         return self.new + self.existing
 

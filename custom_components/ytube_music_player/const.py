@@ -103,6 +103,8 @@ SERVICE_CALL_IDLE_IS_IDLE = "idle_is_idle"
 SERIVCE_CALL_DEBUG_AS_ERROR = "debug_as_error"
 SERVICE_CALL_LIKE_IN_NAME = "like_in_name"
 SERVICE_CALL_GOTO_TRACK = "goto_track"
+SERVICE_CALL_MOVE_TRACK = "move_track_within_queue"
+SERVICE_CALL_APPEND_TRACK = "append_track_to_queue"
 
 
 CONF_RECEIVERS = 'speakers'	 # list of speakers (media_players)
@@ -130,7 +132,7 @@ CONF_SELECT_PLAYMODE = 'select_playmode'
 CONF_SELECT_PLAYCONTINUOUS = 'select_playcontinuous'
 
 DEFAULT_SELECT_PLAYCONTINUOUS = "" #input_boolean.DOMAIN + "." + DOMAIN + '_playcontinuous' # cleared defaults to avoid further issues with multiple instances
-DEFAULT_SELECT_SOURCE = "" #input_select.DOMAIN + "." + DOMAIN + '_source'     # cleared defaults to avoid further issues with multiple instances
+DEFAULT_SELECT_SOURCE = "" #input_select.DOMAIN + "." + DOMAIN + '_source'	 # cleared defaults to avoid further issues with multiple instances
 DEFAULT_SELECT_PLAYLIST = "" #input_select.DOMAIN + "." + DOMAIN + '_playlist' # cleared defaults to avoid further issues with multiple instances
 DEFAULT_SELECT_PLAYMODE = "" #input_select.DOMAIN + "." + DOMAIN + '_playmode' # cleared defaults to avoid further issues with multiple instances
 DEFAULT_SELECT_SPEAKERS = "" #input_select.DOMAIN + "." + DOMAIN + '_speakers' # cleared defaults to avoid further issues with multiple instances
@@ -163,6 +165,10 @@ SEARCH_ID = "search_id"
 SEARCH_TYPE = "search_type"
 LIB_PLAYLIST = 'library_playlists'
 LIB_PLAYLIST_TITLE = "Library Playlists"
+
+HOME_TITLE = "Home"
+HOME_CAT = "home"
+HOME_CAT_2 = "home2"
 
 LIB_ALBUM = 'library_albums'
 LIB_ALBUM_TITLE = "Library Albums"
@@ -331,20 +337,20 @@ def ensure_config(user_input):
 
 
 def find_thumbnail(item):
-    item_thumbnail = ""
-    try:
-        thumbnail_list = ""
-        if 'thumbnails' in item:
-            if 'thumbnail' in item['thumbnails']:
-                thumbnail_list = item['thumbnails']['thumbnail']
-            else:
-                thumbnail_list = item['thumbnails']
-        elif 'thumbnail' in item:
-            thumbnail_list = item['thumbnail']
+	item_thumbnail = ""
+	try:
+		thumbnail_list = ""
+		if 'thumbnails' in item:
+			if 'thumbnail' in item['thumbnails']:
+				thumbnail_list = item['thumbnails']['thumbnail']
+			else:
+				thumbnail_list = item['thumbnails']
+		elif 'thumbnail' in item:
+			thumbnail_list = item['thumbnail']
 
-        if isinstance(thumbnail_list, list):
-            if 'url' in thumbnail_list[-1]:
-                item_thumbnail = thumbnail_list[-1]['url']
-    except:
-        pass
-    return item_thumbnail
+		if isinstance(thumbnail_list, list):
+			if 'url' in thumbnail_list[-1]:
+				item_thumbnail = thumbnail_list[-1]['url']
+	except:
+		pass
+	return item_thumbnail
