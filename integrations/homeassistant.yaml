@@ -15,5 +15,5 @@ homeassistant:
 #  customize_glob: !include_dir_merge_named ../customizations/globs
 
   allowlist_external_dirs:
-    - '/config'
-    - '/tmp'
+    - "/config"
+    - "/tmp"
