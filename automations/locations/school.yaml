@@ -11,19 +11,21 @@ description: 'Notify when kid leaves school'
 trigger:
 - platform: numeric_state
   entity_id:
-  - proximity.school
+#  - proximity.school
+  - sensor.school_nearest_distance
   above: 100
 
 condition:
   condition: template
-  value_template: '{{ states.proximity.school.attributes.dir_of_travel == "away_from" }}'
+#  value_template: '{{ states.proximity.school.attributes.dir_of_travel == "away_from" }}'
+  value_template: '{{ states.sensor.school_nearest_direction_of_travel == "away_from" }}'
 
 action:
 - service: script.notify_engine
   data:
     who: 'family'
     title: '🏫 Leaving school'
-    value1: "Looks like '{{ states.proximity.school.attributes.nearest }}' has left the school"
+    value1: "Looks like '{{ states.sensor.school_nearest_device }}' has left the school"
     target_id: !secret telegram_bot_chat_id
     group: information
     tag_id: 'information'
@@ -56,7 +58,7 @@ action:
               - media_player.display_me
               - media_player.clock_me
           data:
-            message: "Hey you! Looks like '{{ states.proximity.school.attributes.nearest }}' has left the school"
+            message: "Hey you! Looks like '{{ states.sensor.school_nearest_device }}' has left the school"
           extra:
             volume: 0.5
 mode: single

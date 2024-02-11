@@ -11,8 +11,9 @@ description: 'Check if and who arrived at HRT by using proximity sensor'
 trigger:
 - platform: numeric_state
   entity_id:
-  - proximity.hrt
-  below: '300'
+#  - proximity.hrt
+  - sensor.hrt_nearest_distance
+  below: '100'
 
 #condition:
 #  condition: template
@@ -21,7 +22,7 @@ trigger:
 action:
 - service: notify.ebroz_bot
   data:
-    message: Looks like '{{ states.proximity.hrt.attributes.nearest }}' is arriving at HRT
+    message: Looks like '{{ states.sensor.hrt_nearest_device }}' is arriving at HRT
     title: Proximity to HRT
 
 mode: single

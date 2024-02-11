@@ -11,8 +11,9 @@ description: 'Notify is anyone is getting close to home'
 trigger:
 - platform: numeric_state
   entity_id:
-  - proximity.home
-  below: '300'
+#  - proximity.home
+  - sensor.home_nearest_distance
+  below: '100'
 
 #condition:
 #  condition: template
@@ -23,7 +24,7 @@ action:
   data:
     who: 'family'
     title: '🏠 Arriving home'
-    value1: "Looks like '{{ states.proximity.home.attributes.nearest }}' is arriving home"
+    value1: "Looks like '{{ states.sensor.home_nearest_device }}' is arriving home"
     target_id: !secret telegram_bot_chat_id
     group: information
     tag_id: 'information'
@@ -42,6 +43,6 @@ action:
     entity_id:
       - media_player.display_me
       - media_player.clock_me
-    message: "Hey there! Looks like '{{ states.proximity.home.attributes.nearest }}' is almost home"
+    message: "Hey there! Looks like '{{ states.sensor.home_nearest_device }}' is almost home"
 
 mode: single
