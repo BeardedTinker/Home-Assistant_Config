@@ -68,16 +68,16 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
     def supported_color_modes(self):
         """Return the supported color modes for this light."""
         if self._color_mode_dps:
-            return [
+            return {
                 ColorMode(mode)
                 for mode in self._color_mode_dps.values(self._device)
                 if mode and hasattr(ColorMode, mode.upper())
-            ]
+            }
         else:
             try:
                 mode = ColorMode(self.color_mode)
                 if mode and mode != ColorMode.UNKNOWN:
-                    return [mode]
+                    return {mode}
             except ValueError:
                 _LOGGER.warning(
                     "%s/%s: Unrecognised color mode %s ignored",
@@ -85,7 +85,7 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
                     self.name or "light",
                     self.color_mode,
                 )
-        return []
+        return set()
 
     @property
     def supported_features(self):
@@ -352,7 +352,10 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
 
         if (
             ATTR_BRIGHTNESS in params
-            and self.raw_color_mode != ColorMode.HS
+            and (
+                (self.raw_color_mode != ColorMode.HS and color_mode is None)
+                or (color_mode != ColorMode.HS and color_mode is not None)
+            )
             and self._brightness_dps
         ):
             bright = params.get(ATTR_BRIGHTNESS)
