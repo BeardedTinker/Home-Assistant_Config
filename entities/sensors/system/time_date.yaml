@@ -12,7 +12,7 @@ display_options:
   - 'date_time_iso'
   - 'time_date'
   - 'time_utc'
-  - 'beat'
+#  - 'beat'
 
 # These are NOT used, so disabled
 #  - date_time
