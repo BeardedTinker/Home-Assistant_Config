@@ -1,4 +1,5 @@
 """Media Source Implementation."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -77,6 +78,7 @@ async def async_browse_media(
     media_content_type: str | None,
 ) -> BrowseMedia:
     """Browse media."""
+    # pylint: disable=too-many-return-statements
     if media_content_id is None:
         return await build_main_listing(hass)
 
@@ -132,7 +134,9 @@ async def build_main_listing(hass: HomeAssistant):
         parent_source.children.append(child_source)
 
     try:
-        item = await media_source.async_browse_media(hass, None, content_filter=media_source_filter)
+        item = await media_source.async_browse_media(
+            hass, None, content_filter=media_source_filter
+        )
         # If domain is None, it's overview of available sources
         if item.domain is None and item.children is not None:
             parent_source.children.extend(item.children)
@@ -316,7 +320,11 @@ def build_item(
     media_class=None,
 ) -> BrowseMedia:
     """Return BrowseMedia for MediaItem."""
-    title = f"{item.artists[0].name} - {item.name}" if hasattr(item, "artists") else item.name
+    title = (
+        f"{item.artists[0].name} - {item.name}"
+        if hasattr(item, "artists")
+        else item.name
+    )
     img_url = mass.get_image_url(image) if (image := item.image) else None
 
     return BrowseMedia(

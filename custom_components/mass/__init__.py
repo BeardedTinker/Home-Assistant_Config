@@ -1,4 +1,5 @@
 """Music Assistant (music-assistant.github.io) integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -50,7 +51,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             learn_more_url="https://github.com/music-assistant/hass-music-assistant/issues/1143",
             translation_key="prev_version",
         )
-        raise ConfigEntryError("Invalid configuration (migrating from V1 is not possible)")
+        raise ConfigEntryError(
+            "Invalid configuration (migrating from V1 is not possible)"
+        )
 
     mass_url = entry.data[CONF_URL]
     mass = MusicAssistantClient(mass_url, http_session)
@@ -84,11 +87,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async_delete_issue(hass, DOMAIN, "invalid_server_version")
 
-    async def on_hass_stop(event: Event) -> None:  # noqa: ARG001
+    async def on_hass_stop(event: Event) -> None:
         """Handle incoming stop event from Home Assistant."""
         await mass.disconnect()
 
-    entry.async_on_unload(hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, on_hass_stop))
+    entry.async_on_unload(
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, on_hass_stop)
+    )
 
     # launch the music assistant client listen task in the background
     # use the init_ready event to wait until initialization is done
@@ -199,17 +204,15 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 async def async_remove_config_entry_device(
-    hass: HomeAssistant,  # noqa: ARG001
-    config_entry: ConfigEntry,  # noqa: ARG001
-    device_entry: dr.DeviceEntry,  # noqa: ARG001
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    device_entry: dr.DeviceEntry,
 ) -> bool:
     """Remove a config entry from a device."""
     return True
 
 
-async def _async_ensure_addon_running(
-    hass: HomeAssistant, entry: ConfigEntry  # noqa: ARG001
-) -> None:
+async def _async_ensure_addon_running(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Ensure that Music Assistant Server add-on is installed and running."""
     addon_manager = _get_addon_manager(hass)
     try:

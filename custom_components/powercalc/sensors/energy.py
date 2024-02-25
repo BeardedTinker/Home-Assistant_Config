@@ -15,6 +15,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.typing import ConfigType
 
@@ -33,6 +34,7 @@ from custom_components.powercalc.const import (
     DEFAULT_ENERGY_INTEGRATION_METHOD,
     UnitPrefix,
 )
+from custom_components.powercalc.device_binding import get_device_info
 from custom_components.powercalc.errors import SensorConfigurationError
 
 from .abstract import (
@@ -135,6 +137,7 @@ async def create_energy_sensor(
         powercalc_source_entity=source_entity.entity_id,
         powercalc_source_domain=source_entity.domain,
         sensor_config=sensor_config,
+        device_info=get_device_info(hass, sensor_config, source_entity),
     )
 
 
@@ -213,6 +216,7 @@ class VirtualEnergySensor(IntegrationSensor, EnergySensor):
         powercalc_source_entity: str,
         powercalc_source_domain: str,
         sensor_config: ConfigType,
+        device_info: DeviceInfo | None,
     ) -> None:
         super().__init__(
             source_entity=source_entity,
@@ -222,6 +226,7 @@ class VirtualEnergySensor(IntegrationSensor, EnergySensor):
             unit_time=unit_time,
             integration_method=integration_method,
             unique_id=unique_id,
+            device_info=device_info,
         )
 
         self._powercalc_source_entity = powercalc_source_entity

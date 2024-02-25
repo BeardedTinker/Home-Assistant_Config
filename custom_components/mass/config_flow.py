@@ -1,4 +1,5 @@
 """Config flow for MusicAssistant integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -43,7 +44,9 @@ DEFAULT_TITLE = "Music Assistant"
 ON_SUPERVISOR_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_USE_ADDON, default=True): bool,
-        vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
+        vol.Optional(
+            CONF_OPENAI_AGENT_ID, default=""
+        ): selector.ConversationAgentSelector(
             selector.ConversationAgentSelectorConfig(language="en")
         ),
         vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -57,7 +60,9 @@ def get_manual_schema(user_input: dict[str, Any]) -> vol.Schema:
     return vol.Schema(
         {
             vol.Required(CONF_URL, default=default_url): str,
-            vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
+            vol.Optional(
+                CONF_OPENAI_AGENT_ID, default=""
+            ): selector.ConversationAgentSelector(
                 selector.ConversationAgentSelectorConfig(language="en")
             ),
             vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -69,7 +74,9 @@ def get_zeroconf_schema() -> vol.Schema:
     """Return a schema for the zeroconf step."""
     return vol.Schema(
         {
-            vol.Optional(CONF_OPENAI_AGENT_ID, default=""): selector.ConversationAgentSelector(
+            vol.Optional(
+                CONF_OPENAI_AGENT_ID, default=""
+            ): selector.ConversationAgentSelector(
                 selector.ConversationAgentSelectorConfig(language="en")
             ),
             vol.Optional(CONF_ASSIST_AUTO_EXPOSE_PLAYERS, default=False): bool,
@@ -79,7 +86,9 @@ def get_zeroconf_schema() -> vol.Schema:
 
 async def get_server_info(hass: HomeAssistant, url: str) -> ServerInfoMessage:
     """Validate the user input allows us to connect."""
-    async with MusicAssistantClient(url, aiohttp_client.async_get_clientsession(hass)) as client:
+    async with MusicAssistantClient(
+        url, aiohttp_client.async_get_clientsession(hass)
+    ) as client:
         return client.server_info
 
 
@@ -140,11 +149,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
             )
 
-    async def async_step_start_addon(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_start_addon(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Start MusicAssistant Server add-on."""
         if not self.start_task:
             self.start_task = self.hass.async_create_task(self._async_start_addon())
-            return self.async_show_progress(step_id="start_addon", progress_action="start_addon")
+            return self.async_show_progress(
+                step_id="start_addon", progress_action="start_addon"
+            )
         try:
             await self.start_task
         except (FailedConnect, AddonError, AbortFlow) as err:
@@ -155,7 +168,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.start_task = None
         return self.async_show_progress_done(next_step_id="finish_addon_setup")
 
-    async def async_step_start_failed(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_start_failed(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Add-on start failed."""
         return self.async_abort(reason="addon_start_failed")
 
@@ -181,7 +196,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     break
             else:
-                raise FailedConnect("Failed to start MusicAssistant Server add-on: timeout")
+                raise FailedConnect(
+                    "Failed to start MusicAssistant Server add-on: timeout"
+                )
         finally:
             # Continue the flow after show progress when the task is done.
             self.hass.async_create_task(
@@ -199,23 +216,29 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return addon_info
 
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Handle the initial step."""
         if is_hassio(self.hass):
             return await self.async_step_on_supervisor()
 
         return await self.async_step_manual()
 
-    async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Handle a manual configuration."""
         if user_input is None:
-            return self.async_show_form(step_id="manual", data_schema=get_manual_schema({}))
+            return self.async_show_form(
+                step_id="manual", data_schema=get_manual_schema({})
+            )
 
         errors = {}
 
         try:
             self.server_info = await get_server_info(self.hass, user_input[CONF_URL])
-            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID] or ""
             self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
             await self.async_set_unique_id(self.server_info.server_id)
         except CannotConnect:
@@ -232,7 +255,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="manual", data_schema=get_manual_schema(user_input), errors=errors
         )
 
-    async def async_step_zeroconf(self, discovery_info: zeroconf.ZeroconfServiceInfo) -> FlowResult:
+    async def async_step_zeroconf(
+        self, discovery_info: zeroconf.ZeroconfServiceInfo
+    ) -> FlowResult:
         """
         Handle a discovered Mass server.
 
@@ -258,7 +283,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Check that we can connect to the address.
             try:
-                self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+                self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID] or ""
                 self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
                 await get_server_info(self.hass, self.server_info.base_url)
             except CannotConnect:
@@ -275,7 +300,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle logic when on Supervisor host."""
         if user_input is None:
-            return self.async_show_form(step_id="on_supervisor", data_schema=ON_SUPERVISOR_SCHEMA)
+            return self.async_show_form(
+                step_id="on_supervisor", data_schema=ON_SUPERVISOR_SCHEMA
+            )
         if not user_input[CONF_USE_ADDON]:
             return await self.async_step_manual()
 
@@ -302,7 +329,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except CannotConnect:
                 return self.async_abort(reason="cannot_connect")
         if user_input is not None:
-            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID]
+            self.openai_agent_id = user_input[CONF_OPENAI_AGENT_ID] or ""
             self.expose_players_assist = user_input[CONF_ASSIST_AUTO_EXPOSE_PLAYERS]
         return await self._async_create_entry_or_abort()
 
@@ -384,7 +411,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(schema),
         )
 
-    def mass_config_option_schema(self, config_entry: config_entries.ConfigEntry) -> vol.Schema:
+    def mass_config_option_schema(
+        self, config_entry: config_entries.ConfigEntry
+    ) -> vol.Schema:
         """Return a schema for MusicAssistant completion options."""
         return {
             vol.Required(
@@ -399,9 +428,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Optional(
                 CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
-                default=config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
-                if config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS) is not None
-                else False,
+                default=(
+                    config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
+                    if config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
+                    is not None
+                    else False
+                ),
             ): bool,
         }
 

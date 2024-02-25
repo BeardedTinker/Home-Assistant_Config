@@ -1,4 +1,5 @@
 """Base entity model."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,7 +27,11 @@ class MassBaseEntity(Entity):
         self._attr_should_poll = False
         player = mass.players.get_player(player_id)
         dev_mod = player.device_info.model or player.name
-        model = f"{dev_man} {dev_mod}" if (dev_man := player.device_info.manufacturer) else dev_mod
+        model = (
+            f"{dev_man} {dev_mod}"
+            if (dev_man := player.device_info.manufacturer)
+            else dev_mod
+        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, player_id)},
             manufacturer=DEFAULT_NAME,
@@ -39,7 +44,9 @@ class MassBaseEntity(Entity):
         """Register callbacks."""
         await self.async_on_update()
         self.async_on_remove(
-            self.mass.subscribe(self.__on_mass_update, EventType.PLAYER_UPDATED, self.player_id)
+            self.mass.subscribe(
+                self.__on_mass_update, EventType.PLAYER_UPDATED, self.player_id
+            )
         )
         self.async_on_remove(
             self.mass.subscribe(
@@ -70,7 +77,10 @@ class MassBaseEntity(Entity):
 
     async def __on_mass_update(self, event: MassEvent) -> None:
         """Call when we receive an event from MusicAssistant."""
-        if event == EventType.QUEUE_UPDATED and event.object_id != self.player.active_source:
+        if (
+            event == EventType.QUEUE_UPDATED
+            and event.object_id != self.player.active_source
+        ):
             return
         await self.async_on_update()
         self.async_write_ha_state()

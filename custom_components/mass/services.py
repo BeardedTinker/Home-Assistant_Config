@@ -1,11 +1,17 @@
 """Custom services for the Music Assistant integration."""
+
 from __future__ import annotations
 
 from typing import Any
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.core import HomeAssistant, ServiceResponse, SupportsResponse, callback
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceResponse,
+    SupportsResponse,
+    callback,
+)
 from homeassistant.helpers.service import ServiceCall
 from music_assistant.common.models.enums import MediaType
 
@@ -59,6 +65,8 @@ def register_services(hass: HomeAssistant) -> None:
                     item[key] = compact_item(value)
                 elif isinstance(value, list):
                     for subitem in value:
+                        if not isinstance(subitem, dict):
+                            continue
                         compact_item(subitem)
                     # item[key] = [compact_item(x) if isinstance(x, dict) else x for x in value]
             return item
@@ -66,6 +74,8 @@ def register_services(hass: HomeAssistant) -> None:
         dict_result: dict[str, list[dict[str, Any]]] = result.to_dict()
         for media_type_key in dict_result:
             for item in dict_result[media_type_key]:
+                if not isinstance(item, dict):
+                    continue
                 compact_item(item)
         return dict_result
 
@@ -76,7 +86,9 @@ def register_services(hass: HomeAssistant) -> None:
         schema=vol.Schema(
             {
                 vol.Required(ATTR_SEARCH_NAME): cv.string,
-                vol.Optional(ATTR_MEDIA_TYPE): vol.All(cv.ensure_list, [vol.Coerce(MediaType)]),
+                vol.Optional(ATTR_MEDIA_TYPE): vol.All(
+                    cv.ensure_list, [vol.Coerce(MediaType)]
+                ),
                 vol.Optional(ATTR_SEARCH_ARTIST): cv.string,
                 vol.Optional(ATTR_SEARCH_ALBUM): cv.string,
                 vol.Optional(ATTR_LIMIT, default=5): vol.Coerce(int),

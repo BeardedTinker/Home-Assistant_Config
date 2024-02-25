@@ -1,4 +1,5 @@
 """Constants for Music Assistant Component."""
+
 import logging
 
 DOMAIN = "mass"
