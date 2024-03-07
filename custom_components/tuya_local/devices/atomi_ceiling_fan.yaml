@@ -4,7 +4,7 @@ products:
     name: Atomi 52 inch ceiling fan
 primary_entity:
   entity: fan
-  translation_key: fan_with_presets
+  translation_only_key: fan_with_presets
   dps:
     - id: 60
       type: boolean
@@ -58,7 +58,7 @@ secondary_entities:
   - entity: number
     name: Light timer
     category: config
-    icon: "mdi:timer"
+    translation_key: timer
     dps:
       - id: 26
         type: integer

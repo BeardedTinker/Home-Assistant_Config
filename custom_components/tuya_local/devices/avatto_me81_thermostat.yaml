@@ -60,8 +60,7 @@ primary_entity:
       name: week_program
 secondary_entities:
   - entity: switch
-    name: Anti-frost
-    icon: "mdi:snowflake"
+    translation_key: anti_frost
     category: config
     dps:
       - id: 10
@@ -122,8 +121,7 @@ secondary_entities:
         name: button
         optional: true
   - entity: lock
-    name: Child lock
-    icon: "mdi:hand-back-right-off"
+    translation_key: child_lock
     category: config
     dps:
       - id: 40
@@ -154,7 +152,6 @@ secondary_entities:
             value: Internal
             hidden: true
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:

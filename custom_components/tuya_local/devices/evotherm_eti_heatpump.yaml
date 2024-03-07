@@ -4,7 +4,7 @@ products:
     name: Evotherm ETI series
 primary_entity:
   entity: climate
-  translation_key: pool_heatpump
+  translation_only_key: pool_heatpump
   dps:
     - id: 1
       name: hvac_mode
@@ -138,8 +138,7 @@ primary_entity:
       type: bitfield
 secondary_entities:
   - entity: select
-    name: Temperature unit
-    icon: "mdi:temperature-celsius"
+    translation_key: temperature_unit
     category: config
     dps:
       - id: 6
@@ -147,11 +146,10 @@ secondary_entities:
         name: option
         mapping:
           - dps_val: c
-            value: Celsius
+            value: celsius
           - dps_val: f
-            value: Fahrenheit
+            value: fahrenheit
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:

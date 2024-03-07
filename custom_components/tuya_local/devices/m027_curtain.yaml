@@ -69,7 +69,7 @@ secondary_entities:
             value: Night
   - entity: sensor
     name: Time remaining
-    icon: "mdi:timer"
+    class: duration
     category: diagnostic
     dps:
       - id: 9
@@ -87,7 +87,6 @@ secondary_entities:
         type: integer
         unit: ms
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:

@@ -81,7 +81,6 @@ secondary_entities:
           - dps_val: fully_close
             value: Fully closed
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:
@@ -140,7 +139,7 @@ secondary_entities:
         optional: true
   - entity: button
     name: All limits reset
-    icon: "mdi:refresh"
+    class: restart
     category: config
     dps:
       - id: 102

@@ -12,13 +12,10 @@ primary_entity:
           constraint: mode
           conditions:
             - dps_val: "Smart"
-              icon: "mdi:calendar-sync"
               value: auto
             - dps_val: "Manual"
-              icon: "mdi:fire"
               value: heat
             - dps_val: "Anti_frozen"
-              icon: "mdi:snowflake"
               value: cool
     - id: 102
       type: integer
@@ -160,18 +157,16 @@ secondary_entities:
         name: calibration
   - entity: select
     category: config
-    name: Temperature unit
+    translation_key: temperature_unit
     dps:
       - id: 107
         name: option
         type: boolean
         mapping:
           - dps_val: false
-            value: Celsius
-            icon: "mdi:temperature-celsius"
+            value: celsius
           - dps_val: true
-            value: Fahrenheit
-            icon: "mdi:temperature-fahrenheit"
+            value: fahrenheit
   - entity: number
     category: config
     class: temperature

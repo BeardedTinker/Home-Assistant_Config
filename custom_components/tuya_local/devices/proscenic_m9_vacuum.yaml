@@ -189,7 +189,6 @@ secondary_entities:
     name: Cleaning time
     category: diagnostic
     class: duration
-    icon: "mdi:timer-star"
     dps:
       - id: 6
         name: sensor
@@ -249,7 +248,6 @@ secondary_entities:
     name: Side brush life
     category: diagnostic
     class: duration
-    icon: "mdi:timer-sand"
     dps:
       - id: 17
         name: sensor
@@ -261,7 +259,7 @@ secondary_entities:
   - entity: button
     name: Side brush reset
     category: diagnostic
-    icon: "mdi:autorenew"
+    class: restart
     dps:
       - id: 18
         type: boolean
@@ -271,7 +269,6 @@ secondary_entities:
     name: Main brush life
     category: diagnostic
     class: duration
-    icon: "mdi:timer-sand"
     dps:
       - id: 19
         name: sensor
@@ -283,7 +280,7 @@ secondary_entities:
   - entity: button
     name: Main brush reset
     category: diagnostic
-    icon: "mdi:autorenew"
+    class: restart
     dps:
       - id: 20
         type: boolean
@@ -293,7 +290,6 @@ secondary_entities:
     name: Filter life
     category: diagnostic
     class: duration
-    icon: "mdi:timer-sand"
     dps:
       - id: 21
         name: sensor
@@ -305,7 +301,7 @@ secondary_entities:
   - entity: button
     name: Filter reset
     category: diagnostic
-    icon: "mdi:autorenew"
+    class: restart
     dps:
       - id: 22
         type: boolean
@@ -315,7 +311,6 @@ secondary_entities:
     name: Mop life
     category: diagnostic
     class: duration
-    icon: "mdi:timer-sand"
     dps:
       - id: 23
         name: sensor
@@ -327,7 +322,7 @@ secondary_entities:
   - entity: button
     name: Mop reset
     category: diagnostic
-    icon: "mdi:autorenew"
+    class: restart
     dps:
       - id: 24
         type: boolean
@@ -476,7 +471,6 @@ secondary_entities:
   - entity: select
     name: Working mode
     icon: "mdi:vacuum"
-    optional: true
     dps:
       - id: 41
         name: option
@@ -530,7 +524,7 @@ secondary_entities:
   - entity: button
     name: Sensor reset
     category: diagnostic
-    icon: "mdi:autorenew"
+    class: restart
     dps:
       - id: 140
         type: boolean
@@ -557,13 +551,19 @@ secondary_entities:
         # 20022 - Battery low
         # 20024 - Emptying dustbin
         # 20025 - Dustbin empty completed
-  - entity: sensor
-    name: Error message
+  - entity: binary_sensor
+    class: problem
     category: diagnostic
-    icon: "mdi:eye-circle-outline"
     dps:
       - id: 199
         name: sensor
+        type: integer
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+      - id: 199
+        name: fault_code
         type: integer
         # 21003 - Dustbin not installed
         # 21004

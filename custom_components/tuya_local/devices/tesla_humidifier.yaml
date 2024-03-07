@@ -27,8 +27,7 @@ secondary_entities:
         type: boolean
         name: switch
   - entity: select
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 19
@@ -52,7 +51,6 @@ secondary_entities:
         unit: min
         class: measurement
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:

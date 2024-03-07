@@ -80,8 +80,7 @@ secondary_entities:
               min: 0
               max: 255
   - entity: select
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 4
@@ -99,7 +98,6 @@ secondary_entities:
   - entity: sensor
     name: Time remaining
     class: duration
-    icon: "mdi:timer"
     category: diagnostic
     dps:
       - id: 5
@@ -107,7 +105,6 @@ secondary_entities:
         name: sensor
         unit: min
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:

@@ -1,8 +1,7 @@
 name: Tap timer
 products:
   - id: zrsgzc8jktsricjj
-    model: WX1
-    manufacturer: Holman
+    name: Holman WX1
     # DP decoding thanks to funtastix
 primary_entity:
   entity: switch
@@ -59,13 +58,10 @@ secondary_entities:
         unit: "%"
         mapping:
           - dps_val: 0
-            icon: "mdi:battery-10"
-            value: 0
+            value: 10
           - dps_val: 1
-            icon: "mdi:battery-60"
             value: 50
           - dps_val: 2
-            icon: "mdi:battery"
             value: 100
   - entity: sensor
     name: Status
@@ -86,8 +82,7 @@ secondary_entities:
           - dps_val: 3
             value: "Rain Delay"
   - entity: number
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 107
@@ -97,15 +92,15 @@ secondary_entities:
         range:
           min: 0
           max: 60
-  - entity: number
-    name: Time left
-    icon: "mdi:timer"
+  - entity: sensor
+    name: Time remaining
+    class: duration
     category: diagnostic
     dps:
       - id: 109
         optional: true
         type: integer
-        name: value
+        name: sensor
         unit: min
   - entity: sensor
     name: Start A encoded
@@ -119,7 +114,8 @@ secondary_entities:
         type: base64
       - id: 110
         optional: true
-        name: days  # flags for days of the week Sun-Sat, plus a bit for on/off
+        # flags for days of the week Sun-Sat, plus a bit for on/off
+        name: days
         type: base64
         mapping:
           - mask: "FF000000"
@@ -148,7 +144,7 @@ secondary_entities:
         mapping:
           - mask: "FF00000000000000"
   - entity: sensor
-    name: Start B encoded  # start time, duration and days for start B
+    name: Start B encoded
     category: diagnostic
     dps:
       - id: 111
@@ -157,7 +153,7 @@ secondary_entities:
         type: string
       - id: 111
         optional: true
-        name: days  # flags for days of the week Sun-Sat, plus a bit for on/off
+        name: days
         type: base64
         mapping:
           - mask: "FF000000"
@@ -186,7 +182,7 @@ secondary_entities:
         mapping:
           - mask: "FF00000000000000"
   - entity: sensor
-    name: Start C encoded  # start time, duration and days for start C
+    name: Start C encoded
     category: diagnostic
     dps:
       - id: 112
@@ -195,7 +191,7 @@ secondary_entities:
         type: string
       - id: 112
         optional: true
-        name: days  # flags for days of the week Sun-Sat, plus a bit for on/off
+        name: days
         type: base64
         mapping:
           - mask: "FF000000"
@@ -280,7 +276,8 @@ secondary_entities:
         name: sensor
         type: integer
   - entity: sensor
-    name: Flow count encoded  # past 10 days of flow count history.
+    # past 10 days of flow count history.
+    name: Flow count encoded
     category: diagnostic
     dps:
       - id: 121
@@ -435,7 +432,8 @@ secondary_entities:
         name: sensor_present
         type: boolean
   - entity: sensor
-    name: Next watering encoded  # based on starts A, B and C
+    # based on starts A, B and C
+    name: Next watering encoded
     category: diagnostic
     dps:
       - id: 128

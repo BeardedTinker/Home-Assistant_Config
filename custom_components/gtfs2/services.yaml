@@ -1,0 +1,73 @@
+# Describes the format for available ADS services
+update_gtfs:
+  name: Update/create GTFS Data
+  description: Unpacks source to gtfs-db
+  fields:
+    extract_from:
+      name: Indicate source of the data 
+      description: Select if you update from url or zip
+      required: true
+      example: "url"
+      default: "url"
+      selector:
+        select:
+          translation_key: "extract_from"
+          options:
+            - "url"
+            - "zip"
+    file:
+      name: Name of the transport service, without .zip
+      description: If you use the same name as an existing one, the existing one will be overwitten
+      required: true
+      example: "mytransportservice"
+      selector:
+        text:            
+    url:
+      name: URL
+      description: provide the full path to the zip file itself
+      required: true
+      default: "na"
+      example: "https://path-to-my-zip-file-location/filename.zip"
+      selector:
+        text:            
+    clean_feed_info:
+      name: Remove feed-info
+      description: Removes feed_info.txt from zip (use in case file content incorrect)
+      required: true
+      default: false
+      selector:
+        boolean: 
+
+
+update_gtfs_rt_local:
+  name: Update GTFS Realtime Data locally
+  description: Downloads realtime data locally
+  fields:
+    file:
+      name: Name of the transport service with realtime data
+      description: Preferably use the same name as for static data
+      required: true
+      example: "mytransportservice"
+      selector:
+        text:            
+    url:
+      name: URL
+      description: provide the full path to the zip file itself
+      required: true
+      default: "na"
+      example: "https://path-to-my-realttime-data"
+      selector:
+        text:
+        
+update_gtfs_local_stops: 
+  name: Update Local Stops
+  description: Updates local stops based on location entity
+  fields:       
+    entity_id:
+      name: Entity
+      description: Select person or zone to update stops for
+      required: true
+      example: "zone.home"
+      selector:
+        entity:
+          domain: ["person", "zone"]       

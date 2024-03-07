@@ -71,8 +71,7 @@ secondary_entities:
             value: false
             hidden: true
   - entity: select
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 19
@@ -100,8 +99,7 @@ secondary_entities:
           - dps_val: 9h
             value: 9 hours
   - entity: binary_sensor
-    name: Tank empty
-    class: problem
+    translation_key: tank_empty
     category: diagnostic
     dps:
       - id: 22

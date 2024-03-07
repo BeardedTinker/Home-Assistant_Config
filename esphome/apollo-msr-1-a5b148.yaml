@@ -1,0 +1,17 @@
+substitutions:
+  name: apollo-msr-1-a5b148
+  friendly_name: Apollo Multisensor Mk1 (MSR-1) a5b148
+packages:
+  ApolloAutomation.MSR-1: github://ApolloAutomation/MSR-1/Integrations/ESPHome/MSR-1.yaml
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+  encryption:
+    key: /p/AyTCSzPvl8Kcd3qGQ8bCc9LwmCK9LUDkIl92gmX8=
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

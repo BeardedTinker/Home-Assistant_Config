@@ -97,7 +97,6 @@ secondary_entities:
           - dps_val: "3"
             value: "Nightlight"
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:
@@ -112,8 +111,7 @@ secondary_entities:
             value: false
           - value: true
   - entity: select
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 13

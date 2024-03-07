@@ -35,6 +35,9 @@ primary_entity:
         min: 15
         max: 75
       unit: C
+    - id: 21
+      type: integer
+      name: current_temperature
     - id: 7
       type: boolean
       name: away_mode
@@ -52,7 +55,6 @@ primary_entity:
       name: dip_switch_2
 secondary_entities:
   - entity: binary_sensor
-    name: Fault
     class: problem
     category: diagnostic
     dps:
@@ -215,8 +217,7 @@ secondary_entities:
         type: boolean
         name: sensor
   - entity: binary_sensor
-    name: Defrosting
-    class: running
+    translation_key: defrost
     category: diagnostic
     dps:
       - id: 33

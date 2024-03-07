@@ -67,8 +67,7 @@ secondary_entities:
           - dps_val: false
             icon: "mdi:fire-off"
   - entity: select
-    name: Timer
-    icon: "mdi:timer"
+    translation_key: timer
     category: config
     dps:
       - id: 19
@@ -102,7 +101,6 @@ secondary_entities:
           - dps_val: 12h
             value: "12 hours"
   - entity: binary_sensor
-    name: Error
     class: problem
     category: diagnostic
     dps:
