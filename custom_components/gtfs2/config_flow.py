@@ -263,24 +263,28 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the route step."""
         errors: dict[str, str] = {}
         if user_input is None:
-            stops = get_stop_list(
-                self._pygtfs,
-                self._user_inputs[CONF_ROUTE].split(": ")[0],
-                self._user_inputs[CONF_DIRECTION],
-            )
-            last_stop = stops[-1:][0]
-            return self.async_show_form(
-                step_id="stops",
-                data_schema=vol.Schema(
-                    {
-                        vol.Required(CONF_ORIGIN): vol.In(stops),
-                        vol.Required(CONF_DESTINATION, default=last_stop): vol.In(stops),
-                        vol.Required(CONF_NAME): str,
-                        vol.Optional(CONF_INCLUDE_TOMORROW, default = False): selector.BooleanSelector(),
-                    },
-                ),
-                errors=errors,
-            )
+            try:
+                stops = get_stop_list(
+                    self._pygtfs,
+                    self._user_inputs[CONF_ROUTE].split(": ")[0],
+                    self._user_inputs[CONF_DIRECTION],
+                )
+                last_stop = stops[-1:][0]
+                return self.async_show_form(
+                    step_id="stops",
+                    data_schema=vol.Schema(
+                        {
+                            vol.Required(CONF_ORIGIN): vol.In(stops),
+                            vol.Required(CONF_DESTINATION, default=last_stop): vol.In(stops),
+                            vol.Required(CONF_NAME): str,
+                            vol.Optional(CONF_INCLUDE_TOMORROW, default = False): selector.BooleanSelector(),
+                        },
+                    ),
+                    errors=errors,
+                )
+            except:
+                _LOGGER.debug(f"Likely no stops for this route: {[CONF_ROUTE]}")
+                return self.async_abort(reason="no_stops")
         self._user_inputs.update(user_input)
         _LOGGER.debug(f"UserInputs Stops: {self._user_inputs}")
         check_config = await self._check_config(self._user_inputs)

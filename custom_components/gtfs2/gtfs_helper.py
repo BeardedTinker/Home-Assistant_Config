@@ -291,11 +291,14 @@ def get_next_departure(self):
 
     # Format arrival and departure dates and times, accounting for the
     # possibility of times crossing over midnight.
-    _tomorrow = item.get("tomorrow")
+    _tomorrow = False
+    if item.get("tomorrow") == 1 or item.get("calendar_date") > now_date:
+        _tomorrow = True
+    _LOGGER.debug("Time is 'tomorrow': %s ,based on -> tomorrow_val: %s, calendar_date val: %s, now_date val: %s", _tomorrow, item.get("tomorrow"),item.get("calendar_date"), now_date)        
     origin_arrival = now
     dest_arrival = now
     origin_depart_time = f"{now_date} {item['origin_depart_time']}"
-    if _tomorrow == 1 and now_time > item['origin_depart_time']:
+    if _tomorrow and now_time > item['origin_depart_time']:
         origin_arrival = tomorrow
         dest_arrival = tomorrow
         origin_depart_time = f"{tomorrow_date} {item['origin_depart_time']}"

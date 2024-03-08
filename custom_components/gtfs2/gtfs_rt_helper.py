@@ -398,6 +398,7 @@ def update_geojson(self):
 def get_gtfs_rt(hass, path, data):
     """Get gtfs rt data."""
     _LOGGER.debug("Getting gtfs rt locally with data: %s", data)
+    _headers = data.get("headers", None)
     gtfs_dir = hass.config.path(path)
     os.makedirs(gtfs_dir, exist_ok=True)
     url = data["url"]
@@ -408,5 +409,17 @@ def get_gtfs_rt(hass, path, data):
     except Exception as ex:  # pylint: disable=broad-except
         _LOGGER.error("Ìssues with downloading GTFS RT data to: %s", os.path.join(gtfs_dir, file))
         return "no_rt_data_file"
-    return "ok"       
+    if data.get("debug_output", False):
+        data_out = ""
+        feed_entities = get_gtfs_feed_entities(
+            url=data.get("url", None),
+            headers=_headers,
+            label="converting",
+        )
+        for entity in feed_entities:
+            data_out = data_out + "\n" + str(entity)
+        file_all = data["file"] + "_converted.txt"
+        open(os.path.join(gtfs_dir, file_all), "w").write(data_out)     
+    return "ok"   
+        
         
