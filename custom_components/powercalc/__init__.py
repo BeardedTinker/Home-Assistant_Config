@@ -359,7 +359,8 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if unload_ok:
         used_unique_ids: list[str] = hass.data[DOMAIN][DATA_USED_UNIQUE_IDS]
         try:
-            used_unique_ids.remove(config_entry.unique_id)
+            if config_entry.unique_id:
+                used_unique_ids.remove(config_entry.unique_id)
         except ValueError:
             return True
 
@@ -395,8 +396,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             and CONF_POWER_TEMPLATE in data[CONF_FIXED]
         ):
             data[CONF_FIXED].pop(CONF_POWER, None)
-        config_entry.version = 2
-        hass.config_entries.async_update_entry(config_entry, data=data)
+        hass.config_entries.async_update_entry(config_entry, data=data, version=2)
 
     return True
 

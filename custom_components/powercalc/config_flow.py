@@ -9,6 +9,7 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.utility_meter import CONF_METER_TYPE, METER_TYPES
 from homeassistant.config_entries import ConfigEntry, OptionsFlow
 from homeassistant.const import (
     CONF_ATTRIBUTE,
@@ -20,6 +21,7 @@ from homeassistant.const import (
     Platform,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
@@ -67,6 +69,7 @@ from .const import (
     CONF_UNAVAILABLE_POWER,
     CONF_UPDATE_FREQUENCY,
     CONF_UTILITY_METER_TARIFFS,
+    CONF_UTILITY_METER_TYPES,
     CONF_VALUE,
     CONF_VALUE_TEMPLATE,
     CONF_WLED,
@@ -123,7 +126,7 @@ SCHEMA_DAILY_ENERGY_OPTIONS = vol.Schema(
         ): selector.NumberSelector(
             selector.NumberSelectorConfig(
                 min=10,
-                unit_of_measurement="sec",
+                unit_of_measurement=UnitOfTime.SECONDS,
                 mode=selector.NumberSelectorMode.BOX,
             ),
         ),
@@ -145,11 +148,11 @@ SCHEMA_REAL_POWER_OPTIONS = vol.Schema(
         vol.Required(CONF_ENTITY_ID): selector.EntitySelector(
             selector.EntitySelectorConfig(device_class=SensorDeviceClass.POWER),
         ),
+        vol.Optional(CONF_DEVICE): selector.DeviceSelector(),
         vol.Optional(
             CONF_CREATE_UTILITY_METERS,
             default=False,
         ): selector.BooleanSelector(),
-        vol.Optional(CONF_DEVICE): selector.DeviceSelector(),
     },
 )
 
@@ -258,6 +261,19 @@ SCHEMA_GROUP = vol.Schema(
         vol.Required(CONF_NAME): str,
         vol.Optional(CONF_UNIQUE_ID): selector.TextSelector(),
         vol.Optional(CONF_DEVICE): selector.DeviceSelector(),
+    },
+)
+
+SCHEMA_UTILITY_METER_OPTIONS = vol.Schema(
+    {
+        vol.Optional(CONF_UTILITY_METER_TARIFFS, default=[]): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=[], custom_value=True, multiple=True),
+        ),
+        vol.Optional(CONF_UTILITY_METER_TYPES): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=METER_TYPES, translation_key=CONF_METER_TYPE, multiple=True,
+            ),
+        ),
     },
 )
 
@@ -420,6 +436,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             self.sensor_config.update(_build_daily_energy_config(user_input))
+            if self.sensor_config.get(CONF_CREATE_UTILITY_METERS):
+                return await self.async_step_utility_meter_options()
             return self.create_config_entry()
 
         return self.async_show_form(
@@ -443,6 +461,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             if not errors:
+                if self.sensor_config.get(CONF_CREATE_UTILITY_METERS):
+                    return await self.async_step_utility_meter_options()
                 return self.create_config_entry()
 
         group_schema = SCHEMA_GROUP.extend(
@@ -596,6 +616,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self.name = user_input.get(CONF_NAME)
             self.sensor_config.update(user_input)
+            if self.sensor_config.get(CONF_CREATE_UTILITY_METERS):
+                return await self.async_step_utility_meter_options()
             return self.create_config_entry()
 
         return self.async_show_form(
@@ -713,6 +735,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors={},
         )
 
+    async def async_step_utility_meter_options(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        if user_input is not None:
+            self.sensor_config.update(user_input or {})
+            return self.create_config_entry()
+
+        return self.async_show_form(
+            step_id="utility_meter_options",
+            data_schema=_fill_schema_defaults(
+                SCHEMA_UTILITY_METER_OPTIONS,
+                _get_global_powercalc_config(self.hass),
+            ),
+            errors={},
+        )
+
     async def validate_strategy_config(self) -> dict:
         strategy_name = (
             self.sensor_config.get(CONF_MODE) or self.power_profile.calculation_strategy  # type: ignore
@@ -810,6 +849,9 @@ class OptionsFlowHandler(OptionsFlow):
         schema: vol.Schema,
     ) -> dict:
         """Save options, and return errors when validation fails."""
+        if self.sensor_type in [SensorType.GROUP, SensorType.REAL_POWER, SensorType.DAILY_ENERGY]:
+            self._process_user_input(user_input, schema)
+
         if self.sensor_type == SensorType.DAILY_ENERGY:
             self.current_config.update(_build_daily_energy_config(user_input))
 
@@ -842,9 +884,6 @@ class OptionsFlowHandler(OptionsFlow):
                     await strategy_object.validate_config()
                 except StrategyConfigurationError as error:
                     return {"base": error.get_config_flow_translate_key()}
-
-        if self.sensor_type in [SensorType.GROUP, SensorType.REAL_POWER]:
-            self._process_user_input(user_input, schema)
 
         self.hass.config_entries.async_update_entry(
             self.config_entry,
@@ -904,6 +943,9 @@ class OptionsFlowHandler(OptionsFlow):
 
         if self.sensor_type == SensorType.GROUP:
             data_schema = _create_group_options_schema(self.hass, self.config_entry)
+
+        if self.current_config.get(CONF_CREATE_UTILITY_METERS):
+            data_schema = data_schema.extend(SCHEMA_UTILITY_METER_OPTIONS.schema)
 
         return _fill_schema_defaults(
             data_schema,
@@ -1074,7 +1116,7 @@ def _create_group_selector(
     options = [
         selector.SelectOptionDict(
             value=config_entry.entry_id,
-            label=config_entry.data.get(CONF_NAME),
+            label=str(config_entry.data.get(CONF_NAME)),
         )
         for config_entry in hass.config_entries.async_entries(DOMAIN)
         if config_entry.data.get(CONF_SENSOR_TYPE) == SensorType.GROUP
