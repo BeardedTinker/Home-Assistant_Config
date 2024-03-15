@@ -1,0 +1,15 @@
+substitutions:
+  name: atom-bt-proxy-luka
+  friendly_name: Bluetooth Proxy Luka
+packages:
+  esphome.bluetooth-proxy: github://esphome/firmware/bluetooth-proxy/m5stack-atom-lite.yaml@main
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

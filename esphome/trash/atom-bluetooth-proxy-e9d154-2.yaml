@@ -1,5 +1,5 @@
 substitutions:
-  name: atom-bluetooth-proxy-e9d154
+  name: atom-bluetooth-proxy-e9d154-2
   friendly_name: Bluetooth Proxy 2
 packages:
   esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/m5stack-atom-lite.yaml@main
@@ -9,7 +9,7 @@ esphome:
   friendly_name: ${friendly_name}
 api:
   encryption:
-    key: 0GLRJ1MnbcnGy46JWLm9z/9eeky078JJWcB8i1kyy/I=
+    key: oFjEuJMuIoJYzE5W3ofw1Eb3UCNvll+exNQG7fBOYOQ=
 
 
 wifi:
