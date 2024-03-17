@@ -181,7 +181,7 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
         self._data: dict[str, str] = {}
 
     async def _async_update_data(self) -> dict[str, str]:
-        """Get the latest data from GTFS and GTFS relatime, depending refresh interval"""
+        """Get the latest data from GTFS and GTFS relatime, depending refresh interval"""      
         data = self.config_entry.data
         options = self.config_entry.options
         previous_data = None if self.data is None else self.data.copy()

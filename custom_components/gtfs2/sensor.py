@@ -77,7 +77,7 @@ async def async_setup_entry(
         await coordinator.async_config_entry_first_refresh()
         for stop in coordinator.data["local_stops_next_departures"]:
             sensors.append(
-                    GTFSLocalStopSensor(stop, coordinator)
+                    GTFSLocalStopSensor(stop, coordinator, coordinator.data.get("name", "No Name"))
                 )
         
     else:
@@ -467,19 +467,20 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
 class GTFSLocalStopSensor(CoordinatorEntity, SensorEntity):
     """Implementation of a GTFS local stops departures sensor."""
 
-    def __init__(self, stop, coordinator) -> None:
+    def __init__(self, stop, coordinator, name) -> None:
         """Initialize the GTFSsensor."""
         super().__init__(coordinator)
-        self._name = stop["stop_id"]
+        self._stop = stop
+        self._name = self._stop["stop_id"] + "_local_stop_" + self.coordinator.data['device_tracker_id']
         self._attributes: dict[str, Any] = {}
 
-        self._attr_unique_id = f"gtfs-{self._name}_{self.coordinator.data['device_tracker_id']}"
+        self._attr_unique_id = self._name
         self._attr_device_info = DeviceInfo(
-            name=f"GTFS - {self._name}",
+            name=f"GTFS - {name}",
             entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, f"GTFS - {self._name}")},
+            identifiers={(DOMAIN, f"GTFS - {name}")},
             manufacturer="GTFS",
-            model=self._name,
+            model=name,
         )
         self._stop = stop
         self._attributes = self._update_attrs()
@@ -488,8 +489,7 @@ class GTFSLocalStopSensor(CoordinatorEntity, SensorEntity):
     @property
     def name(self) -> str:
         """Return the name of the sensor."""
-        return self._name + "_local_stop_" + self.coordinator.data[
-            'device_tracker_id']
+        return self._name
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -518,7 +518,7 @@ class GTFSLocalStopSensor(CoordinatorEntity, SensorEntity):
         self._attributes["next_departures_lines"] = {}
         if self._departure:
             for stop in self._departure:
-                if stop["stop_id"] == self._name:
+                if self._name.startswith(stop["stop_id"]):
                     self._attributes["next_departures_lines"] = stop["departure"]
                     self._attributes["latitude"] = stop["latitude"]  
                     self._attributes["longitude"] = stop["longitude"]  

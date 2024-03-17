@@ -707,6 +707,7 @@ def get_local_stops_next_departures(self):
     schedule = self._data["schedule"]
     now = dt_util.now().replace(tzinfo=None)
     now_date = now.strftime(dt_util.DATE_STR_FORMAT)
+    now_time = now.strftime(TIME_STR_FORMAT)
     tomorrow = now + datetime.timedelta(days=1)
     tomorrow_date = tomorrow.strftime(dt_util.DATE_STR_FORMAT)    
     device_tracker = self.hass.states.get(self._data['device_tracker_id']) 
@@ -714,7 +715,7 @@ def get_local_stops_next_departures(self):
     longitude = device_tracker.attributes.get("longitude", None)
     include_tomorrow = self._data["include_tomorrow"]    
     tomorrow_select = tomorrow_select2 = tomorrow_where = tomorrow_order = ""
-    tomorrow_calendar_date_where = f"AND (calendar_date_today.date = :today)"
+    tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now'))"
     time_range = str('+' + str(self._data.get("timerange", DEFAULT_LOCAL_STOP_TIMERANGE)) + ' minute')
     radius = self._data.get("radius", DEFAULT_LOCAL_STOP_RADIUS) / 130000
     _LOGGER.debug("Time Range: %s", time_range)
@@ -725,18 +726,19 @@ def get_local_stops_next_departures(self):
         _LOGGER.debug("Includes Tomorrow")
         tomorrow_name = tomorrow.strftime("%A").lower()
         tomorrow_select = f"calendar.{tomorrow_name} AS tomorrow,"
-        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = :today or calendar_date_today.date = :tomorrow)"
+        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now') or calendar_date_today.date = :tomorrow)"
         tomorrow_select2 = f"'0' AS tomorrow,"        
-    
+    _LOGGER.debug("today: %s", now.strftime("%A").lower())
+    _LOGGER.debug("today: %s", tomorrow.strftime("%A").lower())
     sql_query = f"""
         SELECT * FROM (
-        SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, time(st.departure_time) as departure_time,
+        SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
                route.route_long_name,route.route_short_name,route.route_type,
                calendar.{now.strftime("%A").lower()} AS today,
                {tomorrow_select}
                calendar.start_date AS start_date,
                calendar.end_date AS end_date,
-               :today as calendar_date,
+               date('now') as calendar_date,
                0 as today_cd
         FROM trips trip
         INNER JOIN calendar calendar
@@ -748,19 +750,19 @@ def get_local_stops_next_departures(self):
         INNER JOIN routes route
                    ON route.route_id = trip.route_id 
 		WHERE 
-        trip.service_id not in (select service_id from calendar_dates where date = :today and exception_type = 2)
-        and  datetime(calendar_date || ' ' || time(st.departure_time) ) between  datetime('now','localtime') and  datetime('now','localtime',:timerange) 
-        AND calendar.start_date <= :today 
-        AND calendar.end_date >= :today 
+        trip.service_id not in (select service_id from calendar_dates where date = date('now') and exception_type = 2)
+        and  datetime(date('now') || ' ' || time(st.departure_time) ) between  datetime('now','localtime') and  datetime('now','localtime',:timerange) 
+        AND calendar.start_date <= date('now') 
+        AND calendar.end_date >= date('now') 
         )
 		UNION ALL
         SELECT * FROM (
-	    SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, time(st.departure_time) as departure_time,
+	    SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
                route.route_long_name,route.route_short_name,route.route_type,
                '0' AS today,
                {tomorrow_select2}
-               :today AS start_date,
-               :today AS end_date,
+               date('now') AS start_date,
+               date('now') AS end_date,
                calendar_date_today.date as calendar_date,
                calendar_date_today.exception_type as today_cd
         FROM trips trip
@@ -774,10 +776,10 @@ def get_local_stops_next_departures(self):
 				   ON trip.service_id = calendar_date_today.service_id
 		WHERE 
         today_cd = 1
-        and  datetime(calendar_date || ' ' || time(st.departure_time) ) between  datetime('now','localtime') and  datetime('now','localtime',:timerange) 
+        and  datetime(date('now') || ' ' || time(st.departure_time) ) between  datetime('now','localtime') and  datetime('now','localtime',:timerange) 
 		{tomorrow_calendar_date_where}
         )
-        order by stop_id, departure_time
+        order by stop_id, tomorrow, departure_time
         """  # noqa: S608
     result = schedule.engine.connect().execute(
         text(sql_query),
@@ -796,28 +798,30 @@ def get_local_stops_next_departures(self):
     prev_entry = entry = {}
     for row_cursor in result:
         row = row_cursor._asdict()
-        entry = {"stop_id": row['stop_id'], "stop_name": row['stop_name'], "latitude": row['latitude'], "longitude": row['longitude'], "departure": timetable}
 
+        if row["stop_id"] != prev_stop_id and prev_stop_id != "": 
+            local_stops_list.append(prev_entry)
+            timetable = []
+        entry = {"stop_id": row['stop_id'], "stop_name": row['stop_name'], "latitude": row['latitude'], "longitude": row['longitude'], "departure": timetable}
         self._icon = ICONS.get(row['route_type'], ICON)
         if row["today"] == 1 or row["today_cd"] == 1:
-            timetable.append({"departure": row["departure_time"], "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "icon": self._icon})
+            timetable.append({"departure": row["departure_time"], "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
+        
         if (
             "tomorrow" in row
             and row["tomorrow"] == 1
             and row["today"] == 0
             and tomorrow_date <= row["end_date"]
+            and now_time > row["departure_time"]            
         ):
-            timetable.append({"departure": row["departure_time"], "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "icon": self._icon})
+            timetable.append({"departure": row["departure_time"], "date": tomorrow_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
         entry["departure"] = timetable
-        prev_entry = entry
-
-        if row["stop_id"] != prev_stop_id and prev_stop_id != "": 
-            local_stops_list.append(prev_entry)
-            timetable = []
-
+        
+        prev_entry = entry.copy()
         prev_stop_id = str(row["stop_id"])
-    
+
     if entry:      
+
         local_stops_list.append(entry)
     data_returned = local_stops_list   
     _LOGGER.debug("Stop data returned: %s", data_returned)

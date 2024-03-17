@@ -10,7 +10,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfPressure,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-    TEMP_CELSIUS,
+    UnitOfTemperature,
 )
 from homeassistant.helpers.entity import EntityCategory
 
@@ -76,7 +76,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_BME280_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_BMP_PRESSURE: SensorEntityDescription(
@@ -90,14 +90,14 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_BMP_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_BMP280_TEMPERATURE: SensorEntityDescription(
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_BMP280_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_BMP280_PRESSURE: SensorEntityDescription(
@@ -111,7 +111,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_DS18B20_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_HECA_HUMIDITY: SensorEntityDescription(
@@ -125,7 +125,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_HECA_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_HPM_P1: SensorEntityDescription(
@@ -153,7 +153,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_HTU21D_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_HUMIDITY: SensorEntityDescription(
@@ -209,7 +209,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_SHT3X_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_SPS30_P0: SensorEntityDescription(
@@ -288,7 +288,7 @@ SENSOR_DESCRIPTIONS = {
         device_class=SensorDeviceClass.TEMPERATURE,
         key=SENSOR_TEMPERATURE,
         name='Temperature',
-        native_unit_of_measurement=TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SENSOR_WIFI_SIGNAL: SensorEntityDescription(

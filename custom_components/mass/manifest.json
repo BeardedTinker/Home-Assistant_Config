@@ -1,14 +1,25 @@
 {
   "domain": "mass",
   "name": "Music Assistant (BETA)",
-  "after_dependencies": ["media_source", "media_player"],
-  "codeowners": ["@music-assistant"],
+  "after_dependencies": [
+    "media_source",
+    "media_player"
+  ],
+  "codeowners": [
+    "@music-assistant"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/music-assistant/hass-music-assistant",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/music-assistant/hass-music-assistant/issues",
-  "loggers": ["music_assistant"],
-  "requirements": ["music-assistant==2.0.0b83"],
-  "version": "2024.2.0",
-  "zeroconf": ["_mass._tcp.local."]
+  "loggers": [
+    "music_assistant"
+  ],
+  "requirements": [
+    "music-assistant==2.0.0b110"
+  ],
+  "version": "2024.3.1",
+  "zeroconf": [
+    "_mass._tcp.local."
+  ]
 }

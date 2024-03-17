@@ -3,6 +3,9 @@
   "name": "GTFS 2 (General Transit Feed Specification)",
   "codeowners": ["@vingerha"],
   "config_flow": true,
+  "dependencies": [
+    "zone"
+  ],
   "documentation": "https://github.com/vingerha/gtfs2/wiki",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/vingerha/gtfs2/issues",
