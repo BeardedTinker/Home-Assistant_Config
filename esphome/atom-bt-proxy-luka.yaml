@@ -13,3 +13,13 @@ api:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  ap:
+    ssid: ${friendly_name} Fallback
+    password: "IRAstmr7OHH6"
+  manual_ip:
+    # Set this to the IP of the ESP
+    static_ip: 192.168.1.59
+    # Set this to the IP address of the router. Often ends with .1
+    gateway: 192.168.1.1
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    subnet: 255.255.252.0

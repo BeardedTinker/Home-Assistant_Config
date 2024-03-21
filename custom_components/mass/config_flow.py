@@ -30,6 +30,7 @@ from .const import (
     CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
     CONF_INTEGRATION_CREATED_ADDON,
     CONF_OPENAI_AGENT_ID,
+    CONF_PRE_ANNOUNCE_TTS,
     CONF_USE_ADDON,
     DOMAIN,
     LOGGER,
@@ -264,6 +265,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         This flow is triggered by the Zeroconf component. It will check if the
         host is already configured and delegate to the import step if not.
         """
+        # abort if discovery info is not what we expect
+        if "server_id" not in discovery_info.properties:
+            return None
         # abort if we already have exactly this server_id
         # reload the integration if the host got updated
         server_id = discovery_info.properties["server_id"]
@@ -434,6 +438,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     is not None
                     else False
                 ),
+            ): bool,
+            vol.Optional(
+                CONF_PRE_ANNOUNCE_TTS,
+                default=False,
             ): bool,
         }
 
