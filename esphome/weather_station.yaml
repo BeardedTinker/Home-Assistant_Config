@@ -87,7 +87,7 @@ sensor:
 # BME280 is used to get temperature, pressure and humidity
 # BMP280 only provides temperature and pressure so please comment out hummidity section
 #  - platform: bmp280
-  - platform: bme280
+  - platform: bme280_i2c
     address: 0x76
     temperature:
       name: '${display_name} WS Temperature'
@@ -133,7 +133,9 @@ sensor:
 
 # ADC platform helps track status of battery
   - platform: adc
-    pin: GPIO33
+    pin: 
+      number: GPIO33
+      allow_other_uses: true
     name: '${display_name} Battery'
     unit_of_measurement: "V"
     icon: "mdi:battery-high"
@@ -144,9 +146,12 @@ sensor:
     id: voltage
 #    update_interval: 25s
 
+
 # Another ADC platform to track battery %
   - platform: adc
-    pin: GPIO33
+    pin: 
+      number: GPIO33
+      allow_other_uses: true
     name: '${display_name} Battery %'
     attenuation: 11db
     unit_of_measurement: '%'

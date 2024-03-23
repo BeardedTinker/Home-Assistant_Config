@@ -55,6 +55,7 @@ deep_sleep:
   esp32_ext1_wakeup:
     pins: GPIO39
     mode: ALL_LOW
+#    allow_other_uses: true
 ## -- ##
 
 ota:
@@ -188,14 +189,15 @@ sensor:
 ## -- ##
 
 binary_sensor:
-  - platform: gpio
-    pin: 
-      number: GPIO39
-      inverted: true
-    name: "lilygo-t5 Button 1"
-    on_press:
-      then:
-        - component.update: t5_display
+#  - platform: gpio
+#    pin: 
+#      number: GPIO39
+#      inverted: true
+#      allow_other_uses: true
+#    name: "lilygo-t5 Button 1"
+#    on_press:
+#      then:
+#        - component.update: t5_display
   - platform: homeassistant
     entity_id: binary_sensor.balcony_temp_falling
     id: temp_falling
