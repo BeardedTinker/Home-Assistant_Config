@@ -5,6 +5,7 @@ import datetime
 import time
 import logging
 import os
+import glob
 import json
 import requests
 import pygtfs
@@ -12,6 +13,8 @@ from sqlalchemy.sql import text
 import multiprocessing
 from multiprocessing import Process
 from . import zip_file as zipfile
+from pathlib import Path
+
 
 import homeassistant.util.dt as dt_util
 from homeassistant.core import HomeAssistant
@@ -22,11 +25,13 @@ from .const import (
     DEFAULT_PATH_GEOJSON, 
     DEFAULT_LOCAL_STOP_TIMERANGE, 
     DEFAULT_LOCAL_STOP_RADIUS,
+    DEFAULT_PATH_RT,
     ICON,
     ICONS,
     DOMAIN,
     TIME_STR_FORMAT
     )
+from .gtfs_rt_helper import get_rt_route_trip_statuses, get_gtfs_rt
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,7 +81,7 @@ def get_next_departure(self):
     # days.
     limit = 24 * 60 * 60 * 2
     tomorrow_select = tomorrow_select2 = tomorrow_where = tomorrow_order = ""
-    tomorrow_calendar_date_where = f"AND (calendar_date_today.date = :today)"
+    tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now'))"
     if include_tomorrow:
         _LOGGER.debug("Include Tomorrow")
         limit = int(limit / 2 * 3)
@@ -84,8 +89,8 @@ def get_next_departure(self):
         tomorrow_select = f"calendar.{tomorrow_name} AS tomorrow,"
         tomorrow_where = f"OR calendar.{tomorrow_name} = 1"
         tomorrow_order = f"calendar.{tomorrow_name} DESC,"
-        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = :today or calendar_date_today.date = :tomorrow)"
-        tomorrow_select2 = f"'0' AS tomorrow,"
+        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now') or calendar_date_today.date = date('now','+1 day') )"
+        tomorrow_select2 = f"CASE WHEN date('now') < calendar_date_today.date THEN '1' else '0' END as tomorrow,"
     sql_query = f"""
         SELECT trip.trip_id, trip.route_id,trip.trip_headsign,
         route.route_long_name,route.route_short_name,
@@ -133,9 +138,9 @@ def get_next_departure(self):
         {start_station_where}
         {end_station_where}
         AND origin_stop_sequence < dest_stop_sequence
-        AND calendar.start_date <= :today
-        AND calendar.end_date >= :today
-        AND trip.service_id not in (select service_id from calendar_dates where date = :today and exception_type = 2)
+        AND calendar.start_date <= date('now')
+        AND calendar.end_date >= date('now')
+        AND trip.service_id not in (select service_id from calendar_dates where date = date('now') and exception_type = 2)
 		UNION ALL
 	    SELECT trip.trip_id, trip.route_id,trip.trip_headsign,
                route.route_long_name,route.route_short_name,
@@ -162,8 +167,8 @@ def get_next_departure(self):
                '0' AS yesterday,
                '0' AS today,
                {tomorrow_select2}
-               :today AS start_date,
-               :today AS end_date,
+               date('now') AS start_date,
+               date('now') AS end_date,
                calendar_date_today.date as calendar_date,
                calendar_date_today.exception_type as today_cd
         FROM trips trip
@@ -192,8 +197,6 @@ def get_next_departure(self):
         {
             "origin_station_id": start_station_id,
             "end_station_id": end_station_id,
-            "today": now_date,
-            "tomorrow": tomorrow_date,
             "limit": limit,
             "route_type": route_type,
         },
@@ -440,7 +443,7 @@ def remove_from_zip(delmelist,gtfs_dir,file):
             zout.writestr(item, buffer)
     zout.close()
     zin.close()
-    os.rename (os.path.join(gtfs_dir, tempfile_out), os.path.join(gtfs_dir, filename))
+    os.rename(os.path.join(gtfs_dir, tempfile_out), os.path.join(gtfs_dir, filename))
     os.remove(os.path.join(gtfs_dir, tempfile)) 
    
 
@@ -538,9 +541,10 @@ def get_datasources(hass, path) -> dict[str]:
 
 def remove_datasource(hass, path, filename):
     gtfs_dir = hass.config.path(path)
-    _LOGGER.info(f"Removing datasource: {os.path.join(gtfs_dir, filename)}.*")
-    os.remove(os.path.join(gtfs_dir, filename + ".zip"))
-    os.remove(os.path.join(gtfs_dir, filename + ".sqlite"))
+    _LOGGER.info(f"Removing path/datasource: {os.path.join(gtfs_dir, filename)}")
+    for file in Path(path).glob(f"{filename}*"):
+        _LOGGER.info("Removing file: %s", file)
+        os.remove(file)
     return "removed"
     
 def check_extracting(hass, gtfs_dir,file):
@@ -718,7 +722,6 @@ def get_local_stops_next_departures(self):
     tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now'))"
     time_range = str('+' + str(self._data.get("timerange", DEFAULT_LOCAL_STOP_TIMERANGE)) + ' minute')
     radius = self._data.get("radius", DEFAULT_LOCAL_STOP_RADIUS) / 130000
-    _LOGGER.debug("Time Range: %s", time_range)
     if not latitude or not latitude:
         _LOGGER.error("No latitude and/or longitude for : %s", self._data['device_tracker_id'])
         return []
@@ -726,10 +729,8 @@ def get_local_stops_next_departures(self):
         _LOGGER.debug("Includes Tomorrow")
         tomorrow_name = tomorrow.strftime("%A").lower()
         tomorrow_select = f"calendar.{tomorrow_name} AS tomorrow,"
-        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now') or calendar_date_today.date = :tomorrow)"
-        tomorrow_select2 = f"'0' AS tomorrow,"        
-    _LOGGER.debug("today: %s", now.strftime("%A").lower())
-    _LOGGER.debug("today: %s", tomorrow.strftime("%A").lower())
+        tomorrow_calendar_date_where = f"AND (calendar_date_today.date = date('now') or calendar_date_today.date = date('now','+1 day'))"
+        tomorrow_select2 = f"CASE WHEN date('now') < calendar_date_today.date THEN '1' else '0' END as tomorrow,"        
     sql_query = f"""
         SELECT * FROM (
         SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
@@ -739,7 +740,8 @@ def get_local_stops_next_departures(self):
                calendar.start_date AS start_date,
                calendar.end_date AS end_date,
                date('now') as calendar_date,
-               0 as today_cd
+               0 as today_cd, 
+               route.route_id
         FROM trips trip
         INNER JOIN calendar calendar
                    ON trip.service_id = calendar.service_id
@@ -764,7 +766,8 @@ def get_local_stops_next_departures(self):
                date('now') AS start_date,
                date('now') AS end_date,
                calendar_date_today.date as calendar_date,
-               calendar_date_today.exception_type as today_cd
+               calendar_date_today.exception_type as today_cd,
+               route.route_id
         FROM trips trip
         INNER JOIN stop_times st
                    ON trip.trip_id = st.trip_id
@@ -786,8 +789,6 @@ def get_local_stops_next_departures(self):
         {
             "latitude": latitude,
             "longitude": longitude,
-            "today": now_date,
-            "tomorrow": tomorrow_date,
             "timerange": time_range,
             "radius": radius,
         },
@@ -796,22 +797,56 @@ def get_local_stops_next_departures(self):
     local_stops_list = []
     prev_stop_id = ""
     prev_entry = entry = {}
+    
+    
+    # Set elements for realtime retrieval via local file.
+    if self._realtime:
+        self._rt_group = "trip"
+        self._rt_data = {
+            "url": self._trip_update_url,
+            "headers": self._headers,
+            "file": self._data["name"] + "_localstop",
+            }
+        check = get_gtfs_rt(self.hass,DEFAULT_PATH_RT,self._rt_data)
+        # check if local file created
+        if check != "ok":
+            _LOGGER.error("Could not download RT data from: %s", self._trip_update_url)
+            return False
+        else:
+            # use local file created as new url
+            self._trip_update_url = "file://" + DEFAULT_PATH_RT + "/" + self._data["name"] + "_localstop.rt"
+
     for row_cursor in result:
         row = row_cursor._asdict()
-
+        _LOGGER.debug("Row from query: %s", row)
         if row["stop_id"] != prev_stop_id and prev_stop_id != "": 
             local_stops_list.append(prev_entry)
             timetable = []
         entry = {"stop_id": row['stop_id'], "stop_name": row['stop_name'], "latitude": row['latitude'], "longitude": row['longitude'], "departure": timetable}
         self._icon = ICONS.get(row['route_type'], ICON)
-        if row["today"] == 1 or row["today_cd"] == 1:
-            timetable.append({"departure": row["departure_time"], "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
+        if row["today"] == 1 or (row["today_cd"] == 1 and row["start_date"] == row["calendar_date"]):
+            self._trip_id = row["trip_id"]
+            self._direction = str(row["direction_id"])
+            self._route = row['route_id']   
+            self._route_id = row['route_id'] 
+            self._stop_id = row['stop_id']
+            departure_rt = "-"
+            # Find RT if configured
+            if self._realtime:
+                self._get_next_service = {}
+                _LOGGER.debug("Find rt for local stop route: %s - direction: %s - stop: %s", self._route , self._direction, self._stop_id)
+                next_service = get_rt_route_trip_statuses(self)
+                
+                if next_service:
+                    departure_rt = next_service.get(self._route, {}).get(self._direction, {}).get(self._stop_id, [])[0]
+                _LOGGER.debug("Local stop next rt service1: %s", next_service)
+            timetable.append({"departure": row["departure_time"], "departure_realtime": departure_rt, "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
         
         if (
             "tomorrow" in row
             and row["tomorrow"] == 1
             and row["today"] == 0
-            and tomorrow_date <= row["end_date"]
+            #and tomorrow_date <= row["end_date"]
             and now_time > row["departure_time"]            
         ):
             timetable.append({"departure": row["departure_time"], "date": tomorrow_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
@@ -837,3 +872,4 @@ async def update_gtfs_local_stops(hass, data):
         _LOGGER.debug("Reloading local stops for config_entry_id: %s", cf_entry) 
         reload = await hass.config_entries.async_reload(cf_entry)    
     return
+

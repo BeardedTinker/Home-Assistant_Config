@@ -26,7 +26,7 @@ from .const import (
     ATTR_RT_UPDATED_AT
 )    
 from .gtfs_helper import get_gtfs, get_next_departure, check_datasource_index, create_trip_geojson, check_extracting, get_local_stops_next_departures
-from .gtfs_rt_helper import get_rt_route_statuses, get_rt_trip_statuses, get_next_services, get_rt_alerts
+from .gtfs_rt_helper import get_next_services, get_rt_alerts
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -146,14 +146,13 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                 self._direction = data["direction"]
                 self._relative = False
                 try:
-                    self._get_rt_trip_statuses = await self.hass.async_add_executor_job(get_rt_trip_statuses, self)
                     self._get_rt_alerts = await self.hass.async_add_executor_job(get_rt_alerts, self)
                     self._get_next_service = await self.hass.async_add_executor_job(get_next_services, self)
                     self._data["next_departure_realtime_attr"] = self._get_next_service
                     self._data["next_departure_realtime_attr"]["gtfs_rt_updated_at"] = dt_util.utcnow()
                     self._data["alert"] = self._get_rt_alerts
                 except Exception as ex:  # pylint: disable=broad-except
-                   _LOGGER.error("Error getting gtfs realtime data, for origin: %s with error: %s", data["origin"], ex)
+                  _LOGGER.error("Error getting gtfs realtime data, for origin: %s with error: %s", data["origin"], ex)
             else:
                 _LOGGER.debug("GTFS RT: RealTime = false, selected in entity options")            
         else:
@@ -186,7 +185,31 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
         options = self.config_entry.options
         previous_data = None if self.data is None else self.data.copy()
         _LOGGER.debug("Previous data: %s", previous_data)  
-
+        self._realtime = False
+        if "real_time" in options: 
+            if options["real_time"]:
+                self._realtime = True
+                self._get_next_service = {}
+                """Initialize the info object."""
+                self._route_delimiter = None
+                self._headers = None
+                self._trip_update_url = options.get("trip_update_url", None)
+                self._vehicle_position_url = options.get("vehicle_position_url", None)
+                self._alerts_url = options.get("alerts_url", None)
+                if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
+                  if options[CONF_API_KEY] != "":
+                    self._trip_update_url = self._trip_update_url + "?api_key=" + options[CONF_API_KEY]
+                    self._vehicle_position_url = self._vehicle_position_url + "?api_key=" + options[CONF_API_KEY]
+                    self._alerts_url = self._alerts_url + "?api_key=" + options[CONF_API_KEY]
+                  elif options[CONF_X_API_KEY] != "":
+                    self._trip_update_url = self._trip_update_url + "?x_api_key=" + options[CONF_X_API_KEY]
+                    self._vehicle_position_url = self._vehicle_position_url + "?x_api_key=" + options[CONF_X_API_KEY]
+                    self._alerts_url = self._alerts_url + "?x_api_key=" + options[CONF_X_API_KEY]
+                if options.get(CONF_API_KEY_LOCATION, None) == "header":
+                  if options[CONF_API_KEY] != "":
+                    self._headers = {"Authorization": options[CONF_API_KEY]}
+                  elif options[CONF_X_API_KEY] != "":
+                    self._headers = {"x-api-key": options[CONF_X_API_KEY]}
         self._pygtfs = get_gtfs(
             self.hass, DEFAULT_PATH, data, False
         )        
