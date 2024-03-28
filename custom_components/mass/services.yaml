@@ -24,6 +24,16 @@ play_media:
             - playlist
             - track
             - radio
+    artist:
+      required: false
+      example: "Queen"
+      selector:
+        text:
+    album:
+      required: false
+      example: "News of the world"
+      selector:
+        text:
     enqueue:
       filter:
         supported_features:
@@ -38,6 +48,11 @@ play_media:
             - "replace_next"
             - "add"
           translation_key: enqueue
+    radio_mode:
+      required: false
+      advanced: true
+      selector:
+        boolean:
     announce:
       filter:
         supported_features:
@@ -46,22 +61,25 @@ play_media:
       example: "true"
       selector:
         boolean:
-    artist:
+    use_pre_announce:
+      filter:
+        supported_features:
+          - media_player.MediaPlayerEntityFeature.MEDIA_ANNOUNCE
       required: false
-      example: "Queen"
-      selector:
-        text:
-    album:
-      required: false
-      example: "News of the world"
-      selector:
-        text:
-    radio_mode:
-      required: false
-      advanced: true
+      example: "true"
       selector:
         boolean:
-
+    announce_volume:
+      filter:
+        supported_features:
+          - media_player.MediaPlayerEntityFeature.MEDIA_ANNOUNCE
+      required: false
+      example: 75
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
 
 search:
   fields:

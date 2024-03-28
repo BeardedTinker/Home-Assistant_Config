@@ -149,6 +149,9 @@ def get_rt_route_trip_statuses(self):
     ''' Get next rt departure for route (multiple) or trip (single) '''
 
     departure_times = {}
+    
+    if self._vehicle_position_url != "" :   
+        vehicle_positions = get_rt_vehicle_positions(self)
 
     feed_entities = get_gtfs_feed_entities(
         url=self._trip_update_url, headers=self._headers, label="trip data"

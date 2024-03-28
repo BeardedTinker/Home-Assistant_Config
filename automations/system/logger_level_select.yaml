@@ -10,7 +10,6 @@ trigger:
   platform: state
   entity_id:
     - input_select.logger_level
-#    - input_select.logger_component
 
 action:
   - service: logger.set_level

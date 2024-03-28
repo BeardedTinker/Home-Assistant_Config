@@ -384,7 +384,7 @@ def get_gtfs(hass, path, data, update=False):
     file = data["file"] + ".zip"
     sqlite = data["file"] + ".sqlite"
     journal = os.path.join(gtfs_dir, filename + ".sqlite-journal")
-    if os.path.exists(journal) and not update :
+    if check_extracting(hass, gtfs_dir,filename) and not update :
         _LOGGER.warning("Cannot use this datasource as still unpacking: %s", filename)
         return "extracting"
     if update and data["extract_from"] == "url" and os.path.exists(os.path.join(gtfs_dir, file)):
@@ -541,10 +541,11 @@ def get_datasources(hass, path) -> dict[str]:
 
 def remove_datasource(hass, path, filename):
     gtfs_dir = hass.config.path(path)
-    _LOGGER.info(f"Removing path/datasource: {os.path.join(gtfs_dir, filename)}")
-    for file in Path(path).glob(f"{filename}*"):
-        _LOGGER.info("Removing file: %s", file)
-        os.remove(file)
+    _LOGGER.info(f"Removing datasource: {os.path.join(gtfs_dir, filename)}.*")
+    os.remove(os.path.join(gtfs_dir, filename + ".sqlite"))
+    os.remove(os.path.join(gtfs_dir, filename + "_temp.zip"))
+    os.remove(os.path.join(gtfs_dir, filename + "_temp_out.zip"))
+    os.remove(os.path.join(gtfs_dir, filename + ".sqlite"))
     return "removed"
     
 def check_extracting(hass, gtfs_dir,file):
@@ -552,7 +553,8 @@ def check_extracting(hass, gtfs_dir,file):
     gtfs_dir = hass.config.path(gtfs_dir)
     filename = file
     journal = os.path.join(gtfs_dir, filename + ".sqlite-journal")
-    if os.path.exists(journal) :
+    tempzip = os.path.join(gtfs_dir, filename + "_temp.zip")
+    if os.path.exists(journal)  or os.path.exists(tempzip):
         _LOGGER.debug("Extracting: yes")
         return True
     return False    
