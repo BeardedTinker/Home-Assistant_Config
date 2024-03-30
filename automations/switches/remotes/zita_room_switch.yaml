@@ -61,8 +61,8 @@ action:
         - service: light.toggle
           target:
             entity_id:
+              - light.zita_bed_lights
               - light.zita_desk_matrix
-              - light.zita_desk_lights
     - conditions:
       - condition: trigger
         id: hold

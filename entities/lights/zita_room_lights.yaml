@@ -10,6 +10,6 @@ entities:
   - light.zita_ceiling
   - light.zita_tabletop
   - light.zita_desk_light
-  - light.zita_desk_lights
+  - light.zita_bed_lights
   - light.zita_desk_matrix
  

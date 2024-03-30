@@ -6,7 +6,7 @@
 platform: flux
 name: Zita floor flux
 lights:
-  - light.zita_desk_lights
+  - light.zita_bed_lights
   - light.zita_tabletop
 start_time: "07:00"
 stop_time: "23:00"
