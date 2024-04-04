@@ -36,10 +36,10 @@ jobs:
     steps:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v3
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Copy stub files into configuration folder
         run: |
           cp -R secrets_github.yaml secrets.yaml
@@ -59,10 +59,10 @@ jobs:
     steps:
       - name: Getting your configuration from GitHub
         uses: actions/checkout@v3
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Copy stub files into configuration folder
         run: |
           cp -R secrets_github.yaml secrets.yaml
