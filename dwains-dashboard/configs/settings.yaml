@@ -1,4 +1,0 @@
-disable_clock: false
-disable_welcome_message: true
-weather_entity: weather.accuweather
-alarm_entity: ''
