@@ -503,7 +503,7 @@ def get_stop_list(schedule, route_id, direction):
         val = x[0] + ": " + x[1] + ' (' + str(x[2]) + ')'
         stops.append(val)
     _LOGGER.debug(f"stops: {stops}")
-    return stops
+    return stops 
 
 def get_agency_list(schedule, data):
     _LOGGER.debug("Getting agencies with data: %s", data)
@@ -707,8 +707,34 @@ def create_trip_geojson(self):
         coordinate.append(x[1])
         coordinates.append(coordinate)
     self.geojson = {"features": [{"geometry": {"coordinates": coordinates, "type": "LineString"}, "properties": {"id": self._trip_id, "title": self._trip_id}, "type": "Feature"}], "type": "FeatureCollection"}    
-    _LOGGER.debug("Geojson: %s", json.dumps(self.geojson))
+    _LOGGER.debug("Geojson output: %s", json.dumps(self.geojson))
     return None
+    
+def get_local_stop_list(hass, schedule, data):
+    _LOGGER.debug("Getting local stops list with data: %s", data)
+    device_tracker = hass.states.get(data['device_tracker_id'])
+    latitude = device_tracker.attributes.get("latitude", None)
+    longitude = device_tracker.attributes.get("longitude", None) 
+    radius = data.get("radius", DEFAULT_LOCAL_STOP_RADIUS) / 130000
+    sql_query = f"""
+        SELECT stop.stop_id, stop.stop_name
+        FROM stops stop
+        where abs(stop.stop_lat - :latitude) < :radius and abs(stop.stop_lon - :longitude) < :radius
+        """  
+    result = schedule.engine.connect().execute(
+        text(sql_query),
+        {
+            "latitude": latitude,
+            "longitude": longitude,
+            "radius": radius
+        },
+    )   
+    rowcount = 0
+    for row_cursor in result:
+        rowcount += 1
+    _LOGGER.debug("Local stops list output: %s", rowcount)
+    return rowcount
+        
 
 def get_local_stops_next_departures(self):
     _LOGGER.debug("Get local stop departure with data: %s", self._data)

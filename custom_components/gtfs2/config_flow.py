@@ -19,6 +19,7 @@ from .const import (
     DEFAULT_LOCAL_STOP_REFRESH_INTERVAL,
     DEFAULT_LOCAL_STOP_TIMERANGE,
     DEFAULT_LOCAL_STOP_RADIUS,
+    DEFAULT_MAX_LOCAL_STOPS,
     DEFAULT_OFFSET,
     CONF_API_KEY,
     CONF_API_KEY_LOCATION, 
@@ -56,6 +57,7 @@ from .gtfs_helper import (
     remove_datasource,
     check_datasource_index,
     get_agency_list,
+    get_local_stop_list
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ _LOGGER = logging.getLogger(__name__)
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for GTFS."""
 
-    VERSION = 8
+    VERSION = 9
 
     def __init__(self) -> None:
         """Init ConfigFlow."""
@@ -122,13 +124,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
             ) 
         user_input[CONF_URL] = "na"
-        user_input[CONF_EXTRACT_FROM] = "zip"            
+        user_input[CONF_EXTRACT_FROM] = "zip"    
         self._user_inputs.update(user_input)
         _LOGGER.debug(f"UserInputs Local Stops: {self._user_inputs}") 
-        check_data = await self._check_data(self._user_inputs)
-        if check_data :
-            errors["base"] = check_data
-            return self.async_abort(reason=check_data)          
+        stop_limit = await _check_stop_list(self, self._user_inputs)
+        if stop_limit :
+            errors["base"] = stop_limit
+            return self.async_abort(reason=stop_limit) 
         return self.async_create_entry(
             title=user_input[CONF_NAME], data=self._user_inputs
             )                
@@ -341,7 +343,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     check_datasource_index, self.hass, self._pygtfs, DEFAULT_PATH, data["file"]
                 )            
         return None
-
+        
     async def _check_config(self, data):
         self._pygtfs = await self.hass.async_add_executor_job(
             get_gtfs, self.hass, DEFAULT_PATH, data, False
@@ -400,6 +402,15 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
+            if self.config_entry.data.get(CONF_DEVICE_TRACKER_ID, None):
+                _data = user_input
+                _data["file"] = self.config_entry.data["file"]
+                _data["url"] = self.config_entry.data["url"]
+                _data["extract_from"] = self.config_entry.data["extract_from"]
+                _data["device_tracker_id"] = self.config_entry.data["device_tracker_id"]
+                stop_limit = await _check_stop_list(self, _data)
+                if stop_limit :
+                    return self.async_abort(reason=stop_limit) 
             if user_input.get(CONF_REAL_TIME,None):
                 self._user_inputs.update(user_input)
                 _LOGGER.debug(f"UserInputs Options Init with realtime: {self._user_inputs}")
@@ -412,7 +423,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
         if self.config_entry.data.get(CONF_DEVICE_TRACKER_ID, None):
             opt1_schema = {
                     vol.Optional(CONF_LOCAL_STOP_REFRESH_INTERVAL, default=self.config_entry.options.get(CONF_LOCAL_STOP_REFRESH_INTERVAL, DEFAULT_LOCAL_STOP_REFRESH_INTERVAL)): int,
-                    vol.Optional(CONF_RADIUS, default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_LOCAL_STOP_RADIUS)): vol.All(vol.Coerce(int), vol.Range(min=50, max=500)),
+                    vol.Optional(CONF_RADIUS, default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_LOCAL_STOP_RADIUS)): vol.All(vol.Coerce(int), vol.Range(min=50, max=5000)),
                     vol.Optional(CONF_TIMERANGE, default=self.config_entry.options.get(CONF_TIMERANGE, DEFAULT_LOCAL_STOP_TIMERANGE)): vol.All(vol.Coerce(int), vol.Range(min=15, max=120)),
                     vol.Optional(CONF_REAL_TIME, default=self.config_entry.options.get(CONF_REAL_TIME)): selector.BooleanSelector()
                 }
@@ -469,4 +480,17 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                     },
                 ),
                 errors=errors,
-            )       
+            )      
+    
+async def _check_stop_list(self, data):
+    _LOGGER.debug("Checkstops option with data: %s", data)
+    self._pygtfs = await self.hass.async_add_executor_job(
+        get_gtfs, self.hass, DEFAULT_PATH, data, False
+    )
+    count_stops = await self.hass.async_add_executor_job(
+                get_local_stop_list, self.hass, self._pygtfs, data
+            )  
+    if count_stops > DEFAULT_MAX_LOCAL_STOPS:
+        _LOGGER.debug("Checkstops limit reached with: %s", count_stops)
+        return "stop_limit_reached"
+    return None         

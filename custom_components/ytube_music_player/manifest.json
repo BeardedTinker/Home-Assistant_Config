@@ -12,9 +12,9 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/KoljaWindeler/ytube_music_player/issues",
   "requirements": [
-    "ytmusicapi==1.4.2",
+    "ytmusicapi==1.6.0",
     "pytube==15.0.0",
     "integrationhelper==0.2.2"
   ],
-  "version": "20240131.01"
+  "version": "20240404.01"
 }

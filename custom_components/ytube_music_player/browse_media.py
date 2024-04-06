@@ -495,6 +495,9 @@ async def build_item_response(ytmusicplayer, payload):
 					))
 				elif(a['resultType'] == 'artist'):
 					_LOGGER.debug("a: %s", a)
+					if not('artist' in a):
+						a['artist'] = a['artists'][0]['name']  # Fix Top result
+						a['browseId'] = a['artists'][0]['id']  # Fix Top result
 					children.append(BrowseMedia(
 						title = helper.get(a['resultType'], "") + a['artist'], # noqa: E251
 						media_class = MediaClass.ARTIST,					  # noqa: E251

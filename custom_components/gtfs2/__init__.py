@@ -19,58 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_migrate_entry(hass, config_entry: ConfigEntry) -> bool:
     """Migrate old entry."""
     _LOGGER.warning("Migrating from version %s", config_entry.version)
-
-    if config_entry.version == 1:
-
-        new_data = {**config_entry.data}
-        new_data['extract_from'] = 'url'
-        new_data.pop('refresh_interval')
-        
-        new_options = {**config_entry.options}
-        new_options['real_time'] = False
-        new_options['refresh_interval'] = 15
-        new_options['api_key'] = ""
-        new_options['x_api_key'] = ""
-        new_options['offset'] = 0
-        new_data.pop('offset')
-        new_data['route_type'] = '99'
-        new_data['agency'] = '0: ALL'        
-        
-        config_entry.version = 7
-        hass.config_entries.async_update_entry(config_entry, data=new_data)
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-    
-    if config_entry.version == 2:
-
-        new_options = {**config_entry.options}
-        new_data = {**config_entry.data}
-        new_options['real_time'] = False
-        new_options['api_key'] = ""
-        new_options['x_api_key'] = ""
-        new_options['offset'] = 0
-        new_data.pop('offset')
-        new_data['route_type'] = '99'
-        new_data['agency'] = '0: ALL'        
-
-        config_entry.version = 7
-        hass.config_entries.async_update_entry(config_entry, options=new_options)  
-        hass.config_entries.async_update_entry(config_entry, data=new_data)        
-
-    if config_entry.version == 3:
-
-        new_options = {**config_entry.options}
-        new_data = {**config_entry.data}
-        new_options['api_key'] = ""
-        new_options['x_api_key'] = ""
-        new_options['offset'] = 0
-        new_data.pop('offset')
-        new_data['route_type'] = '99'
-        new_data['agency'] = '0: ALL'        
-
-        config_entry.version = 7
-        hass.config_entries.async_update_entry(config_entry, options=new_options)  
-        hass.config_entries.async_update_entry(config_entry, data=new_data)
-        
+      
     if config_entry.version == 4:
 
         new_options = {**config_entry.options}
@@ -80,7 +29,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry) -> bool:
         new_data.pop('offset')
         new_data['agency'] = '0: ALL'        
 
-        config_entry.version = 7
+        config_entry.version = 9
         hass.config_entries.async_update_entry(config_entry, data=new_data)
         hass.config_entries.async_update_entry(config_entry, options=new_options)          
         
@@ -90,7 +39,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry) -> bool:
         new_data['route_type'] = '99'
         new_data['agency'] = '0: ALL'
 
-        config_entry.version = 7
+        config_entry.version = 9
         hass.config_entries.async_update_entry(config_entry, data=new_data)  
         
     if config_entry.version == 6:
@@ -98,8 +47,19 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry) -> bool:
         new_data = {**config_entry.data}
         new_data['agency'] = '0: ALL'
 
-        config_entry.version = 7
-        hass.config_entries.async_update_entry(config_entry, data=new_data)         
+        config_entry.version = 9
+        hass.config_entries.async_update_entry(config_entry, data=new_data)  
+
+
+    if config_entry.version == 7 or config_entry.version == 8:
+
+        new_data = {**config_entry.data}
+        new_options = {**config_entry.options}
+
+        config_entry.version = 9
+        
+        hass.config_entries.async_update_entry(config_entry, data=new_data)  
+        hass.config_entries.async_update_entry(config_entry, options=new_options)        
 
     _LOGGER.warning("Migration to version %s successful", config_entry.version)
 

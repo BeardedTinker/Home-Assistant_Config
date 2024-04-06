@@ -84,7 +84,9 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self._debug_as_error = config.data.get(CONF_DEBUG_AS_ERROR, DEFAULT_DEBUG_AS_ERROR)
 		self._org_name = config.data.get(CONF_NAME, DOMAIN + name_add)
 		self._attr_name = self._org_name
+		self._api_language = config.data.get(CONF_API_LANGUAGE, DEFAULT_API_LANGUAGE)
 		self._init_extra_sensor = config.data.get(CONF_INIT_EXTRA_SENSOR, DEFAULT_INIT_EXTRA_SENSOR)
+		self._maxDatarate = config.data.get(CONF_MAX_DATARATE,DEFAULT_MAX_DATARATE)
 
 		# confgurations can be either the full entity_id or just the name
 		self._select_playlist = input_select.DOMAIN + "." + config.data.get(CONF_SELECT_PLAYLIST, DEFAULT_SELECT_PLAYLIST).replace(input_select.DOMAIN + ".", "")
@@ -123,6 +125,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self.log_me('debug', "- like_in_name: " + str(self._like_in_name))
 		self.log_me('debug', "- track_limit: " + str(self._trackLimit))
 		self.log_me('debug', "- legacy_radio: " + str(self._legacyRadio))
+		self.log_me('debug', "- max_dataRate: " + str(self._maxDatarate))
 
 		self._brand_id = str(config.data.get(CONF_BRAND_ID, ""))
 		self._api = None
@@ -345,7 +348,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		if(self._api is None):
 			self.log_debug_later("- no valid API, try to login")
 			if(os.path.exists(self._header_file)):
-				[ret, msg, self._api] = await async_try_login(self.hass, self._header_file, self._brand_id)
+				[ret, msg, self._api] = await async_try_login(self.hass, self._header_file, self._brand_id, self._api_language)
 				if(msg != ""):
 					self._api = None
 					out = "Issue during login: " + msg
@@ -745,6 +748,17 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			else:
 				self._media_position_updated = datetime.datetime.now(datetime.timezone.utc)
 
+		# Workaround for chromecast sometimes not playing first song in a playlist
+		if(old_state!=None and new_state!=None):	
+			try:
+				if(old_state.state == STATE_IDLE and new_state.state == STATE_PAUSED):
+					if(self._state == STATE_PLAYING):
+						self.log_me('error','chromecast in pause should be playings, '+str(old_state))
+						await self.async_get_track()
+			except:
+				pass
+
+		# detect app switch an turn off if so
 		if('app_id' in _player.attributes):
 			if(self._app_id == None):
 				self._app_id = _player.attributes['app_id']
@@ -899,6 +913,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 							info['track_artist'] = name
 						else:
 							info['track_artist'] += " / " + name
+			elif 'author' in _track:
+				info['track_artist'] = _track['author']  # use 'author' if still no artist info.
 		except:
 			pass
 
@@ -923,6 +939,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 
 		try:
 			if 'album' in _track:
+				info['track_album_name'] = _track['album']['name']  # fix missing album info.
 				if 'id' in _track['album']:
 					info['track_album_id'] = _track['album']['id']
 		except:
@@ -1313,7 +1330,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			return await self.async_get_track(retry=retry - 1)
 
 		# proxy playback, needed e.g. for sonos
-		if(1):
+		try:
 			if(self._proxy_url != "" and self._proxy_path != "" and self._proxy_url != " " and self._proxy_path != " "):
 				p1 = datetime.datetime.now()
 				_proxy_url = await self.hass.async_add_executor_job(lambda:  urlopen(Request(_url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'})))
@@ -1325,7 +1342,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				_url = self._proxy_url + "/" + PROXY_FILENAME
 				t = (datetime.datetime.now() - p1).total_seconds()
 				self.log_me('debug', "- proxy loading time: " + str(t) + " sec")
-		else:
+		except:
 			_LOGGER.error("The proxy method hit an error, turning off")
 			self.exc()
 			await self.async_turn_off_media_player()
@@ -1386,6 +1403,40 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		if(videoId is None):
 			self.log_me('debug', "videoId was None")
 			return ""
+		_url = await self.async_get_url_self(videoId,retry)
+
+		# check url
+		if(_url != ""):
+			r = await self.hass.async_add_executor_job(requests.head, _url)
+			if(r.status_code == 403):
+				self.log_me('error', "- self decoded url return 403 status code, attempt "+str(retry)+"/60")
+				_url = ""
+		
+		if(_url == ""):
+			_url = await self.async_get_url_pytube(videoId)
+		
+		# check url
+		if(_url != ""):
+			r = await self.hass.async_add_executor_job(requests.head, _url)
+			if(r.status_code == 403 or r.status_code == 410):
+				self.log_me('error', "- self decoded url return 403 status code, attempt "+str(retry)+"/60")
+				_url = ""
+
+				if(retry>0):
+					self._api = None
+					self.log_me('debug', "- relogin to fresh cookie and try again")
+					self.async_check_api() 
+					return await self.async_get_url(videoId, retry-1)
+				else:
+					self.log_me('debug', "- giving up, maybe pyTube can help")
+					_url = ""
+
+		self.log_me('debug', "[E] async_get_url")
+		return _url
+
+
+	async def async_get_url_self(self, videoId=None, retry=60):
+		self.log_me('debug', "[S] async_get_url_self")
 		_url = ""
 		await self.async_check_api()
 		try:
@@ -1438,6 +1489,17 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				
 				# try to find best audio only stream, but accept lower quality if we have to
 				valid_streams.sort(key=lambda x: x['bitrate'], reverse=True)
+				self.log_me('debug', "found "+str(len(valid_streams))+" streams")
+				# remove all streams with too high bitrates
+				if(self._maxDatarate>0):
+					for stream in valid_streams:
+						if(stream['bitrate']>self._maxDatarate):
+							if(len(valid_streams)>1):
+								valid_streams.remove(stream)
+								self.log_me('debug', '- removed stream with too high bitrate of '+str(stream['bitrate']))
+							else:
+								self.log_me('debug', '- preseved stream, too high quality but last available stream')
+
 				if(retry<20):
 					streamId = min(3,len(valid_streams))
 				elif(retry<30):
@@ -1447,7 +1509,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				else:
 					streamId = 0
 				
-				self.log_me('debug', 'Using stream '+str(streamId)+"/"+str(len(valid_streams)))
+				self.log_me('debug', 'Using stream '+str(streamId)+"/"+str(len(valid_streams))+", bitrate:"+str(valid_streams[streamId]['bitrate']))
 				# self.log_me('debug', '- using stream ' + str(streamId))
 				if(valid_streams[streamId].get('url') is None):
 					sigCipher_ch = valid_streams[streamId]['signatureCipher']
@@ -1464,19 +1526,24 @@ class yTubeMusicComponent(MediaPlayerEntity):
 					if(self._js == "" or retry<60):
 						self.log_me('debug', "- reloading cipher from current video")
 						await self.async_get_cipher(videoId)
-					signature = self._cipher.get_signature(ciphered_signature=res['s'])
-					_url = res['url'] + "&sig=" + signature
+					
+					#stream_manifest = extract.apply_descrambler(self.streaming_data)
+					##try:
+            		#extract.apply_signature(stream_manifest, self.vid_info, self.js)
+        			##except exceptions.ExtractError:
+					##	extract.apply_signature(stream_manifest, self.vid_info, self.js)
+					if "signature" in res['url'] or ("s" not in res and ("&sig=" in res['url'] or "&lsig=" in res['url'])):
+						# For certain videos, YouTube will just provide them pre-signed, in
+						# which case there's no real magic to download them and we can skip
+						# the whole signature descrambling entirely.
+						self.log_me('error',"signature found, skip decipher")
+						_url = res['url']
+					else:
+						self.log_me('error',"signature not found, decoding")
+						signature = self._cipher.get_signature(ciphered_signature=res['s'])
+						_url = res['url'] + "&sig=" + signature
 					self.log_me('debug', "- self decoded URL via cipher")
-					r = await self.hass.async_add_executor_job(requests.head, _url)
-					if(r.status_code == 403):
-						self.log_me('error', "- decoded url return 403 status code, attempt "+str(retry)+"/60")
-						if(retry>0):
-							self.log_me('debug', "- updating signature Timestamp and try again")
-							self._signatureTimestamp = await self.hass.async_add_executor_job(self._api.get_signatureTimestamp)
-							return await self.async_get_url(videoId, retry-1)
-						else:
-							self.log_me('debug', "- giving up, maybe pyTube can help")
-							_url = ""
+					
 				else:
 					_url = valid_streams[streamId]['url']
 					self.log_me('debug', "- found URL in api data")
@@ -1485,26 +1552,28 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			_LOGGER.error("- Failed to get own(!) URL for track, further details below. Will not try YouTube method")
 			_LOGGER.error(traceback.format_exc())
 			_LOGGER.error(videoId)
-
-		# backup: run youtube stack, only if we failed
-		if(_url == ""):
-			try:
-				streamingData = await self.hass.async_add_executor_job(YouTube, "https://www.youtube.com/watch?v=" + videoId)
-				streams = streamingData.streams
-				streams_audio = streams.filter(only_audio=True)
-				if(len(streams_audio) > 0):
-					_url = streams_audio.order_by('abr').last().url
-				else:
-					_url = streams.order_by('abr').last().url
-				_LOGGER.error("ultimatly")
-				_LOGGER.error(_url)
-
-			except Exception as err:
-				# _LOGGER.error(traceback.format_exc())
-				_LOGGER.error("- Failed to get URL with YouTube methode")
-				_LOGGER.error(err)
-				return ""
 		self.log_me('debug', "[E] async_get_url")
+		return _url
+
+	async def async_get_url_pytube(self, videoId=None):
+		# backup: run youtube stack, only if we failed
+		self.log_me('debug', "[S] async_get_url_pytube")
+		_url = ""
+		try:
+			streamingData = await self.hass.async_add_executor_job(lambda: YouTube("https://www.youtube.com/watch?v=" + videoId))
+			streams = await self.hass.async_add_executor_job(lambda: streamingData.streams)
+			streams_audio = streams.filter(only_audio=True)
+			if(len(streams_audio) > 0):
+				_url = streams_audio.order_by('abr').last().url
+			else:
+				_url = streams.order_by('abr').last().url
+
+		except Exception as err:
+			# _LOGGER.error(traceback.format_exc())
+			_LOGGER.error("- Failed to get URL with YouTube methode")
+			_LOGGER.error(err)
+			return ""
+		self.log_me('debug', "[E] async_get_url_pytube")
 		return _url
 
 
@@ -1909,10 +1978,15 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				supported_media = [['song', 'videoId'], ['playlist', 'browseId'], ['album', 'browseId'], ['artist','browseId']]
 				for media_type in supported_media:
 					for result in media_all:
-						if(result['resultType'] == media_type[0]):
-							if(not('title' in result) and ('artist' in result)):
-								result['title']=result['artist']
-							search_results.append({'type': media_type[0], 'title': result['title'], 'id': result[media_type[1]], 'thumbnail': result['thumbnails'][-1]['url']})
+						if result['resultType'] == media_type[0]:
+							if not('title' in result):
+								if 'artist' in result:
+									result['title'] = result['artist']
+								elif 'artists' in result:  # handle top result
+									result['title'] = result['artists'][0]['name']
+									result['browseId'] = result['artists'][0]['id']
+							if ('videoId' in result) or ('browseId' in result):
+								search_results.append({'type': media_type[0], 'title': result['title'], 'id': result[media_type[1]], 'thumbnail': result['thumbnails'][-1]['url']})
 
 				try:
 					await self.async_update_extra_sensor('search', search_results)

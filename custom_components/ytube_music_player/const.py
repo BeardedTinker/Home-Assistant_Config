@@ -109,6 +109,7 @@ SERVICE_CALL_APPEND_TRACK = "append_track_to_queue"
 
 CONF_RECEIVERS = 'speakers'	 # list of speakers (media_players)
 CONF_HEADER_PATH = 'header_path'
+CONF_API_LANGUAGE = 'api_language'
 CONF_SHUFFLE = 'shuffle'
 CONF_SHUFFLE_MODE = 'shuffle_mode'
 CONF_COOKIE = 'cookie'
@@ -120,6 +121,7 @@ CONF_DEBUG_AS_ERROR = 'debug_as_error'
 CONF_LEGACY_RADIO = 'legacy_radio'
 CONF_SORT_BROWSER = 'sort_browser'
 CONF_INIT_EXTRA_SENSOR = 'extra_sensor'
+CONF_MAX_DATARATE = 'max_datarate'
 
 CONF_TRACK_LIMIT = 'track_limit'
 CONF_PROXY_URL = 'proxy_url'
@@ -137,12 +139,14 @@ DEFAULT_SELECT_PLAYLIST = "" #input_select.DOMAIN + "." + DOMAIN + '_playlist' #
 DEFAULT_SELECT_PLAYMODE = "" #input_select.DOMAIN + "." + DOMAIN + '_playmode' # cleared defaults to avoid further issues with multiple instances
 DEFAULT_SELECT_SPEAKERS = "" #input_select.DOMAIN + "." + DOMAIN + '_speakers' # cleared defaults to avoid further issues with multiple instances
 DEFAULT_HEADER_FILENAME = 'header_'
+DEFAULT_API_LANGUAGE = 'en'
 DEFAULT_LIKE_IN_NAME = False
 DEFAULT_DEBUG_AS_ERROR = False
 DEFAULT_INIT_EXTRA_SENSOR = False
 PROXY_FILENAME = "ytube_proxy.mp4"
 
 DEFAULT_TRACK_LIMIT = 25
+DEFAULT_MAX_DATARATE = 129000
 DEFAULT_LEGACY_RADIO = True
 DEFAULT_SORT_BROWSER = True
 DEFAULT_SHUFFLE_MODE = 1
@@ -239,7 +243,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 
-async def async_try_login(hass, path, brand_id):
+async def async_try_login(hass, path, brand_id, language='en'):
 	ret = {}
 	api = None
 	msg = ""
@@ -247,10 +251,10 @@ async def async_try_login(hass, path, brand_id):
 	try:
 		if(brand_id!=""):
 			_LOGGER.debug("- using brand ID: "+brand_id)
-			api = await hass.async_add_executor_job(YTMusic,path,brand_id)
+			api = await hass.async_add_executor_job(YTMusic,path,brand_id,None,None,language)
 		else:
 			_LOGGER.debug("- login without brand ID and credential at path "+path)
-			api = await hass.async_add_executor_job(YTMusic,path)
+			api = await hass.async_add_executor_job(YTMusic,path,None,None,None,language)
 	except KeyError as err:
 		_LOGGER.debug("- Key exception")
 		if(str(err)=="'contents'"):
@@ -310,6 +314,7 @@ def ensure_config(user_input):
 	"""Make sure that needed Parameter exist and are filled with default if not."""
 	out = {}
 	out[CONF_NAME] = DOMAIN
+	out[CONF_API_LANGUAGE] = DEFAULT_API_LANGUAGE
 	out[CONF_RECEIVERS] = ''
 	out[CONF_SHUFFLE] = DEFAULT_SHUFFLE
 	out[CONF_SHUFFLE_MODE] = DEFAULT_SHUFFLE_MODE
@@ -329,6 +334,7 @@ def ensure_config(user_input):
 	out[CONF_LEGACY_RADIO] = DEFAULT_LEGACY_RADIO
 	out[CONF_SORT_BROWSER] = DEFAULT_SORT_BROWSER
 	out[CONF_INIT_EXTRA_SENSOR] = DEFAULT_INIT_EXTRA_SENSOR
+	out[CONF_MAX_DATARATE] = DEFAULT_MAX_DATARATE
 
 	if user_input is not None:
 		out.update(user_input)
