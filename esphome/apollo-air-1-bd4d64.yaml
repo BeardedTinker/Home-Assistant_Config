@@ -1,0 +1,17 @@
+substitutions:
+  name: apollo-air-1-bd4d64
+  friendly_name: Apollo AIR-1 bd4d64
+packages:
+  ApolloAutomation.AIR-1: github://ApolloAutomation/AIR-1/Integrations/ESPHome/AIR-1.yaml
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+  encryption:
+    key: +z/BVNdog4Np63wN6y5fEBBVZMCh7PplnOUSz9AYGms=
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
