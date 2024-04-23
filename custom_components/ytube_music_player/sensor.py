@@ -9,11 +9,11 @@ from .const import *
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config, async_add_devices):
+async def async_setup_entry(hass, config, async_add_entities):
 	# Run setup via Storage
-	_LOGGER.debug("Config via Storage/UI")
+	_LOGGER.debug("init ytube sensor")
 	if(config.data.get(CONF_INIT_EXTRA_SENSOR, DEFAULT_INIT_EXTRA_SENSOR)):
-		async_add_devices([yTubeMusicSensor(hass, config)], update_before_add=True)
+		async_add_entities([yTubeMusicSensor(hass, config)], update_before_add=True)
 
 
 class yTubeMusicSensor(Entity):
@@ -23,11 +23,13 @@ class yTubeMusicSensor(Entity):
 		# Initialize the sensor.
 		self.hass = hass
 		self._state = STATE_OFF
-		self._attr_unique_id = config.entry_id
+		self._device_id = config.entry_id
 		self._device_name = config.data.get(CONF_NAME)
-		self._attr_name = config.data.get(CONF_NAME) + "_extra"
+		self._attr_unique_id = config.entry_id + "_extra"  # should be different from the media_player entity
+		self._attr_has_entity_name = True
+		self._attr_name = "Extra"
 		self._attr_icon = 'mdi:information-outline'
-		self.hass.data[DOMAIN][self._attr_unique_id]['extra_sensor'] = self
+		self.hass.data[DOMAIN][self._device_id]['extra_sensor'] = self
 		self._attr = {'tracks', 'search', 'lyrics', 'playlists', 'total_tracks'}
 		self._attributes = {}
 		for attr in self._attr:
@@ -38,7 +40,7 @@ class yTubeMusicSensor(Entity):
 	@property
 	def device_info(self):
 		return {
-			'identifiers': {(DOMAIN, self._attr_unique_id)},
+			'identifiers': {(DOMAIN, self._device_id)},
 			'name': self._device_name,
 			'manufacturer': "Google Inc.",
 			'model': DOMAIN
@@ -66,8 +68,8 @@ class yTubeMusicSensor(Entity):
 
 		# update all attributes from the data var
 		for attr in self._attr:
-			if attr in self.hass.data[DOMAIN][self._attr_unique_id]:
-				self._attributes[attr] = self.hass.data[DOMAIN][self._attr_unique_id][attr]
+			if attr in self.hass.data[DOMAIN][self._device_id]:
+				self._attributes[attr] = self.hass.data[DOMAIN][self._device_id][attr]
 
 		try:
 			self.async_schedule_update_ha_state()

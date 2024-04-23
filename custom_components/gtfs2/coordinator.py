@@ -8,7 +8,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.util.dt as dt_util
 
 from .const import (
@@ -19,7 +19,9 @@ from .const import (
     DEFAULT_LOCAL_STOP_RADIUS,
     CONF_API_KEY, 
     CONF_X_API_KEY,
+    CONF_OCP_APIM_KEY,
     CONF_API_KEY_LOCATION,
+    CONF_ACCEPT_HEADER_PB,
     ATTR_DUE_IN,
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
@@ -122,19 +124,27 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                 self._vehicle_position_url = options.get("vehicle_position_url", None)
                 self._alerts_url = options.get("alerts_url", None)
                 if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
-                  if options[CONF_API_KEY] != "":
+                  if options.get(CONF_API_KEY, None):
                     self._trip_update_url = self._trip_update_url + "?api_key=" + options[CONF_API_KEY]
                     self._vehicle_position_url = self._vehicle_position_url + "?api_key=" + options[CONF_API_KEY]
                     self._alerts_url = self._alerts_url + "?api_key=" + options[CONF_API_KEY]
-                  elif options[CONF_X_API_KEY] != "":
+                  elif options.get(CONF_X_API_KEY, None):
                     self._trip_update_url = self._trip_update_url + "?x_api_key=" + options[CONF_X_API_KEY]
                     self._vehicle_position_url = self._vehicle_position_url + "?x_api_key=" + options[CONF_X_API_KEY]
                     self._alerts_url = self._alerts_url + "?x_api_key=" + options[CONF_X_API_KEY]
+                  elif options.get(CONF_OCP_APIM_KEY, None):
+                    self._trip_update_url = self._trip_update_url + "?Ocp-Apim-Subscription-Key=" + options[CONF_OCP_APIM_KEY]
+                    self._vehicle_position_url = self._vehicle_position_url + "?Ocp-Apim-Subscription-Key=" + options[CONF_OCP_APIM_KEY]
+                    self._alerts_url = self._alerts_url + "?Ocp-Apim-Subscription-Key=" + options[CONF_OCP_APIM_KEY] 
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
-                  if options[CONF_API_KEY] != "":
+                  if options.get(CONF_API_KEY,None):
                     self._headers = {"Authorization": options[CONF_API_KEY]}
-                  elif options[CONF_X_API_KEY] != "":
+                  elif options.get(CONF_X_API_KEY, None):
                     self._headers = {"x-api-key": options[CONF_X_API_KEY]}
+                  elif options.get(CONF_OCP_APIM_KEY, None):
+                    self._headers = {"Ocp-Apim-Subscription-Key": options[CONF_OCP_APIM_KEY]}                    
+                if options.get(CONF_ACCEPT_HEADER_PB, False):
+                    self._headers["Accept"] = "application/x-protobuf"
                 self.info = {}
                 self._route_id = self._data["next_departure"].get("route_id", None)
                 if self._route_id == None:
@@ -153,6 +163,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                     self._data["alert"] = self._get_rt_alerts
                 except Exception as ex:  # pylint: disable=broad-except
                   _LOGGER.error("Error getting gtfs realtime data, for origin: %s with error: %s", data["origin"], ex)
+                  raise UpdateFailed(f"Error in getting start/end stop data: {err}")
             else:
                 _LOGGER.debug("GTFS RT: RealTime = false, selected in entity options")            
         else:
@@ -219,6 +230,7 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
             "gtfs_dir": DEFAULT_PATH,
             "name": data["name"],
             "file": data["file"],
+            "offset": options["offset"] if "offset" in options else 0,
             "timerange": options.get("timerange", DEFAULT_LOCAL_STOP_TIMERANGE),
             "radius": options.get("radius", DEFAULT_LOCAL_STOP_RADIUS),
             "device_tracker_id": data["device_tracker_id"],
@@ -230,9 +242,11 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Cannot update this sensor as still unpacking: %s", self._data["file"])
             previous_data["extracting"] = True
             return previous_data
-            
-        self._data["local_stops_next_departures"] = await self.hass.async_add_executor_job(
+        try:    
+            self._data["local_stops_next_departures"] = await self.hass.async_add_executor_job(
                     get_local_stops_next_departures, self
                 )
+        except:
+            raise UpdateFailed(f"Error in getting local stops data: {err}")
         _LOGGER.debug("Data from coordinator: %s", self._data)              
         return self._data

@@ -310,7 +310,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_manual()
 
         self.use_addon = True
-        await install_repository(self.hass)
+        try:
+            await install_repository(self.hass)
+        except Exception as err:
+            # TODO: make this exception more explicit
+            LOGGER.warning(
+                "Failed to install the add-on repository, is it already installed?",
+                exc_info=err,
+            )
         addon_info = await self._async_get_addon_info()
 
         if addon_info.state == AddonState.RUNNING:

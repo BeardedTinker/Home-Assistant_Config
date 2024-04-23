@@ -6,7 +6,6 @@ PLATFORMS = ["sensor", "geo_location"]
 
 DOMAIN = "blitzortung"
 DATA_UNSUBSCRIBE = "unsubscribe"
-ATTR_LIGHTNING_DISTANCE = "distance"
 ATTR_LIGHTNING_AZIMUTH = "azimuth"
 ATTR_LIGHTNING_COUNTER = "counter"
 

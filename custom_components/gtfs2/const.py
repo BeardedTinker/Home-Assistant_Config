@@ -8,6 +8,7 @@ DEFAULT_REFRESH_INTERVAL = 15
 DEFAULT_OFFSET = 0
 DEFAULT_LOCAL_STOP_REFRESH_INTERVAL = 15
 DEFAULT_LOCAL_STOP_TIMERANGE = 30
+DEFAULT_LOCAL_STOP_TIMERANGE_HISTORY = 15
 DEFAULT_LOCAL_STOP_RADIUS = 400
 DEFAULT_MAX_LOCAL_STOPS = 15
 
@@ -15,7 +16,7 @@ DEFAULT_NAME = "GTFS Sensor2"
 DEFAULT_PATH = "gtfs2"
 DEFAULT_PATH_GEOJSON = "www/gtfs2"
 DEFAULT_PATH_RT = "www/gtfs2"
-DEFAULT_API_KEY_LOCATION = "n/a"
+DEFAULT_API_KEY_LOCATION = "not_applicable"
 
 CONF_DATA = "data"
 CONF_DESTINATION = "destination"
@@ -25,7 +26,7 @@ CONF_TOMORROW = "include_tomorrow"
 PLATFORMS = [Platform.SENSOR]
 
 # constants used in helpers
-ATTR_API_KEY_LOCATIONS = ["n/a","header","query_string"]
+ATTR_API_KEY_LOCATIONS = ["not_applicable","header","query_string"]
 ATTR_ARRIVAL = "arrival"
 ATTR_BICYCLE = "trip_bikes_allowed_state"
 ATTR_DAY = "day"
@@ -287,6 +288,8 @@ CONF_REAL_TIME = "real_time"
 # gtfs_rt specific
 CONF_API_KEY = "api_key"
 CONF_X_API_KEY = "x_api_key"
+CONF_OCP_APIM_KEY = "ocp_apim_subscription_key"
+CONF_ACCEPT_HEADER_PB = "accept"
 CONF_STOP_ID = "stopid"
 CONF_TRIP_UPDATE_URL = "trip_update_url"
 CONF_VEHICLE_POSITION_URL = "vehicle_position_url"
@@ -295,7 +298,7 @@ CONF_ROUTE_DELIMITER = "route_delimiter"
 CONF_ICON = "icon"
 CONF_SERVICE_TYPE = "service_type"
 
-
+DEFAULT_ACCEPT_HEADER_PB = False
 DEFAULT_SERVICE = "Service"
 DEFAULT_ICON = "mdi:bus"
 DEFAULT_DIRECTION = "0"

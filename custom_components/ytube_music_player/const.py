@@ -20,6 +20,7 @@ from homeassistant.const import (
 	CONF_PASSWORD,
 	STATE_PLAYING,
 	STATE_PAUSED,
+	STATE_ON,
 	STATE_OFF,
 	STATE_IDLE,
 	ATTR_COMMAND,
@@ -41,17 +42,19 @@ from homeassistant.components.media_player import (
 	DOMAIN as DOMAIN_MP,
 )
 
+#  add for old settings
 from homeassistant.components.input_boolean import (
 	SERVICE_TURN_OFF as IB_OFF,
 	SERVICE_TURN_ON as IB_ON,
 	DOMAIN as DOMAIN_IB,
 )
 
-import homeassistant.components.input_select as input_select
-import homeassistant.components.input_boolean as input_boolean
+import homeassistant.components.select as select
+import homeassistant.components.input_select as input_select  # add for old settings
+import homeassistant.components.input_boolean as input_boolean  # add for old settings
 
 # Should be equal to the name of your component.
-PLATFORMS = {"media_player", "sensor"}
+PLATFORMS = {"sensor", "select", "media_player" }
 DOMAIN = "ytube_music_player"
 
 SUPPORT_YTUBEMUSIC_PLAYER = (
@@ -106,8 +109,7 @@ SERVICE_CALL_GOTO_TRACK = "goto_track"
 SERVICE_CALL_MOVE_TRACK = "move_track_within_queue"
 SERVICE_CALL_APPEND_TRACK = "append_track_to_queue"
 
-
-CONF_RECEIVERS = 'speakers'	 # list of speakers (media_players)
+CONF_RECEIVERS = 'speakers'  # list of speakers (media_players)
 CONF_HEADER_PATH = 'header_path'
 CONF_API_LANGUAGE = 'api_language'
 CONF_SHUFFLE = 'shuffle'
@@ -121,23 +123,34 @@ CONF_DEBUG_AS_ERROR = 'debug_as_error'
 CONF_LEGACY_RADIO = 'legacy_radio'
 CONF_SORT_BROWSER = 'sort_browser'
 CONF_INIT_EXTRA_SENSOR = 'extra_sensor'
+CONF_INIT_DROPDOWNS = 'dropdowns'
+ALL_DROPDOWNS = ["playlists","speakers","playmode","radiomode","repeatmode"]
+DEFAULT_INIT_DROPDOWNS = ["playlists","speakers","playmode"]
 CONF_MAX_DATARATE = 'max_datarate'
 
 CONF_TRACK_LIMIT = 'track_limit'
 CONF_PROXY_URL = 'proxy_url'
 CONF_PROXY_PATH = 'proxy_path'
 
+#  add for old settings
 CONF_SELECT_SOURCE = 'select_source'
 CONF_SELECT_PLAYLIST = 'select_playlist'
 CONF_SELECT_SPEAKERS = 'select_speakers'
 CONF_SELECT_PLAYMODE = 'select_playmode'
 CONF_SELECT_PLAYCONTINUOUS = 'select_playcontinuous'
+OLD_INPUTS = {
+				"playlists": CONF_SELECT_PLAYLIST,
+				"speakers": CONF_SELECT_SPEAKERS,
+				"playmode": CONF_SELECT_PLAYMODE,
+				"radiomode": CONF_SELECT_SOURCE,
+				"repeatmode": CONF_SELECT_PLAYCONTINUOUS
+}
+DEFAULT_SELECT_PLAYCONTINUOUS = ""
+DEFAULT_SELECT_SOURCE = ""
+DEFAULT_SELECT_PLAYLIST = ""
+DEFAULT_SELECT_PLAYMODE = ""
+DEFAULT_SELECT_SPEAKERS = ""
 
-DEFAULT_SELECT_PLAYCONTINUOUS = "" #input_boolean.DOMAIN + "." + DOMAIN + '_playcontinuous' # cleared defaults to avoid further issues with multiple instances
-DEFAULT_SELECT_SOURCE = "" #input_select.DOMAIN + "." + DOMAIN + '_source'	 # cleared defaults to avoid further issues with multiple instances
-DEFAULT_SELECT_PLAYLIST = "" #input_select.DOMAIN + "." + DOMAIN + '_playlist' # cleared defaults to avoid further issues with multiple instances
-DEFAULT_SELECT_PLAYMODE = "" #input_select.DOMAIN + "." + DOMAIN + '_playmode' # cleared defaults to avoid further issues with multiple instances
-DEFAULT_SELECT_SPEAKERS = "" #input_select.DOMAIN + "." + DOMAIN + '_speakers' # cleared defaults to avoid further issues with multiple instances
 DEFAULT_HEADER_FILENAME = 'header_'
 DEFAULT_API_LANGUAGE = 'en'
 DEFAULT_LIKE_IN_NAME = False
@@ -149,8 +162,6 @@ DEFAULT_TRACK_LIMIT = 25
 DEFAULT_MAX_DATARATE = 129000
 DEFAULT_LEGACY_RADIO = True
 DEFAULT_SORT_BROWSER = True
-DEFAULT_SHUFFLE_MODE = 1
-DEFAULT_SHUFFLE = True
 
 ERROR_COOKIE = 'ERROR_COOKIE'
 ERROR_AUTH_USER = 'ERROR_AUTH_USER'
@@ -164,6 +175,10 @@ PLAYMODE_SHUFFLE = "Shuffle"
 PLAYMODE_RANDOM = "Random"
 PLAYMODE_SHUFFLE_RANDOM = "Shuffle Random"
 PLAYMODE_DIRECT = "Direct"
+
+ALL_SHUFFLE_MODES = [PLAYMODE_SHUFFLE, PLAYMODE_RANDOM, PLAYMODE_SHUFFLE_RANDOM, PLAYMODE_DIRECT]
+DEFAULT_SHUFFLE_MODE = PLAYMODE_SHUFFLE_RANDOM
+DEFAULT_SHUFFLE = True
 
 SEARCH_ID = "search_id"
 SEARCH_TYPE = "search_type"
@@ -231,10 +246,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend = vol.Schema({
 	DOMAIN: vol.Schema({
 		vol.Optional(CONF_RECEIVERS): cv.string,
 		vol.Optional(CONF_HEADER_PATH, default=DEFAULT_HEADER_FILENAME): cv.string,
-		vol.Optional(CONF_SELECT_SOURCE, default=DEFAULT_SELECT_SOURCE): cv.string,
-		vol.Optional(CONF_SELECT_PLAYLIST, default=DEFAULT_SELECT_PLAYLIST): cv.string,
-		vol.Optional(CONF_SELECT_PLAYMODE, default=DEFAULT_SELECT_PLAYMODE): cv.string,
-		vol.Optional(CONF_SELECT_SPEAKERS, default=DEFAULT_SELECT_SPEAKERS): cv.string,
 	})
 }, extra=vol.ALLOW_EXTRA)
 
@@ -318,11 +329,6 @@ def ensure_config(user_input):
 	out[CONF_RECEIVERS] = ''
 	out[CONF_SHUFFLE] = DEFAULT_SHUFFLE
 	out[CONF_SHUFFLE_MODE] = DEFAULT_SHUFFLE_MODE
-	out[CONF_SELECT_SOURCE] = DEFAULT_SELECT_SOURCE
-	out[CONF_SELECT_PLAYLIST] = DEFAULT_SELECT_PLAYLIST
-	out[CONF_SELECT_PLAYMODE] = DEFAULT_SELECT_PLAYMODE
-	out[CONF_SELECT_SPEAKERS] = DEFAULT_SELECT_SPEAKERS
-	out[CONF_SELECT_PLAYCONTINUOUS] = DEFAULT_SELECT_PLAYCONTINUOUS
 	out[CONF_PROXY_PATH] = ""
 	out[CONF_PROXY_URL] = ""
 	out[CONF_BRAND_ID] = ""
@@ -334,11 +340,29 @@ def ensure_config(user_input):
 	out[CONF_LEGACY_RADIO] = DEFAULT_LEGACY_RADIO
 	out[CONF_SORT_BROWSER] = DEFAULT_SORT_BROWSER
 	out[CONF_INIT_EXTRA_SENSOR] = DEFAULT_INIT_EXTRA_SENSOR
+	out[CONF_INIT_DROPDOWNS] = DEFAULT_INIT_DROPDOWNS
 	out[CONF_MAX_DATARATE] = DEFAULT_MAX_DATARATE
 
 	if user_input is not None:
+		#  for the old shuffle_mode setting.
 		out.update(user_input)
-			
+		if isinstance(_shuffle_mode := out[CONF_SHUFFLE_MODE], int):
+			if _shuffle_mode >= 1:
+				out[CONF_SHUFFLE_MODE] = ALL_SHUFFLE_MODES[_shuffle_mode - 1]
+			else:
+				out[CONF_SHUFFLE_MODE] = PLAYMODE_DIRECT
+			_LOGGER.error(f"shuffle_mode: {_shuffle_mode} is a deprecated value and has been replaced with '{out[CONF_SHUFFLE_MODE]}'.")
+
+		# If old input(s) exists,uncheck the new corresponding select(s).
+		# If the old input is set to a blank space character, then permanently delete this field.
+		for dropdown in ALL_DROPDOWNS:
+			if (_old_conf_input := out.get(OLD_INPUTS[dropdown])) is not None:
+				if _old_conf_input.replace(" ","") == "":
+					del out[OLD_INPUTS[dropdown]]
+				else:
+					if dropdown in out[CONF_INIT_DROPDOWNS]:
+						out[CONF_INIT_DROPDOWNS].remove(dropdown)
+						_LOGGER.warning(f"old {dropdown} input_select: {_old_conf_input} exists,uncheck the corresponding new select.")
 	return out
 
 

@@ -7,18 +7,15 @@ import time
 
 import voluptuous as vol
 
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME, UnitOfLength
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.event import async_track_time_interval
 
 from homeassistant.util.unit_system import IMPERIAL_SYSTEM
 from homeassistant.util.unit_conversion import DistanceConverter
-from homeassistant.const import (
-    LENGTH_KILOMETERS,
-    LENGTH_MILES,
-)
 from . import const
 from .const import (
     CONF_IDLE_RESET_TIMEOUT,
@@ -75,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
     if hass.config.units == IMPERIAL_SYSTEM:
         radius_mi = radius
-        radius = DistanceConverter.convert(radius, LENGTH_MILES, LENGTH_KILOMETERS)
+        radius = DistanceConverter.convert(radius, UnitOfLength.MILES, UnitOfLength.KILOMETERS)
         _LOGGER.info("imperial system, %s mi -> %s km", radius_mi, radius)
 
     coordinator = BlitzortungCoordinator(
@@ -235,7 +232,7 @@ class BlitzortungCoordinator:
         distance = round(math.sqrt(dx * dx + dy * dy) * 6371, 1)
         azimuth = round(math.atan2(dx, dy) * 180 / math.pi) % 360
 
-        lightning[const.ATTR_LIGHTNING_DISTANCE] = distance
+        lightning[SensorDeviceClass.DISTANCE] = distance
         lightning[const.ATTR_LIGHTNING_AZIMUTH] = azimuth
 
     async def connect(self):
@@ -289,17 +286,17 @@ class BlitzortungCoordinator:
                     notification_id="blitzortung_new_version_available",
                 )
 
-    def on_mqtt_message(self, message, *args):
+    async def on_mqtt_message(self, message, *args):
         for callback in self.callbacks:
             callback(message)
         if message.topic.startswith("blitzortung/1.1"):
             lightning = json.loads(message.payload)
             self.compute_polar_coords(lightning)
-            if lightning[const.ATTR_LIGHTNING_DISTANCE] < self.radius:
-                _LOGGER.debug("ligntning data: %s", lightning)
+            if lightning[SensorDeviceClass.DISTANCE] < self.radius:
+                _LOGGER.debug("lightning data: %s", lightning)
                 self.last_time = time.time()
                 for callback in self.lightning_callbacks:
-                    callback(lightning)
+                    await callback(lightning)
                 for sensor in self.sensors:
                     sensor.update_lightning(lightning)
 

@@ -58,6 +58,45 @@ update_gtfs_rt_local:
       example: "https://path-to-my-realttime-data"
       selector:
         text:
+    api_key:
+      name: api_key
+      description: provide api_key if required
+      required: false
+      selector:
+        text:        
+    x_api_key:
+      name: x_api_key
+      description: provide x_api_key if required
+      required: false
+      selector:
+        text:  
+    ocp_apim_subscription_key:
+      name: Ocp-Apim-Subscription-Key
+      description: provide Ocp-Apim if required
+      required: false
+      selector:
+        text:         
+    api_key_location:
+      name: Indicate location of the key
+      description: Select location of the key
+      required: true      
+      default: "not_applicable"
+      example: "not_applicable"
+      selector:
+        select:
+          translation_key: "api_key_location"
+          options:
+            - "not_applicable"
+            - "header"
+            - "query_string"     
+    accept:
+      name: Accept
+      description: add application/protobuf to the header
+      default: false
+      required: true      
+      selector:
+        boolean: 
+      
     debug_output:
       name: Save all to local file in readable format
       description: for debug purposes, see /config/www/gtfs2
@@ -77,4 +116,4 @@ update_gtfs_local_stops:
       example: "zone.home"
       selector:
         entity:
-          domain: ["person", "zone"]       
+          domain: ["person", "zone"]          

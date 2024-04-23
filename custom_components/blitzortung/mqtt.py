@@ -281,16 +281,17 @@ class MQTT:
                     )
                     continue
 
-            self.hass.async_run_job(
-                subscription.callback,
-                Message(
-                    msg.topic,
-                    payload,
-                    msg.qos,
-                    msg.retain,
-                    subscription.topic,
-                    timestamp,
-                ),
+            self.hass.async_create_task(
+                subscription.callback(
+                    Message(
+                        msg.topic,
+                        payload,
+                        msg.qos,
+                        msg.retain,
+                        subscription.topic,
+                        timestamp,
+                    )
+                )
             )
 
     def _mqtt_on_disconnect(self, _mqttc, _userdata, result_code: int) -> None:

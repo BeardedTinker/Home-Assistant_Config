@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import Mapping
 from contextlib import suppress
 from typing import TYPE_CHECKING, Any
@@ -489,7 +490,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         media_uris: list[str] = []
         # work out (all) uri(s) to play
         for media_id_str in media_id:
-            # prefer URI format
+            # URL or URI string
             if "://" in media_id_str:
                 media_uris.append(media_id_str)
                 continue
@@ -501,7 +502,11 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
                     )
                     media_uris.append(item.uri)
                     continue
-            # lookup by name
+            # try local accessible filename
+            elif await asyncio.to_thread(os.path.isfile, media_id_str):
+                media_uris.append(media_id_str)
+                continue
+            # last resort: lookup by name/search
             if item := await self._get_item_by_name(
                 media_id_str, artist, album, media_type
             ):

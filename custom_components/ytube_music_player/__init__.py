@@ -13,7 +13,13 @@ async def async_setup(hass, config):
 async def async_setup_entry(hass, config_entry):
 	"""Set up this integration using UI/YAML."""
 	hass.config_entries.async_update_entry(config_entry, data=ensure_config(config_entry.data))
-	config_entry.options = config_entry.data
+
+    # It might be unnecessary since the "options" in the config_entry is not being used.
+	# Additionally, due to the use of deprecated methods, 
+	# it resulted in the debug output described in 
+	# https://github.com/KoljaWindeler/ytube_music_player/issues/311.
+	# config_entry.options = config_entry.data
+
 	config_entry.add_update_listener(update_listener)
 
 	hass.data.setdefault(DOMAIN, {})
@@ -21,7 +27,7 @@ async def async_setup_entry(hass, config_entry):
 
 	# Add sensor
 	for platform in PLATFORMS:
-		hass.async_add_job(
+		hass.async_create_task(
 			hass.config_entries.async_forward_entry_setup(config_entry, platform)
 		)
 	return True
@@ -45,4 +51,4 @@ async def update_listener(hass, entry):
 	entry.data = entry.options
 	for platform in PLATFORMS:
 		await hass.config_entries.async_forward_entry_unload(entry, platform)
-		hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, platform))
+		hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, platform))

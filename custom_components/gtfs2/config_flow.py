@@ -24,6 +24,9 @@ from .const import (
     CONF_API_KEY,
     CONF_API_KEY_LOCATION, 
     CONF_X_API_KEY, 
+    CONF_OCP_APIM_KEY,
+    CONF_ACCEPT_HEADER_PB,
+    DEFAULT_ACCEPT_HEADER_PB,
     CONF_VEHICLE_POSITION_URL, 
     CONF_TRIP_UPDATE_URL,
     CONF_ALERTS_URL,
@@ -401,6 +404,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the options."""
+        errors: dict[str, str] = {}
         if user_input is not None:
             if self.config_entry.data.get(CONF_DEVICE_TRACKER_ID, None):
                 _data = user_input
@@ -425,11 +429,13 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(CONF_LOCAL_STOP_REFRESH_INTERVAL, default=self.config_entry.options.get(CONF_LOCAL_STOP_REFRESH_INTERVAL, DEFAULT_LOCAL_STOP_REFRESH_INTERVAL)): int,
                     vol.Optional(CONF_RADIUS, default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_LOCAL_STOP_RADIUS)): vol.All(vol.Coerce(int), vol.Range(min=50, max=5000)),
                     vol.Optional(CONF_TIMERANGE, default=self.config_entry.options.get(CONF_TIMERANGE, DEFAULT_LOCAL_STOP_TIMERANGE)): vol.All(vol.Coerce(int), vol.Range(min=15, max=120)),
+                    vol.Optional(CONF_OFFSET, default=self.config_entry.options.get(CONF_OFFSET, DEFAULT_OFFSET)): int,
                     vol.Optional(CONF_REAL_TIME, default=self.config_entry.options.get(CONF_REAL_TIME)): selector.BooleanSelector()
                 }
             return self.async_show_form(
                 step_id="init",
-                data_schema=vol.Schema(opt1_schema)
+                data_schema=vol.Schema(opt1_schema),
+                errors = errors
             )                
         
         else:
@@ -461,7 +467,9 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_TRIP_UPDATE_URL, default=self.config_entry.options.get(CONF_TRIP_UPDATE_URL)): str,
                         vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY,"")): str,
                         vol.Optional(CONF_X_API_KEY,default=self.config_entry.options.get(CONF_X_API_KEY,"")): str,
+                        vol.Optional(CONF_OCP_APIM_KEY,default=self.config_entry.options.get(CONF_OCP_APIM_KEY,"")): str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
+                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
                     },
                 ),
                 errors=errors,
@@ -476,7 +484,9 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_ALERTS_URL, default=self.config_entry.options.get(CONF_ALERTS_URL,"")): str,
                         vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY,"")): str,
                         vol.Optional(CONF_X_API_KEY,default=self.config_entry.options.get(CONF_X_API_KEY,"")): str,
+                        vol.Optional(CONF_OCP_APIM_KEY,default=self.config_entry.options.get(CONF_OCP_APIM_KEY,"")): str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
+                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
                     },
                 ),
                 errors=errors,
