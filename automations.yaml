@@ -1,3 +1,60 @@
-#####
-# Automations are inside /automations folder...
-#####
+- id: '1714494466617'
+  alias: Evening privacy
+  description: Close shade for privacy
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '30'
+  condition: []
+  action:
+  - device_id: 1090ed79d4175147c1a9faa3d9216647
+    domain: cover
+    entity_id: 7cda5b6c97ef3db6c5f63ac4bbf8512c
+    type: close
+  mode: single
+- id: '1714494567531'
+  alias: Evening privcy
+  description: Close shades after sunset for privacy
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '30'
+  condition: []
+  action:
+  - device_id: 1090ed79d4175147c1a9faa3d9216647
+    domain: cover
+    entity_id: 7cda5b6c97ef3db6c5f63ac4bbf8512c
+    type: close
+  mode: single
+- id: '1714494640190'
+  alias: Morning sun
+  description: Let the morning sun in bedroom
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '45'
+  condition: []
+  action:
+  - device_id: 1090ed79d4175147c1a9faa3d9216647
+    domain: cover
+    entity_id: 7cda5b6c97ef3db6c5f63ac4bbf8512c
+    type: open
+  mode: single
+- id: '1714494731375'
+  alias: When too bright
+  description: When too bright, close shades to 80%
+  trigger:
+  - type: illuminance
+    platform: device
+    device_id: 5521ba9b2a784df5ade00332cb1283fc
+    entity_id: 0c8bc6ed62880501f8904ecbed5b9541
+    domain: sensor
+    above: 500
+  condition: []
+  action:
+  - device_id: 1090ed79d4175147c1a9faa3d9216647
+    domain: cover
+    entity_id: 7cda5b6c97ef3db6c5f63ac4bbf8512c
+    type: set_position
+    position: 80
+  mode: single
