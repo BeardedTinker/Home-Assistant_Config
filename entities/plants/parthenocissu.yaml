@@ -1,19 +1,15 @@
 #####
-# Plant monitor integration. Using LilyGO HiGrow board with pesor firmware
+# Plant monitor integration. Using Zigbee Tuya device
 # https://www.home-assistant.io/integrations/plant
 #####
 
 parthenocissus:
   sensors:
     moisture: sensor.parthenocissus_soil_moisture
-    battery: sensor.parthenocissus_battery_2
+    battery: sensor.parthenocissus_battery
     temperature: sensor.parthenocissus_temperature
-    conductivity: sensor.parthenocissus_salt
-    brightness: sensor.parthenocissus_lux
   min_moisture: 30
   max_moisture: 75
   min_battery: 10
-  min_conductivity: 1
   min_temperature: 19
-  min_brightness: 500
   check_days: 3
