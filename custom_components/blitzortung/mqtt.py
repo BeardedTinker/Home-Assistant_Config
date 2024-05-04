@@ -8,10 +8,9 @@ from typing import Callable, List, Optional, Union
 
 import attr
 
-from homeassistant.core import callback
+from homeassistant.core import callback, HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.dispatcher import dispatcher_send
-from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,7 +87,7 @@ class MQTT:
 
     def __init__(
         self,
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         host,
         port=DEFAULT_PORT,
         keepalive=DEFAULT_KEEPALIVE,

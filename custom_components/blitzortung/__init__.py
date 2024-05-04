@@ -10,7 +10,7 @@ import voluptuous as vol
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME, UnitOfLength
-from homeassistant.core import HomeAssistant
+from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.event import async_track_time_interval
 
@@ -215,6 +215,7 @@ class BlitzortungCoordinator:
             )
         )
 
+    @callback
     def _on_connection_change(self, *args, **kwargs):
         if self.unloading:
             return
