@@ -1,0 +1,32 @@
+name: Deta fan controller
+primary_entity:
+  entity: fan
+  dps:
+    - id: 1
+      type: boolean
+      name: switch
+    - id: 3
+      type: integer
+      name: speed
+      range:
+        min: 1
+        max: 3
+    - id: 102
+      type: integer
+      name: timer
+secondary_entities:
+  - entity: light
+    dps:
+      - id: 9
+        type: boolean
+        name: switch
+      - id: 103
+        type: integer
+        name: timer
+  - entity: switch
+    name: Master
+    category: config
+    dps:
+      - id: 101
+        type: boolean
+        name: switch

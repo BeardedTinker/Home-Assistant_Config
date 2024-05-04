@@ -1,0 +1,128 @@
+name: Grid Connnect power metered double outlet with USB
+primary_entity:
+  entity: switch
+  category: config
+  name: Master
+  class: outlet
+  dps:
+    - id: 101
+      name: switch
+      type: boolean
+    - id: 21
+      name: test_bit
+      type: integer
+secondary_entities:
+  - entity: lock
+    translation_key: child_lock
+    category: config
+    dps:
+      - id: 40
+        name: lock
+        type: boolean
+  - entity: switch
+    class: outlet
+    name: Outlet 1
+    dps:
+      - id: 1
+        name: switch
+        type: boolean
+  - entity: switch
+    class: outlet
+    name: Outlet 2
+    dps:
+      - id: 2
+        name: switch
+        type: boolean
+  - entity: sensor
+    category: diagnostic
+    name: Energy
+    dps:
+      - id: 17
+        name: sensor
+        type: integer
+        unit: Wh
+      - id: 25
+        name: calibration
+        type: integer
+  - entity: sensor
+    class: current
+    category: diagnostic
+    dps:
+      - id: 18
+        name: sensor
+        type: integer
+        class: measurement
+        force: true
+        unit: mA
+      - id: 23
+        name: calibration
+        type: integer
+  - entity: sensor
+    class: power
+    category: diagnostic
+    dps:
+      - id: 19
+        name: sensor
+        type: integer
+        class: measurement
+        unit: W
+        force: true
+        mapping:
+          - scale: 10
+      - id: 24
+        name: calibration
+        type: integer
+  - entity: sensor
+    class: voltage
+    category: diagnostic
+    dps:
+      - id: 20
+        name: sensor
+        type: integer
+        class: measurement
+        unit: V
+        force: true
+        mapping:
+          - scale: 10
+      - id: 22
+        name: calibration
+        type: integer
+  - entity: select
+    category: config
+    name: Initial state
+    icon: "mdi:toggle-switch"
+    dps:
+      - id: 38
+        name: option
+        type: string
+        mapping:
+          - dps_val: "on"
+            value: "On"
+          - dps_val: "off"
+            value: "Off"
+          - dps_val: memory
+            value: Last State
+  - entity: number
+    name: Timer 1
+    translation_key: timer
+    category: config
+    dps:
+      - id: 9
+        type: integer
+        name: value
+        unit: s
+        range:
+          min: 0
+          max: 86400
+  - entity: number
+    name: Timer 2
+    translation_key: timer
+    category: config
+    dps:
+      - id: 10
+        type: integer
+        name: value
+        unit: s
+        range:
+          min: 0
+          max: 86400
