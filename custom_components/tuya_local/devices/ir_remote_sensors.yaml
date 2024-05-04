@@ -1,0 +1,34 @@
+name: Universal remote control
+products:
+  - id: whs3cty93fzrqkpt
+primary_entity:
+  entity: remote
+  dps:
+    - id: 201
+      name: send
+      type: string
+      optional: true
+    - id: 202
+      name: receive
+      type: string
+      optional: true
+      persist: false
+secondary_entities:
+  - entity: sensor
+    class: temperature
+    dps:
+      - id: 101
+        name: sensor
+        type: integer
+        class: measurement
+        unit: C
+        mapping:
+          - scale: 10
+  - entity: sensor
+    class: humidity
+    dps:
+      - id: 102
+        name: sensor
+        type: integer
+        unit: "%"
+        class: measurement
