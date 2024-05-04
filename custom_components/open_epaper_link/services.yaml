@@ -1,0 +1,356 @@
+dlimg:
+  name: Download Image
+  description: Downloads an image from the web and sends it to an ESL. If it does not fit, the image will be resized
+  target:
+    entity:
+      domain: open_epaper_link
+  fields:
+    url:
+      name: Url
+      description: Url of the image to download
+      required: true
+      example: https://morgenwirdes.de/api/v3/esl1.php?plz=84051
+    rotation:
+      name: Rotation
+      description: Rotation to be applied to the image in degrees
+      required: false
+      example: 0
+    dither:
+      name: Dither
+      description: Whether the AP should dither the image or not
+      required: false
+      example: true
+      
+setled:
+  name: Set led pattern
+  description: Sets the led flash pattern
+  target:
+    entity:
+      domain: open_epaper_link
+  fields:
+    mode:
+      name: Mode
+      description: The mode flashing, if set to off, the other options can be ignored
+      required: true
+      example: flash
+      default: flash
+      selector:
+        select:
+          options:
+            - "off"
+            - "flash"
+    brightness:
+      name: Brightness
+      description: Brightnes of the flashes
+      required: false
+      example: 1
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 16
+          step: 1
+          unit_of_measurement: ""
+          mode: slider
+        
+    repeats:
+      name: Repeats
+      description: Repeats of the flash pattern
+      required: false
+      example: 2
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 255
+          step: 1
+          unit_of_measurement: ""
+          mode: slider
+      
+    color1:
+      name: Color 1
+      description: Color of group 1, will internally be converted to rgb332
+      required: false
+      example: [255, 0, 0]
+      default: [255, 0, 0]
+      selector:
+        color_rgb:
+    flashSpeed1:
+      name: FlashSpeed 1
+      description: Delay between flashes in group 1
+      required: false
+      example: 0.2
+      default: 0.2
+      selector:
+        number:
+          min: 0
+          max: 1.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider
+    flashCount1:
+      name: FlashCount1
+      description: Number of flashes in group 1
+      required: false
+      example: 2
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 15
+          step: 1
+          unit_of_measurement: ""
+          mode: slider
+    delay1:
+      name: Delay 1
+      description: Delay between group 1 and 2
+      required: false
+      example: 0.1
+      default: 0.1
+      selector:
+        number:
+          min: 0
+          max: 25.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider      
+      
+    color2:
+      name: Color 2
+      description: Color of group 2
+      required: false
+      example: [0, 255, 0]
+      default: [0, 255, 0]
+      selector:
+        color_rgb:
+    flashSpeed2:
+      name: FlashSpeed 2
+      description: Delay between flashes in group 2
+      required: false
+      example: 0.2
+      default: 0.2
+      selector:
+        number:
+          min: 0
+          max: 1.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider
+    flashCount2:
+      name: FlashCount2
+      description: Number of flashes in group 2
+      required: false
+      example: 2
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 15
+          step: 1
+          unit_of_measurement: ""
+          mode: slider
+    delay2:
+      name: Delay 2
+      description: Delay between group 2 and 3
+      required: false
+      example: 0.1
+      default: 0.1
+      selector:
+        number:
+          min: 0
+          max: 25.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider   
+      
+    color3:
+      name: Color 3
+      description: Color of group 3
+      required: false
+      example: [0, 0, 255]
+      default: [0, 0, 255]
+      selector:
+        color_rgb:
+    flashSpeed3:
+      name: FlashSpeed 3
+      description: Delay between flashes in group 3
+      required: false
+      example: 0.2
+      default: 0.2
+      selector:
+        number:
+          min: 0
+          max: 1.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider
+    flashCount3:
+      name: FlashCount3
+      description: Number of flashes in group 3
+      required: false
+      example: 2
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 15
+          step: 1
+          unit_of_measurement: ""
+          mode: slider
+    delay3:
+      name: Delay 3
+      description: Delay between group 3 and 1
+      required: false
+      example: 0
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 25.5
+          step: 0.1
+          unit_of_measurement: "s"
+          mode: slider   
+      
+drawcustom:
+  name: Draw Custom Image
+  description: Draws a custom image
+  target:
+    entity:
+      domain: open_epaper_link
+  fields:
+    payload:
+      name: Payload
+      description: payload to draw
+      required: true
+      example: look into supported_types.md for examples
+    background:
+      name: Backgroundcolor
+      description: black, white, red
+      required: true
+      example: white
+    rotate:
+      name: rotate
+      description: 0, 90, 180, 270
+      required: false
+      example: 90
+    dry-run:
+      name: Dry-run
+      description: Generate image, but don't send it to the AP.
+      required: false
+      example: true
+
+lines5:
+  name: 5 Line Display
+  description: Sets an ESL to display 5 lines of text, only for 1.54", you can double a line by adding a newline char to your text
+  target:
+    entity:
+      domain: open_epaper_link
+  fields:
+    line1:
+      name: Line 1
+      description: Line 1 of text to display, 1 new line is allowed
+      required: true
+      example: Test
+    line2:
+      name: Line 2
+      description: Line 2 of text to display, 1 new line is allowed
+      required: true
+      example: waylongertext
+    line3:
+      name: Line 3
+      description: Line 3 of text to display, 1 new line is allowed
+      required: true
+      example: '"Test Text"'
+    line4:
+      name: Line 4
+      description: Line 4 of text to display, 1 new line is allowed
+      required: true
+      example: left
+    line5:
+      name: Line 5
+      description: Line 5 of text to display, 1 new line is allowed
+      required: true
+      example: right
+    border:
+      name: Border
+      description: Color of the border
+      required: false
+      example: r
+    format1:
+      name: Format string 1
+      description: Format string for the first row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mbbw
+    format2:
+      name: Format string 2
+      description: Format string for the second row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mwwb
+    format3:
+      name: Format string 3
+      description: Format string for the third row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mbbw
+    format4:
+      name: Format string 4
+      description: Format string for the fourth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: lrwb
+    format5:
+      name: Format string 5
+      description: Format string for the fifth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: rbrr
+
+lines4:
+  name: 4 Line Display
+  description: Sets an ESL to display 4 lines of text, only for 2.9", you can double a line by adding a newline char to your text
+  target:
+    entity:
+      domain: open_epaper_link
+  fields:
+    line1:
+      name: Line 1
+      description: Line 1 of text to display, 1 new line is allowed
+      required: true
+      example: Test
+    line2:
+      name: Line 2
+      description: Line 2 of text to display, 1 new line is allowed
+      required: true
+      example: waylongertext
+    line3:
+      name: Line 3
+      description: Line 3 of text to display, 1 new line is allowed
+      required: true
+      example: '"Test Text"'
+    line4:
+      name: Line 4
+      description: Line 4 of text to display, 1 new line is allowed
+      required: true
+      example: left
+    border:
+      name: Border
+      description: Color of the border
+      required: false
+      example: r
+    format1:
+      name: Format string 1
+      description: Format string for the first row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mbbw
+    format2:
+      name: Format string 2
+      description: Format string for the second row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mwwb
+    format3:
+      name: Format string 3
+      description: Format string for the third row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: mbbw
+    format4:
+      name: Format string 4
+      description: Format string for the fourth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
+      required: false
+      example: lrwb

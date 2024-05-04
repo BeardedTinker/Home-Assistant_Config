@@ -1,0 +1,21 @@
+{
+  "domain": "open_epaper_link",
+  "name": "OpenEPaperLink",
+  "codeowners": [
+    "@jonasniesner"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "recorder"
+  ],
+  "documentation": "https://github.com/jonasniesner/open_epaper_link_homeassistant",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/jonasniesner/open_epaper_link_homeassistant/issues",
+  "requirements": [
+    "qrcode[pil]==7.4.2",
+    "requests_toolbelt==1.0.0",
+    "websocket-client==1.7.0"
+  ],
+  "version": "0.1.4"
+}
