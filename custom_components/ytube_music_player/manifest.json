@@ -2,7 +2,8 @@
   "domain": "ytube_music_player",
   "name": "YouTube Music Player",
   "codeowners": [
-    "@KoljaWindeler"
+    "@KoljaWindeler",
+    "@mang1985"
   ],
   "config_flow": true,
   "dependencies": [
@@ -16,5 +17,5 @@
     "pytube==15.0.0",
     "integrationhelper==0.2.2"
   ],
-  "version": "20240420.02"
+  "version": "20240505.01"
 }

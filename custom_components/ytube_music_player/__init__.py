@@ -12,20 +12,14 @@ async def async_setup(hass, config):
 
 async def async_setup_entry(hass, config_entry):
 	"""Set up this integration using UI/YAML."""
-	hass.config_entries.async_update_entry(config_entry, data=ensure_config(config_entry.data))
-
-    # It might be unnecessary since the "options" in the config_entry is not being used.
-	# Additionally, due to the use of deprecated methods, 
-	# it resulted in the debug output described in 
-	# https://github.com/KoljaWindeler/ytube_music_player/issues/311.
-	# config_entry.options = config_entry.data
-
-	config_entry.add_update_listener(update_listener)
-
 	hass.data.setdefault(DOMAIN, {})
 	hass.data[DOMAIN][config_entry.entry_id] = {}
+	hass.config_entries.async_update_entry(config_entry, data=ensure_config(config_entry.data))
 
-	# Add sensor
+	if not config_entry.update_listeners:
+		config_entry.add_update_listener(async_update_options)
+
+	# Add entities to HA
 	for platform in PLATFORMS:
 		hass.async_create_task(
 			hass.config_entries.async_forward_entry_setup(config_entry, platform)
@@ -40,15 +34,14 @@ async def async_remove_entry(hass, config_entry):
 		try:
 			await hass.config_entries.async_forward_entry_unload(config_entry, platform)
 			_LOGGER.info(
-				"Successfully removed sensor from the integration"
+				"Successfully removed entities from the integration"
 			)
 		except ValueError:
 			pass
 
 
-async def update_listener(hass, entry):
-	"""Update listener."""
-	entry.data = entry.options
+async def async_update_options(hass, config_entry):
+	_LOGGER.debug("Config updated,reload the entities.")
 	for platform in PLATFORMS:
-		await hass.config_entries.async_forward_entry_unload(entry, platform)
-		hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, platform))
+		await hass.config_entries.async_forward_entry_unload(config_entry, platform)
+		hass.async_create_task(hass.config_entries.async_forward_entry_setup(config_entry, platform))

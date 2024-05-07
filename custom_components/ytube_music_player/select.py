@@ -33,8 +33,7 @@ class yTubeMusicSelectEntity(SelectEntity):
 	def select_option(self, option):
 		"""Change the selected option."""
 		self._attr_current_option = option
-		self.async_write_ha_state()
-
+		self.schedule_update_ha_state()
 	@property
 	def device_info(self):
 		return {

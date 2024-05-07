@@ -113,6 +113,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 	def __init__(self, config_entry):
 		"""Set initial parameter to grab them later on."""
 		# store old entry for later
+		self.config_entry = config_entry
 		self.data = {}
 		self.data.update(config_entry.data.items())
 
@@ -173,13 +174,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 		if(self.data[CONF_ADVANCE_CONFIG]):
 			return self.async_show_form(step_id="adv_finish", data_schema=vol.Schema(await async_create_form(self.hass,self.data,3)), errors=self._errors)
 		else:
-			return self.async_create_entry(title="yTubeMusic "+self.data[CONF_NAME].replace(DOMAIN,''), data=self.data)
-	
+			self.hass.config_entries.async_update_entry(self.config_entry, data=ensure_config(self.data))
+			return self.async_create_entry(title='', data={})
+
 	async def async_step_adv_finish(self,user_input=None):
 		self._errors = {}
 		self.data.update(user_input)
-		return self.async_create_entry(title="yTubeMusic "+self.data[CONF_NAME].replace(DOMAIN,''), data=self.data)
-
+		self.hass.config_entries.async_update_entry(self.config_entry, data=ensure_config(self.data))
+		return self.async_create_entry(title='', data={})
 
 async def async_create_form(hass, user_input, page=1):
 	"""Create form for UI setup."""

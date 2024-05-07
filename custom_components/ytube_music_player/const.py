@@ -351,7 +351,7 @@ def ensure_config(user_input):
 				out[CONF_SHUFFLE_MODE] = ALL_SHUFFLE_MODES[_shuffle_mode - 1]
 			else:
 				out[CONF_SHUFFLE_MODE] = PLAYMODE_DIRECT
-			_LOGGER.error(f"shuffle_mode: {_shuffle_mode} is a deprecated value and has been replaced with '{out[CONF_SHUFFLE_MODE]}'.")
+			_LOGGER.debug(f"shuffle_mode: {_shuffle_mode} is a deprecated value and has been replaced with '{out[CONF_SHUFFLE_MODE]}'.")
 
 		# If old input(s) exists,uncheck the new corresponding select(s).
 		# If the old input is set to a blank space character, then permanently delete this field.
@@ -362,7 +362,7 @@ def ensure_config(user_input):
 				else:
 					if dropdown in out[CONF_INIT_DROPDOWNS]:
 						out[CONF_INIT_DROPDOWNS].remove(dropdown)
-						_LOGGER.warning(f"old {dropdown} input_select: {_old_conf_input} exists,uncheck the corresponding new select.")
+						_LOGGER.debug(f"old {dropdown} input_select: {_old_conf_input} exists,uncheck the corresponding new select.")
 	return out
 
 

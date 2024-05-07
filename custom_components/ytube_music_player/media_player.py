@@ -11,7 +11,8 @@ import requests
 import voluptuous as vol
 from homeassistant.components.media_player import BrowseError
 from homeassistant.helpers import config_validation as cv, entity_platform
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.core import Event
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.storage import STORAGE_DIR
 
@@ -105,7 +106,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				pass
 			if self._selects[k] is not None and self._selects[k].replace(" ","") != "":
 				self._selects[k] = _domain + "." + self._selects[k].replace(_domain + ".", "")
-				self.log_me('error', "Found old {} {}: {},Please consider using the new select entities.".format(_domain, k, self._selects[k] ))	
+				self.log_me('debug', "Found old {} {}: {},please consider using the new select entities.".format(_domain, k, self._selects[k] ))	
 
 		self._like_in_name = config.data.get(CONF_LIKE_IN_NAME, DEFAULT_LIKE_IN_NAME)
 
@@ -588,11 +589,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 
 		# subscribe to changes
 		if self._selects['playmode'] is not None:
-			async_track_state_change(self.hass, self._selects['playmode'], self.async_update_playmode)
+			async_track_state_change_event(self.hass, self._selects['playmode'], self.async_update_playmode)
 		if self._selects['repeatmode'] is not None:
-			async_track_state_change(self.hass, self._selects['repeatmode'], self.async_update_playmode)
+			async_track_state_change_event(self.hass, self._selects['repeatmode'], self.async_update_playmode)
 		if self._selects['speakers'] is not None:
-			async_track_state_change(self.hass, self._selects['speakers'], self.async_select_source_helper)
+			async_track_state_change_event(self.hass, self._selects['speakers'], self.async_select_source_helper)
 
 		# make sure that the player, is on and idle
 		try:
@@ -719,7 +720,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 					pass
 				self._untrack_remote_player = None
 		if(self._untrack_remote_player is None):
-			self._untrack_remote_player = async_track_state_change(self.hass, self._remote_player, self.async_sync_player)
+			self._untrack_remote_player = async_track_state_change_event(self.hass, self._remote_player, self.async_sync_player)
 		self.log_me('debug', "[E] async_update_remote_player")
 		return True
 
@@ -735,8 +736,19 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		# this is why we need pytube as include 
 		self.log_me('debug', "[E] async_get_cipher")
 
-	async def async_sync_player(self, entity_id=None, old_state=None, new_state=None):
+	async def async_sync_player(self, event=None):
 		self.log_debug_later("[S] async_sync_player")
+		if isinstance(event,Event):
+			_event_data = event.data
+			entity_id = _event_data.get('entity_id')
+			old_state = _event_data.get('old_state')
+			new_state = _event_data.get('new_state')
+		else:
+			entity_id = None
+			old_state = None
+			new_state = None
+			self.log_me('debug', f"event: {event}")
+	
 		if(entity_id is not None and old_state is not None) and new_state is not None:
 			self.log_debug_later(entity_id + ": " + old_state.state + " -> " + new_state.state)
 			if(entity_id.lower() != self._remote_player.lower()):
@@ -966,12 +978,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 
 		return info
 
-
-	async def async_select_source_helper(self, entity_id=None, old_state=None, new_state=None):
+	async def async_select_source_helper(self, event=None):
 		self.log_me('debug', "[S] async_select_source_helper")
 		# redirect call, obviously we got called by status change, so we can call it without argument and let it pick
 		source_entity_id = None
-		source = self.hass.states.get(entity_id).state
+		source = self.hass.states.get(self._selects['speakers']).state
 		# get entity id from friendly_name
 		for e, f in self._friendly_speakersList.items():
 			if(f == source):
@@ -1062,11 +1073,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			except:
 				self.log_me('error', 'untrack failed')
 		if self._selects['speakers'] is not None:
-			self._untrack_remote_player_selector = async_track_state_change(self.hass, self._selects['speakers'], self.async_select_source_helper)
+			self._untrack_remote_player_selector = async_track_state_change_event(self.hass, self._selects['speakers'], self.async_select_source_helper)
 		if self._selects['playmode'] is not None:
-			async_track_state_change(self.hass, self._selects['playmode'], self.async_update_playmode)
+			async_track_state_change_event(self.hass, self._selects['playmode'], self.async_update_playmode)
 		if self._selects['repeatmode'] is not None:
-			async_track_state_change(self.hass, self._selects['repeatmode'], self.async_update_playmode)
+			async_track_state_change_event(self.hass, self._selects['repeatmode'], self.async_update_playmode)
 		# ----------- speaker -----#
 		try:
 			if(isinstance(self._speakersList, str)):
@@ -1106,6 +1117,9 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			
 			data = {_select.ATTR_OPTION: friendly_speakersList[0], ATTR_ENTITY_ID: self._selects['speakers']}  # select the first one in the list as the default player
 			await self.hass.services.async_call(_select.DOMAIN, _select.SERVICE_SELECT_OPTION, data)
+		else:
+			# we need to set the default player here, as there is no selct field. without a select field we don't get updates from the field and will never set the default player
+			await self.async_select_source(speakersList[0])
 		
 		# finally call update playlist to fill the list .. if it exists
 		await self.async_update_playlists()
@@ -1218,8 +1232,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				pass
 		self.log_me('debug', "[E] async_update_extra_sensor")
 
-
-	async def async_update_playmode(self, entity_id=None, old_state=None, new_state=None):
+	async def async_update_playmode(self, event=None):
 		# called from HA when th user changes the input entry, will read selection to membervar
 		# Changing the shuffle_mode while music is playing will no longer cause interruptions.
 		# Only when shuffle_mode=true the next song will be random.
@@ -1258,7 +1271,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		else:
 			await self.async_get_track()
 
-	async def async_get_track(self, entity_id=None, old_state=None, new_state=None, retry=3, auto_advance=False, keep_track_no=True):
+	async def async_get_track(self, event=None, retry=3, auto_advance=False, keep_track_no=True):
 		self.log_me('debug', "[S] async_get_track")
 		# Get a track and play it from the track_queue.
 		# grab next track from prefetched lis
@@ -1903,7 +1916,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				return
 			if('player' in self._interrupt_data):
 				await self.async_update_remote_player(remote_player=self._interrupt_data['player'])
-				self._untrack_remote_player = async_track_state_change(self.hass, self._remote_player, self.async_sync_player)
+				self._untrack_remote_player = async_track_state_change_event(self.hass, self._remote_player, self.async_sync_player)
 				self._interrupt_data['player'] = None
 			await self.async_get_track()
 			if('pos' in self._interrupt_data):
@@ -2175,6 +2188,6 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			except:
 				self.log_me('debug', "- untrack failed")
 			self._untrack_remote_player_selector = None
-		self._untrack_remote_player_selector = async_track_state_change(
+		self._untrack_remote_player_selector = async_track_state_change_event(
 			self.hass, self._selects['speakers'], self.async_select_source_helper)
 		self.log_me('debug', "- untrack resub")
