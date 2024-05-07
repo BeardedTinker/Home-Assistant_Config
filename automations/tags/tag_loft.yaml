@@ -49,7 +49,7 @@ action:
                 value: thumb-up-outline
                 x: 220
                 "y": 40
-                size: 42
+                size: 48
                 color: red
               - type: text
                 value: Please
@@ -59,7 +59,7 @@ action:
                 size: 36
                 color: black
               - type: text
-                value: press like
+                value: press LIKE
                 font: ppb.ttf
                 x: 10
                 "y": 68

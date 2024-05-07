@@ -1,0 +1,12 @@
+{
+  "domain": "moonraker",
+  "name": "Moonraker",
+  "codeowners": ["@marcolivierarsenault", "@cashew22"],
+  "config_flow": true,
+  "documentation": "https://moonraker-home-assistant.readthedocs.io/en/latest/",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/marcolivierarsenault/moonraker-home-assistant/issues",
+  "loggers": ["moonraker"],
+  "requirements": ["moonraker-api==2.0.5"],
+  "version": "1.2.0"
+}
