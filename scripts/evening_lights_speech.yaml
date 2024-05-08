@@ -4,22 +4,6 @@
 
 eveninglightsspeach:
   sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.display_me
-  #     volume_level: 0.5
-  # - delay: 00:00:01
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-  #       {{ [
-  #       "Good evening, lights are on",
-  #       "Sun is setting! Turning lights on.",
-  #       "Time to evening relaxation. Lights are on",
-  #       "Another day has passed and evening has arrived",
-  #       "Let there be light!",
-  #       ] | random }}
   - alias: "Home Assistant restart"
     service: script.turn_on
     target:
