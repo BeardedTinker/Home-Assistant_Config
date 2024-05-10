@@ -352,7 +352,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
 
     async def async_clear_playlist(self) -> None:
         """Clear players playlist."""
-        if queue := self.mass.players.get_player_queue(self.player.active_source):
+        if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_clear(queue.queue_id)
 
     async def async_play_media(
@@ -559,6 +559,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         self, player: Player, queue: PlayerQueue | None
     ) -> None:
         """Update media attributes for the active queue item."""
+        # pylint: disable=too-many-statements
         self._attr_media_artist = None
         self._attr_media_album_artist = None
         self._attr_media_album_name = None
@@ -585,9 +586,11 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
             )
             self._prev_time = player.elapsed_time
             return
+
         if queue is None:
             # player is completely idle without any source active
             self._attr_source = player.active_source
+            self._attr_app_id = player.active_source
             return
 
         # player has MA as active source (either a group player or the players own queue)
