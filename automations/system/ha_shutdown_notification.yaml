@@ -21,10 +21,10 @@ action:
     color: 'green'
     sticky: 'false'
     timeout_sec: 180
-- service: media_player.volume_set
-  target: 
-    entity_id: media_player.display_me
-  data:
-    volume_level: 0.3
-- delay: 00:00:01
+#- service: media_player.volume_set
+#  target: 
+#    entity_id: media_player.display_me
+#  data:
+#    volume_level: 0.3
+#- delay: 00:00:01
 - service: script.googlescriptharestart
