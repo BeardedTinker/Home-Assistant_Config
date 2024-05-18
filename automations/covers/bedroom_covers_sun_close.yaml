@@ -1,0 +1,23 @@
+#####
+# Close cover on sunrise
+#####
+
+alias: Close shade on sunrise
+id: e1bc3e1d-f7f3-4463-81fb-d49aabffd3f4
+
+trigger:
+  event: sunrise
+  offset: -00:20:00
+  platform: sun
+
+condition:
+  condition: state
+  entity_id: binary_sensor.people_home
+  state: 'on'
+
+action:
+- service: cover.close_cover
+  target:
+    entity_id: cover.bedroom_shade
+  data: {}
+
