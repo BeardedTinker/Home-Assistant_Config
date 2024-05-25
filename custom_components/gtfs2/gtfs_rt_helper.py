@@ -35,8 +35,7 @@ from .const import (
     ATTR_LONGITUDE,
 
     CONF_API_KEY,
-    CONF_X_API_KEY,
-    CONF_OCP_APIM_KEY,
+    CONF_API_KEY_NAME,
     CONF_API_KEY_LOCATION,
     CONF_ACCEPT_HEADER_PB,
     CONF_STOP_ID,
@@ -84,7 +83,13 @@ def get_gtfs_feed_entities(url: str, headers, label: str):
         json_object = json.loads(response.content)
         feed = json_object       
     except ValueError as e:   
-        feed = convert_gtfs_realtime_to_json(response.content)
+        if label == "vehicle_positions":
+            feed = convert_gtfs_realtime_positions_to_json(response.content)
+        elif label == "trip_data":
+            feed = convert_gtfs_realtime_to_json(response.content)
+        else: # not yet converted to json
+            feed.ParseFromString(response.content)
+            return feed.entity            
     
     return feed.get('entity')
 
@@ -161,7 +166,7 @@ def get_rt_route_trip_statuses(self):
         vehicle_positions = get_rt_vehicle_positions(self)
 
     feed_entities = get_gtfs_feed_entities(
-        url=self._trip_update_url, headers=self._headers, label="trip data"
+        url=self._trip_update_url, headers=self._headers, label="trip_data"
     )
     self._feed_entities = feed_entities
     _LOGGER.debug("Search departure times for route: %s, trip: %s, type: %s, direction: %s", self._route_id, self._trip_id, self._rt_group, self._direction)
@@ -260,34 +265,34 @@ def get_rt_vehicle_positions(self):
     feed_entities = get_gtfs_feed_entities(
         url=self._vehicle_position_url,
         headers=self._headers,
-        label="vehicle positions",
+        label="vehicle_positions",
     )
     geojson_body = []
     geojson_element = {"geometry": {"coordinates":[],"type": "Point"}, "properties": {"id": "", "title": "", "trip_id": "", "route_id": "", "direction_id": "", "vehicle_id": "", "vehicle_label": ""}, "type": "Feature"}
     for entity in feed_entities:
-        vehicle = entity.vehicle
+        vehicle = entity["vehicle"]
         
-        if not vehicle.trip.trip_id:
+        if not vehicle["trip"]["trip_id"]:
             # Vehicle is not in service
             continue
-        if vehicle.trip.trip_id == self._trip_id:  
-            _LOGGER.debug("Adding position for TripId: %s, RouteId: %s, DirectionId: %s, Lat: %s, Lon: %s", vehicle.trip.trip_id, vehicle.trip.route_id, vehicle.trip.direction_id, vehicle.position.latitude, vehicle.position.longitude)  
+        if vehicle["trip"]["trip_id"] == self._trip_id: 
+            _LOGGER.debug('Adding position for TripId: %s, RouteId: %s, DirectionId: %s, Lat: %s, Lon: %s', vehicle["trip"]["trip_id"],vehicle["trip"]["route_id"],vehicle["trip"]["direction_id"],vehicle["position"]["latitude"],vehicle["position"]["longitude"])  
             
         # add data if in the selected direction
-        if (str(self._route_id) == str(vehicle.trip.route_id) or str(vehicle.trip.trip_id) == str(self._trip_id)) and str(self._direction) == str(vehicle.trip.direction_id):
+        if (str(self._route_id) == str(vehicle["trip"]["route_id"]) or str(vehicle["trip"]["trip_id"]) == str(self._trip_id)) and str(self._direction) == str(vehicle["trip"]["direction_id"]):
             _LOGGER.debug("Found vehicle on route with attributes: %s", vehicle)
             geojson_element = {"geometry": {"coordinates":[],"type": "Point"}, "properties": {"id": "", "title": "", "trip_id": "", "route_id": "", "direction_id": "", "vehicle_id": "", "vehicle_label": ""}, "type": "Feature"}
             geojson_element["geometry"]["coordinates"] = []
-            geojson_element["geometry"]["coordinates"].append(vehicle.position.longitude)
-            geojson_element["geometry"]["coordinates"].append(vehicle.position.latitude)
-            geojson_element["properties"]["id"] = str(self._route_id) + "(" + str(vehicle.trip.direction_id) + ")" + str(vehicle.trip.trip_id)[-3:]
-            geojson_element["properties"]["title"] = str(self._route_id) + "(" + str(vehicle.trip.direction_id) + ")" + str(vehicle.trip.trip_id)[-3:]
-            geojson_element["properties"]["trip_id"] = vehicle.trip.trip_id
+            geojson_element["geometry"]["coordinates"].append(vehicle["position"]["longitude"])
+            geojson_element["geometry"]["coordinates"].append(vehicle["position"]["latitude"])
+            geojson_element["properties"]["id"] = str(self._route_id) + "(" + str(vehicle["trip"]["direction_id"]) + ")" + str(vehicle["trip"]["trip_id"])[-3:]
+            geojson_element["properties"]["title"] = str(self._route_id) + "(" + str(vehicle["trip"]["direction_id"]) + ")" + str(vehicle["trip"]["trip_id"])[-3:]
+            geojson_element["properties"]["trip_id"] = vehicle["trip"]["trip_id"]
             geojson_element["properties"]["route_id"] = str(self._route_id)
-            geojson_element["properties"]["direction_id"] = vehicle.trip.direction_id
-            geojson_element["properties"]["vehicle_id"] = vehicle.vehicle.id
-            geojson_element["properties"]["vehicle_label"] = vehicle.vehicle.label
-            geojson_element["properties"][vehicle.trip.trip_id] = geojson_element["geometry"]["coordinates"]
+            geojson_element["properties"]["direction_id"] = vehicle["trip"]["direction_id"]
+            geojson_element["properties"]["vehicle_id"] = vehicle["vehicle"]["id"]
+            geojson_element["properties"]["vehicle_label"] = vehicle["vehicle"]["label"]
+            geojson_element["properties"][vehicle["trip"]["trip_id"]] = geojson_element["geometry"]["coordinates"]
             geojson_body.append(geojson_element)
     
     self.geojson = {"features": geojson_body, "type": "FeatureCollection"}
@@ -329,6 +334,38 @@ def get_rt_alerts(self):
                         
     return rt_alerts
     
+def get_rt_alerts_json(self):
+    rt_alerts = {}
+    if (self._alerts_url)[:4] == "http":
+        feed_entities = get_gtfs_feed_entities(
+            url=self._alerts_url,
+            headers=self._headers,
+            label="alerts",
+        )
+        for entity in feed_entities:
+            if entity["alert"]:
+                for x in entity["alert"]["informed_entity"]:
+                    if x["stop_id"]:
+                        stop_id = x["stop_id"] 
+                    else:
+                        stop_id = "unknown"
+                    if x["route_id"]:
+                        route_id = x["route_id"]  
+                    else:
+                        route_id = "unknown"
+                if stop_id == self._stop_id and (route_id == "unknown" or route_id == self._route_id): 
+                    _LOGGER.debug("RT Alert for route: %s, stop: %s, alert: %s", route_id, stop_id, entity["alert"]["header_text"])
+                    rt_alerts["origin_stop_alert"] = (str(entity["alert"]["header_text"]).split('text: "')[1]).split('"',1)[0].replace(':','').replace('\n','')
+                if stop_id == self._destination_id and (route_id == "unknown" or route_id == self._route_id): 
+                    _LOGGER.debug("RT Alert for route: %s, stop: %s, alert: %s", route_id, stop_id, entity["alert"]["header_text"])
+                    rt_alerts["destination_stop_alert"] = (str(entity["alert"]["header_text"]).split('text: "')[1]).split('"',1)[0].replace(':','').replace('\n','')
+                if stop_id == "unknown" and route_id == self._route_id: 
+                    _LOGGER.debug("RT Alert for route: %s, stop: %s, alert: %s", route_id, stop_id, entity["alert"]["header_text"])
+                    rt_alerts["origin_stop_alert"] = (str(entity["alert"]["header_text"]).split('text: "')[1]).split('"',1)[0].replace(':','').replace('\n','')
+                    rt_alerts["destination_stop_alert"] = (str(entity["alert"]["header_text"]).split('text: "')[1]).split('"',1)[0].replace(':','').replace('\n','')    
+                        
+    return rt_alerts
+    
     
 def update_geojson(self):    
     geojson_dir = self.hass.config.path(DEFAULT_PATH_GEOJSON)
@@ -347,21 +384,14 @@ def get_gtfs_rt(hass, path, data):
     url = data["url"]
     file = data["file"] + ".rt"
     if data.get(CONF_API_KEY_LOCATION, None) == "query_string":
-        if data.get(CONF_API_KEY, None):
-            url = url + "?api_key=" + data[CONF_API_KEY]
-        elif data.get(CONF_X_API_KEY, None):
-            url = url + "?x_api_key=" + data[CONF_X_API_KEY]
-        elif data.get(CONF_OCP_APIM_KEY,None):
-            url = url + "?Ocp-Apim-Subscription-Key=" + data[CONF_OCP_APIM_KEY]             
+      if data.get(CONF_API_KEY, None):
+        self._trip_update_url = self._trip_update_url + "?" + data[CONF_API_KEY_NAME] + "=" + data[CONF_API_KEY]
+        self._vehicle_position_url = self._vehicle_position_url ++ "?" + data[CONF_API_KEY_NAME] + "=" + data[CONF_API_KEY]
+        self._alerts_url = self._alerts_url + "?" + data[CONF_API_KEY_NAME] + "=" + data[CONF_API_KEY]
     if data.get(CONF_API_KEY_LOCATION, None) == "header":
-        if data.get(CONF_API_KEY, None):
-            _headers = {"Authorization": data[CONF_API_KEY]}
-        elif data.get(CONF_X_API_KEY, None):
-            _headers = {"x-api-key": data[CONF_X_API_KEY]}
-        elif data.get(CONF_OCP_APIM_KEY, None):
-            _headers = {"Ocp-Apim-Subscription-Key": data[CONF_OCP_APIM_KEY]}            
+        self._headers = {data[CONF_API_KEY_NAME]: data[CONF_API_KEY]}               
     if data.get(CONF_ACCEPT_HEADER_PB, False):
-       _headers["Accept"] = "application/x-protobuf"
+        self._headers["Accept"] = "application/x-protobuf"
     _LOGGER.debug("Getting gtfs rt locally with headers: %s", _headers)
     try:
         r = requests.get(url, headers = _headers , allow_redirects=True)
@@ -370,14 +400,22 @@ def get_gtfs_rt(hass, path, data):
         _LOGGER.error("Ìssues with downloading GTFS RT data to: %s", os.path.join(gtfs_dir, file))
         return "no_rt_data_file"
     if data.get("debug_output", False):
-        data_out = ""
-        feed_entities = get_gtfs_feed_entities(
-            url=data.get("url", None),
-            headers=_headers,
-            label="converting",
-        )
-        file_all = data["file"] + "_converted.txt"
-        open(os.path.join(gtfs_dir, file_all), "w").write(json.dumps(feed_entities, indent=4))     
+        try:
+            data_out = ""
+            feed_entities = get_gtfs_feed_entities(
+                url=data.get("url", None),
+                headers=_headers,
+                label=data.get("rt_type", "-"),
+            )
+            file_all = data["file"] + "_converted.txt" 
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.info("Ìssues with converting GTFS RT data to JSON, output to string") 
+        # check if content is json else write without format
+        try:
+            open(os.path.join(gtfs_dir, file_all), "w").write(json.dumps(feed_entities, indent=4)) 
+        except Exception as ex:
+            _LOGGER.debug("Not writing to file as json because of error: %s", ex)
+            open(os.path.join(gtfs_dir, file_all), "w").write(str(feed_entities))           
     return "ok"   
         
 class LocalFileAdapter(requests.adapters.HTTPAdapter):
@@ -439,3 +477,69 @@ def convert_gtfs_realtime_to_json(gtfs_realtime_data):
         
         json_data["entity"].append(entity_dict)
     return json_data        
+
+def convert_gtfs_realtime_positions_to_json(gtfs_realtime_data):
+    feed = gtfs_realtime_pb2.FeedMessage()
+    feed.ParseFromString(gtfs_realtime_data)
+
+    json_data = {
+        "entity": []
+    }
+    for ent in feed.entity:
+        entity = ent.vehicle
+        entity_dict = {
+        "vehicle": {
+            "trip": {
+                "trip_id" : entity.trip.trip_id,
+                "route_id": entity.trip.route_id,
+                "direction_id": entity.trip.direction_id
+                },
+            "vehicle": {
+                "id": entity.vehicle.id,
+                "label": entity.vehicle.label
+                },
+            "position": {
+                "latitude": entity.position.latitude,
+                "longitude": entity.position.longitude,
+                "bearing": entity.position.bearing,
+                "speed": entity.position.speed
+            },
+            "stop_id": entity.stop_id,
+            "timestamp": entity.timestamp
+        }
+        }
+        json_data["entity"].append(entity_dict)
+    return json_data    
+
+def convert_gtfs_realtime_alerts_to_json(gtfs_realtime_data):
+    feed = gtfs_realtime_pb2.FeedMessage()
+    feed.ParseFromString(gtfs_realtime_data)
+
+    json_data = {
+        "entity": []
+    }
+    for entity in feed.entity:
+        _LOGGER.debug("Alert entity: %s", entity)
+        if entity.HasField('alert'):
+            informed_entities = []
+            for informed_entity in entity.alert.informed_entity:
+                informed_entity_json = {
+                        "route_id": informed_entity.route_id,
+                        "trip_id": informed_entity.trip.trip_id
+                    }
+                informed_entities.append(informed_entity_json)
+            entity_dict = {
+                "alert": {
+                    "id": entity.id,
+                    #"active_period": {
+                    #    "start": entity.alert.active_period.start,
+                    #    "end": entity.alert.active_period.end
+                    #},
+                    "informed_entity": informed_entities,
+                    "header_text": entity.alert.header_text,
+                    "description_text": entity.alert.description_text
+                }   
+            }
+        json_data["entity"].append(entity_dict)
+        _LOGGER.debug("Alert entity JSON: %s", json_data["entity"])
+    return json_data      

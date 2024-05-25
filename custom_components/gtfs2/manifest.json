@@ -4,11 +4,11 @@
   "codeowners": ["@vingerha"],
   "config_flow": true,
   "dependencies": [
-    "zone"
+    "zone", "person"
   ],
   "documentation": "https://github.com/vingerha/gtfs2/wiki",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/vingerha/gtfs2/issues",
-  "requirements": ["pygtfs==0.1.9","gtfs-realtime-bindings==1.0.0","protobuf==4.25.1"],
-  "version": "0.3.0"
+  "requirements": ["pygtfs==0.1.9","gtfs-realtime-bindings==1.0.0","protobuf"],
+  "version": "0.4"
 }

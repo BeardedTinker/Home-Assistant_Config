@@ -50,16 +50,28 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry) -> bool:
         config_entry.version = 9
         hass.config_entries.async_update_entry(config_entry, data=new_data)  
 
-
-    if config_entry.version == 7 or config_entry.version == 8:
+    if config_entry.version == 7 or config_entry.version == 8 or config_entry.version == 9:
 
         new_data = {**config_entry.data}
         new_options = {**config_entry.options}
+        if config_entry.options.get('api_key', None):
+            new_options['api_key_name'] = "Authorization"
+            new_options['api_key'] = config_entry.options.get('api_key')
+        if config_entry.options.get('x_api_key', None):
+            new_options['api_key_name'] = "x_api_key"            
+            new_options['api_key'] = config_entry.options.get('x_api_key')   
+        if config_entry.options.get('ocp_apim_subscription_key', None):
+            new_options['api_key_name'] = "ocp_apim_subscription_key"
+            new_options['api_key'] = config_entry.options.get('ocp_apim_subscription_key')
+            new_options.pop('ocp_apim_subscription_key')
+        if "x_api_key" in config_entry.options:
+            new_options.pop('x_api_key')     
 
-        config_entry.version = 9
+        
+        config_entry.version = 10
         
         hass.config_entries.async_update_entry(config_entry, data=new_data)  
-        hass.config_entries.async_update_entry(config_entry, options=new_options)        
+        hass.config_entries.async_update_entry(config_entry, options=new_options)             
 
     _LOGGER.warning("Migration to version %s successful", config_entry.version)
 

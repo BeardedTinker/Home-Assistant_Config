@@ -21,12 +21,12 @@ from .const import (
     DEFAULT_LOCAL_STOP_RADIUS,
     DEFAULT_MAX_LOCAL_STOPS,
     DEFAULT_OFFSET,
-    CONF_API_KEY,
     CONF_API_KEY_LOCATION, 
-    CONF_X_API_KEY, 
-    CONF_OCP_APIM_KEY,
+    CONF_API_KEY,
+    CONF_API_KEY_NAME,
     CONF_ACCEPT_HEADER_PB,
     DEFAULT_ACCEPT_HEADER_PB,
+    DEFAULT_API_KEY_NAME,
     CONF_VEHICLE_POSITION_URL, 
     CONF_TRIP_UPDATE_URL,
     CONF_ALERTS_URL,
@@ -69,7 +69,7 @@ _LOGGER = logging.getLogger(__name__)
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for GTFS."""
 
-    VERSION = 9
+    VERSION = 10
 
     def __init__(self) -> None:
         """Init ConfigFlow."""
@@ -130,13 +130,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_EXTRACT_FROM] = "zip"    
         self._user_inputs.update(user_input)
         _LOGGER.debug(f"UserInputs Local Stops: {self._user_inputs}") 
-        stop_limit = await _check_stop_list(self, self._user_inputs)
-        if stop_limit :
-            errors["base"] = stop_limit
-            return self.async_abort(reason=stop_limit) 
-        return self.async_create_entry(
-            title=user_input[CONF_NAME], data=self._user_inputs
-            )                
+        check_data = await self._check_data(self._user_inputs)
+        if check_data :
+            errors["base"] = check_data
+            return self.async_abort(reason=check_data)
+        else:
+            return self.async_create_entry(
+                title=user_input[CONF_NAME], data=self._user_inputs
+                )                
                    
     async def async_step_source(self, user_input: dict | None = None) -> FlowResult:
         """Handle a flow initialized by the user."""
@@ -412,6 +413,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                 _data["url"] = self.config_entry.data["url"]
                 _data["extract_from"] = self.config_entry.data["extract_from"]
                 _data["device_tracker_id"] = self.config_entry.data["device_tracker_id"]
+                _data["radius"] = user_input["radius"]
                 stop_limit = await _check_stop_list(self, _data)
                 if stop_limit :
                     return self.async_abort(reason=stop_limit) 
@@ -465,9 +467,8 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                 data_schema=vol.Schema(
                     {
                         vol.Required(CONF_TRIP_UPDATE_URL, default=self.config_entry.options.get(CONF_TRIP_UPDATE_URL)): str,
-                        vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY,"")): str,
-                        vol.Optional(CONF_X_API_KEY,default=self.config_entry.options.get(CONF_X_API_KEY,"")): str,
-                        vol.Optional(CONF_OCP_APIM_KEY,default=self.config_entry.options.get(CONF_OCP_APIM_KEY,"")): str,
+                        vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY)) : str,
+                        vol.Optional(CONF_API_KEY_NAME, default=self.config_entry.options.get(CONF_API_KEY_NAME,DEFAULT_API_KEY_NAME)) : str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
                         vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
                     },
@@ -482,9 +483,8 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_TRIP_UPDATE_URL, default=self.config_entry.options.get(CONF_TRIP_UPDATE_URL)): str,
                         vol.Optional(CONF_VEHICLE_POSITION_URL, default=self.config_entry.options.get(CONF_VEHICLE_POSITION_URL,"")): str,
                         vol.Optional(CONF_ALERTS_URL, default=self.config_entry.options.get(CONF_ALERTS_URL,"")): str,
-                        vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY,"")): str,
-                        vol.Optional(CONF_X_API_KEY,default=self.config_entry.options.get(CONF_X_API_KEY,"")): str,
-                        vol.Optional(CONF_OCP_APIM_KEY,default=self.config_entry.options.get(CONF_OCP_APIM_KEY,"")): str,
+                        vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY)) : str,
+                        vol.Optional(CONF_API_KEY_NAME, default=self.config_entry.options.get(CONF_API_KEY_NAME,DEFAULT_API_KEY_NAME)) : str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
                         vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
                     },
