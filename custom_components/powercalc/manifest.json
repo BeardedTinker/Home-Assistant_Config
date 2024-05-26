@@ -22,5 +22,5 @@
     "requirements": [
         "numpy>=1.21.1"
     ],
-    "version": "v1.12.3"
+    "version": "v1.12.4"
 }
