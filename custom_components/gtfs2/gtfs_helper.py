@@ -384,6 +384,7 @@ def get_gtfs(hass, path, data, update=False):
     url = data["url"]
     file = data["file"] + ".zip"
     sqlite = data["file"] + ".sqlite"
+    check_source_dates = data.get("check_source_dates", False)
     journal = os.path.join(gtfs_dir, filename + ".sqlite-journal")
     if check_extracting(hass, gtfs_dir,filename) and not update :
         _LOGGER.warning("Cannot use this datasource as still unpacking: %s", filename)
@@ -406,9 +407,10 @@ def get_gtfs(hass, path, data, update=False):
                 return "no_data_file"                
     
     # if update (servicecall) then check if new file does not only have future dates
-    if update and not check_calendar_dates_from_zip(gtfs_dir, file):
-        _LOGGER.info('New file contains only dates in the future, extracting terminated')
-        return
+    if check_source_dates:
+        if update and not check_calendar_dates_from_zip(gtfs_dir, file):
+            _LOGGER.info('New file contains only dates in the future, extracting terminated')
+            return
     
     (gtfs_root, _) = os.path.splitext(file)    
     sqlite_file = f"{gtfs_root}.sqlite?check_same_thread=False"

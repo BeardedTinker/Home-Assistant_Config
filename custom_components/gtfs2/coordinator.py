@@ -125,7 +125,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                 if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
                   if options.get(CONF_API_KEY, None):
                     self._trip_update_url = self._trip_update_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
-                    self._vehicle_position_url = self._vehicle_position_url ++ "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
+                    self._vehicle_position_url = self._vehicle_position_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                     self._alerts_url = self._alerts_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
                     self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}               
@@ -196,7 +196,7 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
                 if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
                   if options.get(CONF_API_KEY, None):
                     self._trip_update_url = self._trip_update_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
-                    self._vehicle_position_url = self._vehicle_position_url ++ "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
+                    self._vehicle_position_url = self._vehicle_position_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                     self._alerts_url = self._alerts_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
                     self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}               
