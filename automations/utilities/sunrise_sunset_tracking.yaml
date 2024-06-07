@@ -23,7 +23,6 @@ action:
     color: 'green'
     sticky: 'false'
     timeout_sec: 300
-#
 - service: notify.send_message
   data:
     entity_id: notify.energy_log

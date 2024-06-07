@@ -1,0 +1,42 @@
+#####
+# Warning when Synology system temperature is over XXoC
+# Had 2 thermal shutdowns in 1 month, so give warning first
+#####
+
+alias: 'Synology temperature critical'
+id: fbdf3f33-5749-453a-aac9-c1501f28ba77
+
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.ebroz920_temperature
+    above: 65
+    for: "0:05:00"
+
+action:
+  - service: script.notify_engine
+    data:
+      who: 'family'
+      title: '🚪*Temperature*'
+      value1: 'Synology Critical temperature {{ states("sensor.ebroz920_temperature") }}°C, open the door immediately.'
+      target_id: !secret telegram_bot_chat_id
+      group: system
+      tag_id: 'information'
+      importance_id: default
+      color: 'red'
+      sticky: 'true'
+      timeout_sec: 600
+  #    channel_id: ''
+  - service: script.turn_on
+    target:
+      entity_id: script.google_home_resume
+    data:
+      variables:
+        action:
+          - alias: "Send TTS message"
+            service: tts.google_translate_say
+            target:
+              entity_id: media_player.display_me
+            data:
+              message: 'Synology Critical temperature {{ states("sensor.ebroz920_temperature") }}°C, open the door immediately.'
+            extra:
+              volume: 0.6
