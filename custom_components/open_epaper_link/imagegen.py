@@ -26,6 +26,7 @@ _LOGGER = logging.getLogger(__name__)
 white =  (255, 255, 255,255)
 black = (0, 0, 0,255)
 red = (255, 0, 0,255)
+yellow = (255, 255, 0,255)
 queue = []
 notsetup = True;
 running = False;
@@ -98,6 +99,8 @@ def getIndexColor(color):
         return black
     elif color_str == "red" or color_str == "r":
         return red
+    elif color_str == "yellow" or color_str == "y":
+        return yellow
     else:
         return white
 # should_show_element

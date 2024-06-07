@@ -108,7 +108,7 @@ def setup(hass, config):
             url = "http://" + ip + "/led_flash?mac=" + mac + "&pattern=" + modebyte + color1 + flashSpeed1 + flashCount1 + delay1 + color2 + flashSpeed2 + flashCount2 + delay2 + color3 + flashSpeed3 + flashCount3 + delay3 + repeats + "00";
             result = await hass.async_add_executor_job(requests.get, url)
             if result.status_code != 200:
-               _LOGGER.warning(result.status_code)
+                _LOGGER.warning(result.status_code)
 
     # register the services
     hass.services.register(DOMAIN, "dlimg", dlimg)
@@ -122,7 +122,7 @@ def setup(hass, config):
 def int_to_hex_string(number):
     hex_string = hex(number)[2:]
     if len(hex_string) == 1:
-         hex_string = '0' + hex_string
+        hex_string = '0' + hex_string
     return hex_string
     
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -390,7 +390,7 @@ def get_gtfs(hass, path, data, update=False):
         _LOGGER.warning("Cannot use this datasource as still unpacking: %s", filename)
         return "extracting"
     if update and data["extract_from"] == "url" and os.path.exists(os.path.join(gtfs_dir, file)):
-        remove_datasource(hass, path, filename, False)
+        remove_datasource(hass, path, filename, True)
     if update and data["extract_from"] == "zip" and os.path.exists(os.path.join(gtfs_dir, file)) and os.path.exists(os.path.join(gtfs_dir, sqlite)):
         os.remove(os.path.join(gtfs_dir, sqlite))      
     if data["extract_from"] == "zip":
@@ -849,7 +849,8 @@ def get_local_stops_next_departures(self):
                    ON route.route_id = trip.route_id 
 		WHERE 
         trip.service_id not in (select service_id from calendar_dates where date = date(:now_offset) and exception_type = 2)
-        and  datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange) 
+        and ((datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange))
+        or (datetime(date(:now_offset,'+1 day') || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange)))
         AND calendar.start_date <= date(:now_offset) 
         AND calendar.end_date >= date(:now_offset) 
         )
@@ -875,8 +876,9 @@ def get_local_stops_next_departures(self):
 				   ON trip.service_id = calendar_date_today.service_id
 		WHERE 
         today_cd = 1
-        and  datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange) 
-		{tomorrow_calendar_date_where}
+        and ((datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange))
+        or (datetime(date(:now_offset,'+1 day') || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange)))
+        {tomorrow_calendar_date_where}
         )
         order by stop_id, tomorrow, departure_time
         """  # noqa: S608
@@ -922,6 +924,7 @@ def get_local_stops_next_departures(self):
             timetable = []
         entry = {"stop_id": row['stop_id'], "stop_name": row['stop_name'], "latitude": row['latitude'], "longitude": row['longitude'], "departure": timetable, "offset": offset}
         self._icon = ICONS.get(row['route_type'], ICON)
+        
         if row["today"] == 1 or (row["today_cd"] == 1 and row["start_date"] == row["calendar_date"]):
             self._trip_id = row["trip_id"]
             self._direction = str(row["direction_id"])
@@ -957,13 +960,8 @@ def get_local_stops_next_departures(self):
                 _LOGGER.debug("Departure time corrected: %s, after now: %s", depart_time_corrected, now.replace(tzinfo=timezone))
                 timetable.append({"departure": row["departure_time"], "departure_realtime": departure_rt, "delay_realtime": delay_rt, "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
         
-        if (
-            "tomorrow" in row
-            and row["tomorrow"] == 1
-            and row["today"] == 0
-            and now_time_hist_corrected > row["departure_time"]            
-        ):
-            _LOGGER.debug("Tomorrow adding row_tomorrow: %s, row_today: %s, now_time: %s, departure_time: %s", row["tomorrow"],row["today"],now_time_hist_corrected,row["departure_time"])
+        if (row["tomorrow"] == '1' or row["tomorrow"] == 1) and (datetime.datetime.strptime(now_time_hist_corrected,"%H:%M") > datetime.datetime.strptime(row["departure_time"],"%H:%M:%S")):
+            _LOGGER.debug("Tomorrow: adding row")
             timetable.append({"departure": row["departure_time"], "departure_realtime": "tomorrow", "delay_realtime": "tomorrow", "date": tomorrow_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
         
         prev_entry = entry.copy()
