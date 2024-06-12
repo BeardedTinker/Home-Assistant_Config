@@ -24,8 +24,9 @@ action:
     sticky: 'false'
     timeout_sec: 300
 - service: notify.send_message
-  data:
+  target:
     entity_id: notify.energy_log
+  data:
     message: "{{ states('sensor.date') }},{{ states('sensor.sun_energy_day') }},{{ states('sensor.sun_energy_night') }},{{ states('sensor.daily_energy_total') }},{{ states('sensor.power_usage_minimum_24h') }},{{ states('sensor.power_usage_maximum_24h') }},{{ states('sensor.power_stats') }},{{ states('sensor.daily_total_energy_cost') }},{{ states('sensor.smart_inverter_max_power') }},{{ states('sensor.smart_inverter_daily') }}"
 - service: google_sheets.append_sheet
   data:
