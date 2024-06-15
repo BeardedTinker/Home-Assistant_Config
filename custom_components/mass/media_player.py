@@ -3,10 +3,20 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import os
 from collections.abc import Mapping
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Concatenate,
+    Coroutine,
+    ParamSpec,
+    TypeVar,
+)
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -30,6 +40,7 @@ from homeassistant.components.media_player.const import (
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import STATE_IDLE, STATE_OFF, STATE_PAUSED, STATE_PLAYING
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import (
     AddEntitiesCallback,
     async_get_current_platform,
@@ -43,11 +54,12 @@ from music_assistant.common.models.enums import (
     QueueOption,
     RepeatMode,
 )
-from music_assistant.common.models.errors import MediaNotFoundError
+from music_assistant.common.models.errors import MediaNotFoundError, MusicAssistantError
 from music_assistant.common.models.event import MassEvent
 from music_assistant.common.models.media_items import MediaItemType
 
 from .const import (
+    ATTR_ACTIVE_GROUP,
     ATTR_ACTIVE_QUEUE,
     ATTR_GROUP_LEADER,
     ATTR_GROUP_MEMBERS,
@@ -113,6 +125,28 @@ ATTR_USE_PRE_ANNOUNCE = "use_pre_announce"
 ATTR_ANNOUNCE_VOLUME = "announce_volume"
 
 # pylint: disable=too-many-public-methods
+
+_MassPlayerT = TypeVar("_MassPlayerT", bound="MassPlayer")
+_R = TypeVar("_R")
+_P = ParamSpec("_P")
+
+
+def catch_musicassistant_error(
+    func: Callable[Concatenate[_MassPlayerT, _P], Awaitable[_R]],
+) -> Callable[Concatenate[_MassPlayerT, _P], Coroutine[Any, Any, _R | None]]:
+    """Check and log commands to players."""
+
+    @functools.wraps(func)
+    async def wrapper(
+        self: _MassPlayerT, *args: _P.args, **kwargs: _P.kwargs
+    ) -> _R | None:
+        """Catch Music Assistant errors and convert to Home Assistant error."""
+        try:
+            return await func(self, *args, **kwargs)
+        except MusicAssistantError as err:
+            raise HomeAssistantError(f"{err.__class__.__name__}: {str(err)}") from err
+
+    return wrapper
 
 
 async def async_setup_entry(
@@ -234,6 +268,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
             ATTR_GROUP_MEMBERS: player.group_childs,
             ATTR_GROUP_LEADER: player.synced_to,
             ATTR_ACTIVE_QUEUE: player.active_source,
+            ATTR_ACTIVE_GROUP: player.active_group,
             ATTR_QUEUE_ITEMS: queue.items if queue else None,
             ATTR_QUEUE_INDEX: queue.current_index if queue else None,
         }
@@ -276,6 +311,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         self._update_media_attributes(player, queue)
         self._update_media_image_url(player, queue)
 
+    @catch_musicassistant_error
     async def async_media_play(self) -> None:
         """Send play command to device."""
         if queue := self.mass.player_queues.get(self.player.active_source):
@@ -283,6 +319,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         else:
             await self.mass.players.player_command_play(self.player_id)
 
+    @catch_musicassistant_error
     async def async_media_pause(self) -> None:
         """Send pause command to device."""
         if queue := self.mass.player_queues.get(self.player.active_source):
@@ -290,6 +327,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         else:
             await self.mass.players.player_command_pause(self.player_id)
 
+    @catch_musicassistant_error
     async def async_media_stop(self) -> None:
         """Send stop command to device."""
         if queue := self.mass.player_queues.get(self.player.active_source):
@@ -297,52 +335,63 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         else:
             await self.mass.players.player_command_stop(self.player_id)
 
+    @catch_musicassistant_error
     async def async_media_next_track(self) -> None:
         """Send next track command to device."""
         if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_next(queue.queue_id)
 
+    @catch_musicassistant_error
     async def async_media_previous_track(self) -> None:
         """Send previous track command to device."""
         if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_previous(queue.queue_id)
 
+    @catch_musicassistant_error
     async def async_media_seek(self, position: float) -> None:
         """Send seek command."""
         position = int(position)
         if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_seek(queue.queue_id, position)
 
+    @catch_musicassistant_error
     async def async_mute_volume(self, mute: bool) -> None:
         """Mute the volume."""
         await self.mass.players.player_command_volume_mute(self.player_id, mute)
 
+    @catch_musicassistant_error
     async def async_set_volume_level(self, volume: float) -> None:
         """Send new volume_level to device."""
         volume = int(volume * 100)
         await self.mass.players.player_command_volume_set(self.player_id, volume)
 
+    @catch_musicassistant_error
     async def async_volume_up(self) -> None:
         """Send new volume_level to device."""
         await self.mass.players.player_command_volume_up(self.player_id)
 
+    @catch_musicassistant_error
     async def async_volume_down(self) -> None:
         """Send new volume_level to device."""
         await self.mass.players.player_command_volume_down(self.player_id)
 
+    @catch_musicassistant_error
     async def async_turn_on(self) -> None:
         """Turn on device."""
         await self.mass.players.player_command_power(self.player_id, True)
 
+    @catch_musicassistant_error
     async def async_turn_off(self) -> None:
         """Turn off device."""
         await self.mass.players.player_command_power(self.player_id, False)
 
+    @catch_musicassistant_error
     async def async_set_shuffle(self, shuffle: bool) -> None:
         """Set shuffle state."""
         if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_shuffle(queue.queue_id, shuffle)
 
+    @catch_musicassistant_error
     async def async_set_repeat(self, repeat: str) -> None:
         """Set repeat state."""
         if queue := self.mass.player_queues.get(self.player.active_source):
@@ -350,11 +399,13 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
                 queue.queue_id, RepeatMode(repeat)
             )
 
+    @catch_musicassistant_error
     async def async_clear_playlist(self) -> None:
         """Clear players playlist."""
         if queue := self.mass.player_queues.get(self.player.active_source):
             await self.mass.player_queues.queue_command_clear(queue.queue_id)
 
+    @catch_musicassistant_error
     async def async_play_media(
         self,
         media_type: str,
@@ -388,6 +439,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
             radio_mode=kwargs[ATTR_MEDIA_EXTRA].get(ATTR_RADIO_MODE),
         )
 
+    @catch_musicassistant_error
     async def async_join_players(self, group_members: list[str]) -> None:
         """Join `group_members` as a player group with the current player."""
         player_ids: list[str] = []
@@ -400,10 +452,12 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
             player_ids.append(mass_player_id)
         await self.mass.players.cmd_sync_many(self.player_id, player_ids)
 
+    @catch_musicassistant_error
     async def async_unjoin_player(self) -> None:
         """Remove this player from any group."""
         await self.mass.players.player_command_unsync(self.player_id)
 
+    @catch_musicassistant_error
     async def _async_play_media_advanced(
         self,
         media_id: list[str],
@@ -455,6 +509,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
             queue_id, media=media_uris, option=enqueue, radio_mode=radio_mode
         )
 
+    @catch_musicassistant_error
     async def _async_play_announcement(
         self,
         url: str,
@@ -498,7 +553,7 @@ class MassPlayer(MassBaseEntity, MediaPlayerEntity):
         # prefer (exact) lookup in the library by name
         for func in library_functions:
             result = await func(search=searchname)
-            for item in result.items:
+            for item in result:
                 # handle optional artist filter
                 if (
                     artist
