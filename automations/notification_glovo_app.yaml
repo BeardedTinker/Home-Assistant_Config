@@ -1,0 +1,33 @@
+id: 29b91a0c-11c2-4284-8e70-cf82bed499bd 
+alias: 'Notifications from Glovo App - Andrej' 
+description: "Get notifications from Glovo and redistribute"
+
+variables:
+  last_notification: sensor.pixel_7_pro_last_notification
+
+triggers:
+  - platform: state
+    entity_id: sensor.pixel_7_pro_last_notification
+    attribute: post_time
+
+condition:
+  - alias: "ONLY if App is GLovo" 
+    condition: state
+    entity_id: sensor.pixel_7_pro_last_notification
+    attribute: package
+    state: "com.glovo" 
+
+action:
+  - service: script.notify_engine
+    data:
+      who: 'family'
+      title: "🍱 Glovo {{state_attr(latest_notification, 'android.title')}}"
+      value1: '{{states(last_notification)}}'
+      target_id: !secret telegram_bot_chat_id
+      tag_id: 'information'
+      group: meal
+      channel_id: meal
+      importance_id: high
+      color: 'red'
+      sticky: 'true'
+      timeout_sec: 600      
