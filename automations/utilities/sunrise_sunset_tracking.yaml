@@ -14,7 +14,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '*⚡ Energy Usage*'
+    title: '⚡ Energy Usage'
     value1: "Today's energy use was {{ states('sensor.daily_energy_total') }} kWh."
     target_id: !secret telegram_bot_chat_id
     group: home
