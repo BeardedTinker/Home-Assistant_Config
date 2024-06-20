@@ -30,6 +30,7 @@ api:
     key: "JtyXTtVb8F2KH+8TcBGjoN/EzFWGeQFPhpAgE5+UJGg="
 
 ota:
+  platform: esphome
   password: "cd40374cff4a4cac742542aeac26a5a0"
 
 wifi:

@@ -26,8 +26,10 @@ logger:
 api:
   encryption:
     key: k+MJ5YLEgqaXTBPIK7mQ+F1S8tTYVy5u6mPafMluWE8=
-ota:
 
+ota:
+  platform: esphome
+  
 dashboard_import:
   package_import_url: github://esphome/firmware/voice-assistant/m5stack-atom-echo.yaml@main
 

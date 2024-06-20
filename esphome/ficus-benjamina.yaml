@@ -50,6 +50,7 @@ wifi:
     subnet: 255.255.252.0
 
 ota:
+  platform: esphome
   on_end:
     then:
       - logger.log: 'OTA successful - flipping switch'

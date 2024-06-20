@@ -48,6 +48,7 @@ esphome:
       - script.execute: consider_deep_sleep
 
 ota:
+  platform: esphome
   on_end:
     then:
       - logger.log: 'OTA successful - flipping switch'

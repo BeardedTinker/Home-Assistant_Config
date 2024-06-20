@@ -58,6 +58,7 @@ esp32:
   board: lolin_d32
 
 ota:
+  platform: esphome
   on_end:
     then:
       - logger.log: 'OTA successful - flipping switch'

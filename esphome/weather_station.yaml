@@ -55,6 +55,7 @@ api:
 logger:
 
 ota:
+  platform: esphome
 # On OTA end toggle off HA boolean
   on_end:
     then:
