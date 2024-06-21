@@ -1,0 +1,33 @@
+{
+  "domain": "spook",
+  "name": "Spook",
+  "after_dependencies": [
+    "blueprint",
+    "cloud",
+    "timer",
+    "proximity"
+  ],
+  "codeowners": [
+    "@frenck"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "homeassistant",
+    "input_number",
+    "input_select",
+    "lovelace",
+    "number",
+    "person",
+    "recorder",
+    "repairs",
+    "select",
+    "zone"
+  ],
+  "documentation": "https://spook.boo",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/frenck/spook/issues",
+  "quality_scale": "platinum",
+  "requirements": [],
+  "version": "3.0.1"
+}
