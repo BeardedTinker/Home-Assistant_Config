@@ -30,6 +30,33 @@ update_gtfs:
       example: "https://path-to-my-zip-file-location/filename.zip"
       selector:
         text:            
+    api_key:
+      name: api_key
+      description: provide API key, if required
+      required: false
+      selector:
+        text:        
+    api_key_name:
+      name: api_key_name
+      description: API key_name when using api_key
+      required: true
+      default: "api_key"
+      example: "api_key"
+      selector:
+        text:         
+    api_key_location:
+      name: Indicate location of the key
+      description: Select location of the key
+      required: true      
+      default: "not_applicable"
+      example: "not_applicable"
+      selector:
+        select:
+          translation_key: "api_key_location"
+          options:
+            - "not_applicable"
+            - "header"
+            - "query_string"     
     clean_feed_info:
       name: Remove feed-info
       description: Removes feed_info.txt from zip (use in case file content incorrect)

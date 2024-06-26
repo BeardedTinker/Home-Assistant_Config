@@ -22,7 +22,9 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 
 from .const import (
-    DEFAULT_PATH_GEOJSON, 
+    CONF_API_KEY,
+    CONF_API_KEY_LOCATION,
+    CONF_API_KEY_NAME,
     DEFAULT_LOCAL_STOP_TIMERANGE, 
     DEFAULT_LOCAL_STOP_TIMERANGE_HISTORY,
     DEFAULT_LOCAL_STOP_RADIUS,
@@ -378,10 +380,17 @@ def get_next_departure(self):
 
 def get_gtfs(hass, path, data, update=False):
     _LOGGER.debug("Getting gtfs with data: %s", data)
+    _headers = None
     gtfs_dir = hass.config.path(path)
     os.makedirs(gtfs_dir, exist_ok=True)
     filename = data["file"]
     url = data["url"]
+    if data.get(CONF_API_KEY_LOCATION, None) == "query_string":
+      if data.get(CONF_API_KEY, None):
+        url = url + "?" + data[CONF_API_KEY_NAME] + "=" + data[CONF_API_KEY]
+    if data.get(CONF_API_KEY_LOCATION, None) == "header":
+      if data.get(CONF_API_KEY, None):
+        _headers = {data[CONF_API_KEY_NAME]: data[CONF_API_KEY]}
     file = data["file"] + ".zip"
     sqlite = data["file"] + ".sqlite"
     check_source_dates = data.get("check_source_dates", False)
@@ -400,7 +409,7 @@ def get_gtfs(hass, path, data, update=False):
     if data["extract_from"] == "url":
         if not os.path.exists(os.path.join(gtfs_dir, file)):
             try:
-                r = requests.get(url, allow_redirects=True)
+                r = requests.get(url,headers=_headers, allow_redirects=True)
                 open(os.path.join(gtfs_dir, file), "wb").write(r.content)
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.error("The given URL or GTFS data file/folder was not found")

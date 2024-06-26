@@ -51,6 +51,7 @@ from .const import (
     ROUTE_TYPE_OPTIONS,
     TIMEPOINT_DEFAULT,
     TIMEPOINT_OPTIONS,
+    TIME_STR_FORMAT,                    
     WHEELCHAIR_ACCESS_DEFAULT,
     WHEELCHAIR_ACCESS_OPTIONS,
     WHEELCHAIR_BOARDING_DEFAULT,
@@ -73,10 +74,11 @@ async def async_setup_entry(
            "coordinator"
         ]
         await coordinator.async_config_entry_first_refresh()
-        for stop in coordinator.data["local_stops_next_departures"]:
-            sensors.append(
-                    GTFSLocalStopSensor(stop, coordinator, coordinator.data.get("name", "No Name"))
-                )
+        if not coordinator.data["extracting"]:
+            for stop in coordinator.data["local_stops_next_departures"]:
+                sensors.append(
+                        GTFSLocalStopSensor(stop, coordinator, coordinator.data.get("name", "No Name"))
+                    )
         
     else:
         coordinator: GTFSUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][
@@ -321,7 +323,8 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
                     self._destination.wheelchair_boarding, WHEELCHAIR_BOARDING_DEFAULT
                 )
         else:
-            self._attributes["destination_station_stop_name"] = self._departure.get("destination_stop_name", None)        
+            self._attributes["destination_station_stop_name"] = self._departure.get("destination_stop_name", None)  
+            self._attributes["destination_station_stop_id"] = self._departure.get("destination_stop_id", None)            
 
         # Manage Route metadata
         key = "route_id"
@@ -506,7 +509,7 @@ class GTFSLocalStopSensor(CoordinatorEntity, SensorEntity):
         if self._extracting:  
             self._state = None
         else:
-            self._state = self._stop["stop_name"]
+            self._state = self._stop["stop_name"] + " (" +  str(dt_util.now().replace(tzinfo=None).strftime(TIME_STR_FORMAT)) + ")"
 
         self._attr_native_value = self._state        
         self._attributes["gtfs_updated_at"] = self.coordinator.data[

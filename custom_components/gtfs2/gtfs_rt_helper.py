@@ -192,14 +192,18 @@ def get_rt_route_trip_statuses(self):
             else:
                 direction_id = "nn"
                 
+            # for route-based requests, if the rt-data has no route (ex. TER) then the selection should be on trip_id
+            # result will be that only one RT value will be collected
+            if not route_id:
+                self._rt_group = "trip"   
+                route_id = self._route_id                
+                
             if self._rt_group == "trip":
-                direction_id = self._direction                
+                direction_id = self._direction   
 
-            trip_id = entity["trip_update"]["trip"]["trip_id"]  
-                    
+            trip_id = entity["trip_update"]["trip"]["trip_id"]                     
                         
-            if ((self._rt_group == "route" and (route_id == self._route_id and direction_id == self._direction) or (trip_id == self._trip_id and direction_id == "nn") ) or    
-                    (self._rt_group == "trip" and trip_id == self._trip_id )):
+            if (self._rt_group == "route" and (route_id == self._route_id and direction_id == self._direction) or (trip_id == self._trip_id and direction_id == "nn") ) or  (self._rt_group == "trip" and trip_id == self._trip_id ):
                 
                 _LOGGER.debug("Entity found params - group: %s, route_id: %s, direction_id: %s, self_trip_id: %s, with rt trip: %s", self._rt_group, route_id, direction_id, self._trip_id, entity["trip_update"]["trip"])
                 

@@ -147,13 +147,31 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="source",
                 data_schema=vol.Schema(
                     {
-                        vol.Required(CONF_EXTRACT_FROM): selector.SelectSelector(selector.SelectSelectorConfig(options=["url", "zip"], translation_key="extract_from")),
+                        vol.Required(CONF_EXTRACT_FROM): selector.SelectSelector(
+                            selector.SelectSelectorConfig(
+                                options=["url", "zip"], translation_key="extract_from"
+                            )
+                        ),
                         vol.Required(CONF_FILE): str,
                         vol.Required(CONF_URL, default="na"): str,
+                        vol.Optional(CONF_API_KEY): str,
+                        vol.Optional(
+                            CONF_API_KEY_NAME,
+                            default=DEFAULT_API_KEY_NAME,
+                        ): str,
+                        vol.Required(
+                            CONF_API_KEY_LOCATION,
+                            default=DEFAULT_API_KEY_LOCATION,
+                        ): selector.SelectSelector(
+                            selector.SelectSelectorConfig(
+                                options=ATTR_API_KEY_LOCATIONS,
+                                translation_key="api_key_location",
+                            )
+                        ),
                     },
                 ),
                 errors=errors,
-            )    
+            )
         check_data = await self._check_data(user_input)
         if check_data :
             errors["base"] = check_data
