@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of Fans
+#
+#####
+
+platform: template
+sensors:
+  count_fan:
+    friendly_name: 'Number of Fan entities'
+    unique_id: 80b0c690-adc9-42a5-9461-4131bb64989c
+    value_template: >-
+      {{ states.fan | list | count }}

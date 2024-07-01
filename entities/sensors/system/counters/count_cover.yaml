@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of covers
+#
+#####
+
+platform: template
+sensors:
+  count_cover:
+    friendly_name: 'Number of Covers entities'
+    unique_id: 4ade49cf-f9e0-428d-83e8-ccadb0a94551
+    value_template: >-
+      {{ states.cover | list | count }}

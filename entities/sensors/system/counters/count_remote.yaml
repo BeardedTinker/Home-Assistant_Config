@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of remotes
+#
+#####
+
+platform: template
+sensors:
+  count_remote:
+    friendly_name: 'Number of Remote entities'
+    unique_id: ab5e7ee9-c2a6-4455-823c-d73622c84493
+    value_template: >-
+      {{ states.remote | list | count }}

@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of Schedules
+#
+#####
+
+platform: template
+sensors:
+  count_schedule:
+    friendly_name: 'Number of Schedule entities'
+    unique_id: 6ee26517-3c34-4792-9259-a4c647b3c824
+    value_template: >-
+      {{ states.schedule | list | count }}

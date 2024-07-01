@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of Zones
+#
+#####
+
+platform: template
+sensors:
+  count_zone:
+    friendly_name: 'Number of Zone entities'
+    unique_id: e9cb52b1-cacd-4626-a699-0eb29c78b7f8
+    value_template: >-
+      {{ states.zone | list | count }}

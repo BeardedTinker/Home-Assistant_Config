@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of ToDo's
+#
+#####
+
+platform: template
+sensors:
+  count_todo:
+    friendly_name: 'Number of ToDo entities'
+    unique_id: b7d9fedc-3680-4779-b23b-118adefbee0a
+    value_template: >-
+      {{ states.todo | list | count }}

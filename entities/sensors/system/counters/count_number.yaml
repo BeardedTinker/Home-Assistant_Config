@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of Number
+#
+#####
+
+platform: template
+sensors:
+  count_number:
+    friendly_name: 'Number of Number entities'
+    unique_id: 50bb1f7d-0110-463f-a7f4-e81d44f0c624
+    value_template: >-
+      {{ states.number | list | count }}

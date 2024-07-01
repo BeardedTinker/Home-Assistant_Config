@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of conversations
+#
+#####
+
+platform: template
+sensors:
+  count_conversation:
+    friendly_name: 'Number of Conversation entities'
+    unique_id: b2fe6095-1ddf-4a1e-9c9f-fec2c3b816df
+    value_template: >-
+      {{ states.conversation | list | count }}

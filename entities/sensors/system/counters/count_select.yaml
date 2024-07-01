@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of selects
+#
+#####
+
+platform: template
+sensors:
+  count_select:
+    friendly_name: 'Number of Select entities'
+    unique_id: 27d8b025-52c0-4bd3-bc4a-2d40ff61c8cd
+    value_template: >-
+      {{ states.select | list | count }}

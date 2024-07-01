@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of events
+#
+#####
+
+platform: template
+sensors:
+  count_events:
+    friendly_name: 'Number of Events'
+    unique_id: 29d2b0f3-1cf9-4f8c-adc6-7d070ed29c8c
+    value_template: >-
+      {{ states.event | list | count }}

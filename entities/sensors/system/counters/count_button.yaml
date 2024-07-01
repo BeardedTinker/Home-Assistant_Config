@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of buttons
+#
+#####
+
+platform: template
+sensors:
+  count_button:
+    friendly_name: 'Number of Button entities'
+    unique_id: 36109f31-fb66-4178-a4e0-fcb4105d3a3a
+    value_template: >-
+      {{ states.button | list | count }}

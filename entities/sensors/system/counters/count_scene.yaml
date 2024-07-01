@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of scenes
+#
+#####
+
+platform: template
+sensors:
+  count_scene:
+    friendly_name: 'Number of Scene entities'
+    unique_id: 35482283-4452-4622-a5fb-ea3f6f069763
+    value_template: >-
+      {{ states.scene | list | count }}

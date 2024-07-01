@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of texts
+#
+#####
+
+platform: template
+sensors:
+  count_text:
+    friendly_name: 'Number of Text entities'
+    unique_id: 9754f4f4-dc5a-4dea-b92d-ffe2958cc9df
+    value_template: >-
+      {{ states.text | list | count }}

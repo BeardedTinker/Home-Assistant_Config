@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of sirenes
+#
+#####
+
+platform: template
+sensors:
+  count_siren:
+    friendly_name: 'Number of Siren entities'
+    unique_id: 4e6f7d65-93ca-45e7-950f-e6691948ba94
+    value_template: >-
+      {{ states.siren | list | count }}

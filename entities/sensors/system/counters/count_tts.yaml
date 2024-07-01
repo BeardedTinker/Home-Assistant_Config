@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of TTS
+#
+#####
+
+platform: template
+sensors:
+  count_tts:
+    friendly_name: 'Number of TTS entities'
+    unique_id: 53775444-cd49-4c43-81e0-42370a861bb5
+    value_template: >-
+      {{ states.tts | list | count }}

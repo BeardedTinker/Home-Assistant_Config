@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of stt's
+#
+#####
+
+platform: template
+sensors:
+  count_stt:
+    friendly_name: 'Number of STT entities'
+    unique_id: 352ca9ee-f6a5-4604-8766-f9255504092d
+    value_template: >-
+      {{ states.stt | list | count }}

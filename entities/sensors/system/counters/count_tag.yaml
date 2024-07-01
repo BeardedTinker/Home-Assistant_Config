@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of tags
+#
+#####
+
+platform: template
+sensors:
+  count_tag:
+    friendly_name: 'Number of Tag entities'
+    unique_id: 07937bdb-2642-4d46-8a38-97c20fe78a18
+    value_template: >-
+      {{ states.tag | list | count }}

@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of wake words
+#
+#####
+
+platform: template
+sensors:
+  count_wake_words:
+    friendly_name: 'Number of Wake Words entities'
+    unique_id: f361506f-b131-4137-a487-5de41295cbc1
+    value_template: >-
+      {{ states.wake_word | list | count }}

@@ -1,0 +1,12 @@
+#####
+# Counter that tracks total number of calendars
+#
+#####
+
+platform: template
+sensors:
+  count_calendars:
+    friendly_name: 'Number of Calendar entities'
+    unique_id: 7f17f569-f621-4e39-8510-9ca155fd00f7
+    value_template: >-
+      {{ states.calendar | list | count }}
