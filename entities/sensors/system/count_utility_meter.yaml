@@ -1,6 +1,6 @@
 #####
 # Counter that tracks total number of Utility meters
-#
+# Removed in 2022.9
 #####
 
 platform: template
