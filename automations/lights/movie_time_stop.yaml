@@ -16,12 +16,7 @@ trigger:
     for:
       hours: 0
       minutes: 0
-      seconds: 3
-
-#condition: 
-#  - condition: state
-#    entity_id: light.corner
-#    state: "on"
+      seconds: 2
 
 action:
   - service: scene.turn_on

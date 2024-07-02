@@ -16,7 +16,7 @@ trigger:
     for:
       hours: 0
       minutes: 0
-      seconds: 5
+      seconds: 2
 
 condition:
   - condition: state

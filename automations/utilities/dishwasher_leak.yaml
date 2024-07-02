@@ -10,10 +10,6 @@ trigger:
     entity_id: binary_sensor.leak_sensor_water_leak
     to: 'on'
 
-#condition: "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
-#  - condition: template
-#    value_template: >
-#      "{{ states('binary_sensor.leak_sensor_water_leak') != 'unavailable' }}"
 condition:
   condition: not
   conditions:
@@ -35,18 +31,6 @@ action:
     color: 'red'
     sticky: 'true'
     timeout_sec: 1800
-#- data:
-#     entity_id:
-#       - media_player.display_me
-#       - media_player.clock_me
-#     volume_level: 0.6
-#   service: media_player.volume_set
-# - data:
-#     entity_id:
-#       - media_player.display_me
-#       - media_player.clock_me
-#     message: 'Water leak detected. Check under dishwasher now!'
-#   service: tts.google_translate_say
 - service: script.turn_on
   target:
     entity_id: script.google_home_resume

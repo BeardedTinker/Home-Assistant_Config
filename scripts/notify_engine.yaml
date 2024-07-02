@@ -34,7 +34,8 @@
 # ios_category:   iOS specific - 
 # iso_sound:      iOS specific - DISABLED
 # ios_badge:      iOS specific - DISABLED
-# 
+# file:           File/Image to send (Telegram)
+# caption:        Caption for file/iame (Telegram)
 #####
 
 notify_engine:
@@ -87,6 +88,8 @@ notify_engine:
 #          ledColor: "{{ ledColor | default }}"
           timeout: "{{ timeout_sec | default }}"
           entity_id: "{{ camera_entity | default }}"
+          file: "{{ file | default }}"
+          caption: "{{ caption | default }}"
           push:
             category: "{{ ios_category | default }}"
 #            sound: "{{ ios_sound | default }}"

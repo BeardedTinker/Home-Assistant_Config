@@ -17,6 +17,8 @@ variables:
     - sensor.dypsis_lutescenes_soil_moisture
     - sensor.ficus_benjamina_natasja_soil
     - sensor.ficus_benjamina_soil_moisture
+    - sensor.hydrangea_soil_moisture
+    - sensor.parthenocissus_soil_moisture
     - sensor.parthenocissus_small_soil_moisture
     - sensor.schefflera_arboricola_soil_moisture
     - sensor.test_plant_soil_moisture_2
