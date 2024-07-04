@@ -1,11 +1,11 @@
 """https://github.com/dummylabs/thewatchman§"""
+
 from datetime import timedelta
 import logging
-import os
 import time
 import json
 import voluptuous as vol
-from homeassistant.loader import async_get_integration
+from anyio import Path
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components import persistent_notification
 from homeassistant.util import dt as dt_util
@@ -20,7 +20,6 @@ from homeassistant.const import (
     EVENT_SERVICE_REMOVED,
     EVENT_STATE_CHANGED,
     EVENT_CALL_SERVICE,
-    STATE_UNKNOWN,
 )
 
 from .coordinator import WatchmanCoordinator
@@ -32,7 +31,7 @@ from .utils import (
     table_renderer,
     text_renderer,
     get_config,
-    get_report_path,
+    async_get_report_path,
 )
 
 from .const import (
@@ -139,12 +138,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         # first run, home assistant is loading
         # parse_config will be scheduled once HA is fully loaded
         _LOGGER.info("Watchman started [%s]", VERSION)
-
-    # resources = hass.data["lovelace"]["resources"]
-    # await resources.async_get_info()
-    # for itm in resources.async_items():
-    #     _LOGGER.debug(itm)
-
     return True
 
 
@@ -153,9 +146,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     await hass.config_entries.async_reload(entry.entry_id)
 
 
-async def async_unload_entry(
-    hass: HomeAssistant, config_entry
-):  # pylint: disable=unused-argument
+async def async_unload_entry(hass: HomeAssistant, config_entry):  # pylint: disable=unused-argument
     """Handle integration unload"""
     for cancel_handle in hass.data[DOMAIN].get("cancel_handlers", []):
         if cancel_handle:
@@ -187,7 +178,7 @@ async def add_services(hass: HomeAssistant):
     async def async_handle_report(call):
         """Handle the service call"""
         config = hass.data.get(DOMAIN_DATA, {})
-        path = get_report_path(hass, config.get(CONF_REPORT_PATH, None))
+        path = await async_get_report_path(hass, config.get(CONF_REPORT_PATH, None))
         send_notification = call.data.get(CONF_SEND_NOTIFICATION, False)
         create_file = call.data.get(CONF_CREATE_FILE, True)
         test_mode = call.data.get(CONF_TEST_MODE, False)
@@ -225,7 +216,7 @@ async def add_services(hass: HomeAssistant):
                     error=True,
                 )
 
-            if onboarding(hass, service, path):
+            if await async_onboarding(hass, service, path):
                 await async_notification(
                     hass,
                     "🖖 Achievement unlocked: first report!",
@@ -374,10 +365,10 @@ def get_included_folders(hass):
             config_folders = [hass.config.config_dir]
 
     for fld in config_folders:
-        folders.append(os.path.join(fld, "**/*.yaml"))
+        folders.append((fld, "**/*.yaml"))
 
     if DOMAIN_DATA in hass.data and hass.data[DOMAIN_DATA].get(CONF_CHECK_LOVELACE):
-        folders.append(os.path.join(hass.config.config_dir, ".storage/**/lovelace*"))
+        folders.append((hass.config.config_dir, ".storage/**/lovelace*"))
 
     return folders
 
@@ -449,7 +440,7 @@ async def async_notification(hass, title, message, error=False, n_id="watchman")
         raise HomeAssistantError(message.replace("`", ""))
 
 
-def onboarding(hass, service, path):
+async def async_onboarding(hass, service, path):
     """check if the user runs report for the first time"""
     service = service or get_config(hass, CONF_SERVICE_NAME, None)
-    return not (service or os.path.exists(path))
+    return not (service or await Path(path).exists())
