@@ -48,9 +48,9 @@ Also, if you have time you can try and join me while streaming and there should 
 
 Heart of my smart home is Home Assistant OS running in Virtual Machine on [Synology DSM920+](https://www.synology.com/en-us/products/DS920+) - DSM version 6.2.4.
 
-Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk (Latest available firmware).
+Plugged in Synology is Zigbee USB CC2652RB stick from [slae.sh](https://slae.sh/projects/cc2652/) with Zigbee2mqtt firmware from Koenkk (Latest available firmware). 
 
-And yes, it does have extra RAM installed for total of 20GB RAM.
+And yes, it does have extra RAM installed for total of 20GB RAM, as well as SLZB-06 is used for OTBR support.
 
 From other devices that I use, here is a list:
 
@@ -111,6 +111,7 @@ From other devices that I use, here is a list:
   + Google [Home Mini](https://store.google.com/gb/product/google_home_mini_first_gen?hl=en-GB)
   + Google [Home Display](https://store.google.com/gb/product/google_nest_hub?hl=en-GB)
   + Amazon [Echo 3rd Gen](https://amzn.to/3YiL7tU)
+  + Apple HomePod
   + Lenovo [Smart Clock](https://www.lenovo.com/us/en/smart-clock)
   + LG webOS TV
   + Chromcast with [Google TV 4K](https://amzn.to/3ZDr9Ld) stick 
@@ -128,11 +129,10 @@ From other devices that I use, here is a list:
   + various DLink PoE IP cameras 
   
 ##### OTHER INTEGRATED DEVICES
-  ~~- Tile [Mate 2020](https://amzn.to/3KRYM8f)~~
   - Elgato [Key Light Air](https://amzn.to/3IOe8Ib)
   - [Roborock S5 max](https://amzn.to/3kBFw49)
   - [QuinLED-Dig-Uno](https://quinled.info/2018/09/15/quinled-dig-uno/) for controlling addressable LED strips
-  - [ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel 
+  - ~~[ioios.io](https://ioios.io/) Pithy Display and Pithy Pixel~~ 
   - [Nuki 2.0 Combo](https://nuki.io/en/smart-lock/) Smart Door lock with bridge 
   - [Nuki Opener](https://amzn.to/41Jnb5V/) for intercom
   - [Voron 2.4 R2](https://vorondesign.com/voron2.4) 3D printer (Klipper)
@@ -150,6 +150,9 @@ As I'm running this on Synology, I have mix of Docker containers and Home Assist
 Add-ons:
   - Advanced SSH & Web Terminal 
   - ESPHome - [link](https://esphome.io/) 
+  - Frigate
+  - Matter Server
+  - Open Thread Boarded Router (OTBR)
   - openWakeWorkd
   - Piper
   - Samba Backup - [link](https://github.com/thomasmauerer/hassio-addons)
@@ -185,6 +188,7 @@ There are too many integrations to list them all, but some of the main ones are:
 etc...
 
 Following is a list of active Integrations that are visible at Configuration->Integration page:
+  - 17Track
   - AccuWeather
   - AirVisual
   - Alexa Media Player
@@ -192,17 +196,19 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Android TV Remote
   - Anniversaries
   - Apple TV 
-  - Battery Note (*)
+  - Battery Note
   - Blitzortung (HACS)
   - Certificate Expiry
   - Cloudflare
   - ColorExtractor
   - Discord
   - DLNA server
+  - Downloader (*)
   - Electricity maps
   - Elgato Key Light
   - ESPHome
-  - FAst.com (*)
+  - Fast.com 
+  - File (*)
   - Forcast Solar
   - Generic camera
   - GitHub
@@ -212,6 +218,7 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Google Calendar
   - Google Cast
   - Google Sheets
+  - GTFS 2 (*)
   - HACS
   - HASS Agent
   - Home Assistant Supervisor
@@ -222,6 +229,9 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Jellyfin 
   - Launch library
   - LG webOS Smart TV
+  - Local To-do (*)
+  - Matter (*)
+  - Media Extractor (*)
   - Met.No
   - Mikrotik
   - Minecraft Server
@@ -232,10 +242,14 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Network UPS Tool
   - Nuki lock
   - ONVIF
+  - OTBR (*)
+  - OpenAI Conversation (*)
+  - OpenEPaperLin (*)
   - OpenUV
-  - OurGroceries (*)
-  - Ping (*)
+  - OurGroceries 
+  - Ping 
   - PowerCalc
+  - Proximity (*)
   - Radio Browser
   - Reolink IP/NVR Camera
   - Season
@@ -244,12 +258,14 @@ Following is a list of active Integrations that are visible at Configuration->In
   - Shopping List
   - Sonos
   - SpeedTest
+  - Spook
   - Sun
   - SwitchBot
   - Synology DSM
   - Tado
   - Thread
   - Tile
+  - Tuya 
   - Tuya Local 
   - Twitch
   - UniFi Network
@@ -281,13 +297,19 @@ Up-to-date count of various things in Home Assistant
 | Type                 | Count |
 | -------------------- |:-----:|
 | Alerts               |     4 |
-| Automations          |   193 |
-| Binary sensors       |   321 |
+| Automations          |   203 |
+| Binary sensors       |   359 |
+| Buttons              |   208 |  
+| Calendar             |    14 |
 | Cameras              |    15 |
 | Climates             |    17 |
+| Conversation         |     2 |
 | Counters             |     4 |
-| Device trackers      |   163 |
-| Entities             |  4017 |
+| Covers               |     5 |
+| Device trackers      |   164 |
+| Entities             |  4624 |
+| Events               |     1 |
+| Fans                 |     1 |
 | Groups               |    17 |
 | Image Processing     |     0 |
 | Input Boolean        |    19 |
@@ -295,21 +317,33 @@ Up-to-date count of various things in Home Assistant
 | Input Number         |     8 |
 | Input Select         |     8 |
 | Input Text           |     7 |
-| Lights               |    49 |
+| Lights               |    51 |
 | Lines of code (YAML) |102141 |
 | Locks                |     7 |
-| Media players        |    31 |
+| Media players        |    35 |
+| Number               |   113 |
 | Persons              |     6 |
 | Plants               |     9 |
+| Remotes              |     3 |
+| Scenes               |     1 |
+| Schedules            |     2 |
 | Rest commands        |    13 |
 | Scripts              |    23 |
-| Sensors              |  2394 |
-| Switches             |   190 |
+| Selects              |    94 |
+| Sensors              |  2795 |
+| Sirens               |     1 |
+| STT                  |     1 |
+| Switches             |   187 |
+| Tags                 |    50 |
+| Texts                |     7 |
 | Timers               |     4 |
-| Utility Meters       |     5 |
+| To-dos               |     5 |
+| TTS                  |     1 |
 | Vacuums              |     1 |
+| Wake Words           |     1 |
 | Weather              |     3 |
-* Updated: 07.01.2024 11:00 AM
+| Zones                |     9 |
+* Updated: 04.07.2024 11:30 PM
 
 ### Missing files
 
