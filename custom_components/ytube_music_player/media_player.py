@@ -1725,15 +1725,16 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			return
 		self.log_me('debug', crash_extra)
 
-		# mode "Shuffle" and "Shuffle Random" shuffle the playlist after generation
+		# mode "Shuffle" and "Shuffle Random" shuffle the playlist after generation, but only if shuffle is active
 		if(isinstance(self._tracks, list)):
-			if self._shuffle_mode in (PLAYMODE_SHUFFLE,PLAYMODE_SHUFFLE_RANDOM) and len(self._tracks) > 1:
-				random.shuffle(self._tracks)
-				self.log_me('debug', "- shuffle new tracklist")
-			if(len(self._tracks) == 0):
-				_LOGGER.error("tracklist with 0 tracks loaded, existing")
-				await self.async_turn_off()
-				return
+			if(self._attr_shuffle): 
+				if self._shuffle_mode in (PLAYMODE_SHUFFLE,PLAYMODE_SHUFFLE_RANDOM) and len(self._tracks) > 1:
+					random.shuffle(self._tracks)
+					self.log_me('debug', "- shuffle new tracklist")
+				if(len(self._tracks) == 0):
+					_LOGGER.error("tracklist with 0 tracks loaded, existing")
+					await self.async_turn_off()
+					return
 		else:
 			self.log_me('error', "Tracklist not a list .. turning off")
 			await self.async_turn_off()
