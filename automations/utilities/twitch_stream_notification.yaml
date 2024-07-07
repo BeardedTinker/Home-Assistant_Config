@@ -10,12 +10,10 @@ id: f04afd0e-7fc3-44ad-a89c-58b1ecaaa366
 trigger:
 - platform: state
   entity_id:
-    - sensor.beardedtinker_2
     - sensor.markwatttech
     - sensor.jessassin
     - sensor.drzzs
     - sensor.xisuma
-    - sensor.frenck
     - sensor.tangotek
 
 condition: 
