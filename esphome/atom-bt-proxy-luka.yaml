@@ -9,8 +9,8 @@ esphome:
   friendly_name: ${friendly_name}
 api:
 
-ota:
-  platform: esphome
+#ota:
+#  platform: esphome
 
 wifi:
   ssid: !secret wifi_ssid

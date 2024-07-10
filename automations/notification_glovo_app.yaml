@@ -1,14 +1,15 @@
-id: 29b91a0c-11c2-4284-8e70-cf82bedacf2236e-45a3-40e5-a00a-938053f2812f499bd 
-alias: 'Notifications from Glovo App - Andrej' 
-description: "Get notifications from Glovo and redistribute"
+id: 53f1d088-e5da-4cae-86c0-bf8cfbe83868 
+alias: Notifications from Glovo App - Andrej
+description: Get notifications from Glovo and redistribute
 
-triggers:
+trigger:
   - platform: state
-    entity_id: sensor.pixel_7_pro_last_notification
+    entity_id: 
+      - sensor.pixel_7_pro_last_notification
     attribute: post_time
 
 condition:
-    condition: state
+  - condition: state
     entity_id: sensor.pixel_7_pro_last_notification
     attribute: package
     state: com.glovo
