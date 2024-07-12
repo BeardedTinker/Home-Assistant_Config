@@ -1,4 +1,5 @@
 """Moonraker integration for Home Assistant."""
+
 import asyncio
 import logging
 import os.path
@@ -18,6 +19,7 @@ from .const import (
     CONF_API_KEY,
     CONF_PORT,
     CONF_PRINTER_NAME,
+    CONF_OPTION_POLLING_RATE,
     CONF_TLS,
     CONF_URL,
     DOMAIN,
@@ -54,6 +56,9 @@ def get_user_name(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up this integration using UI."""
+
+    global SCAN_INTERVAL
+
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
 
@@ -67,6 +72,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         entry.data.get(CONF_PRINTER_NAME) if custom_name is None else custom_name
     )
 
+    if entry.options.get(CONF_OPTION_POLLING_RATE) is not None:
+        SCAN_INTERVAL = timedelta(seconds=entry.options.get(CONF_OPTION_POLLING_RATE))
+    else:
+        SCAN_INTERVAL = timedelta(seconds=30)
+
     api = MoonrakerApiClient(
         url,
         async_get_clientsession(hass, verify_ssl=False),
@@ -76,7 +86,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     )
 
     try:
-
         async with async_timeout.timeout(TIMEOUT):
             await api.start()
             printer_info = await api.client.call_method("printer.info")
@@ -189,24 +198,12 @@ class MoonrakerDataUpdateCoordinator(DataUpdateCoordinator):
         gcode = await self._async_fetch_data(
             METHODS.SERVER_FILES_METADATA, query_object
         )
-        return_gcode["estimated_time"] = (
-            gcode.get("estimated_time", 0)
-        )
-        return_gcode["object_height"] = (
-            gcode.get("object_height", 0)
-        )
-        return_gcode["filament_total"] = (
-            gcode.get("filament_total", 0)
-        )
-        return_gcode["layer_count"] = (
-            gcode.get("layer_count", 0)
-        )
-        return_gcode["layer_height"] = (
-            gcode.get("layer_height", 0)
-        )
-        return_gcode["first_layer_height"] = (
-            gcode.get("first_layer_height", 0)
-        )
+        return_gcode["estimated_time"] = gcode.get("estimated_time", 0)
+        return_gcode["object_height"] = gcode.get("object_height", 0)
+        return_gcode["filament_total"] = gcode.get("filament_total", 0)
+        return_gcode["layer_count"] = gcode.get("layer_count", 0)
+        return_gcode["layer_height"] = gcode.get("layer_height", 0)
+        return_gcode["first_layer_height"] = gcode.get("first_layer_height", 0)
 
         try:
             # Keep last since this can fail but, we still want the other data

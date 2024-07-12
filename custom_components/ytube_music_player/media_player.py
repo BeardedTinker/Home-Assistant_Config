@@ -976,6 +976,10 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		except:
 			pass
 
+		# make sure all extracted infos are actually strings
+		for key in info:
+			if(info[key] is None):
+				info[key] = ""
 		return info
 
 	async def async_select_source_helper(self, event=None):

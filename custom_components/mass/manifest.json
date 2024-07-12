@@ -16,9 +16,9 @@
     "music_assistant"
   ],
   "requirements": [
-    "music-assistant==2.0.6"
+    "music-assistant==2.1.0b13"
   ],
-  "version": "2024.6.2",
+  "version": "2024.7.1.b0",
   "zeroconf": [
     "_mass._tcp.local."
   ]

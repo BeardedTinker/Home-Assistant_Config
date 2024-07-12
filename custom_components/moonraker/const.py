@@ -1,4 +1,5 @@
 """Constants for Moonraker."""
+
 from enum import Enum
 
 from homeassistant.const import Platform
@@ -6,7 +7,7 @@ from homeassistant.const import Platform
 # Base component constants
 DOMAIN = "moonraker"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.2.0"
+VERSION = "1.2.2"
 MANIFACTURER = "@marcolivierarsenault"
 
 # Platforms
@@ -26,6 +27,7 @@ CONF_TLS = "tls"
 CONF_PRINTER_NAME = "printer_name"
 CONF_OPTION_CAMERA_STREAM = "camera_stream_url"
 CONF_OPTION_CAMERA_SNAPSHOT = "camera_snapshot_url"
+CONF_OPTION_POLLING_RATE = "polling_rate"
 
 # API dict keys
 HOSTNAME = "hostname"
@@ -45,6 +47,7 @@ class METHODS(Enum):
     MACHINE_DEVICE_POWER_POST_DEVICE = "machine.device_power.post_device"
     MACHINE_UPDATE_REFRESH = "machine.update.refresh"
     MACHINE_UPDATE_STATUS = "machine.update.status"
+    MACHINE_SYSTEM_INFO = "machine.system_info"
     PRINTER_EMERGENCY_STOP = "printer.emergency_stop"
     PRINTER_INFO = "printer.info"
     PRINTER_GCODE_HELP = "printer.gcode.help"
@@ -57,6 +60,7 @@ class METHODS(Enum):
     PRINTER_FIRMWARE_RESTART = "printer.firmware_restart"
     SERVER_FILES_METADATA = "server.files.metadata"
     SERVER_HISTORY_TOTALS = "server.history.totals"
+    SERVER_JOB_QUEUE_STATUS = "server.job_queue.status"
     SERVER_RESTART = "server.restart"
     SERVER_WEBCAMS_LIST = "server.webcams.list"
 

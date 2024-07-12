@@ -1,4 +1,5 @@
 """Adds config flow for Moonraker."""
+
 import logging
 
 from typing import Any
@@ -18,6 +19,7 @@ from .const import (
     CONF_PRINTER_NAME,
     CONF_TLS,
     CONF_URL,
+    CONF_OPTION_POLLING_RATE,
     CONF_OPTION_CAMERA_STREAM,
     CONF_OPTION_CAMERA_SNAPSHOT,
     DOMAIN,
@@ -167,6 +169,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
+                    vol.Optional(
+                        CONF_OPTION_POLLING_RATE,
+                        default=self.config_entry.options.get(
+                            CONF_OPTION_POLLING_RATE, 30
+                        ),
+                    ): int,
                     vol.Optional(
                         CONF_OPTION_CAMERA_STREAM,
                         default=self.config_entry.options.get(

@@ -390,18 +390,13 @@ async def build_item_response(ytmusicplayer, payload):
 			if('artist' in media[0]):
 				if(isinstance(media[0]['artist'], list)):
 					if('name' in media[0]['artist'][0]):
-						title = media[0]['artist'][0]['name']
+						header_title = media[0]['artist'][0]['name']
+			elif('artists' in media[0]):
+				if(isinstance(media[0]['artists'], list)):
+					if('name' in media[0]['artists'][0]):
+						header_title = media[0]['artists'][0]['name']
 
 		for item in media:
-			if("artists" in item):
-				artist = ""
-				if(isinstance(item["artists"], str)):
-					artist = item["artists"]
-				elif(isinstance(item["artists"], list)):
-					artist = item["artists"][0]["name"]
-				if(artist):
-					title = artist + " - " + title
-
 			children.append(BrowseMedia(
 				title = f"{item['title']}",				 # noqa: E251
 				media_class = MediaClass.TRACK,			# noqa: E251
