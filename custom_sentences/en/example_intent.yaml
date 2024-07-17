@@ -1,0 +1,7 @@
+# This is an example of how custom sentences should be added to this repository
+language: "en"
+intents:
+  ExampleIntent:
+    data:
+      - sentences:
+          - "do example sentences work"
