@@ -21,7 +21,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '✅ *Daily Chores*'
+    title: '🏡 Daily Chores'
     value1: 'Today, {{ states("input_text.chores_dog") }} will take the dog out.'
     value2: '{{ states("input_text.chores_dishwasher") }} will empty dishwasher and {{ states("input_text.chores_washing_machine") }} will empty washing machine in tub.'
 #    value3: >

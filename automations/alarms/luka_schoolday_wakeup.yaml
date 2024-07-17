@@ -42,7 +42,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'luka'
-    title: '⏲ *Good morning Luka*'
+    title: '⏲ Good morning Luka'
     value1: 'It is {{ states("sensor.time") }} - time to wake up'
     group: duties
     tag_id: 'information'

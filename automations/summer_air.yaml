@@ -45,7 +45,7 @@ action:
       - service: script.notify_engine
         data:
           who: 'family'
-          title: '🚪*Temperature*'
+          title: '🚪Open Windows'
           value1: 'Open windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.living_room_temperature")|int - states("sensor.balcony_temperature")|int}}° hotter than outside.'
           target_id: !secret telegram_bot_chat_id
           group: weather
@@ -97,7 +97,7 @@ action:
       - service: script.notify_engine
         data:
           who: 'family'
-          title: '🚪*Temperature*'
+          title: '🚪Close windows'
           value1: 'Close windows - inside temperature is {{ states("sensor.dining_room_temperature") }}°C, {{states("sensor.loggia_temperature")|int - states("sensor.dining_room_temperature")|int}}° cooler than outside.'
           target_id: !secret telegram_bot_chat_id
           group: weather

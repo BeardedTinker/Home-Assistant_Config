@@ -32,7 +32,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: '*Update Home Assistant*'
+    title: 'Update Home Assistant'
     value1: 'There is an update to Home Assistant Supervise'
     value2: '{{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}'
     value3: 'Triggering GitHub workflow build...'
@@ -47,7 +47,7 @@ action:
 
 - service: persistent_notification.create
   data:
-    title: '*Update Home Assistant*'
+    title: 'Update Home Assistant'
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
@@ -76,7 +76,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: '*Update Home Assistant*'
+    title: 'Update Home Assistant'
     value1: 'GitHub workflow has started'
     target_id: !secret discord_github_id
     group: ha_update
@@ -89,7 +89,7 @@ action:
 
 - service: persistent_notification.create
   data:
-    title: '*Update Home Assistant*'
+    title: 'Update Home Assistant'
     message: >
       There is an update to Home Assistant Supervised
         * {{ states("sensor.current_version") }} -> {{ states("sensor.latest_version") }}
@@ -102,7 +102,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: '*Update Home Assistant*'
+    title: 'Update Home Assistant'
     value1: 'GitHub workflow has {{states("sensor.github_checkrun_home_assistant_stable")}}'
     target_id: !secret discord_github_id
     group: ha_update

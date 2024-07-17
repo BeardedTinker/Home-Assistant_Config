@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'zita'
-    title: '📶 *WiFi Connected*'
+    title: '📶 WiFi Connected'
     value1: ' {{ states("sensor.ele_l29_wifi_connection") }} WiFi is connected - well done!'
     group: home
     tag_id: 'information'

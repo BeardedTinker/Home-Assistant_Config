@@ -20,7 +20,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '*HACS Update*'
+    title: 'HACS Update'
     value1: 'HACS Update(s) at {{ states("sensor.time") }}'
     value2: '{{state_attr("sensor.hacs","repositories")}}'
     value3: "There is {{ states('sensor.hacs') }} update."

@@ -17,7 +17,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '*Information*'
+    title: '🔋Battery State'
     value1: 'There are low batteries: {{ states("sensor.low_batteries") }}'
     target_id: !secret telegram_bot_chat_id
     group: system

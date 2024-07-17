@@ -28,6 +28,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
+    title: 'Midnight'
     value1: "It's {{ states('sensor.date') }} {{ states('sensor.time') }} - all lights out"
     group: home
     tag_id: 'information'

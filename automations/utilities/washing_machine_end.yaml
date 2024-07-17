@@ -20,7 +20,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '♨ *Washing done*'
+    title: '♨ Washing done'
     value1: 'Washing machine is done. Open the door.'
     target_id: !secret telegram_bot_chat_id
     group: home

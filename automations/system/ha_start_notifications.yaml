@@ -13,7 +13,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '*HA started*'
+    title: 'HA started'
     value1: 'Home Assistant started at {{ states("sensor.time") }}'
     group: ha
     tag_id: 'information'

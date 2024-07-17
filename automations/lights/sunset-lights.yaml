@@ -19,7 +19,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '🌅 *Sunset*'
+    title: '🌅 Sunset'
     value1: 'Sun setting, turning lights on.'
     group: home
     tag_id: 'information'

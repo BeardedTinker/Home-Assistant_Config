@@ -24,7 +24,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'discord'
-    title: '*GitHub workflow failed!*'
+    title: 'GitHub workflow failed!'
     value1: 'At {{ trigger.to_state.attributes.completed_at  }}, while building {{ trigger.to_state.attributes.friendly_name }} '
     target_id: !secret discord_github_id
     group: system

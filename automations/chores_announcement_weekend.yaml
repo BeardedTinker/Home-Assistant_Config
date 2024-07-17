@@ -25,7 +25,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '✅ *Saturday Chores*'
+    title: '💬 Saturday Chores'
     value1: 'Girls, time to clean and tidy your rooms. Empty bins, wipe off the dust, clean your desks...'
     target_id: !secret telegram_bot_chat_id
     group: duties

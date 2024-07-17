@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '⚠ *Earthquake Alert!*'
+    title: '⚠ Earthquake Alert!'
     value1: 'Earthquake detected! Stay calm!'
     target_id: !secret telegram_bot_chat_id
     group: emergency   

@@ -23,7 +23,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '💧 *Water Leak Alert!*'
+    title: '💧 Water Leak Alert!'
     value1: 'Water leak detected - check under dishwasher now!'
     target_id: !secret telegram_bot_chat_id
     group: home

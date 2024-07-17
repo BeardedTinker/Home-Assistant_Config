@@ -27,7 +27,7 @@ action:
   - service: script.notify_engine
     data:
       who: 'luka'
-      title: '🛰️ *Luka location*'
+      title: '🛰️ Luka location'
       value1: 'Luka, please start your Home Assistant app on iOS'
       group: info
       tag_id: 'information'

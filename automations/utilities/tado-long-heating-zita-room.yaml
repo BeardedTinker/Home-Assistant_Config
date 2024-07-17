@@ -20,7 +20,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: '♨ *HEATING WARNING!!*'
+    title: '♨ HEATING WARNING!!'
     value1: 'Zita Room Heating ON for > 60 minutes'
     target_id: !secret telegram_bot_chat_id
     group: home

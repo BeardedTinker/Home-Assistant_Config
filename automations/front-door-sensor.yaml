@@ -32,7 +32,7 @@ action:
         - service: script.notify_engine
           data:
             who: 'family'
-            title: '*Front door*'
+            title: '👮Front door ALERT'
             value1: "Motion in apartment! No family member is home"
             target_id: !secret telegram_bot_chat_id
             group: security
@@ -62,7 +62,7 @@ action:
         - service: script.notify_engine
           data:
             who: 'family'
-            title: '🚪*Front door*'
+            title: '🚪Front door reminder'
             value1: 'Front door is open! Outside temperature is {{ states("sensor.balcony_temperature") }}°C'
             target_id: !secret telegram_bot_chat_id
             group: home

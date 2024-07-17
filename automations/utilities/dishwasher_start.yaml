@@ -20,7 +20,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '♨ *Dishwasher starting*'
+    title: '♨ Dishwasher starting'
     value1: 'Dishwasher is starting.'
     target_id: !secret telegram_bot_chat_id
     group: home

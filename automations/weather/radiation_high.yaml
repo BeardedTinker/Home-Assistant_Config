@@ -18,7 +18,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '☢ *Radiation Level Alert!*'
+    title: '☢ Radiation Level Alert!'
     value1: 'Radiation is currently {{ states("sensor.geiger_counter") }} CPM. Normal value is below 25'
     target_id: !secret telegram_bot_chat_id
     group: weather

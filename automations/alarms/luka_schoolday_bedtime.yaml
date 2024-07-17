@@ -39,7 +39,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'luka'
-    title: '⏲ *Bedtime Luka*'
+    title: '⏲ Bedtime Luka'
     value1: 'It is {{ states("sensor.time") }} - time to go to bed'
     group: duties
     tag_id: 'information'

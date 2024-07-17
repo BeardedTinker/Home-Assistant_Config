@@ -16,7 +16,7 @@ action:
   - service: script.notify_engine
     data:
       who: 'family'
-      title: '🚪*Temperature*'
+      title: '🚪Temperature'
       value1: 'Synology Critical temperature {{ states("sensor.ebroz920_temperature") }}°C, open the door immediately.'
       target_id: !secret telegram_bot_chat_id
       group: system

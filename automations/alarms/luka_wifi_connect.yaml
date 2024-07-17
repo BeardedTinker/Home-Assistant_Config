@@ -15,7 +15,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'luka'
-    title: '📶 *WiFi Connected*'
+    title: '📶 WiFi Connected'
     value1: ' {{ states("sensor.iphone_ssid") }} WiFi is connected - well done!'
     group: home
     tag_id: 'information'

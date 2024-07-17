@@ -23,7 +23,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: '🧹 *Vacuum status*'
+    title: '🧹 Vacuum status'
     value1: '{{ trigger.to_state.name }} is {{ trigger.to_state.state }}'
     target_id: !secret telegram_bot_chat_id
     group: home

@@ -44,8 +44,8 @@ action:
 - service: script.notify_engine
   data:
     who: 'parents'
-    title: '💦 *Water the plants*'
-    value1: "Some plants are below 40% soil humidity. Please water them"
+    title: '💦 Water the plants'
+    value1: "Some plants have dry soil. Please water them"
     group: home
     tag_id: 'information'
     importance_id: default

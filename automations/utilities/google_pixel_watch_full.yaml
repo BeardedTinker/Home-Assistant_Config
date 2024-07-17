@@ -14,7 +14,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'andrej'
-    title: '♨ *Watch is full*'
+    title: '♨ Watch is full'
     value1: 'Watch is charged - come and get it.'
     target_id: !secret telegram_bot_chat_id
     group: info

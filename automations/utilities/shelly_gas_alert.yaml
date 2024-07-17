@@ -29,7 +29,7 @@ action:
 - service: script.notify_engine
   data:
     who: 'family'
-    title: '☠ *Gas Leak Alert!*'
+    title: '☠ Gas Leak Alert!'
     value1: 'Gas is currently {{ states("sensor.shelly_gas_10521cef4a01_concentration") }} PPM. Normal value is 0.'
     target_id: !secret telegram_bot_chat_id
     group: home
