@@ -302,20 +302,22 @@ async def add_to_associated_group(
     # When we are not dealing with a uuid, the user has set a group name manually
     # Create a new group entry for this group
     if not group_entry and len(group_entry_id) != 32:
-        group_entry = ConfigEntry(
-            version=ConfigFlow.VERSION,
-            minor_version=ConfigFlow.MINOR_VERSION,
-            domain=DOMAIN,
-            source=SOURCE_IMPORT,
-            title=group_entry_id,
-            data={
-                CONF_SENSOR_TYPE: SensorType.GROUP,
-                CONF_NAME: group_entry_id,
-            },
-            options={},
-            unique_id=group_entry_id,
-        )
-        await hass.config_entries.async_add(group_entry)
+        group_entry = hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, group_entry_id)
+        if not group_entry:
+            group_entry = ConfigEntry(
+                version=ConfigFlow.VERSION,
+                minor_version=ConfigFlow.MINOR_VERSION,
+                domain=DOMAIN,
+                source=SOURCE_IMPORT,
+                title=group_entry_id,
+                data={
+                    CONF_SENSOR_TYPE: SensorType.GROUP,
+                    CONF_NAME: group_entry_id,
+                },
+                options={},
+                unique_id=group_entry_id,
+            )
+            await hass.config_entries.async_add(group_entry)
 
     if not group_entry:
         _LOGGER.warning(
@@ -476,6 +478,7 @@ def create_grouped_energy_sensor(
             unique_id=energy_unique_id,
             sensor_config=sensor_config,
             device_info=get_device_info(hass, sensor_config, None),
+            unit_prefix=sensor_config.get(CONF_ENERGY_SENSOR_UNIT_PREFIX, UnitPrefix.NONE),
         )
 
     return GroupedEnergySensor(
