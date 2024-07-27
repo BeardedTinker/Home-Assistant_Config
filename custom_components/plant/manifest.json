@@ -1,0 +1,20 @@
+{
+  "domain": "plant",
+  "name": "Plant Monitor",
+  "after_dependencies": [
+    "recorder",
+    "openplantbook",
+    "integration",
+    "utility_meter"
+  ],
+  "codeowners": [
+    "@Olen"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/Olen/homeassistant-plant/",
+  "issue_tracker": "https://github.com/Olen/homeassistant-plant/issues",
+  "requirements": [
+    "async-timeout>=4.0.2"
+  ],
+  "version": "2024.7.0"
+}

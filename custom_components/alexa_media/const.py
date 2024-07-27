@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 For more details about this platform, please refer to the documentation at
 https://community.home-assistant.io/t/echo-devices-alexa-as-media-player-testers-needed/58639
 """
+
 from datetime import timedelta
 
 from homeassistant.const import (
@@ -14,7 +15,7 @@ from homeassistant.const import (
     PERCENTAGE,
 )
 
-__version__ = "4.10.3"
+__version__ = "4.11.5"
 PROJECT_URL = "https://github.com/alandtse/alexa_media_player/"
 ISSUE_URL = f"{PROJECT_URL}issues"
 NOTIFY_URL = f"{PROJECT_URL}wiki/Configuration%3A-Notification-Component#use-the-notifyalexa_media-service"
@@ -58,9 +59,11 @@ DATA_LISTENER = "listener"
 
 EXCEPTION_TEMPLATE = "An exception of type {0} occurred. Arguments:\n{1!r}"
 
-DEFAULT_EXTENDED_ENTITY_DISCOVERY = False
+DEFAULT_SCAN_INTERVAL = 60
 DEFAULT_QUEUE_DELAY = 1.5
 DEFAULT_PUBLIC_URL = ""
+DEFAULT_EXTENDED_ENTITY_DISCOVERY = False
+DEFAULT_DEBUG = False
 SERVICE_CLEAR_HISTORY = "clear_history"
 SERVICE_UPDATE_LAST_CALLED = "update_last_called"
 SERVICE_FORCE_LOGOUT = "force_logout"
