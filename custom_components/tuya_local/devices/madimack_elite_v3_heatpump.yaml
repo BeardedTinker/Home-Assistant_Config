@@ -66,9 +66,6 @@ primary_entity:
     - id: 102
       name: current_temperature
       type: integer
-    - id: 15
-      name: unknown_15
-      type: integer
     - id: 101
       name: unknown_101
       type: integer
@@ -76,6 +73,20 @@ primary_entity:
       name: unknown_107
       type: boolean
 secondary_entities:
+  - entity: binary_sensor
+    class: problem
+    category: diagnostic
+    dps:
+      - id: 15
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+      - id: 15
+        type: bitfield
+        name: fault_code
   - entity: sensor
     category: diagnostic
     name: Power level
