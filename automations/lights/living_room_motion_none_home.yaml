@@ -39,3 +39,9 @@ action:
     entity_id: media_player.display_me
     message: Intruder alert!
   service: tts.google_translate_say
+- data:
+    message: TTS
+    data:
+      tts_text: Intruder alert Living room.
+      media_stream: alarm_stream
+  service: notify.mobile_app_pixel_7_pro
