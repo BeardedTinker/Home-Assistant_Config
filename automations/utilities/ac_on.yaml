@@ -1,0 +1,39 @@
+#####
+# Turn AC on when temperature in and out is over 26
+#####
+
+alias: Turn AC on
+description: Turn AC on when indoor and outdoor is over 26
+id: f216978e-68ab-423a-a049-ad262f96bbf1
+
+trigger:
+  platform: numeric_state
+  entity_id: sensor.loggia_temperature
+  above: 26
+  for: '00:01:30'
+
+condition:
+  condition: and
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.loggia_temperature
+    above: 26
+  - condition: numeric_state
+    entity_id: sensor.dining_room_temperature
+    above: 26
+  - condition: state
+    alias: "People home"
+    entity_id: binary_sensor.people_home
+    state: 'on'
+
+action:
+  - service: mqtt.publish
+    data:
+      qos: "0"
+      retain: false
+      topic: zigbee2mqtt/IR blaster/set
+      payload: >-
+        {"ir_code_to_send":"B1UNjwbZAegEgAMBZQGAAwCeIAFAEwGeAYADQAsF6ASeAZ4BQAcC2QGeoAEB6ASAA0AB4AMLCp4B2QHoBNkBZQGeYAEF6ASeAZ4B4AEPBJ4B2QGe4AABwAvAB0ABwAvAB+ADAYATgFNAAYAPgAED2QHoBEADBp4BngHZAZ5gAQHZAeADD4ALQAEC2QGeYAEH2QFlAdkB6ARAAwGeAUABAegE4AELgAEC2QGeoAEB6ATAAwDZIAsC2QGe4AABwAsE2QFlAZ6gAQLZAZ5gAQbZAWUB2QGeYAHgBwdAAeABEwJlAZ6gAQLZAZ7gAAHAC8AH4AMB4CsTwDPAB0ABwAvAB0ABwAsB2QFAl+AB74APgAED2QFTMkJHA54B6ASAA+ADAUATwAFAC0ADQAHAB0ABQAtAA0ABQAdAA8AB4A8L4AMBAtkBnuAAAcALwAdAAcALBtkBZQHZAZ5gAcAHwF/AD8AHQBdAA8APQAfgAw9AC0ABQBdAAcAHQBdAA0ABQAdAA8ABwCMD2QFlAUAX4AMDQAFAFwCeoAEC2QGe4AABwAuABwNlAdkB4AMDAJ4gAeADD0ALAJ5gAQHZAYALwAcBngFAD0ADA54B2QFAB+ADA+ADE8ALwAfgDyfAFwCeIAHAC+AZBwPoBGUB4AgnAgFlAQ=="}
+  - service: script.acontemperature
+
+mode: single

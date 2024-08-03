@@ -1,0 +1,26 @@
+####
+# AC off due to door
+####
+
+acoffdoor:
+  sequence:
+  - alias: "AC off due to open door"
+    service: script.turn_on
+    target:
+      entity_id: script.google_home_resume
+    data:
+      variables:
+        action:
+          - alias: "Send TTS message"
+            service: tts.google_translate_say
+            target:
+              entity_id: media_player.display_me
+            data:
+              message: >
+                {{ [
+                "AC has been turnd off - door is open",
+                "Close door, AC has been turned off",
+                "Due to open door, I rund AC off",
+                ] | random }}
+            extra:
+              volume: 0.4
