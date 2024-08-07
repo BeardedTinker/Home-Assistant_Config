@@ -177,7 +177,7 @@
       level_config:
         on_level: previous
       linkquality: 91
-      power_on_behavior:
+      power_on_behavior: previous
       update:
         installed_version: 587757105
         latest_version: 587531825

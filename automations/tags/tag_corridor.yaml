@@ -391,7 +391,7 @@ action:
             severe_weather else 'black' }}
     target:
       entity_id:
-        - open_epaper_link.0000021C63473B10
+        - open_epaper_link.0000021c63473b10
 variables:
   severe_weather:
     - fog

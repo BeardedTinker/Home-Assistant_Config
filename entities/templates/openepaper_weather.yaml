@@ -21,7 +21,7 @@
       state: "{{ now().isoformat() }}"
       attributes:
         moon_phase: >
-          {% set cond_moon = states('sensor.moon_phase') %}
+          {% set cond_moon = states('sensor.moon') %}
           {% if cond_moon == 'new_moon' %}
           moon-new
           {% elif cond_moon == 'full_moon' %}
