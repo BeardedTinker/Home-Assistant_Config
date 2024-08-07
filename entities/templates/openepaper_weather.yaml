@@ -1,0 +1,243 @@
+- trigger:
+    platform: time_pattern
+    minutes: "/15"
+    variables:
+          forecast_entity: weather.forecast_home
+  action:
+    - service: weather.get_forecasts
+      target:
+        entity_id: "{{forecast_entity}}"
+      data:
+        type: hourly
+      response_variable: weather_home_hourly
+    - service: weather.get_forecasts
+      target:
+        entity_id: "{{forecast_entity}}"
+      data:
+        type: daily
+      response_variable: weather_home_daily   
+  sensor:
+    - name: Weatherman Data Tag
+      state: "{{ now().isoformat() }}"
+      attributes:
+        moon_phase: >
+          {% set cond_moon = states('sensor.moon_phase') %}
+          {% if cond_moon == 'new_moon' %}
+          moon-new
+          {% elif cond_moon == 'full_moon' %}
+          moon-full
+          {% else %}
+          {{ "moon-" + cond_moon | replace("_", "-") }}
+          {%endif%}
+        sun_next_rising: >
+          {{ as_timestamp(state_attr("sun.sun", "next_rising")) | timestamp_custom('%-I:%M %p') }}
+        sun_next_setting: >
+          {{ as_timestamp(state_attr("sun.sun", "next_setting")) | timestamp_custom('%-I:%M %p') }}  
+        temperature_unit: "{{ state_attr(forecast_entity,'temperature_unit') }}"
+        wind_speed_unit: "{{ state_attr(forecast_entity,'wind_speed_unit') }}"
+        precipitation_unit: "{{ state_attr(forecast_entity,'precipitation_unit') }}"  
+        pressure_unit: "{{ state_attr(forecast_entity,'pressure_unit') }}"
+        wm_cond_now: >
+          {% set cond_now = states(forecast_entity) %}
+          {% if cond_now == 'partlycloudy' %}{% set cond_now = 'partly-cloudy' %}{% endif %}
+          {% if cond_now == 'clear-night' %}{% set cond_now = 'night' %}{% endif %}
+          {% if states('sun.sun') == 'below_horizon' %}
+              {% if cond_now == 'sunny' %} night {% elif cond_now == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond_now }} {% endif %}
+          {% else %}
+              {{ cond_now }}
+          {% endif %}
+        wm_temp_now: >
+          {{ state_attr(forecast_entity,'temperature') }}  
+        wm_wind_speed_now: >
+          {{ state_attr(forecast_entity,'wind_speed') | round }}
+        wm_wind_dir_now: >
+          {{ state_attr(forecast_entity,'wind_bearing') | round }}    
+        wm_dew_point_now: >
+          {{ state_attr(forecast_entity,'dew_point') }}
+        wm_humidity_now: >
+          {{ state_attr(forecast_entity,'humidity') }}
+        wm_cloud_coverage_now: >
+          {{ state_attr(forecast_entity,'cloud_coverage') }}
+        wm_pressure_now: >
+          {{ state_attr(forecast_entity,'pressure') }}  
+        wm_cond_0: >
+          {% set cond0 = weather_home_hourly[forecast_entity]['forecast'][0].condition %}
+          {% if cond0 == 'partlycloudy' %}{% set cond0 = 'partly-cloudy' %}{% endif %}
+          {% if cond0 == 'clear-night' %}{% set cond0 = 'night' %}{% endif %}
+          {% set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {% set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {% set cond0_time = as_timestamp(weather_home_hourly[forecast_entity]['forecast'][0].datetime) %}
+          {% if states('sun.sun') == 'above_horizon' and cond0_time > next_setting %}
+              {% if cond0 == 'sunny' %} night {% elif cond0 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}
+          {% elif states('sun.sun') == 'below_horizon' and cond0_time < next_rising %}
+              {% if cond0 == 'sunny' %} night {% elif cond0 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond0 }} {% endif %}    
+          {% else %}
+              {{ cond0 }}
+          {% endif %}
+        wm_temp_0: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][0].temperature | round }}
+        wm_precipitation_0: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][0].precipitation }}
+        wm_wind_speed_0: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][0].wind_speed | round }}
+        wm_wind_dir_0: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][0].wind_bearing | round }}
+        wm_time_0: >
+          {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][0].datetime) | timestamp_custom('%I') | int }} {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][0].datetime) | timestamp_custom('%p') }}    
+        wm_cond_1: >
+          {% set cond1 = weather_home_hourly[forecast_entity]['forecast'][1].condition %}
+          {% if cond1 == 'partlycloudy' %}{% set cond1 = 'partly-cloudy' %}{% endif %}
+          {% if cond1 == 'clear-night' %}{% set cond1 = 'night' %}{% endif %}
+          {% set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {% set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {% set cond1_time = as_timestamp(weather_home_hourly[forecast_entity]['forecast'][1].datetime) %}
+          {% if states('sun.sun') == 'above_horizon' and cond1_time > next_setting %}
+              {% if cond1 == 'sunny' %} night {% elif cond1 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond1 }} {% endif %}
+          {% elif states('sun.sun') == 'below_horizon' and cond1_time < next_rising %}
+              {% if cond1 == 'sunny' %} night {% elif cond1 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond1 }} {% endif %}
+          {% else %}
+              {{ cond1 }}
+          {% endif %}
+        wm_temp_1: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][1].temperature | round }}
+        wm_precipitation_1: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][1].precipitation }}
+        wm_wind_speed_1: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][1].wind_speed | round }}
+        wm_wind_dir_1: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][1].wind_bearing | round }}
+        wm_time_1: >
+          {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][1].datetime) | timestamp_custom('%I') | int }} {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][1].datetime) | timestamp_custom('%p') }}    
+        wm_cond_2: >
+          {% set cond2 = weather_home_hourly[forecast_entity]['forecast'][2].condition %}
+          {% if cond2 == 'partlycloudy' %}{% set cond2 = 'partly-cloudy' %}{% endif %}
+          {% if cond2 == 'clear-night' %}{% set cond2 = 'night' %}{% endif %}
+          {% set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {% set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {% set cond2_time = as_timestamp(weather_home_hourly[forecast_entity]['forecast'][2].datetime) %}
+          {% if states('sun.sun') == 'above_horizon' and cond2_time > next_setting %}
+              {% if cond2 == 'sunny' %} night {% elif cond2 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond2 }} {% endif %}
+          {% elif states('sun.sun') == 'below_horizon' and cond2_time < next_rising %}
+              {% if cond2 == 'sunny' %} night {% elif cond2 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond2 }} {% endif %}
+          {% else %}
+              {{ cond2 }}
+          {% endif %}
+        wm_temp_2: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][2].temperature | round }}
+        wm_precipitation_2: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][2].precipitation }}
+        wm_wind_speed_2: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][2].wind_speed | round }}
+        wm_wind_dir_2: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][2].wind_bearing | round }}
+        wm_time_2: >
+          {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][2].datetime) | timestamp_custom('%I') | int }} {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][2].datetime) | timestamp_custom('%p') }}    
+        wm_cond_3: >
+          {% set cond3 = weather_home_hourly[forecast_entity]['forecast'][3].condition %}
+          {% if cond3 == 'partlycloudy' %}{% set cond3 = 'partly-cloudy' %}{% endif %}
+          {% if cond3 == 'clear-night' %}{% set cond3 = 'night' %}{% endif %}
+          {% set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+          {% set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {% set cond3_time = as_timestamp(weather_home_hourly[forecast_entity]['forecast'][3].datetime) %}
+          {% if states('sun.sun') == 'above_horizon' and cond3_time > next_setting %}
+              {% if cond3 == 'sunny' %} night {% elif cond3 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond3 }} {% endif %}
+          {% elif states('sun.sun') == 'below_horizon' and cond3_time < next_rising %}
+              {% if cond3 == 'sunny' %} night {% elif cond3 == 'partly-cloudy' %} night-partly-cloudy {% else %} {{ cond3 }} {% endif %}
+          {% else %}
+              {{ cond3 }}
+          {% endif %}
+        wm_temp_3: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][3].temperature | round }}
+        wm_precipitation_3: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][3].precipitation }}
+        wm_wind_speed_3: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][3].wind_speed | round }}
+        wm_wind_dir_3: >
+          {{ weather_home_hourly[forecast_entity]['forecast'][3].wind_bearing | round }}
+        wm_time_3: >
+          {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][3].datetime) | timestamp_custom('%I') | int }} {{ as_timestamp(weather_home_hourly[forecast_entity]['forecast'][3].datetime) | timestamp_custom('%p') }}    
+        wm_cond_4: >
+          {% set cond4 = weather_home_daily[forecast_entity]['forecast'][1].condition %}
+          {% if cond4 == 'partlycloudy' %}{% set cond4 = 'partly-cloudy'%}{% endif %}
+          {% if cond4 == 'clear-night' %}{% set cond4 = 'night' %}{% endif %}
+          {{ cond4 }}
+        wm_temp_4: >
+          {{ weather_home_daily[forecast_entity]['forecast'][1].temperature | round }}
+        wm_precipitation_4: >
+          {{ weather_home_daily[forecast_entity]['forecast'][1].precipitation }}
+        wm_temp_4_low: >
+          {{ weather_home_daily[forecast_entity]['forecast'][1].templow | round }}
+        wm_wind_speed_4: >
+          {{ weather_home_daily[forecast_entity]['forecast'][1].wind_speed | round }}
+        wm_wind_dir_4: >
+          {{ weather_home_daily[forecast_entity]['forecast'][1].wind_bearing | round }}
+        wm_time_4: >
+          {{ "%s" % (["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][as_timestamp(weather_home_daily[forecast_entity]['forecast'][1].datetime) | timestamp_custom('%w') | int]) }}
+        wm_cond_5: >
+          {% set cond5 = weather_home_daily[forecast_entity]['forecast'][2].condition %}
+          {% if cond5 == 'partlycloudy' %}{% set cond5 = 'partly-cloudy'%}{% endif %}
+          {% if cond5 == 'clear-night' %}{% set cond5 = 'night' %}{% endif %}
+          {{ cond5 }}
+        wm_temp_5: >
+          {{ weather_home_daily[forecast_entity]['forecast'][2].temperature | round }}
+        wm_precipitation_5: >
+          {{ weather_home_daily[forecast_entity]['forecast'][2].precipitation }}
+        wm_temp_5_low: >
+          {{ weather_home_daily[forecast_entity]['forecast'][2].templow | round }}
+        wm_wind_speed_5: >
+          {{ weather_home_daily[forecast_entity]['forecast'][2].wind_speed | round }}
+        wm_wind_dir_5: >
+          {{ weather_home_daily[forecast_entity]['forecast'][2].wind_bearing | round }}
+        wm_time_5: >
+          {{ "%s" % (["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][as_timestamp(weather_home_daily[forecast_entity]['forecast'][2].datetime) | timestamp_custom('%w') | int]) }}
+        wm_cond_6: >
+          {% set cond6 = weather_home_daily[forecast_entity]['forecast'][3].condition %}
+          {% if cond6 == 'partlycloudy' %}{% set cond6 = 'partly-cloudy'%}{% endif %}
+          {% if cond6 == 'clear-night' %}{% set cond6 = 'night' %}{% endif %}
+          {{ cond6 }}
+        wm_temp_6: >
+          {{ weather_home_daily[forecast_entity]['forecast'][3].temperature | round }}
+        wm_precipitation_6: >
+          {{ weather_home_daily[forecast_entity]['forecast'][3].precipitation }}
+        wm_temp_6_low: >
+          {{ weather_home_daily[forecast_entity]['forecast'][3].templow | round }}
+        wm_wind_speed_6: >
+          {{ weather_home_daily[forecast_entity]['forecast'][3].wind_speed | round }}
+        wm_wind_dir_6: >
+          {{ weather_home_daily[forecast_entity]['forecast'][3].wind_bearing | round }}
+        wm_time_6: >
+          {{ "%s" % (["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][as_timestamp(weather_home_daily[forecast_entity]['forecast'][3].datetime) | timestamp_custom('%w') | int]) }}  
+        wm_cond_7: >
+          {% set cond7 = weather_home_daily[forecast_entity]['forecast'][4].condition %}
+          {% if cond7 == 'partlycloudy' %}{% set cond7 = 'partly-cloudy'%}{% endif %}
+          {% if cond7 == 'clear-night' %}{% set cond7 = 'night' %}{% endif %}
+          {{ cond7 }}
+        wm_temp_7: >
+          {{ weather_home_daily[forecast_entity]['forecast'][4].temperature | round }}
+        wm_precipitation_7: >
+          {{ weather_home_daily[forecast_entity]['forecast'][4].precipitation }}
+        wm_temp_7_low: >
+          {{ weather_home_daily[forecast_entity]['forecast'][4].templow | round }}
+        wm_wind_speed_7: >
+          {{ weather_home_daily[forecast_entity]['forecast'][4].wind_speed | round }}
+        wm_wind_dir_7: >
+          {{ weather_home_daily[forecast_entity]['forecast'][4].wind_bearing | round }}
+        wm_time_7: >
+          {{ "%s" % (["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][as_timestamp(weather_home_daily[forecast_entity]['forecast'][4].datetime) | timestamp_custom('%w') | int]) }}
+        wm_cond_8: >
+          {% set cond8 = weather_home_daily[forecast_entity]['forecast'][5].condition %}
+          {% if cond8 == 'partlycloudy' %}{% set cond8 = 'partly-cloudy'%}{% endif %}
+          {% if cond8 == 'clear-night' %}{% set cond8 = 'night' %}{% endif %}
+          {{ cond8 }}
+        wm_temp_8: >
+          {{ weather_home_daily[forecast_entity]['forecast'][5].temperature | round }}
+        wm_temp_8_low: >
+          {{ weather_home_daily[forecast_entity]['forecast'][5].templow | round }}    
+        wm_precipitation_8: >
+          {{ weather_home_daily[forecast_entity]['forecast'][5].precipitation }}
+        wm_wind_speed_8: >
+          {{ weather_home_daily[forecast_entity]['forecast'][5].wind_speed | round }}
+        wm_wind_dir_8: >
+          {{ weather_home_daily[forecast_entity]['forecast'][5].wind_bearing | round }}
+        wm_time_8: >
+          {{ "%s" % (["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][as_timestamp(weather_home_daily[forecast_entity]['forecast'][5].datetime) | timestamp_custom('%w') | int]) }}    
