@@ -129,7 +129,7 @@ def customimage(entity_id, service, hass):
         img = Image.new('RGBA', (canvas_width, canvas_height), color=background)
     pos_y = 0
     for element in payload:
-        _LOGGER.info("type: " + element["type"])
+        _LOGGER.debug("type: " + element["type"])
         if not should_show_element(element):
             continue
         #line
@@ -147,6 +147,13 @@ def customimage(entity_id, service, hass):
         if element["type"] == "rectangle":
             img_rect = ImageDraw.Draw(img)  
             img_rect.rectangle([(element['x_start'],element['y_start']),(element['x_end'],element['y_end'])],fill = getIndexColor(element['fill']), outline=getIndexColor(element['outline']), width=element['width'])
+        #rectangle pattern
+        if element["type"] == "rectangle_pattern":
+            img_rect_pattern = ImageDraw.Draw(img)
+            for x in range(element["x_repeat"]):
+                for y in range(element["y_repeat"]):
+                    img_rect_pattern.rectangle([(element['x_start'] + x * (element['x_offset'] + element['x_size']),element['y_start'] + y * (element['y_offset'] + element['y_size'])),(element['x_start'] + x * (element['x_offset'] + element['x_size'])+element['x_size'],element['y_start'] + y * (element['y_offset'] + element['y_size'])+element['y_size'])], fill=getIndexColor(element['fill']),outline=getIndexColor(element['outline']),width=element['width'])
+
         #text
         if element["type"] == "text":
             d = ImageDraw.Draw(img)
@@ -163,13 +170,15 @@ def customimage(entity_id, service, hass):
             anchor = element.get('anchor', "lt")
             align = element.get('align', "left")
             spacing = element.get('spacing', 5)
+            stroke_width = element.get('stroke_width', 0)
+            stroke_fill = element.get('stroke_fill', 'white')
             if "max_width" in element:
                 text = get_wrapped_text(str(element['value']), font, line_length=element['max_width'])
                 anchor = None
             else:
                 text = str(element['value'])
-            d.text((element['x'],  akt_pos_y), text, fill=getIndexColor(color), font=font, anchor=anchor, align=align, spacing=spacing)
-            textbbox = d.textbbox((element['x'],  akt_pos_y), text, font=font, anchor=anchor, align=align, spacing=spacing)
+            d.text((element['x'],  akt_pos_y), text, fill=getIndexColor(color), font=font, anchor=anchor, align=align, spacing=spacing, stroke_width=stroke_width, stroke_fill=stroke_fill)
+            textbbox = d.textbbox((element['x'],  akt_pos_y), text, font=font, anchor=anchor, align=align, spacing=spacing, stroke_width=stroke_width)
             pos_y = textbbox[3]
         if element["type"] == "multiline":
             d = ImageDraw.Draw(img)
@@ -180,12 +189,14 @@ def customimage(entity_id, service, hass):
             font = ImageFont.truetype(font_file, size)
             color = element.get('color', "black")
             anchor = element.get('anchor', "lm")
+            stroke_width = element.get('stroke_width', 0)
+            stroke_fill = element.get('stroke_fill', 'white')
             _LOGGER.debug("Got Multiline string: %s with delimiter: %s" % (element['value'],element["delimiter"]))
             lst = element['value'].replace("\n","").split(element["delimiter"])
             pos = element.get('start_y', pos_y + element.get('y_padding', 10))
             for elem in lst:
                 _LOGGER.debug("String: %s" % (elem))
-                d.text((element['x'], pos ), str(elem), fill=getIndexColor(color), font=font, anchor=anchor)
+                d.text((element['x'], pos ), str(elem), fill=getIndexColor(color), font=font, anchor=anchor, stroke_width=stroke_width, stroke_fill=stroke_fill)
                 pos = pos + element['offset_y']
             pos_y = pos
         #icon
@@ -195,7 +206,7 @@ def customimage(entity_id, service, hass):
             # ttf from https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf
             font_file = os.path.join(os.path.dirname(__file__), 'materialdesignicons-webfont.ttf')
             meta_file = os.path.join(os.path.dirname(__file__), "materialdesignicons-webfont_meta.json") 
-            f = open(meta_file) 
+            f = open(meta_file)
             data = json.load(f)
             chr_hex = ""
             value = element['value']
@@ -212,9 +223,11 @@ def customimage(entity_id, service, hass):
                         break
             if chr_hex == "":
                 raise HomeAssistantError("Non valid icon used: "+ value)
+            stroke_width = element.get('stroke_width', 0)
+            stroke_fill = element.get('stroke_fill', 'white')
             font = ImageFont.truetype(font_file, element['size'])
             anchor = element['anchor'] if 'anchor' in element else "la"
-            d.text((element['x'],  element['y']), chr(int(chr_hex, 16)), fill=getIndexColor(element['color']), font=font, anchor=anchor)
+            d.text((element['x'],  element['y']), chr(int(chr_hex, 16)), fill=getIndexColor(element['color']), font=font, anchor=anchor, stroke_width=stroke_width, stroke_fill=stroke_fill)
        #dlimg
         if element["type"] == "dlimg":
             url = element['url']
@@ -469,6 +482,71 @@ def customimage(entity_id, service, hass):
                         img_draw.rectangle([(diag_x + yaxis_width, curr_y), (diag_x + yaxis_width + yaxis_tick_width - 1, curr_y)], width=0, fill=getIndexColor(yaxis_color))
                         curr += yaxis_tick_every
 
+        # progress_bar
+        if element["type"] == "progress_bar":
+            img_draw = ImageDraw.Draw(img)
+
+            x_start = element['x_start']
+            y_start = element['y_start']
+            x_end = element['x_end']
+            y_end = element['y_end']
+            progress = element['progress']
+            direction = element.get('direction', 'right')
+            background = getIndexColor(element.get('background', 'white'))
+            fill = getIndexColor(element.get('fill', 'red'))
+            outline = getIndexColor(element.get('outline', 'black'))
+            width = element.get('width', 1)
+            show_percentage = element.get('show_percentage', False)
+
+            # background
+            img_draw.rectangle([(x_start, y_start), (x_end, y_end)], fill=background, outline=outline, width=width)
+
+            # Calculate progress dimensions
+            if direction in ['right', 'left']:
+                progress_width = int((x_end - x_start) * (progress / 100))
+                progress_height = y_end - y_start
+            else:  # up or down
+                progress_width = x_end - x_start
+                progress_height = int((y_end - y_start) * (progress / 100))
+
+            # Draw progress
+            if direction == 'right':
+                img_draw.rectangle([(x_start, y_start), (x_start + progress_width, y_end)], fill=fill)
+            elif direction == 'left':
+                img_draw.rectangle([(x_end - progress_width, y_start), (x_end, y_end)], fill=fill)
+            elif direction == 'up':
+                img_draw.rectangle([(x_start, y_end - progress_height), (x_end, y_end)], fill=fill)
+            elif direction == 'down':
+                img_draw.rectangle([(x_start, y_start), (x_end, y_start + progress_height)], fill=fill)
+
+            img_draw.rectangle([(x_start, y_start), (x_end, y_end)], fill=None, outline=outline, width=width)
+
+            # display percentage text if enabled
+            if show_percentage:
+                font_size = min(y_end - y_start - 4, x_end - x_start - 4, 20)  # Adjust max font size as needed
+                font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), 'ppb.ttf'), font_size)
+                percentage_text = f"{progress}%"
+
+                # Calculate text position
+                text_bbox = img_draw.textbbox((0, 0), percentage_text, font=font)
+                text_width = text_bbox[2] - text_bbox[0]
+                text_height = text_bbox[3] - text_bbox[1]
+                text_x = (x_start + x_end - text_width) / 2
+                text_y = (y_start + y_end - text_height) / 2
+
+                # text color based on progress
+                if progress > 50:
+                    text_color = background
+                else:
+                    text_color = fill
+
+                # Draw text
+                img_draw.text((text_x, text_y), percentage_text, font=font, fill=text_color, anchor='lt') # TODO anchor is still off
+
+
+
+
+
     #post processing
     img = img.rotate(rotate, expand=True)
     rgb_image = img.convert('RGB')
@@ -484,6 +562,7 @@ def customimage(entity_id, service, hass):
     rgb_image.save(buf, format='JPEG', quality="maximum")
     byte_im = buf.getvalue()
     return byte_im
+
 # adds an image to the queue
 def queueimg(url, content):
     queue.append([url,content])

@@ -17,5 +17,6 @@
     "requests_toolbelt==1.0.0",
     "websocket-client==1.7.0"
   ],
+  "single_config_entry": true,
   "version": "0.1.4"
 }
