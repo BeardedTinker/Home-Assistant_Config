@@ -12,7 +12,13 @@ trigger:
   to: 'on'
   for: '00:06:00'
 
-condition: []
+condition: 
+  condition: and
+  conditions:
+  - condition: state
+    alias: "AC is on"
+    entity_id: binary_sensor.ac_on
+    state: 'on'
 
 action:
   - service: mqtt.publish

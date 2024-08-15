@@ -8,7 +8,7 @@ id: f216978e-68ab-423a-a049-ad262f96bbf1
 
 trigger:
   platform: numeric_state
-  entity_id: sensor.loggia_temperature
+  entity_id: sensor.balcony_temperature
   above: 26
   for: '00:01:30'
 
@@ -16,7 +16,7 @@ condition:
   condition: and
   conditions:
   - condition: numeric_state
-    entity_id: sensor.loggia_temperature
+    entity_id: sensor.balcony_temperature
     above: 26
   - condition: numeric_state
     entity_id: sensor.dining_room_temperature
@@ -25,6 +25,11 @@ condition:
     alias: "People home"
     entity_id: binary_sensor.people_home
     state: 'on'
+  - condition: state
+    alias: "AC is off"
+    entity_id: binary_sensor.ac_on
+    state: 'off'
+
 
 action:
   - service: mqtt.publish
