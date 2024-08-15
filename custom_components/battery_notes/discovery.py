@@ -1,4 +1,5 @@
 """Discovery of devices with a battery definition."""
+
 from __future__ import annotations
 
 import logging
@@ -11,15 +12,17 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import discovery_flow
 from homeassistant.helpers.typing import ConfigType
 
+from .common import get_device_model_id
 from .const import (
+    CONF_BATTERY_QUANTITY,
+    CONF_BATTERY_TYPE,
     CONF_DEVICE_NAME,
     CONF_MANUFACTURER,
     CONF_MODEL,
-    CONF_BATTERY_TYPE,
-    CONF_BATTERY_QUANTITY,
+    CONF_MODEL_ID,
     DOMAIN,
 )
-from .library import ModelInfo, DeviceBatteryDetails, Library
+from .library import DeviceBatteryDetails, Library, ModelInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,12 +58,13 @@ async def get_model_information(
 
     manufacturer = device_entry.manufacturer
     model = device_entry.model
+    model_id = get_device_model_id(device_entry)
     hw_version = device_entry.hw_version
 
     if not manufacturer or not model:
         return None
 
-    return ModelInfo(manufacturer, model, hw_version)
+    return ModelInfo(manufacturer, model, model_id, hw_version)
 
 
 class DiscoveryManager:
@@ -145,14 +149,13 @@ class DiscoveryManager:
         }
 
         if device_battery_details:
-            discovery_data[
-                CONF_BATTERY_TYPE
-            ] = device_battery_details.battery_type
-            discovery_data[
-                CONF_BATTERY_QUANTITY
-            ] = device_battery_details.battery_quantity
+            discovery_data[CONF_BATTERY_TYPE] = device_battery_details.battery_type
+            discovery_data[CONF_BATTERY_QUANTITY] = (
+                device_battery_details.battery_quantity
+            )
         discovery_data[CONF_MANUFACTURER] = device_battery_details.manufacturer
         discovery_data[CONF_MODEL] = device_battery_details.model
+        discovery_data[CONF_MODEL_ID] = get_device_model_id(device_entry),
         discovery_data[CONF_DEVICE_NAME] = get_wrapped_device_name(
             device_entry.id, device_entry
         )

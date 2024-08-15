@@ -1,4 +1,5 @@
 """Support for Moonraker camera."""
+
 from __future__ import annotations
 
 import logging
@@ -15,12 +16,15 @@ from .const import (
     CONF_URL,
     CONF_OPTION_CAMERA_STREAM,
     CONF_OPTION_CAMERA_SNAPSHOT,
+    CONF_OPTION_CAMERA_PORT,
+    CONF_OPTION_THUMBNAIL_PORT,
     DOMAIN,
     METHODS,
     PRINTSTATES,
 )
 
 _LOGGER = logging.getLogger(__name__)
+DEFAULT_PORT = 80
 
 hardcoded_camera = {
     "name": "webcam",
@@ -97,10 +101,18 @@ class MoonrakerCamera(MjpegCamera):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)}
         )
+        if (
+            config_entry.options.get(CONF_OPTION_CAMERA_PORT) is not None
+            and config_entry.options.get(CONF_OPTION_CAMERA_PORT) != ""
+        ):
+            self.port = config_entry.options.get(CONF_OPTION_CAMERA_PORT)
+        else:
+            self.port = DEFAULT_PORT
+
         if camera["stream_url"].startswith("http"):
             self.url = ""
         else:
-            self.url = f"http://{config_entry.data.get(CONF_URL)}"
+            self.url = f"http://{config_entry.data.get(CONF_URL)}:{self.port}"
 
         _LOGGER.info(f"Connecting to camera: {self.url}{camera['stream_url']}")
 
@@ -133,6 +145,14 @@ class PreviewCamera(Camera):
         self._current_pic = None
         self._current_path = ""
 
+        if (
+            config_entry.options.get(CONF_OPTION_THUMBNAIL_PORT) is not None
+            and config_entry.options.get(CONF_OPTION_THUMBNAIL_PORT) != ""
+        ):
+            self.port = config_entry.options.get(CONF_OPTION_THUMBNAIL_PORT)
+        else:
+            self.port = DEFAULT_PORT
+
     async def async_camera_image(
         self, width: int | None = None, height: int | None = None
     ) -> bytes | None:
@@ -163,10 +183,10 @@ class PreviewCamera(Camera):
         new_path = new_path.replace(" ", "%20")
 
         _LOGGER.debug(
-            f"Fetching new thumbnail: http://{self.url}/server/files/gcodes/{new_path}"
+            f"Fetching new thumbnail: http://{self.url}:{self.port}/server/files/gcodes/{new_path}"
         )
         response = await self._session.get(
-            f"http://{self.url}/server/files/gcodes/{new_path}"
+            f"http://{self.url}:{self.port}/server/files/gcodes/{new_path}"
         )
 
         self._current_path = new_path

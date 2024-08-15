@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 # Base component constants
 DOMAIN = "moonraker"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.2.2"
+VERSION = "1.3.0"
 MANIFACTURER = "@marcolivierarsenault"
 
 # Platforms
@@ -28,6 +28,8 @@ CONF_PRINTER_NAME = "printer_name"
 CONF_OPTION_CAMERA_STREAM = "camera_stream_url"
 CONF_OPTION_CAMERA_SNAPSHOT = "camera_snapshot_url"
 CONF_OPTION_POLLING_RATE = "polling_rate"
+CONF_OPTION_CAMERA_PORT = "camera_port"
+CONF_OPTION_THUMBNAIL_PORT = "thumbnail_port"
 
 # API dict keys
 HOSTNAME = "hostname"
@@ -47,7 +49,6 @@ class METHODS(Enum):
     MACHINE_DEVICE_POWER_POST_DEVICE = "machine.device_power.post_device"
     MACHINE_UPDATE_REFRESH = "machine.update.refresh"
     MACHINE_UPDATE_STATUS = "machine.update.status"
-    MACHINE_SYSTEM_INFO = "machine.system_info"
     PRINTER_EMERGENCY_STOP = "printer.emergency_stop"
     PRINTER_INFO = "printer.info"
     PRINTER_GCODE_HELP = "printer.gcode.help"

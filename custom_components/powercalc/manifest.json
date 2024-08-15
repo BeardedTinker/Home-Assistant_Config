@@ -14,13 +14,13 @@
         "select",
         "utility_meter"
     ],
-    "documentation": "https://github.com/bramstroker/homeassistant-powercalc",
+    "documentation": "https://docs.powercalc.nl",
     "domain": "powercalc",
-    "iot_class": "local_polling",
+    "iot_class": "calculated",
     "issue_tracker": "https://github.com/bramstroker/homeassistant-powercalc/issues",
     "name": "Powercalc",
     "requirements": [
         "numpy>=1.21.1"
     ],
-    "version": "v1.13.4"
+    "version": "v1.14.2"
 }

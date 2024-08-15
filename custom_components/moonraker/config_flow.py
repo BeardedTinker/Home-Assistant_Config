@@ -22,6 +22,8 @@ from .const import (
     CONF_OPTION_POLLING_RATE,
     CONF_OPTION_CAMERA_STREAM,
     CONF_OPTION_CAMERA_SNAPSHOT,
+    CONF_OPTION_CAMERA_PORT,
+    CONF_OPTION_THUMBNAIL_PORT,
     DOMAIN,
     TIMEOUT,
 )
@@ -185,6 +187,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_OPTION_CAMERA_SNAPSHOT,
                         default=self.config_entry.options.get(
                             CONF_OPTION_CAMERA_SNAPSHOT, ""
+                        ),
+                    ): str,
+                    vol.Optional(
+                        CONF_OPTION_CAMERA_PORT,
+                        default=self.config_entry.options.get(
+                            CONF_OPTION_CAMERA_PORT, ""
+                        ),
+                    ): str,
+                    vol.Optional(
+                        CONF_OPTION_THUMBNAIL_PORT,
+                        default=self.config_entry.options.get(
+                            CONF_OPTION_THUMBNAIL_PORT, ""
                         ),
                     ): str,
                 }

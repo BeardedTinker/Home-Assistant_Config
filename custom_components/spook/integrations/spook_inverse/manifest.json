@@ -9,7 +9,6 @@
   "integration_type": "helper",
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/frenck/spook/issues",
-  "quality_scale": "platinum",
   "requirements": [],
-  "version": "3.0.1"
+  "version": "3.1.0"
 }

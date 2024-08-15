@@ -20,6 +20,7 @@ from .const import CONF_ASSIST_AUTO_EXPOSE_PLAYERS, CONF_OPENAI_AGENT_ID, DOMAIN
 
 DEFAULT_URL = "http://mass.local:8095"
 DEFAULT_TITLE = "Music Assistant"
+DOCS_VOICE_URL = "https://music-assistant.io/integration/voice/"
 
 
 def get_manual_schema(user_input: dict[str, Any]) -> vol.Schema:
@@ -174,13 +175,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.hass.config_entries.async_update_entry(
                 self.config_entry,
                 # store as data instead of options - adjust this once the reconfigure flow is available
-                data={
-                    CONF_URL: user_input[CONF_URL],
-                    CONF_OPENAI_AGENT_ID: user_input[CONF_OPENAI_AGENT_ID],
-                    CONF_ASSIST_AUTO_EXPOSE_PLAYERS: user_input[
-                        CONF_ASSIST_AUTO_EXPOSE_PLAYERS
-                    ],
-                },
+                data=user_input,
             )
             await self.hass.config_entries.async_reload(self.config_entry.entry_id)
             return self.async_create_entry(title="", data={})
@@ -189,6 +184,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(schema),
+            description_placeholders={"docs_voice_url": DOCS_VOICE_URL},
         )
 
     def mass_config_option_schema(
@@ -198,22 +194,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return {
             vol.Required(
                 CONF_URL,
-                default=config_entry.data.get(CONF_URL),
+                description={"suggested_value": config_entry.data.get(CONF_URL)},
             ): str,
             vol.Optional(
                 CONF_OPENAI_AGENT_ID,
-                default=config_entry.data.get(CONF_OPENAI_AGENT_ID),
+                description={
+                    "suggested_value": config_entry.data.get(CONF_OPENAI_AGENT_ID)
+                },
             ): selector.ConversationAgentSelector(
                 selector.ConversationAgentSelectorConfig(language="en")
             ),
             vol.Optional(
                 CONF_ASSIST_AUTO_EXPOSE_PLAYERS,
-                default=(
-                    config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
-                    if config_entry.data.get(CONF_ASSIST_AUTO_EXPOSE_PLAYERS)
-                    is not None
-                    else False
-                ),
+                description={
+                    "suggested_value": config_entry.data.get(
+                        CONF_ASSIST_AUTO_EXPOSE_PLAYERS
+                    )
+                },
             ): bool,
         }
 

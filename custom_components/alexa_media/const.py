@@ -15,7 +15,7 @@ from homeassistant.const import (
     PERCENTAGE,
 )
 
-__version__ = "4.12.4"
+__version__ = "4.12.7"
 PROJECT_URL = "https://github.com/alandtse/alexa_media_player/"
 ISSUE_URL = f"{PROJECT_URL}issues"
 NOTIFY_URL = f"{PROJECT_URL}wiki/Configuration%3A-Notification-Component#use-the-notifyalexa_media-service"
@@ -59,12 +59,13 @@ DATA_LISTENER = "listener"
 
 EXCEPTION_TEMPLATE = "An exception of type {0} occurred. Arguments:\n{1!r}"
 
-DEFAULT_SCAN_INTERVAL = 60
-DEFAULT_QUEUE_DELAY = 1.5
-DEFAULT_PUBLIC_URL = ""
-DEFAULT_EXTENDED_ENTITY_DISCOVERY = False
 DEFAULT_DEBUG = False
-SERVICE_CLEAR_HISTORY = "clear_history"
+DEFAULT_EXTENDED_ENTITY_DISCOVERY = False
+DEFAULT_HASS_URL = "http://homeassistant.local:8123"
+DEFAULT_PUBLIC_URL = ""
+DEFAULT_QUEUE_DELAY = 1.5
+DEFAULT_SCAN_INTERVAL = 60
+
 SERVICE_UPDATE_LAST_CALLED = "update_last_called"
 SERVICE_FORCE_LOGOUT = "force_logout"
 

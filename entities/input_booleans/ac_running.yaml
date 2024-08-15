@@ -1,0 +1,9 @@
+#####
+# Dishwasher is turned on 
+# changed to ON after 3 minutes of activity 
+# changed to off after automation triggers
+#####
+
+ac_on:
+  name: AC
+  icon: mdi:air-conditioner
