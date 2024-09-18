@@ -73,7 +73,7 @@ HUB_CATEGORIES = [
 
 class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 13
-    MINOR_VERSION = 4
+    MINOR_VERSION = 5
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
     device = None
     data = {}
@@ -282,9 +282,9 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             existing_uuid = (
                 domain_data.get(cloud_device["uuid"]) if domain_data else None
             )
-            if existing_id or existing_uuid:
-                _LOGGER.debug("Device is already registered.")
-                continue
+            existing = existing_id or existing_uuid
+            if existing and existing.get("device"):
+                cloud_device["exists"] = True
 
             _LOGGER.debug(f"Adding device: {cloud_device['id']}")
             cloud_devices[cloud_device["id"]] = cloud_device
@@ -324,6 +324,8 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         device_list = []
         for key in self.__cloud_devices.keys():
             device_entry = self.__cloud_devices[key]
+            if device_entry.get("exists"):
+                continue
             if device_entry[CONF_LOCAL_KEY] != "":
                 if device_entry["online"]:
                     device_list.append(
@@ -595,6 +597,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         )
 
 
+def create_test_device(hass: HomeAssistant, config: dict):
+    """Set up a tuya device based on passed in config."""
+    subdevice_id = config.get(CONF_DEVICE_CID)
+    device = TuyaLocalDevice(
+        "Test",
+        config[CONF_DEVICE_ID],
+        config[CONF_HOST],
+        config[CONF_LOCAL_KEY],
+        config[CONF_PROTOCOL_VERSION],
+        subdevice_id,
+        hass,
+        True,
+    )
+
+    return device
+
+
 async def async_test_connection(config: dict, hass: HomeAssistant):
     domain_data = hass.data.get(DOMAIN)
     existing = domain_data.get(get_device_id(config)) if domain_data else None
@@ -604,16 +623,10 @@ async def async_test_connection(config: dict, hass: HomeAssistant):
         await asyncio.sleep(5)
 
     try:
-        subdevice_id = config.get(CONF_DEVICE_CID)
-        device = TuyaLocalDevice(
-            "Test",
-            config[CONF_DEVICE_ID],
-            config[CONF_HOST],
-            config[CONF_LOCAL_KEY],
-            config[CONF_PROTOCOL_VERSION],
-            subdevice_id,
+        device = await hass.async_add_executor_job(
+            create_test_device,
             hass,
-            True,
+            config,
         )
         await device.async_refresh()
         retval = device if device.has_returned_state else None

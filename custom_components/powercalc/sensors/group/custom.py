@@ -74,6 +74,7 @@ from custom_components.powercalc.const import (
     CONF_POWER_SENSOR_PRECISION,
     CONF_SENSOR_TYPE,
     CONF_SUB_GROUPS,
+    CONF_UTILITY_METER_NET_CONSUMPTION,
     DATA_DOMAIN_ENTITIES,
     DEFAULT_ENERGY_SENSOR_PRECISION,
     DEFAULT_POWER_SENSOR_PRECISION,
@@ -199,12 +200,12 @@ async def create_group_sensors_custom(
 
         group_sensors.append(energy_sensor)
 
+        sensor_config[CONF_UTILITY_METER_NET_CONSUMPTION] = True
         group_sensors.extend(
             await create_utility_meters(
                 hass,
                 energy_sensor,
                 sensor_config,
-                net_consumption=True,
             ),
         )
 
@@ -234,31 +235,38 @@ async def resolve_entity_ids_recursively(
     device_class: SensorDeviceClass,
     resolved_ids: set[str] | None = None,
 ) -> set[str]:
-    """Get all the entity id's for the current group and all the subgroups."""
+    """Get all the entity IDs for the current group and all the subgroups."""
     if resolved_ids is None:
         resolved_ids = set()
 
-    # Include the power/energy sensors for an existing Virtual Power config entry
-    member_entry_ids = entry.data.get(CONF_GROUP_MEMBER_SENSORS) or []
-    for member_entry_id in member_entry_ids:
-        member_entry = hass.config_entries.async_get_entry(member_entry_id)
-        if member_entry is None:
-            continue
+    def add_member_entry_ids() -> None:
+        """Add power/energy sensors from the group member entries."""
+        member_entry_ids = entry.data.get(CONF_GROUP_MEMBER_SENSORS) or []
+        for member_entry_id in member_entry_ids:
+            member_entry = hass.config_entries.async_get_entry(member_entry_id)
+            if member_entry is None:
+                continue
+
+            key = resolve_key_based_on_device_class(member_entry)
+            if key and key in member_entry.data:
+                resolved_ids.add(str(member_entry.data.get(key)))
+
+    def resolve_key_based_on_device_class(member_entry: ConfigEntry) -> str | None:
+        """Resolve the correct key for power/energy sensor based on device class."""
         if member_entry.data.get(CONF_SENSOR_TYPE) == SensorType.REAL_POWER:
-            key = CONF_ENTITY_ID if device_class == SensorDeviceClass.POWER else ENTRY_DATA_ENERGY_ENTITY
-        else:
-            key = ENTRY_DATA_POWER_ENTITY if device_class == SensorDeviceClass.POWER else ENTRY_DATA_ENERGY_ENTITY
-        if key not in member_entry.data:  # pragma: no cover
-            continue
+            return CONF_ENTITY_ID if device_class == SensorDeviceClass.POWER else ENTRY_DATA_ENERGY_ENTITY
+        return ENTRY_DATA_POWER_ENTITY if device_class == SensorDeviceClass.POWER else ENTRY_DATA_ENERGY_ENTITY
 
-        resolved_ids.update([str(member_entry.data.get(key))])
+    def add_specified_sensors() -> None:
+        """Add additional power/energy sensors specified by the user."""
+        conf_key = CONF_GROUP_POWER_ENTITIES if device_class == SensorDeviceClass.POWER else CONF_GROUP_ENERGY_ENTITIES
+        resolved_ids.update(entry.data.get(conf_key) or [])
 
-    # Include the additional power/energy sensors the user specified
-    conf_key = CONF_GROUP_POWER_ENTITIES if device_class == SensorDeviceClass.POWER else CONF_GROUP_ENERGY_ENTITIES
-    resolved_ids.update(entry.data.get(conf_key) or [])
+    async def add_area_entities() -> None:
+        """Add entities from the defined areas."""
+        if CONF_AREA not in entry.data:
+            return
 
-    # Include entities from defined areas
-    if CONF_AREA in entry.data:
         resolved_area_entities, _ = await resolve_include_entities(
             hass,
             {
@@ -269,29 +277,29 @@ async def resolve_entity_ids_recursively(
         area_entities = [
             entity.entity_id
             for entity in resolved_area_entities
-            if isinstance(
-                entity,
-                PowerSensor if device_class == SensorDeviceClass.POWER else EnergySensor,
-            )
+            if isinstance(entity, PowerSensor if device_class == SensorDeviceClass.POWER else EnergySensor)
         ]
         resolved_ids.update(area_entities)
 
-    # Include the entities from sub groups
-    subgroups = entry.data.get(CONF_SUB_GROUPS)
-    if not subgroups:
-        return resolved_ids
+    async def add_subgroup_entities() -> None:
+        """Recursively add entities from subgroups."""
+        subgroups = entry.data.get(CONF_SUB_GROUPS)
+        if not subgroups:
+            return
 
-    for subgroup_entry_id in subgroups:
-        subgroup_entry = hass.config_entries.async_get_entry(subgroup_entry_id)
-        if subgroup_entry is None:
-            _LOGGER.error("Subgroup config entry not found: %s", subgroup_entry_id)
-            continue
-        await resolve_entity_ids_recursively(
-            hass,
-            subgroup_entry,
-            device_class,
-            resolved_ids,
-        )
+        for subgroup_entry_id in subgroups:
+            subgroup_entry = hass.config_entries.async_get_entry(subgroup_entry_id)
+            if subgroup_entry is None:
+                _LOGGER.error("Subgroup config entry not found: %s", subgroup_entry_id)
+                continue
+
+            await resolve_entity_ids_recursively(hass, subgroup_entry, device_class, resolved_ids)
+
+    # Process the main logic
+    add_member_entry_ids()
+    add_specified_sensors()
+    await add_area_entities()
+    await add_subgroup_entities()
 
     return resolved_ids
 
@@ -417,6 +425,7 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
         self._prev_state_store: PreviousStateStore = PreviousStateStore(hass)
         self._native_value_exact = Decimal(0)
         self._states: dict[str, Decimal] = {}
+        self._ignore_unavailable_state = bool(self._sensor_config.get(CONF_IGNORE_UNAVAILABLE_STATE))
         self.group_type = group_type
 
     async def async_added_to_hass(self) -> None:
@@ -459,7 +468,7 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
     def on_state_change(self, event: Event[EventStateChangedData]) -> None:
         """Triggered when one of the group entities changes state."""
         new_state = event.data.get("new_state")
-        if not new_state:
+        if not new_state:  # pragma: no cover
             return
         calculated_new_state = self.calculate_new_state(new_state)
         self.set_new_state(calculated_new_state)
@@ -511,14 +520,17 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
         all_states = [self.hass.states.get(entity_id) for entity_id in self._entities]
         states: list[State] = list(filter(None, all_states))
         available_states = [state for state in states if state and state.state not in [STATE_UNKNOWN, STATE_UNAVAILABLE]]
-        new_state = self.calculate_initial_state(available_states, states)
+        if not available_states and not self._ignore_unavailable_state:
+            new_state: Decimal | str = STATE_UNAVAILABLE
+        else:
+            new_state = self.calculate_initial_state(available_states, states)
         self.set_new_state(new_state)
 
     @callback
     def set_new_state(self, state: Decimal | str) -> None:
         """Set the new state and update the entity."""
         if state == STATE_UNAVAILABLE or not isinstance(state, Decimal):
-            self._attr_available = bool(self._sensor_config.get(CONF_IGNORE_UNAVAILABLE_STATE))
+            self._attr_available = self._ignore_unavailable_state
             self.async_write_ha_state()
             return
 
@@ -592,7 +604,7 @@ class GroupedPowerSensor(GroupedSensor, PowerSensor):
 
     def get_summed_state(self) -> Decimal | str:
         if not self._states:
-            if self._sensor_config.get(CONF_IGNORE_UNAVAILABLE_STATE):
+            if self._ignore_unavailable_state:
                 return Decimal(0)
             return STATE_UNAVAILABLE
 
@@ -670,9 +682,7 @@ class GroupedEnergySensor(GroupedSensor, EnergySensor):
         """
         group_sum = Decimal(self._native_value_exact) if self._native_value_exact else Decimal(0)
         _LOGGER.debug("%s: Recalculate, current value: %s", self.entity_id, group_sum)
-        for state in member_states:
-            if state.state in [STATE_UNKNOWN, STATE_UNAVAILABLE]:
-                continue
+        for state in member_available_states:
             group_sum += self.calculate_delta(state)
 
         _LOGGER.debug(

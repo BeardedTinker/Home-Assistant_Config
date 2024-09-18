@@ -9,8 +9,8 @@ id: fbdf3f33-5749-453a-aac9-c1501f28ba77
 trigger:
   - platform: numeric_state
     entity_id: sensor.ebroz920_temperature
-    above: 68
-    for: "0:07:00"
+    above: 70
+    for: "0:12:00"
 
 action:
   - service: script.notify_engine

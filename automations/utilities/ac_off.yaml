@@ -17,7 +17,7 @@ condition:
   conditions:
   - condition: state
     alias: "AC is on"
-    entity_id: binary_sensor.ac_on
+    entity_id: input_boolean.ac_on
     state: 'on'
 
 action:

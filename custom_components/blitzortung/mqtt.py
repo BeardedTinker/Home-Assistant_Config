@@ -7,6 +7,8 @@ from operator import attrgetter
 from typing import Callable, List, Optional, Union
 
 import attr
+import paho.mqtt.client as mqtt
+from paho.mqtt.matcher import MQTTMatcher
 
 from homeassistant.core import callback, HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -28,9 +30,6 @@ MAX_RECONNECT_WAIT = 300  # seconds
 
 def _raise_on_error(result_code: int) -> None:
     """Raise error if error result."""
-    # pylint: disable=import-outside-toplevel
-    import paho.mqtt.client as mqtt
-
     if result_code != 0:
         raise HomeAssistantError(
             f"Error talking to MQTT: {mqtt.error_string(result_code)}"
@@ -39,9 +38,6 @@ def _raise_on_error(result_code: int) -> None:
 
 def _match_topic(subscription: str, topic: str) -> bool:
     """Test if topic matches subscription."""
-    # pylint: disable=import-outside-toplevel
-    from paho.mqtt.matcher import MQTTMatcher
-
     matcher = MQTTMatcher()
     matcher[subscription] = True
     try:
@@ -93,10 +89,6 @@ class MQTT:
         keepalive=DEFAULT_KEEPALIVE,
     ) -> None:
         """Initialize Home Assistant MQTT client."""
-        # We don't import on the top because some integrations
-        # should be able to optionally rely on MQTT.
-        import paho.mqtt.client as mqtt  # pylint: disable=import-outside-toplevel
-
         self.hass = hass
         self.host = host
         self.port = port
@@ -110,10 +102,6 @@ class MQTT:
 
     def init_client(self):
         """Initialize paho client."""
-        # We don't import on the top because some integrations
-        # should be able to optionally rely on MQTT.
-        import paho.mqtt.client as mqtt  # pylint: disable=import-outside-toplevel
-
         proto = mqtt.MQTTv311
         self._mqttc = mqtt.Client(protocol=proto)
 
@@ -133,9 +121,6 @@ class MQTT:
 
     async def async_connect(self) -> str:
         """Connect to the host. Does not process messages yet."""
-        # pylint: disable=import-outside-toplevel
-        import paho.mqtt.client as mqtt
-
         result: int = None
         try:
             result = await self.hass.async_add_executor_job(
@@ -225,9 +210,6 @@ class MQTT:
         Resubscribe to all topics we were subscribed to and publish birth
         message.
         """
-        # pylint: disable=import-outside-toplevel
-        import paho.mqtt.client as mqtt
-
         if result_code != mqtt.CONNACK_ACCEPTED:
             _LOGGER.error(
                 "Unable to connect to the MQTT broker: %s",

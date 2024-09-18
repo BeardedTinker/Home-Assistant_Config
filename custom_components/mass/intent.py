@@ -63,6 +63,7 @@ class MassPlayMediaOnMediaPlayerHandler(intent.IntentHandler):
 
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         """Handle the intent."""
+        # pylint: disable=too-many-locals
         response = intent_obj.create_response()
         slots = self.async_validate_slots(intent_obj.slots)
         config_entry = await self._get_loaded_config_entry(intent_obj.hass)
@@ -72,6 +73,7 @@ class MassPlayMediaOnMediaPlayerHandler(intent.IntentHandler):
         )
 
         query = slots.get(QUERY_SLOT, {}).get(SLOT_VALUE)
+        radio_mode = False
         if query:
             if not config_entry.data.get(CONF_OPENAI_AGENT_ID):
                 raise intent.IntentHandleError(
@@ -86,6 +88,7 @@ class MassPlayMediaOnMediaPlayerHandler(intent.IntentHandler):
                 return response
             media_id = json_payload.get(ATTR_MEDIA_ID)
             media_type = json_payload.get(ATTR_MEDIA_TYPE)
+            radio_mode = json_payload.get(ATTR_RADIO_MODE, False)
         else:
             artist = slots.get(ARTIST_SLOT, {}).get(SLOT_VALUE, "")
             track = slots.get(TRACK_SLOT, {}).get(SLOT_VALUE, "")
@@ -113,7 +116,7 @@ class MassPlayMediaOnMediaPlayerHandler(intent.IntentHandler):
                 media_type=media_type,
                 media_id=media_id,
                 enqueue=None,
-                extra={ATTR_RADIO_MODE: False},
+                extra={ATTR_RADIO_MODE: radio_mode},
             )
         except MusicAssistantError as err:
             raise intent.IntentHandleError(err.args[0] if err.args else "") from err

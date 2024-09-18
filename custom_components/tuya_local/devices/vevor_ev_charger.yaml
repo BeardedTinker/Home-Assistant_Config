@@ -2,6 +2,10 @@ name: Portable EV charger
 products:
   - id: otugaigzdqfyc9er
     name: Vevor SS EU Mode2 7kW
+  - id: w7lvyyxyevpwf20e
+    name: Vevor SS US 7kW
+  - id: ypdfdnwauasb8rje
+    name: Vevor SS EU Mode2 3.7kW
 primary_entity:
   entity: sensor
   name: Status
@@ -72,7 +76,8 @@ secondary_entities:
         mapping:
           - scale: 1000
   - entity: sensor
-    class: Phase A power
+    name: Phase A power
+    class: power
     category: diagnostic
     dps:
       - id: 6
@@ -114,6 +119,7 @@ secondary_entities:
       - id: 9
         type: integer
         name: sensor
+        optional: true
         unit: kW
         class: measurement
         mapping:
@@ -163,6 +169,7 @@ secondary_entities:
     dps:
       - id: 14
         type: string
+        optional: true
         name: option
         mapping:
           - dps_val: charge_now
@@ -182,6 +189,7 @@ secondary_entities:
     dps:
       - id: 16
         type: boolean
+        optional: true
         name: button
   - entity: switch
     icon: "mdi:power"
@@ -204,6 +212,7 @@ secondary_entities:
     dps:
       - id: 25
         type: integer
+        optional: true
         name: sensor
         unit: kWh
         mapping:
@@ -228,6 +237,7 @@ secondary_entities:
     dps:
       - id: 28
         type: integer
+        optional: true
         name: value
         unit: h
         range:

@@ -317,12 +317,47 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         _LOGGER.debug(f"UserInputs Stops: {self._user_inputs}")
         check_config = await self._check_config(self._user_inputs)
         if check_config:
-            errors["base"] = check_config
-            return self.async_abort(reason=check_config)
+            return await self.async_step_stops_retry()
         else:
             return self.async_create_entry(
                 title=user_input[CONF_NAME], data=self._user_inputs
             )
+            
+    async def async_step_stops_retry(self, user_input: dict | None = None) -> FlowResult:
+        """Handle the route step."""
+        errors: dict[str, str] = {}
+        if user_input is None:
+            try:
+                stops = get_stop_list(
+                    self._pygtfs,
+                    self._user_inputs[CONF_ROUTE].split(": ")[0],
+                    self._user_inputs[CONF_DIRECTION],
+                )
+                last_stop = stops[-1:][0]
+                return self.async_show_form(
+                    step_id="stops_retry",
+                    data_schema=vol.Schema(
+                        {
+                            vol.Required(CONF_ORIGIN, default = self._user_inputs[CONF_ORIGIN]): vol.In(stops),
+                            vol.Required(CONF_DESTINATION, default = self._user_inputs[CONF_DESTINATION]): vol.In(stops),
+                            vol.Required(CONF_NAME): str,
+                            vol.Optional(CONF_INCLUDE_TOMORROW, default = False): selector.BooleanSelector(),
+                        },
+                    ),
+                    errors=errors,
+                )
+            except:
+                _LOGGER.debug(f"Likely no stops for this route: {[CONF_ROUTE]}")
+                return self.async_abort(reason="no_stops")
+        self._user_inputs.update(user_input)
+        _LOGGER.debug(f"UserInputs Stops: {self._user_inputs}")
+        check_config = await self._check_config(self._user_inputs)
+        if check_config:
+            return await self.async_step_stops_retry()
+        else:
+            return self.async_create_entry(
+                title=user_input[CONF_NAME], data=self._user_inputs
+            )            
             
     async def async_step_stops_train(self, user_input: dict | None = None) -> FlowResult:
         """Handle the stops when train, as often impossible to select ID"""

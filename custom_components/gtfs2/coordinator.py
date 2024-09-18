@@ -61,6 +61,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
         self._pygtfs = get_gtfs(
             self.hass, DEFAULT_PATH, data, False
         )        
+
         self._data = {
             "schedule": self._pygtfs,
             "origin": data["origin"],
@@ -78,13 +79,12 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
         }           
 
         if check_extracting(self.hass, self._data['gtfs_dir'],self._data['file']):    
-            _LOGGER.warning("Cannot update this sensor as still unpacking: %s", self._data["file"])
-            previous_data={}
+            _LOGGER.debug("Cannot update this sensor as still unpacking: %s", self._data["file"])
             previous_data["extracting"] = True
             return previous_data
         
 
-        # determin static + rt or only static (refresh schedule depending)
+        # determine static + rt or only static (refresh schedule depending)
         #1. sensor exists with data but refresh interval not yet reached, use existing data
         if previous_data is not None and (datetime.datetime.strptime(previous_data["gtfs_updated_at"],'%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=options.get("refresh_interval", DEFAULT_REFRESH_INTERVAL))) >  dt_util.utcnow() + timedelta(seconds=1) :        
             run_static = False
@@ -221,8 +221,7 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
         self._data["gtfs_updated_at"] = dt_util.utcnow().isoformat() 
         
         if check_extracting(self.hass, self._data['gtfs_dir'],self._data['file']):    
-            _LOGGER.warning("Cannot update this sensor as still unpacking: %s", self._data["file"])
-            previous_data={}
+            _LOGGER.debug("Cannot update this sensor as still unpacking: %s", self._data["file"])
             previous_data["extracting"] = True
             return previous_data
         try:    

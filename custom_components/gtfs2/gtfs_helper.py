@@ -42,7 +42,7 @@ _LOGGER = logging.getLogger(__name__)
 def get_next_departure(self):
     _LOGGER.debug("Get next departure with data: %s", self._data)
     if check_extracting(self.hass, self._data['gtfs_dir'],self._data['file']):
-        _LOGGER.warning("Cannot get next depurtures on this datasource as still unpacking: %s", self._data["file"])
+        _LOGGER.debug("Cannot get next depurtures on this datasource as still unpacking: %s", self._data["file"])
         return {}
 
     """Get next departures from data."""
@@ -396,7 +396,7 @@ def get_gtfs(hass, path, data, update=False):
     check_source_dates = data.get("check_source_dates", False)
     journal = os.path.join(gtfs_dir, filename + ".sqlite-journal")
     if check_extracting(hass, gtfs_dir,filename) and not update :
-        _LOGGER.warning("Cannot use this datasource as still unpacking: %s", filename)
+        _LOGGER.debug("Cannot use this datasource as still unpacking: %s", filename)
         return "extracting"
     if update and data["extract_from"] == "url" and os.path.exists(os.path.join(gtfs_dir, file)):
         remove_datasource(hass, path, filename, True)
@@ -423,8 +423,10 @@ def get_gtfs(hass, path, data, update=False):
     
     (gtfs_root, _) = os.path.splitext(file)    
     sqlite_file = f"{gtfs_root}.sqlite?check_same_thread=False"
-    joined_path = os.path.join(gtfs_dir, sqlite_file)     
+    joined_path = os.path.join(gtfs_dir, sqlite_file)  
+
     gtfs = pygtfs.Schedule(joined_path)
+   
     if not gtfs.feeds: 
         if data.get("clean_feed_info", False):
             extract = Process(target=extract_from_zip, args = (hass, gtfs,gtfs_dir,file,['shapes.txt','transfers.txt','feed_info.txt']))
@@ -439,7 +441,7 @@ def get_gtfs(hass, path, data, update=False):
 def extract_from_zip(hass, gtfs, gtfs_dir, file, remove_file):
     _LOGGER.debug("Extracting gtfs file: %s", file)
     # first remove shapes from zip to avoid possibly very large db 
-    clean = remove_from_zip(remove_file,gtfs_dir, file[:-4])    
+    clean = remove_from_zip(remove_file,gtfs_dir, file[:-4])
     if os.fork() != 0:
         return
     pygtfs.append_feed(gtfs, os.path.join(gtfs_dir, file))
@@ -497,17 +499,21 @@ def remove_from_zip(delmelist,gtfs_dir,file):
     filename = file + ".zip"
     os.rename (os.path.join(gtfs_dir, filename), os.path.join(gtfs_dir, tempfile))
     # Load the ZIP archive
-    zin = zipfile.ZipFile (f"{os.path.join(gtfs_dir, tempfile)}", 'r')
-    zout = zipfile.ZipFile (f"{os.path.join(gtfs_dir, tempfile_out)}", 'w')
-    for item in zin.infolist():
-        buffer = zin.read(item.filename)
-        if (item.filename not in delmelist):
-            zout.writestr(item, buffer)
-    zout.close()
-    zin.close()
-    os.rename(os.path.join(gtfs_dir, tempfile_out), os.path.join(gtfs_dir, filename))
-    os.remove(os.path.join(gtfs_dir, tempfile)) 
-   
+    try: 
+        zin = zipfile.ZipFile (f"{os.path.join(gtfs_dir, tempfile)}", 'r')
+        zout = zipfile.ZipFile (f"{os.path.join(gtfs_dir, tempfile_out)}", 'w')
+        for item in zin.infolist():
+            buffer = zin.read(item.filename)
+            if (item.filename not in delmelist):
+                zout.writestr(item, buffer)
+        zout.close()
+        zin.close()
+        os.rename(os.path.join(gtfs_dir, tempfile_out), os.path.join(gtfs_dir, filename))
+        os.remove(os.path.join(gtfs_dir, tempfile)) 
+    except Exception as ex:  # pylint: disable=broad-except
+        print('Something went wrong with the zipfile... : ', ex)
+        return     
+
 
 def get_route_list(schedule, data):
     _LOGGER.debug("Getting routes with data: %s", data)

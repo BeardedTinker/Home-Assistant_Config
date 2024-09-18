@@ -194,13 +194,15 @@ class DiscoveryManager:
             model_info = ModelInfo(
                 model_info.manufacturer,
                 model_info.model.replace("/", "#slash#"),
+                model_info.model_id,
             )
 
         _LOGGER.debug(
-            "%s: Auto discovered model (manufacturer=%s, model=%s)",
+            "%s: Auto discovered model (manufacturer=%s, model=%s, model_id=%s)",
             entity_entry.entity_id,
             model_info.manufacturer,
             model_info.model,
+            model_info.model_id,
         )
         return model_info
 
@@ -215,11 +217,12 @@ class DiscoveryManager:
 
         manufacturer = str(device_entry.manufacturer)
         model = str(device_entry.model)
+        model_id = device_entry.model_id if hasattr(device_entry, "model_id") else None
 
         if len(manufacturer) == 0 or len(model) == 0:
             return None
 
-        return ModelInfo(manufacturer, model)
+        return ModelInfo(manufacturer, model, model_id)
 
     @callback
     def _init_entity_discovery(
@@ -303,21 +306,21 @@ class DiscoveryManager:
         provided.
         """
         found_entity_ids: list[str] = []
+        self._extract_entity_ids(search_dict, found_entity_ids)
+        return found_entity_ids
 
+    def _extract_entity_ids(self, search_dict: dict, found_entity_ids: list[str]) -> None:
+        """Helper function to recursively extract entity IDs."""
         for key, value in search_dict.items():
             if key == CONF_ENTITY_ID:
                 found_entity_ids.append(value)
-
             elif isinstance(value, dict):
-                results = self._find_entity_ids_in_yaml_config(value)
-                for result in results:
-                    found_entity_ids.append(result)  # pragma: no cover
-
+                self._extract_entity_ids(value, found_entity_ids)
             elif isinstance(value, list):
-                for item in value:
-                    if isinstance(item, dict):
-                        results = self._find_entity_ids_in_yaml_config(item)
-                        for result in results:
-                            found_entity_ids.append(result)
+                self._process_list_items(value, found_entity_ids)
 
-        return found_entity_ids
+    def _process_list_items(self, items: list, found_entity_ids: list[str]) -> None:
+        """Helper function to process list items."""
+        for item in items:
+            if isinstance(item, dict):
+                self._extract_entity_ids(item, found_entity_ids)

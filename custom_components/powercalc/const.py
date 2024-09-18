@@ -13,7 +13,7 @@ from homeassistant.const import (
 )
 from homeassistant.const import __version__ as HA_VERSION  # noqa
 
-MIN_HA_VERSION = "2024.3"
+MIN_HA_VERSION = "2024.4"
 
 DOMAIN = "powercalc"
 DOMAIN_CONFIG = "config"
@@ -115,6 +115,7 @@ CONF_CALCULATION_ENABLED_CONDITION = "calculation_enabled_condition"
 CONF_DISABLE_STANDBY_POWER = "disable_standby_power"
 CONF_CUSTOM_MODEL_DIRECTORY = "custom_model_directory"
 CONF_UTILITY_METER_OFFSET = "utility_meter_offset"
+CONF_UTILITY_METER_NET_CONSUMPTION = "utility_meter_net_consumption"
 CONF_UTILITY_METER_TYPES = "utility_meter_types"
 CONF_UTILITY_METER_TARIFFS = "utility_meter_tariffs"
 CONF_OR = "or"

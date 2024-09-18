@@ -43,6 +43,7 @@ from .const import (
     CONF_ENERGY_INTEGRATION_METHOD,
     CONF_EXCLUDE_ENTITIES,
     CONF_FIXED,
+    CONF_FORCE_CALCULATE_GROUP_ENERGY,
     CONF_GAMMA_CURVE,
     CONF_GROUP,
     CONF_GROUP_ENERGY_ENTITIES,
@@ -78,6 +79,7 @@ from .const import (
     CONF_SUBTRACT_ENTITIES,
     CONF_UNAVAILABLE_POWER,
     CONF_UPDATE_FREQUENCY,
+    CONF_UTILITY_METER_NET_CONSUMPTION,
     CONF_UTILITY_METER_TARIFFS,
     CONF_UTILITY_METER_TYPES,
     CONF_VALUE,
@@ -405,6 +407,7 @@ SCHEMA_UTILITY_METER_OPTIONS = vol.Schema(
                 multiple=True,
             ),
         ),
+        vol.Optional(CONF_UTILITY_METER_NET_CONSUMPTION, default=False): selector.BooleanSelector(),
     },
 )
 
@@ -553,6 +556,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
                 vol.Optional(CONF_DEVICE): selector.DeviceSelector(),
                 vol.Optional(CONF_HIDE_MEMBERS, default=False): selector.BooleanSelector(),
                 vol.Optional(CONF_INCLUDE_NON_POWERCALC_SENSORS, default=True): selector.BooleanSelector(),
+                vol.Optional(CONF_FORCE_CALCULATE_GROUP_ENERGY, default=False): selector.BooleanSelector(),
             },
         )
 
@@ -1303,6 +1307,8 @@ class PowercalcConfigFlow(PowercalcCommonFlow, ConfigFlow, domain=DOMAIN):
         """Handle the flow for advanced options."""
         if user_input is not None or self.skip_advanced_step:
             self.sensor_config.update(user_input or {})
+            if self.sensor_config.get(CONF_CREATE_UTILITY_METERS):
+                return await self.async_step_utility_meter_options()
             return self.create_config_entry()  # type: ignore
 
         return self.async_show_form(
@@ -1360,15 +1366,6 @@ class PowercalcConfigFlow(PowercalcCommonFlow, ConfigFlow, domain=DOMAIN):
                             options=ENERGY_INTEGRATION_METHODS,
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
-                    ),
-                },
-            )
-
-        if self.sensor_config.get(CONF_CREATE_UTILITY_METERS):
-            schema = schema.extend(
-                {
-                    vol.Optional(CONF_UTILITY_METER_TARIFFS, default=[]): selector.SelectSelector(
-                        selector.SelectSelectorConfig(options=[], custom_value=True, multiple=True),
                     ),
                 },
             )
@@ -1625,7 +1622,6 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
                 self.sensor_config[key] = user_input.get(key)
             elif key in self.sensor_config:
                 self.sensor_config.pop(key)
-        return
 
     def build_basic_options_schema(self) -> vol.Schema:
         """Build the basic options schema. depending on the selected sensor type."""

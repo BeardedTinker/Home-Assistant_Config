@@ -21,7 +21,7 @@ class MediaProcessor:
     async def _encode_image(self, img):
         """Encode image as base64"""
         img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='PNG')
+        img.save(img_byte_arr, format='JPEG')
         base64_image = base64.b64encode(
             img_byte_arr.getvalue()).decode('utf-8')
         return base64_image
@@ -36,6 +36,11 @@ class MediaProcessor:
             # Open the image file
             img = await self.hass.loop.run_in_executor(None, Image.open, image_path)
             with img:
+                # Check if the image is a GIF and convert if necessary
+                _LOGGER.debug(f"Image format: {img.format}")
+                if img.format == 'GIF':
+                    # Convert GIF to RGB
+                    img = img.convert('RGB')
                 # calculate new height based on aspect ratio
                 width, height = img.size
                 aspect_ratio = width / height
@@ -45,7 +50,7 @@ class MediaProcessor:
                 if width > target_width or height > target_height:
                     img = img.resize((target_width, target_height))
 
-                # Convert the image to base64
+                # Encode the image to base64
                 base64_image = await self._encode_image(img)
 
         elif image_data:
@@ -54,6 +59,10 @@ class MediaProcessor:
             img_byte_arr.write(image_data)
             img = await self.hass.loop.run_in_executor(None, Image.open, img_byte_arr)
             with img:
+                _LOGGER.debug(f"Image format: {img.format}")
+                if img.format == 'GIF':
+                    # Convert GIF to RGB
+                    img = img.convert('RGB')
                 # calculate new height based on aspect ratio
                 width, height = img.size
                 aspect_ratio = width / height
@@ -127,8 +136,8 @@ class MediaProcessor:
         return self.client
 
     async def add_videos(self, video_paths, event_ids, interval, target_width, include_filename):
-        tmp_clips_dir = f"config/custom_components/{DOMAIN}/tmp_clips"
-        tmp_frames_dir = f"config/custom_components/{DOMAIN}/tmp_frames"
+        tmp_clips_dir = f"/config/custom_components/{DOMAIN}/tmp_clips"
+        tmp_frames_dir = f"/config/custom_components/{DOMAIN}/tmp_frames"
         if not video_paths:
             video_paths = []
         """Wrapper for client.add_frame for videos"""
@@ -166,8 +175,8 @@ class MediaProcessor:
                         ffmpeg_cmd = [
                             "ffmpeg",
                             "-i", video_path,
-                            "-vf", f"fps=1/{interval},select='eq(n\\,0)+not(mod(n\\,{interval}))'",
-                            os.path.join(tmp_frames_dir, "frame%04d.png")
+                            "-vf", f"fps=1/{interval},select='eq(n\\,0)+not(mod(n\\,{interval}))'", os.path.join(
+                                tmp_frames_dir, "frame%04d.jpg")
                         ]
                         # Run ffmpeg command
                         await self.hass.loop.run_in_executor(None, os.system, " ".join(ffmpeg_cmd))
@@ -177,6 +186,13 @@ class MediaProcessor:
                             _LOGGER.debug(f"Adding frame {frame_file}")
                             frame_counter = 0
                             frame_path = os.path.join(tmp_frames_dir, frame_file)
+
+                            # Remove transparency for compatibility
+                            with Image.open(frame_path) as img:
+                                if img.mode == 'RGBA':
+                                    img = img.convert('RGB')
+                                    img.save(frame_path)
+
                             self.client.add_frame(
                                 base64_image=await self.resize_image(image_path=frame_path, target_width=target_width),
                                 filename=video_path.split(
@@ -192,7 +208,14 @@ class MediaProcessor:
         # Clean up tmp dirs
         try:
             await self.hass.loop.run_in_executor(None, shutil.rmtree, tmp_clips_dir)
-            await self.hass.loop.run_in_executor(None, shutil.rmtree, tmp_frames_dir)
+            _LOGGER.info(
+                f"Deleted tmp folder: {tmp_clips_dir}")
         except FileNotFoundError as e:
-            pass
+            _LOGGER.error(f"Failed to delete tmp folder: {e}")
+        try:
+            await self.hass.loop.run_in_executor(None, shutil.rmtree, tmp_frames_dir)
+            _LOGGER.info(
+                f"Deleted tmp folder: {tmp_frames_dir}")
+        except FileNotFoundError as e:
+            _LOGGER.error(f"Failed to delete tmp folders: {e}")
         return self.client
