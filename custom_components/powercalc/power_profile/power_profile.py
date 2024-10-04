@@ -9,8 +9,10 @@ from typing import NamedTuple, Protocol
 
 from homeassistant.components.binary_sensor import DOMAIN as BINARY_SENSOR_DOMAIN
 from homeassistant.components.camera import DOMAIN as CAMERA_DOMAIN
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.media_player import DOMAIN as MEDIA_PLAYER_DOMAIN
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.const import __version__ as HA_VERSION  # noqa
 from homeassistant.core import HomeAssistant, State
@@ -30,9 +32,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class DeviceType(StrEnum):
     CAMERA = "camera"
-    COVER_DOMAIN = "cover_domain"
     COVER = "cover"
     LIGHT = "light"
+    PRINTER = "printer"
     SMART_SWITCH = "smart_switch"
     SMART_SPEAKER = "smart_speaker"
     NETWORK = "network"
@@ -47,10 +49,12 @@ class SubProfileMatcherType(StrEnum):
 
 DOMAIN_DEVICE_TYPE = {
     CAMERA_DOMAIN: DeviceType.CAMERA,
+    COVER_DOMAIN: DeviceType.COVER,
     LIGHT_DOMAIN: DeviceType.LIGHT,
     SWITCH_DOMAIN: DeviceType.SMART_SWITCH,
     MEDIA_PLAYER_DOMAIN: DeviceType.SMART_SPEAKER,
     BINARY_SENSOR_DOMAIN: DeviceType.NETWORK,
+    SENSOR_DOMAIN: DeviceType.PRINTER,
 }
 
 
@@ -264,10 +268,8 @@ class SubProfileSelector:
         self._matchers: list[SubProfileMatcher] = self._build_matchers()
 
     def _build_matchers(self) -> list[SubProfileMatcher]:
-        matchers: list[SubProfileMatcher] = []
-        for matcher_config in self._config.matchers:
-            matchers.append(self._create_matcher(matcher_config))
-        return matchers
+        """Create matchers from json config."""
+        return [self._create_matcher(matcher_config) for matcher_config in self._config.matchers]
 
     def select_sub_profile(self, entity_state: State) -> str:
         """Dynamically tries to select a sub profile depending on the entity state.

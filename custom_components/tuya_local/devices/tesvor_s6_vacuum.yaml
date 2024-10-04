@@ -197,8 +197,7 @@ secondary_entities:
         name: sensor
         unit: m2
   - entity: select
-    name: Mopping
-    icon: "mdi:cup-water"
+    translation_key: mopping
     category: config
     dps:
       - id: 10
@@ -206,13 +205,13 @@ secondary_entities:
         name: option
         mapping:
           - dps_val: closed
-            value: "Off"
+            value: "off"
           - dps_val: low
-            value: Low
+            value: low
           - dps_val: middle
-            value: Medium
+            value: medium
           - dps_val: high
-            value: High
+            value: high
   - entity: button
     name: Reset map
     class: restart
@@ -323,8 +322,7 @@ secondary_entities:
         mapping:
           - scale: 0.1
   - entity: select
-    name: Language
-    icon: "mdi:translate"
+    translation_key: language
     category: config
     dps:
       - id: 36
@@ -333,24 +331,21 @@ secondary_entities:
         optional: true
         mapping:
           - dps_val: Chinese
-            value: 中文
+            value: chinese
           - dps_val: English
-            value: English
+            value: english
           - dps_val: German
-            value: Deutsch
+            value: german
           - dps_val: Italy
-            value: Italiano
+            value: italian
           - dps_val: Russian
-            value: Русский
+            value: russian
           - dps_val: Tesvor_Spanish
-            value: Español
+            value: spanish
           - dps_val: Japanese
-            value: 日本語
+            value: japanese
           - dps_val: Korean
-            value: 한글
-          - dps_val: null
-            value: unknown
-            hidden: true
+            value: korean
   - entity: number
     name: Dust collection frequency
     category: config

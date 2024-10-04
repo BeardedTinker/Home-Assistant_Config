@@ -838,7 +838,8 @@ def calculate_eta(data):
     """Calculate ETA of current print."""
     percent_job = calculate_pct_job(data)
     if (
-        data["status"]["print_stats"]["print_duration"] <= 0
+        data["status"]["print_stats"]["state"] != PRINTSTATES.PRINTING.value
+        or data["status"]["print_stats"]["print_duration"] <= 0
         or percent_job <= 0
         or percent_job >= 1
     ):

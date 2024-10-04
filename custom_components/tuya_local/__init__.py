@@ -572,7 +572,82 @@ async def async_migrate_entry(hass, entry: ConfigEntry):
                         }
 
         await async_migrate_entries(hass, entry.entry_id, update_unique_id13_5)
-        hass.config_entries.async_update_entry(entry, minor_version=5)
+
+    if entry.version == 13 and entry.minor_version < 6:
+        # Migrate unique ids of existing entities to new id taking into
+        # account translation_key, and standardising naming
+        device_id = entry.unique_id
+        conf_file = await hass.async_add_executor_job(
+            get_config,
+            entry.data[CONF_TYPE],
+        )
+        if conf_file is None:
+            _LOGGER.error(
+                NOT_FOUND,
+                entry.data[CONF_TYPE],
+            )
+            return False
+
+        @callback
+        def update_unique_id13_6(entity_entry):
+            """Update the unique id of an entity entry."""
+            old_id = entity_entry.unique_id
+            platform = entity_entry.entity_id.split(".", 1)[0]
+            # Standardistion of entity naming to use translation_key
+            replacements = {
+                "switch_sleep_mode": "switch_sleep",
+                "switch_sleep_timer": "switch_sleep",
+                "select_voice_language": "select_language",
+                "select_restore_power_state": "select_initial_state",
+                "select_power_on_state": "select_initial_state",
+                "select_restart_status": "select_initial_state",
+                "select_poweron_status": "select_initial_state",
+                "select_mop_mode": "select_mopping",
+                "select_mop_control": "select_mopping",
+                "select_water_setting": "select_mopping",
+                "select_water_mode": "select_mopping",
+                "select_water_control": "select_mopping",
+                "select_water_tank": "select_mopping",
+                "light_light": "light",
+                "light_lights": "light",
+            }
+            for suffix, new_suffix in replacements.items():
+                if old_id.endswith(suffix):
+                    e = conf_file.primary_entity
+                    new_id = e.unique_id(device_id)
+                    if (
+                        e.entity != platform
+                        or e.name
+                        or not new_id.endswith(new_suffix)
+                    ):
+                        for e in conf_file.secondary_entities():
+                            new_id = e.unique_id(device_id)
+                            if (
+                                e.entity == platform
+                                and not e.name
+                                and new_id.endswith(new_suffix)
+                            ):
+                                break
+                    if (
+                        e.entity == platform
+                        and not e.name
+                        and new_id.endswith(new_suffix)
+                    ):
+                        _LOGGER.info(
+                            "Migrating %s unique_id %s to %s",
+                            e.entity,
+                            old_id,
+                            new_id,
+                        )
+                        return {
+                            "new_unique_id": entity_entry.unique_id.replace(
+                                old_id,
+                                new_id,
+                            )
+                        }
+
+        await async_migrate_entries(hass, entry.entry_id, update_unique_id13_6)
+        hass.config_entries.async_update_entry(entry, minor_version=6)
 
     return True
 

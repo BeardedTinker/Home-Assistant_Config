@@ -43,7 +43,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 # get anniversary date
 # if specified date does not include year, add current year according to formatting
 def _get_anniversary_date(self, i, year):
-    m = re.search('(^\d{1,2}.\d{1,2}$)',self._anniversaries[i]['date'])
+    m = re.search('(^[0-9]{1,2}.[0-9]{1,2}$)',self._anniversaries[i]['date'])
     if m is not None:
     # yY bBm d - cx
         m = self._date_format.find("%Y")
@@ -127,7 +127,7 @@ class AnniversarySensor(Entity):
                         event_on = this_year
                     attr_ext1["event_on"] = datetime.strptime(event_on,"%Y-%m-%d").strftime(self._date_format)
 
-                    m = re.search('(^\d{1,2}.\d{1,2}$)',self._anniversaries[i]['date'])
+                    m = re.search('(^[0-9]{1,2}.[0-9]{1,2}$)',self._anniversaries[i]['date'])
                     if m is None: # date contains year as well
                         if next_year:
                             event_anniversary = int(today_p.year - anni_date_p.year + 1)

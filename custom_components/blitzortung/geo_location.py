@@ -17,6 +17,7 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.util.dt import utc_from_timestamp
 from homeassistant.util.unit_system import IMPERIAL_SYSTEM
 
+from . import BlitzortungConfigEntry
 from .const import ATTR_EXTERNAL_ID, ATTR_PUBLICATION_DATE, ATTRIBUTION, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,8 +29,8 @@ DEFAULT_ICON = "mdi:flash"
 SIGNAL_DELETE_ENTITY = "blitzortung_delete_entity_{0}"
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+async def async_setup_entry(hass, config_entry: BlitzortungConfigEntry, async_add_entities):
+    coordinator = config_entry.runtime_data
     if not coordinator.max_tracked_lightnings:
         return
 

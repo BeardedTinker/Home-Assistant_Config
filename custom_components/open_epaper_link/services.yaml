@@ -354,3 +354,30 @@ lines4:
       description: Format string for the fourth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
       required: false
       example: lrwb
+clear_pending:
+  name: Clear Pending
+  description: Clears the pending status for one or more ESL tags
+  target:
+    entity:
+      domain: open_epaper_link
+force_refresh:
+  name: Force Refresh
+  description: Forces the ESL to refresh the display
+  target:
+    entity:
+      domain: open_epaper_link
+reboot_tag:
+  name: Reboot Tag
+  description: Reboots one or more ESL tags
+  target:
+    entity:
+      domain: open_epaper_link
+scan_channels:
+  name: Scan Channels
+  description: Lets the ESL scan for channels
+  target:
+    entity:
+      domain: open_epaper_link
+reboot_ap:
+  name: Reboot AP
+  description: Reboots the AP

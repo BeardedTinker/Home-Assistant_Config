@@ -88,7 +88,7 @@ class APStateSensor(SensorEntity):
             "identifiers": {(DOMAIN, "ap")}
         }
     def update(self) -> None:
-        lut = {0: "offline",1: "online",2: "flashing",3: "wait for reset",4: "requires power cycle",5: "failed",6: "coming online"}
+        lut = {0: "offline",1: "online",2: "flashing",3: "wait for reset",4: "requires power cycle",5: "failed",6: "coming online", 7: "no radio"}
         self._attr_native_value = lut[self._hub.data["ap"]["apstate"]]
         
 class APRunStateSensor(SensorEntity):

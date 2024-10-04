@@ -23,9 +23,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     new_devices = []
     for esls in hub.esls:
         if hub.data[esls]["lqi"] != 100 or hub.data[esls]["rssi"] != 100:
-            camera = LocalFile(esls, get_image_path(hass, "open_epaper_link." + str(esls).lower()), hub)
-            new_devices.append(camera)
-    async_add_entities(new_devices,True)
+            image_path = get_image_path(hass, "open_epaper_link." + str(esls).lower())
+            if os.path.exists(image_path):
+                camera = LocalFile(esls, image_path, hub)
+                new_devices.append(camera)
+            else:
+                _LOGGER.warning(f"Could not find image for ESL {esls}")
+    if new_devices:
+        async_add_entities(new_devices,True)
 
 class LocalFile(Camera):
 
@@ -58,11 +63,11 @@ class LocalFile(Camera):
             with open(self._file_path, "rb") as file:
                 return file.read()
         except FileNotFoundError:
-            _LOGGER.warning(
-                "Could not read image from file: %s",
-                self._file_path,
-            )
-        return None
+            _LOGGER.warning(f"Could not read image from file: {self._file_path}")
+            return None
+        except IOError as error:
+            _LOGGER.error(f"Could not read image from file: {error}")
+            return None
 
     def check_file_path_access(self, file_path):
         """Check that filepath given is readable."""

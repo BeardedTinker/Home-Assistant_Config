@@ -17,6 +17,8 @@ DATA_SCHEMA = vol.Schema({("host"): str})
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     if len(data["host"]) < 3:
         raise InvalidHost
+    # remove http or https from the host
+    data["host"] = data["host"].replace("http://", "").replace("https://", "").replace("/", "")
     hub = Hub(hass, data["host"], "")
     result = await hub.test_connection()
     if not result:

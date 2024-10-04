@@ -1,11 +1,23 @@
 import datetime
+from typing import Any
+from dataclasses import dataclass
 
-SW_VERSION = "1.3.1"
+from homeassistant.util.hass_dict import HassKey
+
+from .version import __version__
+
+
+@dataclass
+class BlitzortungConfig:
+    config: dict[str, Any]
+
+
+SW_VERSION = __version__
 
 PLATFORMS = ["sensor", "geo_location"]
 
 DOMAIN = "blitzortung"
-DATA_UNSUBSCRIBE = "unsubscribe"
+BLITZORTUNG_CONFIG: HassKey[BlitzortungConfig] = HassKey(DOMAIN)
 ATTR_LIGHTNING_AZIMUTH = "azimuth"
 ATTR_LIGHTNING_COUNTER = "counter"
 

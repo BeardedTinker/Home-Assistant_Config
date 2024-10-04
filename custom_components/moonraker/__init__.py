@@ -217,9 +217,9 @@ class MoonrakerDataUpdateCoordinator(DataUpdateCoordinator):
             return_gcode["thumbnails_path"] = os.path.join(dirname, path)
             return return_gcode
         except Exception as ex:
-            _LOGGER.error("failed to get thumbnails  {%s}", ex)
-            _LOGGER.error("Query Object {%s}", query_object)
-            _LOGGER.error("gcode {%s}", gcode)
+            _LOGGER.warning("failed to get thumbnails  {%s}", ex)
+            _LOGGER.warning("Query Object {%s}", query_object)
+            _LOGGER.warning("gcode {%s}", gcode)
             return return_gcode
 
     async def _async_fetch_data(
