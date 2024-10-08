@@ -25,24 +25,27 @@ _LOGGER: Final = logging.getLogger(__name__)
 # Time to wait before trying to reconnect on disconnections.
 _RECONNECT_SECONDS : int = 30
 
-#Hub class for handeling communication
+#Hub class for handling communication
 class Hub:
     #the init function starts the thread for all other communication
-    def __init__(self, hass: HomeAssistant, host: str,cfgenty: str) -> None:
+    def __init__(self, hass: HomeAssistant, host: str, cfgentry: str) -> None:
         self._host = host
-        self._cfgenty = cfgenty
+        self._cfgenty = cfgentry
         self._hass = hass
         self._name = host
         self._id = host.lower()
         self.esls = []
         self.data = dict()
         self.data["ap"] = dict()
-        self.data["ap"]["ip"] =  self._host;
-        self.data["ap"]["systime"] = None;
-        self.data["ap"]["heap"] = None;
-        self.data["ap"]["recordcount"] = None;
-        self.data["ap"]["dbsize"] = None;
-        self.data["ap"]["littlefsfree"] = None;
+        self.data["ap"]["ip"] =  self._host
+        self.data["ap"]["systime"] = None
+        self.data["ap"]["heap"] = None
+        self.data["ap"]["recordcount"] = None
+        self.data["ap"]["dbsize"] = None
+        self.data["ap"]["littlefsfree"] = None
+        self.ap_config = {}
+        self.ap_config_loaded = asyncio.Event()
+        self._hass.async_create_task(self.fetch_ap_config())
         self.eventloop = asyncio.get_event_loop()
         thread = Thread(target=self.connection_thread)
         thread.start()
@@ -65,18 +68,18 @@ class Hub:
             wifissid = sys.get('wifissid')
             self._hass.states.set(DOMAIN + ".ip", self._host,{"icon": "mdi:ip","friendly_name": "AP IP","should_poll": False})
             self.data["ap"] = dict()
-            self.data["ap"]["ip"] =  self._host;
-            self.data["ap"]["systime"] = systime;
-            self.data["ap"]["heap"] = heap;
-            self.data["ap"]["recordcount"] = recordcount;
-            self.data["ap"]["dbsize"] = dbsize;
-            self.data["ap"]["littlefsfree"] = littlefsfree;
-            self.data["ap"]["rssi"] = rssi;
-            self.data["ap"]["apstate"] = apstate;
-            self.data["ap"]["runstate"] = runstate;
-            self.data["ap"]["temp"] = temp;
-            self.data["ap"]["wifistatus"] = wifistatus;
-            self.data["ap"]["wifissid"] = wifissid;
+            self.data["ap"]["ip"] =  self._host
+            self.data["ap"]["systime"] = systime
+            self.data["ap"]["heap"] = heap
+            self.data["ap"]["recordcount"] = recordcount
+            self.data["ap"]["dbsize"] = dbsize
+            self.data["ap"]["littlefsfree"] = littlefsfree
+            self.data["ap"]["rssi"] = rssi
+            self.data["ap"]["apstate"] = apstate
+            self.data["ap"]["runstate"] = runstate
+            self.data["ap"]["temp"] = temp
+            self.data["ap"]["wifistatus"] = wifistatus
+            self.data["ap"]["wifissid"] = wifissid
         elif 'tags' in data:
             tag = data.get('tags')[0]
             tagmac = tag.get('mac')
@@ -162,11 +165,12 @@ class Hub:
             }
             self._hass.bus.fire(DOMAIN + "_event", event_data)
         elif 'errMsg' in data:
-            ermsg = data.get('errMsg');
+            errmsg = data.get('errMsg')
         elif 'logMsg' in data:
-            logmsg = data.get('logMsg');
+            logmsg = data.get('logMsg')
         elif 'apitem' in data:
-            logmsg = data.get('apitem');
+            self._hass.loop.call_soon_threadsafe(self.fetch_ap_config())
+            logmsg = data.get('apitem')
         else:
             _LOGGER.debug("Unknown msg")
             _LOGGER.debug(data)
@@ -206,3 +210,15 @@ class Hub:
         await self._hass.config_entries.async_unload_platforms(self._cfgenty, ["sensor","camera","button"])
         await self._hass.config_entries.async_forward_entry_setups(self._cfgenty, ["sensor","camera","button"])
         return True
+
+    async def fetch_ap_config(self):
+        async with aiohttp.ClientSession() as session:
+            async with async_timeout.timeout(10):
+                response = await session.get(f"http://{self._host}/get_ap_config")
+                if response.status == 200:
+                    data = await response.json()
+                    _LOGGER.info(f"AP config: {data}")
+                    self.ap_config = data
+                    self.ap_config_loaded.set()
+                else:
+                    _LOGGER.error(f"Failed to fetch AP config: {response.status}")

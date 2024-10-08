@@ -160,11 +160,11 @@ def int_to_hex_string(number):
     
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub.Hub(hass, entry.data["host"], entry)
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor","button", "camera"])
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor","button", "camera","select", "switch", "text"])
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor", "button", "camera"])
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor", "button", "camera", "select", "switch", "text"])
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok

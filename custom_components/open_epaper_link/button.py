@@ -115,8 +115,11 @@ class RebootAPButton(ButtonEntity):
         self._hub = hub
         self._attr_name = "Reboot AP"
         self._attr_unique_id = "reboot_ap"
-        self._attr_entity_category = EntityCategory.CONFIG
         self._attr_icon = "mdi:restart"
+
+    @property
+    def available(self) -> bool:
+        return self._hub.online
 
     @property
     def device_info(self):

@@ -3,7 +3,7 @@ from .const import DOMAIN
 import requests
 import logging
 from homeassistant.core import HomeAssistant
-
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 _LOGGER: Final = logging.getLogger(__name__)
 
 def get_image_folder(hass):
@@ -42,9 +42,27 @@ async def reboot_ap(hass: HomeAssistant) -> bool:
     try:
         result = await hass.async_add_executor_job(lambda : requests.post(url))
         if result.status_code == 200:
+            hass
             _LOGGER.info("Rebooted ESL Access Point")
         else:
             _LOGGER.error("Failed to reboot ESL Access Point")
     except Exception as e:
         _LOGGER.error("Failed to reboot ESL Access Point: %s", e)
         return False
+
+async def set_ap_config_item(hub, key: str, value: str|int) -> bool:
+    """Set a configuration item on the Access Point."""
+    if key in hub.ap_config and hub.ap_config[key] != value:
+        data = {
+            key: value
+        }
+        _LOGGER.debug(data)
+        try:
+            response = await hub._hass.async_add_executor_job(lambda: requests.post(f"http://{hub._host}/save_apcfg", data=data))
+            if response.status_code == 200:
+                hub.ap_config[key] = value
+                async_dispatcher_send(hub._hass, f"{DOMAIN}_ap_config_update")
+                return True
+        except Exception as e:
+            _LOGGER.error(f"Failed to set AP config {key}: {e}")
+            return False

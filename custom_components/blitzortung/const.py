@@ -20,6 +20,7 @@ DOMAIN = "blitzortung"
 BLITZORTUNG_CONFIG: HassKey[BlitzortungConfig] = HassKey(DOMAIN)
 ATTR_LIGHTNING_AZIMUTH = "azimuth"
 ATTR_LIGHTNING_COUNTER = "counter"
+ATTR_LIGHTNING_DISTANCE = "distance"
 
 SERVER_STATS = "server_stats"
 

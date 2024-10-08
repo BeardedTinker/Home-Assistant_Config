@@ -224,7 +224,6 @@ def customimage(entity_id, service, hass):
             stroke_fill = element.get('stroke_fill', 'white')
             if "max_width" in element:
                 text = get_wrapped_text(str(element['value']), font, line_length=element['max_width'])
-                anchor = None
             else:
                 text = str(element['value'])
             d.text((element['x'],  akt_pos_y), text, fill=getIndexColor(color), font=font, anchor=anchor, align=align, spacing=spacing, stroke_width=stroke_width, stroke_fill=stroke_fill)

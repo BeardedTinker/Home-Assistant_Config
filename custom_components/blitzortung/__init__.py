@@ -1,4 +1,5 @@
 """The blitzortung integration."""
+
 import json
 import logging
 import math
@@ -15,8 +16,10 @@ from homeassistant.helpers.event import async_track_time_interval
 
 from homeassistant.util.unit_system import IMPERIAL_SYSTEM
 from homeassistant.util.unit_conversion import DistanceConverter
-from . import const
+
 from .const import (
+    ATTR_LIGHTNING_DISTANCE,
+    ATTR_LIGHTNING_AZIMUTH,
     BLITZORTUNG_CONFIG,
     CONF_IDLE_RESET_TIMEOUT,
     CONF_MAX_TRACKED_LIGHTNINGS,
@@ -29,6 +32,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     PLATFORMS,
+    SERVER_STATS,
 )
 from .geohash_utils import geohash_overlap
 from .mqtt import MQTT, MQTT_CONNECTED, MQTT_DISCONNECTED
@@ -37,7 +41,7 @@ from .version import __version__
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema(
-    {DOMAIN: vol.Schema({vol.Optional(const.SERVER_STATS, default=False): bool})},
+    {DOMAIN: vol.Schema({vol.Optional(SERVER_STATS, default=False): bool})},
     extra=vol.ALLOW_EXTRA,
 )
 
@@ -72,7 +76,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: BlitzortungConfig
 
     if hass.config.units == IMPERIAL_SYSTEM:
         radius_mi = radius
-        radius = DistanceConverter.convert(radius, UnitOfLength.MILES, UnitOfLength.KILOMETERS)
+        radius = DistanceConverter.convert(
+            radius, UnitOfLength.MILES, UnitOfLength.KILOMETERS
+        )
         _LOGGER.info("imperial system, %s mi -> %s km", radius_mi, radius)
 
     config_entry.runtime_data = BlitzortungCoordinator(
@@ -83,7 +89,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: BlitzortungConfig
         max_tracked_lightnings,
         time_window_seconds,
         DEFAULT_UPDATE_INTERVAL,
-        server_stats=config.get(const.SERVER_STATS),
+        server_stats=config.get(SERVER_STATS),
     )
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
@@ -213,8 +219,8 @@ class BlitzortungCoordinator:
         distance = round(math.sqrt(dx * dx + dy * dy) * 6371, 1)
         azimuth = round(math.atan2(dx, dy) * 180 / math.pi) % 360
 
-        lightning[SensorDeviceClass.DISTANCE] = distance
-        lightning[const.ATTR_LIGHTNING_AZIMUTH] = azimuth
+        lightning[ATTR_LIGHTNING_DISTANCE] = distance
+        lightning[ATTR_LIGHTNING_AZIMUTH] = azimuth
 
     async def connect(self):
         await self.mqtt_client.async_connect()
@@ -233,9 +239,7 @@ class BlitzortungCoordinator:
         )
 
         self._disconnect_callbacks.append(
-            async_track_time_interval(
-                self.hass, self._tick, const.DEFAULT_UPDATE_INTERVAL
-            )
+            async_track_time_interval(self.hass, self._tick, DEFAULT_UPDATE_INTERVAL)
         )
 
     async def disconnect(self):
