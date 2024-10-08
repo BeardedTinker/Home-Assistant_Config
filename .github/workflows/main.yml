@@ -52,7 +52,7 @@ jobs:
       - name: Install Home Assistant
         run: pip3 install homeassistant==$(cat .HA_VERSION)
       - name: Check config
-        run: hass -c . --script check_config --info all
+        run: hass -c . --script check_config --info all --system
   home_assistant_stable:
     runs-on: ubuntu-latest
     needs: [yamllint, remarklint]
