@@ -31,9 +31,8 @@ async def async_setup_entry(
     if not coordinator.max_tracked_lightnings:
         return
 
-    # We don't want geo_location entities from the previous Home Assistant run to remain
-    # in the registry and have an unavailable state, so we remove all geo_location 
-    # entities.
+    # This block of code can be removed in some time. For now it has to stay to clean up
+    # user registry after https://github.com/mrk-its/homeassistant-blitzortung/pull/128
     entity_reg = er.async_get(hass)
     if entities := er.async_entries_for_config_entry(entity_reg, config_entry.entry_id):
         for entity in entities:
@@ -148,6 +147,12 @@ class BlitzortungEventManager:
 class BlitzortungEvent(GeolocationEvent):
     """Define a lightning strike event."""
 
+    _attr_attribution = ATTRIBUTION
+    _attr_icon = "mdi:flash"
+    _attr_name = "Lightning Strike"
+    _attr_should_poll = False
+    _attr_source = DOMAIN
+
     def __init__(self, distance, latitude, longitude, unit, time, status, region):
         """Initialize entity with data provided."""
         self._time = time
@@ -157,20 +162,14 @@ class BlitzortungEvent(GeolocationEvent):
         self._remove_signal_delete = None
         self._strike_id = str(uuid.uuid4()).replace("-", "")
         self.entity_id = f"geo_location.lightning_strike_{self._strike_id}"
-        self._attr_name = "Lightning strike"
-        self._attr_translation_key = "lightning_strike"
-        self._attr_unique_id = self._strike_id
         self._attr_distance = distance
         self._attr_latitude = latitude
-        self._attr_longitude = longitude
-        self._attr_attribution = ATTRIBUTION
+        self._attr_longitude = longitude 
         self._attr_extra_state_attributes = {
             ATTR_EXTERNAL_ID: self._strike_id,
             ATTR_PUBLICATION_DATE: utc_from_timestamp(self._publication_date),
         }
         self._attr_unit_of_measurement = unit
-        self._attr_source = DOMAIN
-        self._attr_should_poll = False
 
     @callback
     def _delete_callback(self):

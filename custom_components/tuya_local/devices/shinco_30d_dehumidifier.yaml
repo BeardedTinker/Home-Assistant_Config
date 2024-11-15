@@ -2,6 +2,8 @@ name: Dehumidifier
 products:
   - id: to4nyl9qxvkqmcmk
     name: Klarstein DryFy Connect
+  - id: fvxjwu2oggajswbx
+    name: Shinco SDZ/YDZ-series
 primary_entity:
   entity: humidifier
   class: dehumidifier
@@ -188,4 +190,5 @@ secondary_entities:
     dps:
       - id: 102
         type: boolean
+        optional: true
         name: switch

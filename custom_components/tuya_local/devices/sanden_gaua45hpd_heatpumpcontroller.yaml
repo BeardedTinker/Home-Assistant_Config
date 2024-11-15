@@ -157,7 +157,7 @@ secondary_entities:
         type: string
         name: history_7
   - entity: sensor
-    name: Status
+    translation_key: status
     class: enum
     dps:
       - id: 118
@@ -317,6 +317,8 @@ secondary_entities:
         name: sensor
         unit: kWh
         class: total_increasing
+        mapping:
+          - scale: 10
   - entity: number
     name: Password
     category: config

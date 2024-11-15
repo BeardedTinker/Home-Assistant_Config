@@ -78,7 +78,7 @@ async def async_setup_services(hass):
 
 async def _async_handle_water_plant(hass: HomeAssistant, data: Mapping[str, Any]) -> None:
 
-    coordinator = _get_coordinator(hass, data)
+    coordinator, device = _get_coordinator(hass, data)
 
     if coordinator is None:
         _LOGGER.warning(f"Unable to find coordinator for {data[ATTR_DEVICE_ID]}")

@@ -8,9 +8,10 @@ from datetime import timedelta
 
 import async_timeout
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Config, HomeAssistant
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -38,7 +39,7 @@ _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("loading moonraker init")
 
 
-async def async_setup(_hass: HomeAssistant, _config: Config):
+async def async_setup(_hass: HomeAssistant, _config: ConfigType):
     """Set up this integration using YAML is not supported."""
     return True
 

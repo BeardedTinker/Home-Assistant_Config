@@ -11,5 +11,5 @@
     "integrationhelper>=0.2.2",
     "voluptuous>=0.12.1"
   ],
-  "version": "5.2.0"
+  "version": "6.0.0"
 }

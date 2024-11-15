@@ -1,5 +1,7 @@
 """The Powercalc constants."""
 
+from __future__ import annotations
+
 from datetime import timedelta
 from enum import StrEnum
 from typing import Literal
@@ -30,6 +32,7 @@ DATA_STANDBY_POWER_SENSORS = "standby_power_sensors"
 
 ENTRY_DATA_ENERGY_ENTITY = "_energy_entity"
 ENTRY_DATA_POWER_ENTITY = "_power_entity"
+ENTRY_GLOBAL_CONFIG_UNIQUE_ID = "powercalc_global_configuration"
 
 DUMMY_ENTITY_ID = "sensor.dummy"
 
@@ -142,6 +145,8 @@ class UnitPrefix(StrEnum):
     NONE = "none"
     KILO = "k"
     MEGA = "M"
+    GIGA = "G"
+    TERA = "T"
 
 
 ENTITY_CATEGORY_CONFIG = "config"
@@ -161,6 +166,7 @@ DEFAULT_POWER_SENSOR_PRECISION = 2
 DEFAULT_ENERGY_INTEGRATION_METHOD = ENERGY_INTEGRATION_METHOD_LEFT
 DEFAULT_ENERGY_NAME_PATTERN = "{} energy"
 DEFAULT_ENERGY_SENSOR_PRECISION = 4
+DEFAULT_ENERGY_UNIT_PREFIX = UnitPrefix.KILO
 DEFAULT_ENTITY_CATEGORY: str | None = ENTITY_CATEGORY_NONE
 DEFAULT_UTILITY_METER_TYPES = [DAILY, WEEKLY, MONTHLY]
 
@@ -201,6 +207,9 @@ class CalculationStrategy(StrEnum):
     FIXED = "fixed"
     PLAYBOOK = "playbook"
     WLED = "wled"
+
+
+CALCULATION_STRATEGY_CONF_KEYS: list[str] = [strategy.value for strategy in CalculationStrategy]
 
 
 class SensorType(StrEnum):

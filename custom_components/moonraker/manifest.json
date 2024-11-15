@@ -8,5 +8,5 @@
   "issue_tracker": "https://github.com/marcolivierarsenault/moonraker-home-assistant/issues",
   "loggers": ["moonraker"],
   "requirements": ["moonraker-api==2.0.6"],
-  "version": "1.3.7"
+  "version": "1.4.0"
 }

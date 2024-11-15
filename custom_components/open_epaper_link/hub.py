@@ -45,8 +45,9 @@ class Hub:
         self.data["ap"]["littlefsfree"] = None
         self.ap_config = {}
         self.ap_config_loaded = asyncio.Event()
-        self._hass.async_create_task(self.fetch_ap_config())
         self.eventloop = asyncio.get_event_loop()
+        self._is_fetching_config = False
+        self.eventloop.create_task(self.fetch_ap_config())
         thread = Thread(target=self.connection_thread)
         thread.start()
         self.online = True
@@ -169,7 +170,11 @@ class Hub:
         elif 'logMsg' in data:
             logmsg = data.get('logMsg')
         elif 'apitem' in data:
-            self._hass.loop.call_soon_threadsafe(self.fetch_ap_config())
+            _LOGGER.debug(f"AP item: {data.get('apitem')}")
+            if not self._is_fetching_config:
+                self.eventloop.call_soon_threadsafe(
+                    lambda: self.eventloop.create_task(self.fetch_ap_config())
+                )
             logmsg = data.get('apitem')
         else:
             _LOGGER.debug("Unknown msg")
@@ -212,13 +217,25 @@ class Hub:
         return True
 
     async def fetch_ap_config(self):
-        async with aiohttp.ClientSession() as session:
-            async with async_timeout.timeout(10):
-                response = await session.get(f"http://{self._host}/get_ap_config")
-                if response.status == 200:
-                    data = await response.json()
-                    _LOGGER.info(f"AP config: {data}")
-                    self.ap_config = data
-                    self.ap_config_loaded.set()
-                else:
-                    _LOGGER.error(f"Failed to fetch AP config: {response.status}")
+        if self._is_fetching_config:
+            return
+
+        try:
+            self._is_fetching_config = True
+            async with aiohttp.ClientSession() as session:
+                async with async_timeout.timeout(10):
+                    response = await session.get(f"http://{self._host}/get_ap_config")
+                    if response.status == 200:
+                        data = await response.json()
+                        if self.ap_config != data:
+                            _LOGGER.debug(f"AP config updated: {data}")
+                            self.ap_config = data
+                            self.ap_config_loaded.set()
+                    else:
+                        _LOGGER.warning(f"Failed to fetch AP config: {response.status}")
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout while fetching AP config")
+        except Exception as e:
+            _LOGGER.error(f"Error fetching AP config: {e}")
+        finally:
+            self._is_fetching_config = False

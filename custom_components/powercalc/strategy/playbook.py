@@ -82,9 +82,12 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
         self._update_callback = update_callback
 
     async def calculate(self, entity_state: State) -> Decimal | None:
-        if self._states_trigger and entity_state.state in self._states_trigger:
-            playbook_id = self._states_trigger[entity_state.state]
-            await self.activate_playbook(playbook_id)
+        if self._states_trigger:
+            if entity_state.state in self._states_trigger:
+                playbook_id = self._states_trigger[entity_state.state]
+                await self.activate_playbook(playbook_id)
+            else:
+                await self.stop_playbook()
 
         return self._power
 
@@ -112,6 +115,7 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
 
         _LOGGER.debug("Stopping playbook")
         self._active_playbook = None
+        self._power = Decimal(0)
         if self._cancel_timer is not None:
             self._cancel_timer()
             self._cancel_timer = None
@@ -202,6 +206,11 @@ class PlaybookStrategy(PowerCalculationStrategyInterface):
 
     def can_calculate_standby(self) -> bool:
         return bool(self._states_trigger and STATE_OFF in self._states_trigger)
+
+    @property
+    def registered_playbooks(self) -> list[str]:
+        playbooks = dict(self._config.get(CONF_PLAYBOOKS, {}))
+        return list(playbooks.keys())
 
 
 class PlaybookQueue:

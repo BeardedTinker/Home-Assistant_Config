@@ -4,41 +4,40 @@ image_analyzer:
   fields:
     provider:
       name: Provider
-      description: 'Provider to use'
+      description: 'Configuration to use'
       required: true
-      default: 'OpenAI'
       selector:
-        select:
-          options:
-            - 'OpenAI'
-            - 'Anthropic'
-            - 'Google'
-            - 'Groq'
-            - 'Ollama'
-            - 'LocalAI'
-            - 'Custom OpenAI'
+        config_entry:
+          integration: llmvision
     model:
       name: Model
       required: false
-      description: 'Model to use'
+      description: 'Model to use. Uncheck for default.'
       example: "gpt-4o-mini"
-      default: "gpt-4o-mini"
       selector:
         text:
           multiline: false
     message:
       name: Prompt
       required: true
-      description: 'Prompt'
-      example: "Describe the person present in the photo"
+      description: 'Model prompt'
+      example: "Describe the image"
       selector:
         text:
           multiline: true
+    remember:
+      name: Remember
+      required: false
+      description: 'Remember this event so you can ask about it later'
+      example: true
+      default: false
+      selector:
+        boolean:
     image_file:
       name: Image File
       required: false
       description: 'Local path to image'
-      example: "/config/www/images/img.jpg"
+      example: "/config/www/tmp/front_door.jpg"
       selector:
         text:
           multiline: true
@@ -53,26 +52,28 @@ image_analyzer:
           multiple: true
     include_filename:
       name: Include Filename
-      required: false
+      required: true
       description: 'Include filename in the request'
+      example: false
       default: false
       selector:
         boolean:
     target_width:
       name: Target Width
       required: false
-      description: 'Width in pixels to downscale to'
+      description: 'Width in pixels to downscale'
       example: 1280
       default: 1280
       selector:
         number:
           min: 512
-          max: 3840
+          max: 1920
     detail:
       name: Detail
       required: false
-      description: "Detail parameter, leave empty for 'auto'"
-      default: 'high'
+      description: "Detail parameter. Leave empty for 'auto'"
+      default: 'low'
+      example: 'low'
       selector:
         select:
           options:
@@ -86,19 +87,27 @@ image_analyzer:
       default: 100
       selector:
         number:
-          min: 10
-          max: 1000
+          min: 1
+          max: 300
     temperature:
       name: Temperature
       required: true
       description: 'Randomness. Lower is more accurate, higher is more creative'
-      example: 0.5
-      default: 0.5
+      example: 0.2
+      default: 0.2
       selector:
         number:
-          min: 0.0
+          min: 0.1
           max: 1.0
           step: 0.1
+    expose_images:
+      name: Expose Images
+      description: (Experimental) Expose analyzed frames after processing. This will save analyzed frames in /www/llmvision so they can be used for notifications. (Only works for entity input, include camera name should be enabled). Existing files will be overwritten.
+      required: false
+      example: false
+      default: false
+      selector:
+        boolean:
 
 video_analyzer:
   name: Video Analyzer
@@ -106,34 +115,35 @@ video_analyzer:
   fields:
     provider:
       name: Provider
-      description: 'Provider to use'
+      description: 'Configuration to use'
       required: true
-      default: 'OpenAI'
       selector:
-        select:
-          options:
-            - 'OpenAI'
-            - 'Anthropic'
-            - 'Google'
-            - 'Ollama'
-            - 'LocalAI'
+        config_entry:
+          integration: llmvision
     model:
       name: Model
       required: false
-      description: 'Model to use'
+      description: 'Model to use. Uncheck for default.'
       example: "gpt-4o-mini"
-      default: "gpt-4o-mini"
       selector:
         text:
           multiline: false
     message:
       name: Prompt
       required: true
-      description: 'Prompt'
-      example: "Describe what's going on in the video"
+      description: 'Model prompt'
+      example: "Describe what happens in the video"
       selector:
         text:
           multiline: true
+    remember:
+      name: Remember
+      required: false
+      description: 'Remember this event so you can ask about it later'
+      example: true
+      default: false
+      selector:
+        boolean:
     video_file:
       name: Video File
       required: false
@@ -150,38 +160,41 @@ video_analyzer:
       selector:
         text:
           multiline: true
-    interval:
-      name: Interval
-      description: Analyze frames every <interval> seconds
-      required: true
+    max_frames:
+      name: Max Frames
+      description: How many frames to analyze. Picks frames with the most movement.
+      required: false
       example: 3
       default: 3
       selector:
         number:
           min: 1
-          max: 60
+          max: 10
+          step: 1
     include_filename:
       name: Include Filename
-      required: false
+      required: true
       description: 'Include filename in the request'
+      example: false
       default: false
       selector:
         boolean:
     target_width:
       name: Target Width
       required: false
-      description: 'Width in pixels to downscale to'
+      description: 'Width in pixels to downscale'
       example: 1280
       default: 1280
       selector:
         number:
           min: 512
-          max: 3840
+          max: 1920
     detail:
       name: Detail
       required: false
       description: "Detail parameter, leave empty for 'auto'"
-      default: 'high'
+      default: 'low'
+      example: 'low'
       selector:
         select:
           options:
@@ -195,16 +208,253 @@ video_analyzer:
       default: 100
       selector:
         number:
-          min: 10
-          max: 1000
+          min: 1
+          max: 300
     temperature:
       name: Temperature
       required: true
       description: 'Randomness. Lower is more accurate, higher is more creative'
-      example: 0.5
-      default: 0.5
+      example: 0.2
+      default: 0.2
       selector:
         number:
           min: 0.0
+          max: 1.0
+          step: 0.1
+    expose_images:
+      name: Expose Images
+      description: (Experimental) Expose analyzed frames after processing. This will save analyzed frames in /www/llmvision so they can be used for notifications. (Only works for entity input, include camera name should be enabled). Existing files will be overwritten.
+      required: false
+      example: false
+      default: false
+      selector:
+        boolean:
+
+stream_analyzer:
+  name: Stream Analyzer
+  description: Analyze a live camera stream with AI
+  fields:
+    provider:
+      name: Provider
+      description: 'Configuration to use'
+      required: true
+      selector:
+        config_entry:
+          integration: llmvision
+    model:
+      name: Model
+      required: false
+      description: 'Model to use. Uncheck for default.'
+      example: "gpt-4o-mini"
+      selector:
+        text:
+          multiline: false
+    message:
+      name: Prompt
+      required: true
+      description: 'Model prompt'
+      example: "Describe what happens in the camera feed"
+      selector:
+        text:
+          multiline: true
+    remember:
+      name: Remember
+      required: false
+      description: 'Remember this event so you can ask about it later'
+      example: true
+      default: false
+      selector:
+        boolean:
+    image_entity:
+      name: Camera Entity
+      required: true
+      description: 'Camera entity to stream'
+      example: 'camera.front_door'
+      selector:
+        entity:
+          domain: ["camera"]
+          multiple: true
+    duration:
+      name: Recording Duration
+      required: true
+      description: 'How long to record in seconds'
+      example: 5
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+    max_frames:
+      name: Max Frames
+      description: How many frames to analyze. Picks frames with the most movement.
+      required: false
+      example: 3
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+    include_filename:
+      name: Include camera name
+      required: true
+      description: 'Include camera name in request'
+      example: false
+      default: false
+      selector:
+        boolean:
+    target_width:
+      name: Target Width
+      required: false
+      description: 'Width in pixels to downscale'
+      example: 1280
+      default: 1280
+      selector:
+        number:
+          min: 512
+          max: 1920
+    detail:
+      name: Detail
+      required: false
+      description: "Detail parameter, leave empty for 'auto'"
+      default: 'low'
+      example: 'low'
+      selector:
+        select:
+          options:
+            - 'high'
+            - 'low'
+    max_tokens:
+      name: Maximum Tokens
+      description: 'Maximum number of tokens to generate'
+      required: true
+      example: 100
+      default: 100
+      selector:
+        number:
+          min: 1
+          max: 300
+    temperature:
+      name: Temperature
+      required: true
+      description: 'Randomness. Lower is more accurate, higher is more creative'
+      example: 0.2
+      default: 0.2
+      selector:
+        number:
+          min: 0.1
+          max: 1.0
+          step: 0.1
+    expose_images:
+      name: Expose Images
+      description: (Experimental) Expose analyzed frames after processing. This will save analyzed frames in /www/llmvision so they can be used for notifications. (Only works for entity input, include camera name should be enabled). Existing files will be overwritten.
+      required: false
+      example: false
+      default: false
+      selector:
+        boolean:
+
+data_analyzer:
+  name: Data Analyzer
+  description: Update sensors with data extracted from images (Beta)
+  fields:
+    provider:
+      name: Provider
+      description: 'Configuration to use'
+      required: true
+      selector:
+        config_entry:
+          integration: llmvision
+    model:
+      name: Model
+      required: false
+      description: 'Model to use. Uncheck for default.'
+      example: "gpt-4o-mini"
+      selector:
+        text:
+          multiline: false
+    message:
+      name: Prompt
+      required: true
+      description: 'Describe what should be extracted from the image. Data types and available options will be recognized automatically based the provided sensor.'
+      example: "How many cars are parked?"
+      default: "How many cars are parked?"
+      selector:
+        text:
+          multiline: true
+    sensor_entity:
+      name: Sensor Entity
+      description: The sensor to update
+      required: true
+      selector:
+        entity:
+          multiple: false
+          filter:
+            domain: ["number", "input_number", "text", "input_text", "input_boolean", "select", "input_select"]
+    image_file:
+      name: Image File
+      required: false
+      description: 'Local path to image'
+      example: "/config/www/tmp/front_door.jpg"
+      selector:
+        text:
+          multiline: true
+    image_entity:
+      name: Image Entity
+      required: false
+      description: 'Image or camera entity to analyze'
+      example: 'image.front_door_person'
+      selector:
+        entity:
+          domain: ["image", "camera"]
+          multiple: true
+    include_filename:
+      name: Include Filename
+      required: true
+      description: 'Include filename in the request'
+      example: false
+      default: false
+      selector:
+        boolean:
+    target_width:
+      name: Target Width
+      required: false
+      description: 'Width in pixels to downscale'
+      example: 1280
+      default: 1280
+      selector:
+        number:
+          min: 512
+          max: 1920
+    detail:
+      name: Detail
+      required: false
+      description: "Detail parameter. Leave empty for 'auto'"
+      default: 'high'
+      example: 'high'
+      selector:
+        select:
+          options:
+            - 'high'
+            - 'low'
+    max_tokens:
+      name: Maximum Tokens
+      description: 'Maximum number of tokens to generate. A low value is recommended since this will likely result in a number.'
+      required: true
+      example: 5
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 50
+    temperature:
+      name: Temperature
+      required: true
+      description: 'Randomness. Lower is more accurate, higher is more creative. 0.1 is recommended for best accuracy.'
+      example: 0.1
+      default: 0.1
+      selector:
+        number:
+          min: 0.1
           max: 1.0
           step: 0.1

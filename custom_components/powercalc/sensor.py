@@ -8,7 +8,7 @@ import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 
 import homeassistant.helpers.config_validation as cv
 import homeassistant.helpers.entity_registry as er
@@ -115,6 +115,7 @@ from .const import (
     ENTITY_CATEGORIES,
     ENTRY_DATA_ENERGY_ENTITY,
     ENTRY_DATA_POWER_ENTITY,
+    ENTRY_GLOBAL_CONFIG_UNIQUE_ID,
     SERVICE_ACTIVATE_PLAYBOOK,
     SERVICE_CALIBRATE_ENERGY,
     SERVICE_CALIBRATE_UTILITY_METER,
@@ -331,6 +332,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Setup sensors from config entry (GUI config flow)."""
+
+    if entry.unique_id == ENTRY_GLOBAL_CONFIG_UNIQUE_ID:
+        return
+
     sensor_config = convert_config_entry_to_sensor_config(entry, hass)
 
     bind_config_entry_to_device(hass, entry)
@@ -594,12 +599,17 @@ def convert_config_entry_to_sensor_config(config_entry: ConfigEntry, hass: HomeA
                 hass,
             )
 
+    def process_utility_meter_offset() -> None:
+        if CONF_UTILITY_METER_OFFSET in sensor_config:
+            sensor_config[CONF_UTILITY_METER_OFFSET] = timedelta(days=sensor_config[CONF_UTILITY_METER_OFFSET])
+
     handle_sensor_type()
 
     process_daily_fixed_energy()
     process_fixed_config()
     process_linear_config()
     process_calculation_enabled_condition()
+    process_utility_meter_offset()
 
     return sensor_config
 
@@ -731,7 +741,8 @@ async def add_discovered_entities(
 ) -> None:
     """Add discovered entities based on include configuration."""
     if CONF_INCLUDE in config:
-        found_entities, discoverable_entities = await resolve_include_entities(hass, config.get(CONF_INCLUDE))  # type: ignore
+        include_config: dict = cast(dict, config[CONF_INCLUDE])
+        found_entities, discoverable_entities = await resolve_include_entities(hass, include_config)
         entities_to_add.existing.extend(found_entities)
         for entity_id in discoverable_entities:
             sensor_configs[entity_id] = {CONF_ENTITY_ID: entity_id}

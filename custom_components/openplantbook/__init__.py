@@ -1,4 +1,5 @@
 """The OpenPlantBook integration."""
+
 import asyncio
 from datetime import datetime, timedelta
 import logging
@@ -7,7 +8,7 @@ import re
 import urllib.parse
 
 import async_timeout
-from pyopenplantbook import MissingClientIdOrSecret, OpenPlantBookApi
+from openplantbook_sdk import MissingClientIdOrSecret, OpenPlantBookApi
 import voluptuous as vol
 
 from homeassistant import exceptions
@@ -20,8 +21,13 @@ from homeassistant.core import (
     SupportsResponse,
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
 from homeassistant.helpers.entity import async_generate_entity_id
 from homeassistant.util import raise_if_invalid_filename, slugify
+
+from homeassistant.components.persistent_notification import (
+    create as create_notification,
+)
 
 from .const import (
     ATTR_ALIAS,
@@ -29,6 +35,7 @@ from .const import (
     ATTR_HOURS,
     ATTR_IMAGE,
     ATTR_SPECIES,
+    ATTR_PLANT_INSTANCE,
     CACHE_TIME,
     DOMAIN,
     FLOW_DOWNLOAD_IMAGES,
@@ -41,7 +48,20 @@ from .const import (
     OPB_SERVICE_CLEAN_CACHE,
     OPB_SERVICE_GET,
     OPB_SERVICE_SEARCH,
+    OPB_SERVICE_UPLOAD,
+    OPB_MEASUREMENTS_TO_UPLOAD,
+    FLOW_UPLOAD_DATA,
+    OPB_INFO_MESSAGE,
+    OPB_CURRENT_INFO_MESSAGE,
 )
+
+from .uploader import (
+    UPLOAD_TIME_INTERVAL,
+    UPLOAD_WAIT_AFTER_RESTART,
+    async_setup_upload_schedule,
+    plant_data_upload,
+)
+
 from .plantbook_exception import OpenPlantbookException
 
 CONFIG_SCHEMA = vol.Schema({DOMAIN: vol.Schema({})}, extra=vol.ALLOW_EXTRA)
@@ -58,12 +78,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     if DOMAIN not in hass.data:
         hass.data[DOMAIN] = {}
+
     if ATTR_API not in hass.data[DOMAIN]:
         hass.data[DOMAIN][ATTR_API] = OpenPlantBookApi(
             entry.data.get(CONF_CLIENT_ID), entry.data.get(CONF_CLIENT_SECRET)
         )
+
     if ATTR_SPECIES not in hass.data[DOMAIN]:
         hass.data[DOMAIN][ATTR_SPECIES] = {}
+
+    # Display one-off notification about new functionality after upgrade
+    if not entry.data.get(OPB_INFO_MESSAGE):
+        hass.config_entries.async_update_entry(
+            entry, data={**entry.data, OPB_INFO_MESSAGE: OPB_CURRENT_INFO_MESSAGE}
+        )
+        if not entry.options.get(FLOW_UPLOAD_DATA):
+            _LOGGER.debug(
+                "Trigger after upgrade notification: %s", OPB_CURRENT_INFO_MESSAGE
+            )
+            create_notification(
+                hass=hass,
+                title="New Feature available in OpenPlantbook Integration",
+                message=f"Plant-sensors data uploading is available now. Please consider enabling it in ["
+                f"OpenPlantbook Integration's settings]("
+                f"https://github.com/Olen/home-assistant-openplantbook?tab=readme-ov-file#configuration) to "
+                f"contribute to a creation of a Worldwide [Browsable]("
+                f"https://open.plantbook.io/ui/sensor-data/) dataset. [More info.]("
+                f"https://open.plantbook.io/ui/sensor-data/)",
+            )
+        else:
+            _LOGGER.debug(
+                "Skipping after upgrade notification: %s because UPLOAD option is enabled",
+                OPB_CURRENT_INFO_MESSAGE,
+            )
 
     async def get_plant(call: ServiceCall) -> ServiceResponse:
         if DOMAIN not in hass.data:
@@ -84,7 +131,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             _LOGGER.debug("I am the first process to get %s", species)
             hass.data[DOMAIN][ATTR_SPECIES][species] = {}
             try:
-                plant_data = await hass.data[DOMAIN][ATTR_API].get_plantbook_data(
+                plant_data = await hass.data[DOMAIN][ATTR_API].async_plant_detail_get(
                     species
                 )
             except MissingClientIdOrSecret:
@@ -92,6 +139,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                 _LOGGER.error(
                     "Missing client ID or secret. Please set up the integration again"
                 )
+                del hass.data[DOMAIN][ATTR_SPECIES][species]
                 raise
 
             if plant_data:
@@ -131,6 +179,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                     entity_id, plant_data[OPB_DISPLAY_PID], plant_data
                 )
                 return plant_data
+            del hass.data[DOMAIN][ATTR_SPECIES][species]
             return {}
         elif OPB_PID not in hass.data[DOMAIN][ATTR_SPECIES][species]:
             # If more than one "get_plant" is triggered for the same species, we wait for up to
@@ -163,7 +212,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         else:
             del hass.data[DOMAIN][ATTR_SPECIES][species]
             raise OpenPlantbookException(
-                "an unknown error occured while fetching data for species %s", species
+                "an unknown error occurred while fetching data for species %s", species
             )
 
     async def search_plantbook(call: ServiceCall) -> ServiceResponse:
@@ -177,7 +226,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
         _LOGGER.info("Searching for %s", alias)
         try:
-            plant_data = await hass.data[DOMAIN][ATTR_API].search_plantbook(alias)
+            plant_data = await hass.data[DOMAIN][ATTR_API].async_plant_search(alias)
         except MissingClientIdOrSecret:
             _LOGGER.error(
                 "Missing client ID or secret. Please set up the integration again"
@@ -191,6 +240,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.states.async_set(f"{DOMAIN}.{OPB_ATTR_SEARCH_RESULT}", state, attrs)
 
         return attrs
+
+    async def plant_data_upload_service(call: ServiceCall) -> ServiceResponse:
+        return {"result": await plant_data_upload(hass, entry=entry, call=call)}
 
     async def clean_cache(call: ServiceCall) -> None:
         hours = call.data.get(ATTR_HOURS)
@@ -237,6 +289,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.debug("Downloading of %s done", url)
         return download_to
 
+    # Setup upload schedule
+    await async_setup_upload_schedule(hass, entry)
+    # Setup optionFlow updates listener
+    entry.async_on_unload(entry.add_update_listener(config_update_listener))
+
     hass.services.async_register(
         DOMAIN, OPB_SERVICE_SEARCH, search_plantbook, None, SupportsResponse.OPTIONAL
     )
@@ -245,6 +302,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     )
     hass.services.async_register(
         DOMAIN, OPB_SERVICE_CLEAN_CACHE, clean_cache, None, SupportsResponse.NONE
+    )
+    hass.services.async_register(
+        DOMAIN,
+        OPB_SERVICE_UPLOAD,
+        plant_data_upload_service,
+        None,
+        SupportsResponse.OPTIONAL,
     )
     hass.states.async_set(f"{DOMAIN}.{OPB_ATTR_SEARCH_RESULT}", 0)
 
@@ -260,7 +324,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         service=OPB_SERVICE_CLEAN_CACHE,
         service_data={ATTR_HOURS: 0},
         blocking=True,
-        limit=30,
+        # limit=30,
     )
     _LOGGER.debug("Removing search result")
     hass.states.async_remove(f"{DOMAIN}.{OPB_ATTR_SEARCH_RESULT}")
@@ -272,6 +336,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.pop(DOMAIN)
 
     return True
+
+
+async def config_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle component's options update"""
+    # await hass.config_entries.async_reload(entry.entry_id)
+
+    _LOGGER.debug("Options update: %s, %s", entry.entry_id, entry.options)
+    await async_setup_upload_schedule(hass, entry)
 
 
 class CannotConnect(exceptions.HomeAssistantError):

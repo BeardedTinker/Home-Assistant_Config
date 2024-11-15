@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from decimal import Decimal
+from typing import cast
 
 from homeassistant.const import CONF_CONDITION, CONF_ENTITIES
 from homeassistant.core import HomeAssistant
@@ -100,7 +101,7 @@ class PowerCalculatorStrategyFactory:
         power_profile: PowerProfile | None,
     ) -> FixedStrategy:
         """Create the fixed strategy."""
-        fixed_config = config.get(CONF_FIXED)
+        fixed_config: dict | None = config.get(CONF_FIXED)
         if fixed_config is None:
             if power_profile and power_profile.fixed_mode_config:
                 fixed_config = power_profile.fixed_mode_config
@@ -113,7 +114,7 @@ class PowerCalculatorStrategyFactory:
         if isinstance(power, Template):
             power.hass = self._hass
 
-        states_power: dict = fixed_config.get(CONF_STATES_POWER)  # type: ignore
+        states_power = fixed_config.get(CONF_STATES_POWER)
         if states_power:
             for p in states_power.values():
                 if isinstance(p, Template):
@@ -139,8 +140,9 @@ class PowerCalculatorStrategyFactory:
         if CONF_WLED not in config:
             raise StrategyConfigurationError("No WLED configuration supplied")
 
+        wled_config: dict = cast(dict, config.get(CONF_WLED))
         return WledStrategy(
-            config=config.get(CONF_WLED),  # type: ignore
+            config=wled_config,
             light_entity=source_entity,
             hass=self._hass,
             standby_power=config.get(CONF_STANDBY_POWER),
@@ -150,8 +152,8 @@ class PowerCalculatorStrategyFactory:
         if CONF_PLAYBOOK not in config:
             raise StrategyConfigurationError("No Playbook configuration supplied")
 
-        playbook_config = config.get(CONF_PLAYBOOK)
-        return PlaybookStrategy(self._hass, playbook_config)  # type: ignore
+        playbook_config: dict = cast(dict, config.get(CONF_PLAYBOOK))
+        return PlaybookStrategy(self._hass, playbook_config)
 
     async def _create_composite(
         self,

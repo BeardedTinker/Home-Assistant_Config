@@ -58,11 +58,11 @@ action:
   data:
     entity_id: media_player.whatever_me
     message: 'Good morning Luka. It is {{ states("sensor.time") }} and time for you to get up. '
-- service: light.turn_on
-  target:
-    entity_id: light.luka_floor_light
-  data:
-    brightness: 64
+#- service: light.turn_on
+#  target:
+#    entity_id: light.luka
+#  data:
+#    brightness: 64
 - delay: '00:00:10'
 - service: media_player.volume_set
   data:

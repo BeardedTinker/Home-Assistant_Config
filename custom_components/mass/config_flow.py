@@ -12,9 +12,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import AbortFlow, FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import aiohttp_client, selector
-from music_assistant.client import MusicAssistantClient
-from music_assistant.client.exceptions import CannotConnect, InvalidServerVersion
-from music_assistant.common.models.api import ServerInfoMessage
+from music_assistant_client import MusicAssistantClient
+from music_assistant_client.exceptions import CannotConnect, InvalidServerVersion
+from music_assistant_models.api import ServerInfoMessage
 
 from .const import CONF_ASSIST_AUTO_EXPOSE_PLAYERS, CONF_OPENAI_AGENT_ID, DOMAIN, LOGGER
 

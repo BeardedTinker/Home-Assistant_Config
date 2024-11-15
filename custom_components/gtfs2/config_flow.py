@@ -48,6 +48,7 @@ from .const import (
     CONF_REFRESH_INTERVAL,
     CONF_OFFSET,
     CONF_REAL_TIME,
+    CONF_SOURCE_TIMEZONE_CORRECTION,
     ATTR_API_KEY_LOCATIONS
 )    
 
@@ -93,7 +94,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the source."""
         errors: dict[str, str] = {}      
         if user_input is None:
-            datasources = get_datasources(self.hass, DEFAULT_PATH)
+            datasources = await get_datasources(self.hass, DEFAULT_PATH)
             return self.async_show_form(
                 step_id="start_end",
                 data_schema=vol.Schema(
@@ -113,7 +114,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the source."""
         errors: dict[str, str] = {}       
         if user_input is None:
-            datasources = get_datasources(self.hass, DEFAULT_PATH)
+            datasources = await get_datasources(self.hass, DEFAULT_PATH)
             return self.async_show_form(
                 step_id="local_stops",
                 data_schema=vol.Schema(
@@ -185,7 +186,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         errors: dict[str, str] = {}
         if user_input is None:
-            datasources = get_datasources(self.hass, DEFAULT_PATH)
+            datasources = await get_datasources(self.hass, DEFAULT_PATH)
             return self.async_show_form(
                 step_id="remove",
                 data_schema=vol.Schema(
@@ -196,7 +197,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors=errors,
             )
         try:
-            removed = remove_datasource(self.hass, DEFAULT_PATH, user_input[CONF_FILE])
+            removed = remove_datasource(self.hass, DEFAULT_PATH, user_input[CONF_FILE], True)
             _LOGGER.debug(f"Removed gtfs data source: {removed}")
         except Exception as ex:
             _LOGGER.error("Error while deleting : %s", {ex})
@@ -497,6 +498,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
             opt1_schema = {
                         vol.Optional(CONF_REFRESH_INTERVAL, default=self.config_entry.options.get(CONF_REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL)): int,
                         vol.Optional(CONF_OFFSET, default=self.config_entry.options.get(CONF_OFFSET, DEFAULT_OFFSET)): int,
+                        vol.Optional(CONF_SOURCE_TIMEZONE_CORRECTION, default=self.config_entry.options.get(CONF_SOURCE_TIMEZONE_CORRECTION, 0)): int,
                         vol.Optional(CONF_REAL_TIME, default=self.config_entry.options.get(CONF_REAL_TIME)): selector.BooleanSelector()
                     }
             return self.async_show_form(

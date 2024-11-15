@@ -331,7 +331,7 @@ def create_grouped_power_sensor(
         entities=power_sensor_ids,
         unique_id=unique_id,
         sensor_config=sensor_config,
-        rounding_digits=sensor_config.get(CONF_POWER_SENSOR_PRECISION) or DEFAULT_POWER_SENSOR_PRECISION,
+        rounding_digits=int(sensor_config.get(CONF_POWER_SENSOR_PRECISION) or DEFAULT_POWER_SENSOR_PRECISION),
         group_type=group_type,
         entity_id=entity_id,
         device_id=sensor_config.get(CONF_DEVICE),
@@ -383,7 +383,7 @@ def create_grouped_energy_sensor(
         entities=energy_sensor_ids,
         unique_id=energy_unique_id,
         sensor_config=sensor_config,
-        rounding_digits=sensor_config.get(CONF_ENERGY_SENSOR_PRECISION) or DEFAULT_ENERGY_SENSOR_PRECISION,
+        rounding_digits=int(sensor_config.get(CONF_ENERGY_SENSOR_PRECISION) or DEFAULT_ENERGY_SENSOR_PRECISION),
         group_type=group_type,
         entity_id=entity_id,
         device_id=sensor_config.get(CONF_DEVICE),
@@ -479,7 +479,7 @@ class GroupedSensor(BaseEntity, RestoreSensor, SensorEntity):
         domain = self._sensor_config.get(CONF_DOMAIN)
         if domain == "all":
             entity_registry = er.async_get(self.hass)
-            entities = [entity.entity_id for entity in entity_registry.entities.values() if entity.device_class == self.device_class]
+            entities = [entity.entity_id for entity in entity_registry.entities.values() if entity.device_class == self.device_class]  # type: ignore
         else:
             entities = self.hass.data[DOMAIN].get(DATA_DOMAIN_ENTITIES).get(domain, [])
             entities = filter_entity_list_by_class(

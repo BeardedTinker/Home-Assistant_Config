@@ -46,11 +46,7 @@ def get_next_departure(self):
         return {}
 
     """Get next departures from data."""
-    if self.hass.config.time_zone is None:
-        _LOGGER.error("Timezone is not set in Home Assistant configuration")
-        timezone = "UTC"
-    else:
-        timezone=dt_util.get_time_zone(self.hass.config.time_zone)
+
     schedule = self._data["schedule"]
     route_type = self._data["route_type"]
     
@@ -72,12 +68,16 @@ def get_next_departure(self):
     offset = self._data["offset"]
     include_tomorrow = self._data["include_tomorrow"]
     now = dt_util.now().replace(tzinfo=None) + datetime.timedelta(minutes=offset)
+    now_local_tz = dt_util.now() + datetime.timedelta(minutes=offset)
     now_date = now.strftime(dt_util.DATE_STR_FORMAT)
+    now_date_local_tz = now_local_tz.strftime(dt_util.DATE_STR_FORMAT)
     now_time = now.strftime(TIME_STR_FORMAT)
     yesterday = now - datetime.timedelta(days=1)
     yesterday_date = yesterday.strftime(dt_util.DATE_STR_FORMAT)
     tomorrow = now + datetime.timedelta(days=1)
+    tomorrow_local_tz = dt_util.now() + datetime.timedelta(minutes=offset) + datetime.timedelta(days=1) 
     tomorrow_date = tomorrow.strftime(dt_util.DATE_STR_FORMAT)
+    tomorrow_date_local_tz = tomorrow_local_tz.strftime(dt_util.DATE_STR_FORMAT)
 
     # Fetch all departures for yesterday, today and optionally tomorrow,
     # up to an overkill maximum in case of a departure every minute for those
@@ -99,6 +99,8 @@ def get_next_departure(self):
         route.route_long_name,route.route_short_name,
         	   start_station.stop_id as origin_stop_id,
                start_station.stop_name as origin_stop_name,
+               start_station.stop_timezone as origin_stop_timezone,
+               agency.agency_timezone as agency_timezone,
                time(origin_stop_time.arrival_time) AS origin_arrival_time,
                time(origin_stop_time.departure_time) AS origin_depart_time,
                date(origin_stop_time.departure_time) AS origin_depart_date,
@@ -109,6 +111,7 @@ def get_next_departure(self):
                origin_stop_time.stop_sequence AS origin_stop_sequence,
                origin_stop_time.timepoint AS origin_stop_timepoint,
                end_station.stop_name as dest_stop_name,
+               end_station.stop_timezone as dest_stop_timezone,
                time(destination_stop_time.arrival_time) AS dest_arrival_time,
                time(destination_stop_time.departure_time) AS dest_depart_time,
                destination_stop_time.drop_off_type AS dest_drop_off_type,
@@ -137,6 +140,8 @@ def get_next_departure(self):
                    ON destination_stop_time.stop_id = end_station.stop_id
         INNER JOIN routes route
                    ON route.route_id = trip.route_id 
+        INNER JOIN agency agency
+                   ON agency.agency_id = route.agency_id                        
 		WHERE {route_type_where}
         {start_station_where}
         {end_station_where}
@@ -149,6 +154,8 @@ def get_next_departure(self):
                route.route_long_name,route.route_short_name,
                start_station.stop_id as origin_stop_id,
                start_station.stop_name as origin_stop_name,
+               start_station.stop_timezone as origin_stop_timezone,
+               agency.agency_timezone as agency_timezone,
                time(origin_stop_time.arrival_time) AS origin_arrival_time,
                time(origin_stop_time.departure_time) AS origin_depart_time,
                date(origin_stop_time.departure_time) AS origin_depart_date,
@@ -159,6 +166,7 @@ def get_next_departure(self):
                origin_stop_time.stop_sequence AS origin_stop_sequence,
                origin_stop_time.timepoint AS origin_stop_timepoint,
                end_station.stop_name as dest_stop_name,
+               end_station.stop_timezone as dest_stop_timezone,
                time(destination_stop_time.arrival_time) AS dest_arrival_time,
                time(destination_stop_time.departure_time) AS dest_depart_time,
                destination_stop_time.drop_off_type AS dest_drop_off_type,
@@ -187,6 +195,8 @@ def get_next_departure(self):
                    ON route.route_id = trip.route_id 
         INNER JOIN calendar_dates calendar_date_today
 				   ON trip.service_id = calendar_date_today.service_id
+        INNER JOIN agency agency
+                   ON agency.agency_id = route.agency_id                        
 		WHERE {route_type_where}
         {start_station_where}
         {end_station_where}
@@ -217,7 +227,7 @@ def get_next_departure(self):
             if yesterday_start is None:
                 yesterday_start = row["origin_depart_date"]
             if yesterday_start != row["origin_depart_date"]:
-                idx = f"{now_date} {row['origin_depart_time']}"
+                idx = f"{now_date_local_tz} {row['origin_depart_time']}"
                 timetable[idx] = {**row, **extras}
                 yesterday_last = idx
         if row["today"] == 1 or row["today_cd"] == 1:
@@ -226,12 +236,13 @@ def get_next_departure(self):
                 today_start = row["origin_depart_date"]
                 extras["first"] = True
             if today_start == row["origin_depart_date"]:
-                idx_prefix = now_date
+                idx_prefix = now_date_local_tz
             else:
-                idx_prefix = tomorrow_date
+                idx_prefix = tomorrow_date_local_tz
             idx = f"{idx_prefix} {row['origin_depart_time']}"
             timetable[idx] = {**row, **extras}
             today_last = idx
+            _LOGGER.debug("idx prefix: %s", idx_prefix)
         if (
             "tomorrow" in row
             and row["tomorrow"] == 1
@@ -244,6 +255,7 @@ def get_next_departure(self):
             if tomorrow_start == row["origin_depart_date"]:
                 idx = f"{tomorrow_date} {row['origin_depart_time']}"
                 timetable[idx] = {**row, **extras}
+
     # Flag last departures.
     for idx in filter(None, [yesterday_last, today_last]):
         timetable[idx]["last"] = True
@@ -252,7 +264,7 @@ def get_next_departure(self):
         if datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S") > now:
             item = timetable[key]
             _LOGGER.info(
-                "Departure found for station %s @ %s -> %s", start_station_id, key, item
+                "Departure(s) found for station %s @ %s -> %s", start_station_id, key, item
             )
             break
     _LOGGER.debug("item: %s", item)
@@ -264,32 +276,74 @@ def get_next_departure(self):
         _LOGGER.info("No items found in gtfs")
         return {}
 
-    # create upcoming timetable
+    # Define timezone related attribs
+    if self.hass.config.time_zone is None:
+        _LOGGER.error("Timezone is not set in Home Assistant configuration")
+        timezone = "UTC"
+    else:
+        timezone = dt_util.get_time_zone(self.hass.config.time_zone)
+        _LOGGER.debug("Timezone HA: %s",timezone)
+    _LOGGER.debug("Default timezone: %s",timezone)
+    _LOGGER.debug("Agency timezone: %s",item["agency_timezone"])
+    _LOGGER.debug("Origin stop timezone: %s",item["origin_stop_timezone"])
+    _LOGGER.debug("Dest stop timezone: %s",item["dest_stop_timezone"])
+    if item["agency_timezone"] is not None:
+        _LOGGER.debug("Setting Orig & Dest TZ based on Agency: %s",item["agency_timezone"])
+        timezone = dt_util.get_time_zone(item["agency_timezone"])
+        timezone_dest = dt_util.get_time_zone(item["agency_timezone"])  
+    elif item["origin_stop_timezone"] is not None:    
+        _LOGGER.debug("Setting Orig & Dest TZ based on origin stop: %s",item["origin_stop_timezone"])
+        timezone = dt_util.get_time_zone(item["origin_stop_timezone"])
+        timezone_dest = dt_util.get_time_zone(item["orig_stop_timezone"]) 
+    if item["dest_stop_timezone"] is not None and item["agency_timezone"] is None:
+        _LOGGER.debug("Setting Dest TZ based on dest stop: %s",item["dest_stop_timezone"])
+        timezone_dest = dt_util.get_time_zone(item["dest_stop_timezone"])  
+    else:
+        timezone_dest = timezone
+    _LOGGER.debug("Defined orig timezone: %s, dest timezone: %s",timezone,timezone_dest)
+    _LOGGER.debug("Defined now incl. offset (if configured): %s",now_local_tz)
+
+    # create upcoming timetable, use timezone before resetting to UTC and reset 'item' to match with timezone
     timetable_remaining = []
+    ix = 0
+    item={}
     for key in sorted(timetable.keys()):
-        if datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S") > now:
-            timetable_remaining.append(dt_util.as_utc(datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S")).isoformat())
+        upcoming = datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone)
+        _LOGGER.debug ("Upcoming_departure_in_defined_timezone: %s, Now_in_defined_timezone_plus_offset: %s, key: %s, ix: %s", upcoming, now_local_tz, key, ix)
+        if upcoming > now_local_tz:
+            if ix == 0 :
+                _LOGGER.debug("Resetting item")
+                item = timetable[key]
+                ix = ix + 1
+            _LOGGER.debug("Adding departure: %s", upcoming)
+            timetable_remaining.append(dt_util.as_utc(upcoming).isoformat())
+    _LOGGER.debug("item reset: %s", item)        
     _LOGGER.debug(
         "Timetable Remaining Departures on this Start/Stop: %s", timetable_remaining
     )
-    # create upcoming timetable with line info
+    if item == {}:
+        data_returned = {        
+        "gtfs_updated_at": dt_util.utcnow().isoformat(),
+        }
+        _LOGGER.info("No items found in gtfs")
+        return {}
+    
+    # create upcoming timetable with line info and headsign
     timetable_remaining_line = []
+    timetable_remaining_headsign = []
     for key, value in sorted(timetable.items()):
-        if datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S") > now:
+        upcoming = datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone)
+        if upcoming > now_local_tz:
             timetable_remaining_line.append(
-                str(dt_util.as_utc(datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S")).isoformat()) + " (" + str(value["route_short_name"]) +  str( ("/" + value["route_long_name"])  if value["route_long_name"] else "") + ")"
+                str(dt_util.as_utc(upcoming).isoformat()) + " (" + str(value["route_short_name"]) +  str( ("/" + value["route_long_name"])  if value["route_long_name"] else "") + ")"
+            )
+            timetable_remaining_headsign.append(
+                str(dt_util.as_utc(upcoming).isoformat()) + " (" + str(value["trip_headsign"]) + ")"
             )
     _LOGGER.debug(
         "Timetable Remaining Departures on this Start/Stop, per line: %s",
         timetable_remaining_line,
     )
-    # create upcoming timetable with headsign
-    timetable_remaining_headsign = []
-    for key, value in sorted(timetable.items()):
-        if datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S") > now:
-            timetable_remaining_headsign.append(
-                str(dt_util.as_utc(datetime.datetime.strptime(key, "%Y-%m-%d %H:%M:%S")).isoformat()) + " (" + str(value["trip_headsign"]) + ")"
-            )
     _LOGGER.debug(
         "Timetable Remaining Departures on this Start/Stop, with headsign: %s",
         timetable_remaining_headsign,
@@ -298,12 +352,12 @@ def get_next_departure(self):
     # Format arrival and departure dates and times, accounting for the
     # possibility of times crossing over midnight.
     _tomorrow = False
-    if item.get("tomorrow") == 1 or item.get("calendar_date") > now_date:
+    if item.get("tomorrow") == 1 or item.get("calendar_date") > now_date_local_tz or item.get("origin_depart_date") != '1970-01-01' :
         _tomorrow = True
-    _LOGGER.debug("Time is 'tomorrow': %s ,based on -> tomorrow_val: %s, calendar_date val: %s, now_date val: %s", _tomorrow, item.get("tomorrow"),item.get("calendar_date"), now_date)        
+    _LOGGER.debug("Time is 'tomorrow': %s ,based on -> tomorrow_val: %s, calendar_date val: %s, now_date_local_tz val: %s", _tomorrow, item.get("tomorrow"),item.get("calendar_date"), now_date_local_tz)        
     origin_arrival = now
     dest_arrival = now
-    origin_depart_time = f"{now_date} {item['origin_depart_time']}"
+    origin_depart_time = f"{now_date_local_tz} {item['origin_depart_time']}"
     if _tomorrow and now_time > item['origin_depart_time']:
         origin_arrival = tomorrow
         dest_arrival = tomorrow
@@ -328,9 +382,11 @@ def get_next_departure(self):
     dest_depart_time = (
         f"{dest_depart.strftime(dt_util.DATE_STR_FORMAT)} {item['dest_depart_time']}"
     )
-    # align on timezone
-    depart_time = dt_util.parse_datetime(origin_depart_time).replace(tzinfo=timezone)    
-    arrival_time = dt_util.parse_datetime(dest_arrival_time).replace(tzinfo=timezone)
+ 
+    _LOGGER.debug("Orig depart time: %s", origin_depart_time)
+    
+    depart_time = dt_util.parse_datetime(origin_depart_time).replace(tzinfo=timezone)
+    arrival_time = dt_util.parse_datetime(dest_arrival_time).replace(tzinfo=timezone_dest)
     origin_arrival_time = dt_util.as_utc(datetime.datetime.strptime(origin_arrival_time, "%Y-%m-%d %H:%M:%S")).isoformat()
     origin_depart_time = dt_util.as_utc(datetime.datetime.strptime(origin_depart_time, "%Y-%m-%d %H:%M:%S")).isoformat()
     dest_arrival_time = dt_util.as_utc(datetime.datetime.strptime(dest_arrival_time, "%Y-%m-%d %H:%M:%S")).isoformat()
@@ -369,7 +425,9 @@ def get_next_departure(self):
         "departure_time": depart_time,
         "arrival_time": arrival_time,
         "origin_stop_time": origin_stop_time,
+        "origin_stop_timezone": item["origin_stop_timezone"],
         "destination_stop_time": destination_stop_time,
+        "destination_stop_timezone": item["dest_stop_timezone"],
         "destination_stop_name": item["dest_stop_name"],
         "next_departures": timetable_remaining,
         "next_departures_lines": timetable_remaining_line,
@@ -595,11 +653,12 @@ def get_agency_list(schedule, data):
     _LOGGER.debug(f"agencies: {agencies}")
     return agencies
 
-def get_datasources(hass, path) -> dict[str]:
+async def get_datasources(hass, path) -> dict[str]:
     _LOGGER.debug(f"Getting datasources for path: {path}")
     gtfs_dir = hass.config.path(path)
     os.makedirs(gtfs_dir, exist_ok=True)
-    files = os.listdir(gtfs_dir)
+    files = await hass.async_add_executor_job(
+            os.listdir, gtfs_dir)
     datasources = []
     for file in files:
         if file.endswith(".sqlite"):
@@ -805,11 +864,6 @@ def get_local_stop_list(hass, schedule, data):
         
 
 def get_local_stops_next_departures(self):
-    if self.hass.config.time_zone is None:
-        _LOGGER.error("Timezone is not set in Home Assistant configuration")
-        timezone = "UTC"
-    else:
-        timezone=dt_util.get_time_zone(self.hass.config.time_zone)
     _LOGGER.debug("Get local stop departure with data: %s", self._data)
     if check_extracting(self.hass, self._data['gtfs_dir'],self._data['file']):
         _LOGGER.warning("Cannot get next depurtures on this datasource as still unpacking: %s", self._data["file"])
@@ -844,7 +898,7 @@ def get_local_stops_next_departures(self):
         tomorrow_select2 = f"CASE WHEN date(:now_offset) < calendar_date_today.date THEN '1' else '0' END as tomorrow,"        
     sql_query = f"""
         SELECT * FROM (
-        SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
+        SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, stop.stop_timezone as stop_timezone, agency.agency_timezone as agency_timezone, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
                route.route_long_name,route.route_short_name,route.route_type,
                calendar.{now.strftime("%A").lower()} AS today,
                {tomorrow_select}
@@ -862,6 +916,8 @@ def get_local_stops_next_departures(self):
                    on stop.stop_id = st.stop_id and abs(stop.stop_lat - :latitude) < :radius and abs(stop.stop_lon - :longitude) < :radius
         INNER JOIN routes route
                    ON route.route_id = trip.route_id 
+        INNER JOIN agency agency
+                   ON agency.agency_id = route.agency_id 
 		WHERE 
         trip.service_id not in (select service_id from calendar_dates where date = date(:now_offset) and exception_type = 2)
         and ((datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange))
@@ -871,7 +927,7 @@ def get_local_stops_next_departures(self):
         )
 		UNION ALL
         SELECT * FROM (
-	    SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
+	    SELECT stop.stop_id, stop.stop_name,stop.stop_lat as latitude, stop.stop_lon as longitude, stop.stop_timezone as stop_timezone, agency.agency_timezone as agency_timezone, trip.trip_id, trip.trip_headsign, trip.direction_id, time(st.departure_time) as departure_time,
                route.route_long_name,route.route_short_name,route.route_type,
                '0' AS today,
                {tomorrow_select2}
@@ -889,6 +945,8 @@ def get_local_stops_next_departures(self):
                    ON route.route_id = trip.route_id 
         INNER JOIN calendar_dates calendar_date_today
 				   ON trip.service_id = calendar_date_today.service_id
+        INNER JOIN agency agency
+                   ON agency.agency_id = route.agency_id                    
 		WHERE 
         today_cd = 1
         and ((datetime(date(:now_offset) || ' ' || time(st.departure_time) ) between  datetime(:now_offset,:timerange_history) and  datetime(:now_offset,:timerange))
@@ -913,6 +971,16 @@ def get_local_stops_next_departures(self):
     prev_stop_id = ""
     prev_entry = entry = {}
     
+    # Define timezone
+    if self.hass.config.time_zone is None:
+        _LOGGER.error("Timezone is not set in Home Assistant configuration, using UTC")
+        timezone_local = dt_util.get_time_zone("UTC")
+    else:
+        timezone_local = dt_util.get_time_zone(self.hass.config.time_zone)
+    _LOGGER.debug("Local timezone: %s",timezone_local)
+    now_tz = dt_util.now().replace(tzinfo=timezone_local) + datetime.timedelta(minutes=offset)        
+    _LOGGER.debug("Default 'now' on local timezone, incl. offset (if configured): %s",now_tz)
+
     
     # Set elements for realtime retrieval via local file.
     if self._realtime:
@@ -934,9 +1002,27 @@ def get_local_stops_next_departures(self):
     for row_cursor in result:
         row = row_cursor._asdict()
         _LOGGER.debug("Row from query: %s", row)
+        
+        #defining TZ for row
+        _LOGGER.debug("Configured Agency timezone: %s", row['agency_timezone'])
+        _LOGGER.debug("Configured Stop timezone: %s", row['stop_timezone'])
+        if row['agency_timezone'] is not None:
+            timezone_agency = dt_util.get_time_zone(row['agency_timezone'])
+        elif row['stop_timezone'] is not None:
+            timezone_agency = dt_util.get_time_zone(row['stop_timezone'])
+        else:
+            timezone_agency = timezone_local
+        if row['stop_timezone'] is not None:
+            timezone_stop = dt_util.get_time_zone(row['stop_timezone'])
+        else:
+            timezone_stop = timezone_local
+        _LOGGER.debug("Using Agency timezone: %s", timezone_agency)            
+        _LOGGER.debug("Using Stop timezone: %s", timezone_stop) 
+                
         if row["stop_id"] != prev_stop_id and prev_stop_id != "": 
             local_stops_list.append(prev_entry)
             timetable = []
+             
         entry = {"stop_id": row['stop_id'], "stop_name": row['stop_name'], "latitude": row['latitude'], "longitude": row['longitude'], "departure": timetable, "offset": offset}
         self._icon = ICONS.get(row['route_type'], ICON)
         
@@ -946,38 +1032,63 @@ def get_local_stops_next_departures(self):
             self._route = row['route_id']   
             self._route_id = row['route_id'] 
             self._stop_id = row['stop_id']
+            _LOGGER.debug("Row departure_time: %s", row["departure_time"])              
+            # collect departure time from row, using agency timezone as basis, then transforming it to the stop-specific timezone (based on Amtrak)
+            self._departure_datetime = datetime.datetime.strptime(now_date + " " + row["departure_time"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone_agency).astimezone(tz=timezone_stop)
+            self._departure_datetime_utc = dt_util.as_utc(self._departure_datetime)
+            _LOGGER.debug("Self._departure datetime in agency_tz: %s", self._departure_datetime)
+            self._departure_time = self._departure_datetime.replace(tzinfo=None).strftime(TIME_STR_FORMAT)       
+            _LOGGER.debug("Self._departure time in stop tz: %s", self._departure_time)
             departure_rt = "-"
+            departure_rt_datetime = '-'
             delay_rt = "-"
+            delay_rt_derived = '-'
             # Find RT if configured
             if self._realtime:
                 self._get_next_service = {}
                 _LOGGER.debug("Find rt for local stop route: %s - direction: %s - stop: %s", self._route , self._direction, self._stop_id)
                 next_service = get_rt_route_trip_statuses(self)
-                
+                _LOGGER.debug("Next service: %s", next_service)
                 if next_service:                       
                     delays = next_service.get(self._route, {}).get(self._direction, {}).get(self._stop_id, []).get("delays", [])
                     departures = next_service.get(self._route, {}).get(self._direction, {}).get(self._stop_id, []).get("departures", [])
                     delay_rt = delays[0] if delays else "-"
                     departure_rt = departures[0] if departures else "-"
-                    
+                    departure_rt_datetime = departure_rt
+                _LOGGER.debug("Departure rt: %s, Delay rt: %s", departure_rt, delay_rt)   
             if departure_rt != '-':
-                depart_time_corrected = departures[0]
-                _LOGGER.debug("Departure time: %s, corrected with delay timestamp: %s", dt_util.parse_datetime(f"{now_date} {row["departure_time"]}").replace(tzinfo=timezone), depart_time_corrected)
+                depart_time_corrected_time = departures[0].astimezone(tz=timezone_stop)
+                departure_rt = depart_time_corrected_time.replace(tzinfo=None).strftime(TIME_STR_FORMAT)
+                td = abs(depart_time_corrected_time - self._departure_datetime)
+                if td.seconds != 0 and depart_time_corrected_time < self._departure_datetime :
+                    delay_rt_derived = '-' + str(td)
+                elif td.seconds != 0: 
+                    delay_rt_derived = str(td)
+                _LOGGER.debug("Delay derived: %s", delay_rt_derived) 
             else: 
-                depart_time_corrected = dt_util.parse_datetime(f"{now_date} {row["departure_time"]}").replace(tzinfo=timezone)
-            if delay_rt != '-':
-                depart_time_corrected = dt_util.parse_datetime(f"{now_date} {row["departure_time"]}").replace(tzinfo=timezone) + datetime.timedelta(seconds=delay_rt)
-                _LOGGER.debug("Departure time: %s, corrected with delay: %s", dt_util.parse_datetime(f"{now_date} {row["departure_time"]}").replace(tzinfo=timezone), depart_time_corrected)
+                depart_time_corrected_time = (dt_util.parse_datetime(f"{now_date} {self._departure_time}")).replace(tzinfo=timezone_stop)
+            _LOGGER.debug("Departure time corrected based on realtime-time: %s", depart_time_corrected_time)    
+            if delay_rt != '-' and delay_rt != 0 :
+                depart_time_corrected_delay = (dt_util.parse_datetime(f"{now_date} {self._departure_time}") + datetime.timedelta(seconds=delay_rt)).replace(tzinfo=timezone_stop)
             else:
-                depart_time_corrected = dt_util.parse_datetime(f"{now_date} {row["departure_time"]}").replace(tzinfo=timezone)                
-            _LOGGER.debug("Departure time: %s", depart_time_corrected)   
-            if depart_time_corrected > now.replace(tzinfo=timezone): 
-                _LOGGER.debug("Departure time corrected: %s, after now: %s", depart_time_corrected, now.replace(tzinfo=timezone))
-                timetable.append({"departure": row["departure_time"], "departure_realtime": departure_rt, "delay_realtime": delay_rt, "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
+                delay_rt = '-'
+                depart_time_corrected_delay = dt_util.parse_datetime(f"{now_date} {self._departure_time}").replace(tzinfo=timezone_stop)                
+            _LOGGER.debug("Departure time corrected based on realtime-delay: %s", depart_time_corrected_delay)   
+
+            if depart_time_corrected_delay > depart_time_corrected_time: 
+                depart_time_corrected = depart_time_corrected_delay
+            else:
+                depart_time_corrected = depart_time_corrected_time
+            _LOGGER.debug("Departure time corrected: %s", depart_time_corrected_delay)   
+
+            if depart_time_corrected > now_tz: 
+                _LOGGER.debug("Departure time corrected: %s, after now in tz with offset: %s", depart_time_corrected, now_tz)
+                timetable.append({"departure": self._departure_time, "departure_datetime": self._departure_datetime_utc, "departure_realtime": departure_rt, "departure_realtime_datetime": departure_rt_datetime, "delay_realtime_derived": delay_rt_derived, "delay_realtime": delay_rt, "date": now_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
+                _LOGGER.debug("Timetable: %s", timetable)
         
         if (row["tomorrow"] == '1' or row["tomorrow"] == 1) and (datetime.datetime.strptime(now_time_hist_corrected,"%H:%M") > datetime.datetime.strptime(row["departure_time"],"%H:%M:%S")):
             _LOGGER.debug("Tomorrow: adding row")
-            timetable.append({"departure": row["departure_time"], "departure_realtime": "tomorrow", "delay_realtime": "tomorrow", "date": tomorrow_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
+            timetable.append({"departure": self._departure_time, "departure_datetime": self._departure_datetime_utc, "departure_realtime": "tomorrow", "departure_realtime_datetime": "tomorrow", "delay_realtime_derived": "tomorrow", "delay_realtime": "tomorrow",  "date": tomorrow_date, "stop_name": row['stop_name'], "route": row["route_short_name"], "route_long": row["route_long_name"], "headsign": row["trip_headsign"], "trip_id": row["trip_id"], "direction_id": row["direction_id"], "icon": self._icon})
         
         prev_entry = entry.copy()
         prev_stop_id = str(row["stop_id"])

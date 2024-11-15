@@ -20,12 +20,12 @@ from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.const import ATTR_ENTITY_ID, ATTR_FRIENDLY_NAME
 import homeassistant.components.media_player as media_player
 
-from pytube import YouTube # to generate cipher
-from pytube import request # to generate cipher
-from pytube import extract # to generate cipher
+from pytubefix import YouTube # to generate cipher
+from pytubefix import request # to generate cipher
+from pytubefix import extract # to generate cipher
 
 import ytmusicapi
-from pytube.exceptions import RegexMatchError
+from pytubefix.exceptions import RegexMatchError
 # use this to work with local version
 # and make sure that the local package is also only loading local files
 # from .ytmusicapi import YTMusic
@@ -35,95 +35,7 @@ from .const import *
 
 ################### Temp FIX remove me! ###############################
 ################### Temp FIX remove me! ###############################
-import pytube, re
-# Another temporary hotfix https://github.com/pytube/pytube/issues/1199
-def patched__init__(self, js: str):
-    self.transform_plan: List[str] = pytube.cipher.get_transform_plan(js)
-    var_regex = re.compile(r"^\$*\w+\W")
-    var_match = var_regex.search(self.transform_plan[0])
-    if not var_match:
-        raise RegexMatchError(
-            caller="__init__", pattern=var_regex.pattern
-        )
-    var = var_match.group(0)[:-1]
-    self.transform_map = pytube.cipher.get_transform_map(js, var)
-    self.js_func_patterns = [
-        r"\w+\.(\w+)\(\w,(\d+)\)",
-        r"\w+\[(\"\w+\")\]\(\w,(\d+)\)"
-    ]
-
-#    self.throttling_plan = pytube.cipher.get_throttling_plan(js)
-#    self.throttling_array = pytube.cipher.get_throttling_function_array(js)
-
-    self.calculated_n = None
-
-pytube.cipher.Cipher.__init__ = patched__init__
-################### Temp FIX remove me! ###############################
-#https://github.com/pytube/pytube/issues/2005
-def patched__get_transform_map__(js: str, var: str) -> Dict:
-	transform_object = pytube.cipher.get_transform_object(js, var)
-	mapper = {}
-	for obj in transform_object:
-		# AJ:function(a){a.reverse()} => AJ, function(a){a.reverse()}
-		name, function = obj.split(":", 1)
-		if function == '"jspb"':
-			continue
-		fn = pytube.cipher.map_functions(function)
-		mapper[name] = fn
-	return mapper
-
-pytube.cipher.get_transform_map = patched__get_transform_map__
-
-
-def patched_get_throttling_function_name(js: str) -> str:
-    """Extract the name of the function that computes the throttling parameter.
-
-    :param str js:
-        The contents of the base.js asset file.
-    :rtype: str
-    :returns:
-        The name of the function used to compute the throttling parameter.
-    """
-    function_patterns = [
-        # https://github.com/ytdl-org/youtube-dl/issues/29326#issuecomment-865985377
-        # https://github.com/yt-dlp/yt-dlp/commit/48416bc4a8f1d5ff07d5977659cb8ece7640dcd8
-        # var Bpa = [iha];
-        # ...
-        # a.C && (b = a.get("n")) && (b = Bpa[0](b), a.set("n", b),
-        # Bpa.length || iha("")) }};
-        # In the above case, `iha` is the relevant function name
-        r'a\.[a-zA-Z]\s*&&\s*\([a-z]\s*=\s*a\.get\("n"\)\)\s*&&.*?\|\|\s*([a-z]+)',
-        r'\([a-z]\s*=\s*([a-zA-Z0-9$]+)(\[\d+\])?\([a-z]\)',
-        r'\([a-z]\s*=\s*([a-zA-Z0-9$]+)(\[\d+\])\([a-z]\)',
-    ]
-    logger.debug('Finding throttling function name')
-    for pattern in function_patterns:
-        regex = re.compile(pattern)
-        function_match = regex.search(js)
-        if function_match:
-            logger.debug("finished regex search, matched: %s", pattern)
-            if len(function_match.groups()) == 1:
-                return function_match.group(1)
-            idx = function_match.group(2)
-            if idx:
-                idx = idx.strip("[]")
-                array = re.search(
-                    r'var {nfunc}\s*=\s*(\[.+?\]);'.format(
-                        nfunc=re.escape(function_match.group(1))),
-                    js
-                )
-                if array:
-                    array = array.group(1).strip("[]").split(",")
-                    array = [x.strip() for x in array]
-                    return array[int(idx)]
-
-    raise RegexMatchError(
-        caller="get_throttling_function_name", pattern="multiple"
-    )
-
-pytube.cipher.get_throttling_function_name = patched_get_throttling_function_name
-################### Temp FIX remove me! ###############################
-################### Temp FIX remove me! ###############################
+import pytubefix, re
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -316,6 +228,7 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			self._update_needed = True
 		else:
 			hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, self.async_startup)
+
 
 	# user had difficulties during the debug message on, so we'll provide a workaroud to post debug as errors
 	def log_me(self, type, msg):
@@ -793,12 +706,12 @@ class yTubeMusicComponent(MediaPlayerEntity):
 	async def async_get_cipher(self, videoId):
 		self.log_debug_later("[S] async_get_cipher")
 		embed_url = "https://www.youtube.com/embed/" + videoId
-		# this is why we need pytube as include 
+		# this is why we need pytubefix as include 
 		embed_html = await self.hass.async_add_executor_job(request.get, embed_url)
 		js_url = extract.js_url(embed_html)
 		self._js = await self.hass.async_add_executor_job(request.get, js_url)
-		self._cipher = pytube.cipher.Cipher(js=self._js)
-		# this is why we need pytube as include 
+		self._cipher = pytubefix.cipher.Cipher(js=self._js, js_url=js_url)
+		# this is why we need pytubefix as include 
 		self.log_me('debug', "[E] async_get_cipher")
 
 	async def async_sync_player(self, event=None):

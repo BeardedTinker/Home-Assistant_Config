@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import async_timeout
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
-from homeassistant.const import CONF_URL, EVENT_HOMEASSISTANT_STOP
+from homeassistant.const import CONF_URL, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.issue_registry import (
@@ -17,35 +18,55 @@ from homeassistant.helpers.issue_registry import (
     async_create_issue,
     async_delete_issue,
 )
-from music_assistant.client import MusicAssistantClient
-from music_assistant.client.exceptions import CannotConnect, InvalidServerVersion
-from music_assistant.common.models.enums import EventType
-from music_assistant.common.models.errors import MusicAssistantError
+from homeassistant.helpers.typing import ConfigType
+from music_assistant_client import MusicAssistantClient
+from music_assistant_client.exceptions import CannotConnect, InvalidServerVersion
+from music_assistant_models.enums import EventType
+from music_assistant_models.errors import MusicAssistantError
 
+from .actions import register_actions
 from .const import DOMAIN, LOGGER
-from .helpers import MassEntryData
-from .services import register_services
 
 if TYPE_CHECKING:
-    from music_assistant.common.models.event import MassEvent
+    from music_assistant_models.event import MassEvent
 
-PLATFORMS = ("media_player",)
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+PLATFORMS = [Platform.MEDIA_PLAYER]
 
 CONNECT_TIMEOUT = 10
 LISTEN_READY_TIMEOUT = 30
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up from a config entry."""
-    # ruff: noqa: PLR0915
+@dataclass
+class MusicAssistantEntryData:
+    """Hold Mass data for the config entry."""
+
+    mass: MusicAssistantClient
+    listen_task: asyncio.Task
+
+
+type MusicAssistantConfigEntry = ConfigEntry[MusicAssistantEntryData]
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the Music Assistant component."""
+    # register our (custom) actions/services
+    register_actions(hass)
+    return True
+
+
+async def async_setup_entry(
+    hass: HomeAssistant, entry: MusicAssistantConfigEntry
+) -> bool:
+    """Set up Music Assistant from a config entry."""
     http_session = async_get_clientsession(hass, verify_ssl=False)
     mass_url = entry.data[CONF_URL]
     mass = MusicAssistantClient(mass_url, http_session)
 
     try:
-        async with async_timeout.timeout(CONNECT_TIMEOUT):
+        async with asyncio.timeout(CONNECT_TIMEOUT):
             await mass.connect()
-    except (CannotConnect, asyncio.TimeoutError) as err:
+    except (TimeoutError, CannotConnect) as err:
         raise ConfigEntryNotReady(
             f"Failed to connect to music assistant server {mass_url}"
         ) from err
@@ -59,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             translation_key="invalid_server_version",
         )
         raise ConfigEntryNotReady(f"Invalid server version: {err}") from err
-    except Exception as err:
+    except MusicAssistantError as err:
         LOGGER.exception("Failed to connect to music assistant server", exc_info=err)
         raise ConfigEntryNotReady(
             f"Unknown error connecting to the Music Assistant server {mass_url}"
@@ -81,36 +102,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     listen_task = asyncio.create_task(_client_listen(hass, entry, mass, init_ready))
 
     try:
-        async with async_timeout.timeout(LISTEN_READY_TIMEOUT):
+        async with asyncio.timeout(LISTEN_READY_TIMEOUT):
             await init_ready.wait()
-    except asyncio.TimeoutError as err:
+    except TimeoutError as err:
         listen_task.cancel()
         raise ConfigEntryNotReady("Music Assistant client not ready") from err
 
-    if DOMAIN not in hass.data:
-        hass.data[DOMAIN] = {}
-        register_services(hass)
-
-    hass.data[DOMAIN][entry.entry_id] = MassEntryData(mass, listen_task)
-
-    # initialize platforms
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # store the listen task and mass client in the entry data
+    entry.runtime_data = MusicAssistantEntryData(mass, listen_task)
 
     # If the listen task is already failed, we need to raise ConfigEntryNotReady
     if listen_task.done() and (listen_error := listen_task.exception()) is not None:
         await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-        hass.data[DOMAIN].pop(entry.entry_id)
         try:
             await mass.disconnect()
         finally:
             raise ConfigEntryNotReady(listen_error) from listen_error
 
+    # initialize platforms
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     # register listener for removed players
     async def handle_player_removed(event: MassEvent) -> None:
         """Handle Mass Player Removed event."""
+        if event.object_id is None:
+            return
         dev_reg = dr.async_get(hass)
         if hass_device := dev_reg.async_get_device({(DOMAIN, event.object_id)}):
-            dev_reg.async_remove_device(hass_device.id)
+            dev_reg.async_update_device(
+                hass_device.id, remove_config_entry_id=entry.entry_id
+            )
 
     entry.async_on_unload(
         mass.subscribe(handle_player_removed, EventType.PLAYER_REMOVED)
@@ -134,9 +155,9 @@ async def _client_listen(
         LOGGER.error("Failed to listen: %s", err)
     except Exception as err:  # pylint: disable=broad-except
         # We need to guard against unknown exceptions to not crash this task.
-        LOGGER.exception("Unexpected exception: %s", err)
         if entry.state != ConfigEntryState.LOADED:
             raise
+        LOGGER.exception("Unexpected exception: %s", err)
 
     if not hass.is_stopping:
         LOGGER.debug("Disconnected from server. Reloading integration")
@@ -148,7 +169,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
-        mass_entry_data: MassEntryData = hass.data[DOMAIN].pop(entry.entry_id)
+        mass_entry_data: MusicAssistantEntryData = entry.runtime_data
         mass_entry_data.listen_task.cancel()
         await mass_entry_data.mass.disconnect()
 

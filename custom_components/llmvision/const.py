@@ -16,32 +16,39 @@ CONF_OLLAMA_PORT = 'ollama_port'
 CONF_OLLAMA_HTTPS = 'ollama_https'
 CONF_CUSTOM_OPENAI_ENDPOINT = 'custom_openai_endpoint'
 CONF_CUSTOM_OPENAI_API_KEY = 'custom_openai_api_key'
+CONF_RETENTION_TIME = 'retention_time'
 
 # service call constants
+MESSAGE = 'message'
+REMEMBER = 'remember'
 PROVIDER = 'provider'
 MAXTOKENS = 'max_tokens'
 TARGET_WIDTH = 'target_width'
 MODEL = 'model'
-MESSAGE = 'message'
 IMAGE_FILE = 'image_file'
 IMAGE_ENTITY = 'image_entity'
 VIDEO_FILE = 'video_file'
 EVENT_ID = 'event_id'
 INTERVAL = 'interval'
+DURATION = 'duration'
+MAX_FRAMES = 'max_frames'
 DETAIL = 'detail'
 TEMPERATURE = 'temperature'
 INCLUDE_FILENAME = 'include_filename'
+EXPOSE_IMAGES = 'expose_images'
+SENSOR_ENTITY = 'sensor_entity'
 
 # Error messages
-ERROR_OPENAI_NOT_CONFIGURED = "OpenAI provider is not configured"
-ERROR_ANTHROPIC_NOT_CONFIGURED = "Anthropic provider is not configured"
-ERROR_GOOGLE_NOT_CONFIGURED = "Google provider is not configured"
-ERROR_GROQ_NOT_CONFIGURED = "Groq provider is not configured"
-ERROR_LOCALAI_NOT_CONFIGURED = "LocalAI provider is not configured"
-ERROR_OLLAMA_NOT_CONFIGURED = "Ollama provider is not configured"
+ERROR_OPENAI_NOT_CONFIGURED = "OpenAI is not configured"
+ERROR_ANTHROPIC_NOT_CONFIGURED = "Anthropic is not configured"
+ERROR_GOOGLE_NOT_CONFIGURED = "Google is not configured"
+ERROR_GROQ_NOT_CONFIGURED = "Groq is not configured"
+ERROR_GROQ_MULTIPLE_IMAGES = "Groq does not support videos or streams"
+ERROR_LOCALAI_NOT_CONFIGURED = "LocalAI is not configured"
+ERROR_OLLAMA_NOT_CONFIGURED = "Ollama is not configured"
 ERROR_CUSTOM_OPENAI_NOT_CONFIGURED = "Custom OpenAI provider is not configured"
 ERROR_NO_IMAGE_INPUT = "No image input provided"
-ERROR_HANDSHAKE_FAILED = "Handshake with LocalAI server failed"
+ERROR_HANDSHAKE_FAILED = "Connection could not be established"
 
 # Versions
 # https://docs.anthropic.com/en/api/versioning

@@ -36,6 +36,8 @@ from .const import (
     ATTR_WHEELCHAIR,
     ATTR_WHEELCHAIR_DESTINATION,
     ATTR_WHEELCHAIR_ORIGIN,
+    ATTR_TIMEZONE_ORIGIN,
+    ATTR_TIMEZONE_DESTINATION,
     BICYCLE_ALLOWED_DEFAULT,
     BICYCLE_ALLOWED_OPTIONS,
     DEFAULT_NAME,
@@ -216,14 +218,14 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
         # Define the state as a Agency TZ, then help TZ (which is UTC if no HA TZ set)
         if not self._departure:
             self._state = None
-        elif self._agency:
-            _LOGGER.debug(
-                "Self._departure time for state value TZ: %s ",
-                {self._departure.get("departure_time")},
-            )
-            self._state = self._departure["departure_time"].replace(
-                tzinfo=dt_util.get_time_zone(self._agency.agency_timezone)
-            )
+        #elif self._agency:
+        #    _LOGGER.debug(
+        #        "Self._departure time for state value TZ: %s ",
+        #        {self._departure.get("departure_time")},
+        #    )
+        #    self._state = self._departure["departure_time"].replace(
+        #        tzinfo=dt_util.get_time_zone(self._agency.agency_timezone)
+        #    )
         else:
             _LOGGER.debug(
                 "Self._departure time from helper: %s",
@@ -371,6 +373,7 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
             self._attributes[ATTR_TIMEPOINT_ORIGIN] = TIMEPOINT_OPTIONS.get(
                 self._departure["origin_stop_time"]["Timepoint"], TIMEPOINT_DEFAULT
             )
+            self._attributes[ATTR_TIMEZONE_ORIGIN] = self._departure.get("origin_stop_timezone", None)
         else:
             self.remove_keys(prefix)
         
@@ -378,6 +381,7 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
             _LOGGER.debug("Destination_stop_time %s", self._departure["destination_stop_time"])
         else:
             _LOGGER.debug("No destination_stop_time, possibly no service today")
+        
         prefix = "destination_stop"
         if self._departure:
             self.append_keys(self._departure["destination_stop_time"], prefix)
@@ -392,6 +396,7 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
             self._attributes[ATTR_TIMEPOINT_DESTINATION] = TIMEPOINT_OPTIONS.get(
                 self._departure["destination_stop_time"]["Timepoint"], TIMEPOINT_DEFAULT
             )
+            self._attributes[ATTR_TIMEZONE_DESTINATION] = self._departure.get("destination_stop_timezone", None)
         else:
             self.remove_keys(prefix)
 

@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN
 
 if TYPE_CHECKING:
-    from music_assistant.client import MusicAssistantClient
+    from music_assistant_client import MusicAssistantClient
 
 
 @dataclass

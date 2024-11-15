@@ -34,6 +34,8 @@ primary_entity:
               mapping:
                 - dps_val: Warming
                   value: heating
+                - dps_val: Heat
+                  value: heating
                 - dps_val: "Off"
                   value: idle
                 - dps_val: Closed
@@ -62,8 +64,7 @@ primary_entity:
         - scale: 10
 secondary_entities:
   - entity: button
-    name: Factory reset
-    class: restart
+    translation_key: factory_reset
     category: config
     dps:
       - id: 39

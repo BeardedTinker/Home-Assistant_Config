@@ -137,7 +137,7 @@ def customimage(entity_id, service, hass):
         # line
         if element["type"] == "line":
             check_for_missing_required_arguments(element, ["x_start", "x_end"], "line")
-            img_line = ImageDraw.Draw(img)  
+            img_line = ImageDraw.Draw(img)
             if "y_start" not in element:
                 y_start = pos_y + element.get("y_padding", 0)
                 y_end = y_start
@@ -217,7 +217,7 @@ def customimage(entity_id, service, hass):
             else:
                 akt_pos_y = element['y']
             color = element.get('color', "black")
-            anchor = element.get('anchor', "lt")
+            anchor = element.get('anchor', '')
             align = element.get('align', "left")
             spacing = element.get('spacing', 5)
             stroke_width = element.get('stroke_width', 0)
@@ -226,6 +226,7 @@ def customimage(entity_id, service, hass):
                 text = get_wrapped_text(str(element['value']), font, line_length=element['max_width'])
             else:
                 text = str(element['value'])
+            anchor = anchor or ('la' if '\n' in text else 'lt')
             d.text((element['x'],  akt_pos_y), text, fill=getIndexColor(color), font=font, anchor=anchor, align=align, spacing=spacing, stroke_width=stroke_width, stroke_fill=stroke_fill)
             textbbox = d.textbbox((element['x'],  akt_pos_y), text, font=font, anchor=anchor, align=align, spacing=spacing, stroke_width=stroke_width)
             pos_y = textbbox[3]
@@ -256,7 +257,8 @@ def customimage(entity_id, service, hass):
             d.fontmode = "1"
             # ttf from https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf
             font_file = os.path.join(os.path.dirname(__file__), 'materialdesignicons-webfont.ttf')
-            meta_file = os.path.join(os.path.dirname(__file__), "materialdesignicons-webfont_meta.json") 
+            meta_file = os.path.join(os.path.dirname(
+                __file__), "materialdesignicons-webfont_meta.json")
             f = open(meta_file)
             data = json.load(f)
             chr_hex = ""
@@ -318,7 +320,7 @@ def customimage(entity_id, service, hass):
                 imgdl = Image.open(io.BytesIO(data))
             else:
                 imgdl = Image.open(url)
-                
+
             if rotate2 != 0:
                 imgdl = imgdl.rotate(-rotate2, expand=1)
             width2, height2 = imgdl.size
@@ -405,7 +407,7 @@ def customimage(entity_id, service, hass):
             height = y_end - y_start + 1
             # The duration of history to look at (default 1 day)
             duration = timedelta(seconds=element.get("duration", 60*60*24))
-            
+
             end = dt.utcnow()
             start = end - duration
             # The label font and size
@@ -447,7 +449,7 @@ def customimage(entity_id, service, hass):
             max_v = element.get("high", None)
             # Obtain all states of all given entities in the given duration
             all_states = get_significant_states(hass, start_time=start, entity_ids=[plot["entity"] for plot in element["data"]], significant_changes_only=False, minimal_response=True, no_attributes=False)
-            
+
             # prepare data and obtain min_v and max_v with it
             raw_data = []
             for plot in element["data"]:

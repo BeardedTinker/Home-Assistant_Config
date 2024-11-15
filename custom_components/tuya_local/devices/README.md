@@ -332,6 +332,18 @@ example, some devices have a "Manual" mode, which is automatically selected
 when adjustments are made to other settings, but should not be available as
 an explicit mode for the user to select.
 
+### `available`
+
+*Optional.*
+
+This works the similarly to `hidden` above, but instead of a boolean
+value, this should be set to the name of an attribute, which returns a
+boolean value, so that the value can be dynamically hidden or shown. A
+typical use is where variants of a device use the same config, and
+have a flag attribute that indicates whether certain features are
+available or not. The mapping will be hidden from the values list when
+the referenced attribute is showing `false`, and shown when it is `true`.
+
 ### `scale`
 
 *Optional, default=1.*
@@ -532,6 +544,18 @@ Note that each condition must specify a `dps_val` to match againt. If you want t
 ```
 
 
+## Generic dps
+
+The following dps may be defined for any entity type. The names should be
+avoided for any extra attribute that is not for the listed purpose.
+
+- **available** (optional, string) a dp name that returns a boolean indicating
+whether the entity should show as available or not (even when it appears to be
+returning valid state). This may be used to disable entities that the device
+indicates it does not support, through a feature flag dp. This should only be
+used when the device is permanently indicating a missing feature, as HA may
+hide the entity if it is marked as unavailable early enough during startup.
+
 ## Entity types
 
 Entities have specific mappings of dp names to functions. Any unrecognized dp name is added to the entity as a read-only extra attribute, so can be observed and queried from HA, but if you need to be able to change it, you should split it into its own entity of an appropriate type (number, select, switch for example).
@@ -623,6 +647,7 @@ Humidifer can also cover dehumidifiers (use class to specify which).
 - **mode** (optional, mapping of strings): a dp to control preset modes of the device
 - **humidity** (optional, number): a dp to control the target humidity of the device
 - **current_humidity** (optional, number): a dp to report the current humidity measured by the device
+- **action** (optional, string): a dp to report the current action the device is performing. Valid actions are `humidifying`, `drying`, `idle` and `off`
 
 ### `lawn_mower`
 - **activity** (required, string): a dp to report the current activity of the mower. Valid activities are `mowing`, `paused`, `docked`, `error`, `returning` (from LawnMowerActivities in https://github.com/home-assistant/core/blob/dev/homeassistant/components/lawn_mower/const.py). Any additional activities should be mapped to one of those, and exposed through an extra attribute or sensor entity that shows all the statuses that the mower is reporting.

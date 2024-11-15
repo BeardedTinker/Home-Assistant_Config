@@ -163,9 +163,8 @@ secondary_entities:
         type: boolean
         name: button
   - entity: button
-    name: Filter reset
+    translation_key: filter_reset
     category: config
-    class: restart
     dps:
       - id: 12
         type: boolean
@@ -198,7 +197,7 @@ secondary_entities:
         name: sensor
         unit: "%"
   - entity: sensor
-    name: Status
+    translation_key: status
     category: diagnostic
     icon: "mdi:robot-vacuum"
     dps:

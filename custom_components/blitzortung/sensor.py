@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
+    DOMAIN as SENSOR_PLATFORM,
 )
 from homeassistant.const import (
     CONF_NAME,
@@ -18,7 +19,8 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.typing import UNDEFINED
-
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from . import BlitzortungConfigEntry
 from .const import (
     ATTR_LAT,
@@ -57,7 +59,7 @@ class BlitzortungSensor(SensorEntity):
         self._attr_attribution = ATTRIBUTION
         self._attr_device_info = DeviceInfo(
             name=integration_name,
-            identifiers={(DOMAIN, integration_name)},
+            identifiers={(DOMAIN, unique_prefix)},
             model="Blitzortung Lightning Detector",
             sw_version=SW_VERSION,
             entry_type=DeviceEntryType.SERVICE,
@@ -158,7 +160,7 @@ class ServerStatSensor(BlitzortungSensor):
         else:
             self.data_type = int
         if self.data_type in (int, float):
-            self._attr_state_class=SensorStateClass.MEASUREMENT
+            self._attr_state_class = SensorStateClass.MEASUREMENT
 
         super().__init__(coordinator, description, integration_name, unique_prefix)
 
@@ -190,7 +192,6 @@ SENSORS: tuple[BlitzortungSensorEntityDescription, ...] = (
         translation_key=ATTR_LIGHTNING_AZIMUTH,
         has_entity_name=True,
         native_unit_of_measurement=DEGREE,
-        state_class=SensorStateClass.MEASUREMENT,
         entity_class=AzimuthSensor,
     ),
     BlitzortungSensorEntityDescription(
@@ -209,7 +210,6 @@ SENSORS: tuple[BlitzortungSensorEntityDescription, ...] = (
         has_entity_name=True,
         native_unit_of_measurement=UnitOfLength.KILOMETERS,
         device_class=SensorDeviceClass.DISTANCE,
-        state_class=SensorStateClass.MEASUREMENT,
         entity_class=DistanceSensor,
     ),
 )
@@ -223,7 +223,79 @@ async def async_setup_entry(
 
     coordinator = config_entry.runtime_data
 
-    unique_prefix = config_entry.unique_id
+    unique_prefix = config_entry.entry_id
+
+    # Migrate old service identifiers to new identifiers
+    device_registry = dr.async_get(hass)
+    old_ids = (DOMAIN, config_entry.title)
+    if device_entry := device_registry.async_get_device(identifiers={old_ids}):
+        new_ids = (DOMAIN, unique_prefix)
+        _LOGGER.debug(
+            "Migrating service %s from old IDs '%s' to new IDs '%s'",
+            device_entry.name,
+            old_ids,
+            new_ids,
+        )
+        device_registry.async_update_device(device_entry.id, new_identifiers={new_ids})
+
+    # Migrate old unique IDs to new unique IDs
+    entity_registry = er.async_get(hass)
+    old_unique_id = f"{config_entry.title}-server_stats"
+    if entity_id := entity_registry.async_get_entity_id(
+        SENSOR_PLATFORM, DOMAIN, old_unique_id
+    ):
+        new_unique_id = f"{unique_prefix}-clients_connected"
+        _LOGGER.debug(
+            "Migrating entity %s from old unique ID '%s' to new unique ID '%s'",
+            entity_id,
+            old_unique_id,
+            new_unique_id,
+        )
+        entity_registry.async_update_entity(entity_id, new_unique_id=new_unique_id)
+
+    for sensor_type in (
+        ATTR_LIGHTNING_AZIMUTH,
+        ATTR_LIGHTNING_COUNTER,
+        ATTR_LIGHTNING_DISTANCE,
+        "bytes_received",
+        "bytes_sent",
+        "clients_connected",
+        "heap_current",
+        "load_bytes_received_1min",
+        "load_bytes_sent_1min",
+        "load_connections_1min",
+        "load_messages_received_1min",
+        "load_messages_sent_1min",
+        "load_publish_received_1min",
+        "load_publish_sent_1min",
+        "load_sockets_1min",
+        "messages_received",
+        "messages_sent",
+        "messages_stored",
+        "publish_bytes_received",
+        "publish_bytes_sent",
+        "publish_messages_received",
+        "publish_messages_sent",
+        "publish_messages_sent",
+        "retained messages_count",
+        "store_messages_bytes",
+        "store_messages_count",
+        "subscriptions_count",
+        "uptime",
+        "version",
+    ):
+        old_unique_id = f"{config_entry.title}-{sensor_type}"
+        if entity_id := entity_registry.async_get_entity_id(
+            SENSOR_PLATFORM, DOMAIN, old_unique_id
+        ):
+            new_unique_id = f"{unique_prefix}-{sensor_type}"
+            _LOGGER.debug(
+                "Migrating entity %s from old unique ID '%s' to new unique ID '%s'",
+                entity_id,
+                old_unique_id,
+                new_unique_id,
+            )
+            entity_registry.async_update_entity(entity_id, new_unique_id=new_unique_id)
 
     sensors = [
         description.entity_class(
