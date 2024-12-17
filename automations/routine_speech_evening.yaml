@@ -11,7 +11,7 @@ initial_state: true
 
 trigger:
   - platform: state
-    entity_id: binary_sensor.kitchen_motion
+    entity_id: binary_sensor.dark_outside
     from: 'off'
     to: 'on'
 

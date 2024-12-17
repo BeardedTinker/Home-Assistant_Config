@@ -9,10 +9,10 @@ from .const import *
 import os
 import os.path
 from homeassistant.helpers.storage import STORAGE_DIR
-from ytmusicapi import YTMusic
+import ytmusicapi
 from ytmusicapi.helpers import SUPPORTED_LANGUAGES
 import requests
-from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
+#from ytmusicapi.auth.oauth import OAuthCredentials, RefreshingToken
 
 
 import traceback
@@ -42,10 +42,12 @@ class yTubeMusicFlowHandler(config_entries.ConfigFlow):
 		user_input = dict()
 		user_input[CONF_NAME] = DOMAIN
 
-		session = requests.Session()
-		self.oauth = OAuthCredentials("","",session,"")
-		self.code = await self.hass.async_add_executor_job(self.oauth.get_code) 
-		user_input[CONF_CODE] = self.code
+#		OAUTH
+#		session = requests.Session()
+#		self.oauth = OAuthCredentials("","",session,"")
+#		self.code = await self.hass.async_add_executor_job(self.oauth.get_code) 
+#		user_input[CONF_CODE] = self.code
+#		OAUTH
 		return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
 
 	# we get here after the user click submit on the oauth screem
@@ -55,17 +57,24 @@ class yTubeMusicFlowHandler(config_entries.ConfigFlow):
 		if user_input is not None:
 			user_input[CONF_NAME] = user_input[CONF_NAME].replace(DOMAIN_MP+".","") # make sure to erase "media_player.bla" -> bla
 			self.data = user_input
-		try:
-			self.token = await self.hass.async_add_executor_job(lambda: self.oauth.token_from_code(self.code["device_code"])) 
-			self.refresh_token = RefreshingToken(credentials=self.oauth, **self.token)
-			self.refresh_token.update(self.refresh_token.as_dict())
-		except:
-			self._errors["base"] = ERROR_GENERIC
-			user_input[CONF_CODE] = self.code
-			return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
-		# if we get here then Oauth worked, right?
-		user_input[CONF_HEADER_PATH] = os.path.join(self.hass.config.path(STORAGE_DIR),DEFAULT_HEADER_FILENAME+user_input[CONF_NAME].replace(' ','_')+'.json')
-		return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+#		OAUTH			
+#		try:
+#			self.token = await self.hass.async_add_executor_job(lambda: self.oauth.token_from_code(self.code["device_code"])) 
+#			self.refresh_token = RefreshingToken(credentials=self.oauth, **self.token)
+#			self.refresh_token.update(self.refresh_token.as_dict())
+#		except:
+#			self._errors["base"] = ERROR_GENERIC
+#			user_input[CONF_CODE] = self.code
+#			return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
+#		# if we get here then Oauth worked, right?
+#		user_input[CONF_HEADER_PATH] = os.path.join(self.hass.config.path(STORAGE_DIR),DEFAULT_HEADER_FILENAME+user_input[CONF_NAME].replace(' ','_')+'.json')
+#		OAUTH
+		self._errors = await async_check_data(self.hass,user_input)
+		if self._errors == {}:
+			user_input[CONF_HEADER_PATH] = os.path.join(self.hass.config.path(STORAGE_DIR),DEFAULT_HEADER_FILENAME+user_input[CONF_NAME].replace(' ','_')+'.json')
+			self.data = user_input
+			return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+		return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
 
 
 	# will be called by sending the form, until configuration is done
@@ -73,7 +82,9 @@ class yTubeMusicFlowHandler(config_entries.ConfigFlow):
 		self._errors = {}
 		if user_input is not None:
 			self.data.update(user_input)
-			await self.hass.async_add_executor_job(lambda: self.refresh_token.store_token(self.data[CONF_HEADER_PATH]))
+#			OAUTH			
+#			await self.hass.async_add_executor_job(lambda: self.refresh_token.store_token(self.data[CONF_HEADER_PATH]))
+#			OAUTH
 			if(self.data[CONF_ADVANCE_CONFIG]):
 				return self.async_show_form(step_id="adv_finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,3)), errors=self._errors)
 			else:
@@ -123,59 +134,42 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 		self._errors = {}
 		# sync data and user input
 		user_input = self.data
-		self.redo_token = False
-				
-		# Test if we can start YTMusic with this file
-		try:
-			await self.hass.async_add_executor_job(YTMusic,self.data[CONF_HEADER_PATH])
-		except:
-			_LOGGER.debug("Login error")
-			# Not working, lets prepare new session
-			session = requests.Session()
-			self.oauth = OAuthCredentials("","",session,"")
-			self.code = await self.hass.async_add_executor_job(self.oauth.get_code) 
-			user_input[CONF_CODE] = self.code
-			self.redo_token = True
-			# no good, start with page 1 and -> oauth
-			return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
-		# all is well, lets continue with page 2 and -> finish
-		return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+		return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
 
-	# addition oauth needed
 	async def async_step_oauth(self, user_input=None):   # pylint: disable=unused-argument
 		self._errors = {}
 		# sync data and user input again
 		self.data.update(user_input)
 		user_input = self.data
-		
-		# test token
-		try:
-			self.token = await self.hass.async_add_executor_job(lambda: self.oauth.token_from_code(self.code["device_code"])) 
-			self.refresh_token = RefreshingToken(credentials=self.oauth, **self.token)
-			self.refresh_token.update(self.refresh_token.as_dict())
-		except:
-			self._errors["base"] = ERROR_GENERIC
-			user_input[CONF_CODE] = self.code
-			return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
-		# if we get here then Oauth worked, right?
-		return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+
+		if user_input is not None:
+			user_input[CONF_NAME] = user_input[CONF_NAME].replace(DOMAIN_MP+".","") # make sure to erase "media_player.bla" -> bla
+			self.data.update(user_input)
+		self._errors = await async_check_data(self.hass,user_input)
+		if self._errors == {}:
+			user_input[CONF_HEADER_PATH] = os.path.join(self.hass.config.path(STORAGE_DIR),DEFAULT_HEADER_FILENAME+user_input[CONF_NAME].replace(' ','_')+'.json')
+			self.data.update(user_input)
+			return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+		return self.async_show_form(step_id="oauth", data_schema=vol.Schema(await async_create_form(self.hass,user_input,1)), errors=self._errors)
+
 
 	# will be called by sending the form, until configuration is done
 	async def async_step_finish(self,user_input=None):
 		self._errors = {}
-		if(self.redo_token):
-			await self.hass.async_add_executor_job(lambda: self.refresh_token.store_token(self.data[CONF_HEADER_PATH]))
-		else:		
-			# if file name changed, we need to move the cookie
-			if(self.data[CONF_HEADER_PATH]!=user_input[CONF_HEADER_PATH]):
-				os.rename(self.data[CONF_HEADER_PATH],user_input[CONF_HEADER_PATH])
-		# update AFTER the if above!!
-		self.data.update(user_input)
-		if(self.data[CONF_ADVANCE_CONFIG]):
-			return self.async_show_form(step_id="adv_finish", data_schema=vol.Schema(await async_create_form(self.hass,self.data,3)), errors=self._errors)
-		else:
-			self.hass.config_entries.async_update_entry(self.config_entry, data=ensure_config(self.data))
-			return self.async_create_entry(title='', data={})
+		if user_input is not None:
+			# sync data and user input again
+			self.data.update(user_input)
+			user_input = self.data
+#			OAUTH			
+#			await self.hass.async_add_executor_job(lambda: self.refresh_token.store_token(self.data[CONF_HEADER_PATH]))
+#			OAUTH
+			if(self.data[CONF_ADVANCE_CONFIG]):
+				return self.async_show_form(step_id="adv_finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,3)), errors=self._errors)
+			else:
+				return self.async_create_entry(title="yTubeMusic "+self.data[CONF_NAME].replace(DOMAIN,''), data=self.data)
+		# we should never get below here
+		return self.async_show_form(step_id="finish", data_schema=vol.Schema(await async_create_form(self.hass,user_input,2)), errors=self._errors)
+
 
 	async def async_step_adv_finish(self,user_input=None):
 		self._errors = {}
@@ -190,9 +184,10 @@ async def async_create_form(hass, user_input, page=1):
 	languages = list(SUPPORTED_LANGUAGES)
 
 	if(page == 1):
-		data_schema[vol.Required(CONF_CODE+"TT", default="https://www.google.com/device?user_code="+user_input[CONF_CODE]["user_code"])] = str # name of the component without domain
+#		data_schema[vol.Required(CONF_CODE+"TT", default="https://www.google.com/device?user_code="+user_input[CONF_CODE]["user_code"])] = str # name of the component without domain
 		data_schema[vol.Required(CONF_NAME, default=user_input[CONF_NAME])] = str # name of the component without domain
-	elif(page == 2):
+		data_schema[vol.Required(CONF_COOKIE, default=user_input[CONF_COOKIE])] = str # configuration of the cookie
+	if(page == 2):
 		# Generate a list of excluded entities.
 		# This method is more reliable because it won't become invalid 
 		# if users modify entity IDs, and it supports multiple instances.
@@ -250,3 +245,44 @@ async def async_create_form(hass, user_input, page=1):
 		data_schema[vol.Optional(CONF_PROXY_URL, default=user_input[CONF_PROXY_URL])] = str # select of input_boolean -> continuous on/off
 
 	return data_schema
+
+
+async def async_check_data(hass, user_input):
+	"""Check validity of the provided date."""
+	ret = {}
+	if(CONF_COOKIE in user_input and CONF_HEADER_PATH in user_input):
+		# sadly config flow will not allow to have a multiline text field
+		# we get a looong string that we've to rearrange into multiline for ytmusic
+
+		# so the fields are written like 'identifier': 'value', but some values actually have ':' inside, bummer.
+		# we'll split after every ': ', and try to parse the key + value 
+		cs = user_input[CONF_COOKIE].split(": ")
+		key = []
+		value = []
+		c = "" # reset
+		remove_keys = {":authority", ":method", ":path", ":scheme"} # ytubemusic api doesn't like the google chrome arguments
+		for i in range(0,len(cs)-1): # we're grabbing [i] and [i+1], so skip the last and go only to len()-1
+			key.append(cs[i][cs[i].rfind(' ')+1:]) # find the last STRING in the current element
+			value.append(cs[i+1]) # add the next element as value. This will contain the NEXT key which we're erasing later
+			if(i>0): # once we have more then one value
+				value[i-1] = value[i-1].replace(' '+key[i],'') # remove the current key from the last value
+				if(key[i-1] not in remove_keys):
+					c += key[i-1]+": "+value[i-1]+'\n' # re-join and add missing line break
+			if(i==len(cs)-2): # add last key value pair
+				c += key[i]+": "+value[i]+'\n'
+
+		try:
+			ytmusicapi.setup(filepath = user_input[CONF_HEADER_PATH], headers_raw = c)
+		except:
+			ret["base"] = ERROR_GENERIC
+			formatted_lines = traceback.format_exc().splitlines()
+			for i in formatted_lines:
+				if(i.startswith('Exception: ')):
+					if(i.find('The following entries are missing in your headers: Cookie')>=0):
+						ret["base"] = ERROR_COOKIE
+					elif(i.find('The following entries are missing in your headers: X-Goog-AuthUser')>=0):
+						ret["base"] = ERROR_AUTH_USER
+			_LOGGER.error(traceback.format_exc())
+			return ret
+		[ret, msg, api] = await async_try_login(hass,user_input[CONF_HEADER_PATH],"")
+	return ret

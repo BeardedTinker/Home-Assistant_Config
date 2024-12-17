@@ -332,6 +332,7 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
     temperature_keys = [
         "temperature_sensor",
         "temperature_fan",
+        "temperature_probe",
         "tmc2240",
         "bme280",
         "htu21d",
@@ -351,9 +352,19 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 status_key=obj,
                 name=split_obj[1].removesuffix("_temp").replace("_", " ").title()
                 + " Temp",
-                value_fn=lambda sensor: sensor.coordinator.data["status"][
-                    sensor.status_key
-                ]["temperature"],
+                value_fn=lambda sensor: (
+                    round(
+                        sensor.coordinator.data["status"][sensor.status_key][
+                            "temperature"
+                        ],
+                        2,
+                    )
+                    if sensor.coordinator.data["status"][sensor.status_key][
+                        "temperature"
+                    ]
+                    is not None
+                    else None
+                ),
                 subscriptions=[(obj, "temperature")],
                 icon="mdi:thermometer",
                 unit=UnitOfTemperature.CELSIUS,
@@ -529,9 +540,19 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 key=f"{split_obj[0]}_{split_obj[1]}_temperature",
                 status_key=obj,
                 name=f"{split_obj[1].replace('_',' ')} Temperature".title(),
-                value_fn=lambda sensor: sensor.coordinator.data["status"][
-                    sensor.status_key
-                ]["temperature"],
+                value_fn=lambda sensor: (
+                    round(
+                        sensor.coordinator.data["status"][sensor.status_key][
+                            "temperature"
+                        ],
+                        2,
+                    )
+                    if sensor.coordinator.data["status"][sensor.status_key][
+                        "temperature"
+                    ]
+                    is not None
+                    else None
+                ),
                 subscriptions=[(obj, "temperature")],
                 icon="mdi:thermometer",
                 unit=UnitOfTemperature.CELSIUS,
@@ -564,9 +585,18 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 key=f"{obj}_temp",
                 status_key=obj,
                 name=f"{base_name} Temperature".title(),
-                value_fn=lambda sensor: float(
-                    sensor.coordinator.data["status"][sensor.status_key]["temperature"]
-                    or 0.0
+                value_fn=lambda sensor: (
+                    round(
+                        sensor.coordinator.data["status"][sensor.status_key][
+                            "temperature"
+                        ],
+                        2,
+                    )
+                    if sensor.coordinator.data["status"][sensor.status_key][
+                        "temperature"
+                    ]
+                    is not None
+                    else None
                 ),
                 subscriptions=[(obj, "temperature")],
                 icon=icon,

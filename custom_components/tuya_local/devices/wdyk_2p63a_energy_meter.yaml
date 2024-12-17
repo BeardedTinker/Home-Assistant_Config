@@ -29,9 +29,6 @@ primary_entity:
       type: base64
       optional: true
       force: true
-    - id: 9
-      type: bitfield
-      name: fault_code
     - id: 19
       type: string
       name: breaker_number
@@ -41,7 +38,6 @@ primary_entity:
       optional: true
 secondary_entities:
   - entity: binary_sensor
-    name: Short circuit
     class: problem
     category: diagnostic
     dps:
@@ -49,202 +45,52 @@ secondary_entities:
         type: bitfield
         name: sensor
         mapping:
-          - dps_val: 1
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Surge
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 2
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Overload
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 4
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Current leak
-    class: safety
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 8
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Temperature
-    class: heat
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 16
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Fire
-    class: smoke
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 32
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: High power
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 64
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Self test
-    class: running
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 128
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Over current
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 256
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Unbalanced
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 512
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Over voltage
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 1024
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Under voltage
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 2048
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Out of phase
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 4096
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Outage
-    class: power
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
-          - dps_val: 8192
+          - dps_val: 0
             value: false
           - value: true
-  - entity: binary_sensor
-    name: Magnetism
-    class: tamper
-    category: diagnostic
-    dps:
       - id: 9
         type: bitfield
-        name: sensor
+        name: fault_code
+      - id: 9
+        type: bitfield
+        name: description
         mapping:
+          - dps_val: 0
+            value: ok
+          - dps_val: 1
+            value: Short circuit
+          - dps_val: 2
+            value: Surge
+          - dps_val: 4
+            value: Overload
+          - dps_val: 8
+            value: Earth leak
+          - dps_val: 16
+            value: High temperature
+          - dps_val: 32
+            value: Fire
+          - dps_val: 64
+            value: High power
+          - dps_val: 128
+            value: Self test
+          - dps_val: 256
+            value: Over current
+          - dps_val: 512
+            value: Unbalanced
+          - dps_val: 1024
+            value: Over voltage
+          - dps_val: 2048
+            value: Under voltage
+          - dps_val: 4096
+            value: Phase fault
+          - dps_val: 8192
+            value: Outage
           - dps_val: 16384
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: Credit low
-    class: problem
-    icon: "mdi:cash"
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
+            value: Magnetism
           - dps_val: 32768
-            value: true
-          - value: false
-  - entity: binary_sensor
-    name: "No balance"
-    class: problem
-    category: diagnostic
-    dps:
-      - id: 9
-        type: bitfield
-        name: sensor
-        mapping:
+            value: Credit low
           - dps_val: 65536
-            value: true
-          - value: false
+            value: Credit expired
   - entity: switch
     name: Prepay
     category: config
@@ -254,12 +100,13 @@ secondary_entities:
         type: boolean
         name: switch
   - entity: button
-    name: Reset energy
+    name: Reset balance energy
     category: config
     class: restart
     dps:
       - id: 12
         type: boolean
+        optional: true
         name: button
   - entity: sensor
     name: Energy balance
@@ -307,9 +154,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: V
+        mask: "FFFF0000000000000000"
         mapping:
-          - mask: "FFFF0000000000000000"
-            scale: 10
+          - scale: 10
   - entity: sensor
     name: Current A
     class: current
@@ -320,9 +167,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: A
+        mask: "0000FFFFFF0000000000"
         mapping:
-          - mask: "0000FFFFFF0000000000"
-            scale: 1000
+          - scale: 1000
   - entity: sensor
     name: Power A
     class: power
@@ -333,9 +180,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: kW
+        mask: "0000000000FFFFFF0000"
         mapping:
-          - mask: "0000000000FFFFFF0000"
-            scale: 1000
+          - scale: 1000
   - entity: sensor
     name: Voltage B
     class: voltage
@@ -346,9 +193,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: V
+        mask: "FFFF000000000000"
         mapping:
-          - mask: "FFFF000000000000"
-            scale: 10
+          - scale: 10
   - entity: sensor
     name: Current B
     class: current
@@ -359,9 +206,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: A
+        mask: "0000FFFFFF000000"
         mapping:
-          - mask: "0000FFFFFF000000"
-            scale: 1000
+          - scale: 1000
   - entity: sensor
     name: Power B
     class: power
@@ -372,9 +219,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: kW
+        mask: "0000000000FFFFFF"
         mapping:
-          - mask: "0000000000FFFFFF"
-            scale: 1000
+          - scale: 1000
   - entity: sensor
     name: Voltage C
     class: voltage
@@ -385,9 +232,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: V
+        mask: "FFFF000000000000"
         mapping:
-          - mask: "FFFF000000000000"
-            scale: 10
+          - scale: 10
   - entity: sensor
     name: Current C
     class: current
@@ -398,9 +245,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: A
+        mask: "0000FFFFFF000000"
         mapping:
-          - mask: "0000FFFFFF000000"
-            scale: 1000
+          - scale: 1000
   - entity: sensor
     name: Power C
     class: power
@@ -411,9 +258,9 @@ secondary_entities:
         name: sensor
         optional: true
         unit: kW
+        mask: "0000000000FFFFFF"
         mapping:
-          - mask: "0000000000FFFFFF"
-            scale: 1000
+          - scale: 1000
   - entity: number
     name: Overvoltage threshold
     category: config
@@ -487,15 +334,6 @@ secondary_entities:
     category: config
     dps:
       - id: 115
-        type: boolean
-        name: button
-        optional: true
-  - entity: button
-    name: Reset balance energy
-    class: restart
-    category: config
-    dps:
-      - id: 12
         type: boolean
         name: button
         optional: true

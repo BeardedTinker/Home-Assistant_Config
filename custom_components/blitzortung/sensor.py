@@ -30,6 +30,7 @@ from .const import (
     ATTR_LON,
     ATTRIBUTION,
     BLITZORTUNG_CONFIG,
+    BLIZORTUNG_URL,
     DOMAIN,
     SERVER_STATS,
     SW_VERSION,
@@ -63,6 +64,10 @@ class BlitzortungSensor(SensorEntity):
             model="Blitzortung Lightning Detector",
             sw_version=SW_VERSION,
             entry_type=DeviceEntryType.SERVICE,
+            configuration_url=BLIZORTUNG_URL.format(
+                lat=coordinator.latitude, 
+                lon=coordinator.longitude
+            ),
         )
         self.entity_description = description
 

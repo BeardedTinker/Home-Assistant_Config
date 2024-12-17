@@ -14,7 +14,7 @@ almostmidnightspeech:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id: media_player.display_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

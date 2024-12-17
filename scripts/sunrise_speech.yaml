@@ -10,25 +10,6 @@ sunrisespeech:
     entity_id: input_boolean.audio_notifications
     state: 'on'
 
-  # - alias: "Set volume"
-  #   service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.display_me
-  #     volume_level: 0.5
-  # - alias: "Wait for 1 seocnd"
-  #   delay: 00:00:01
-  # - alias: "Good morning speech"
-  #   service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-  #      {{ [
-  #      "Good morning Vietnam!",
-  #      "Good morning sunshine!",
-  #      "Rise and shine!",
-  #      "What a beautiful day",
-  #      "Let there be sun!",
-  #      ] | random }}
   - alias: "Good morning speech"
     service: script.turn_on
     target:
@@ -39,7 +20,7 @@ sunrisespeech:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id: media_player.display_me
+              entity_id: media_player.clock_me
             data:
               message: >
                {{ [

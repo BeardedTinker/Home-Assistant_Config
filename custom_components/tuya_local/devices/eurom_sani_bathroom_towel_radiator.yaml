@@ -2,6 +2,8 @@ name: Bathroom radiator
 products:
   - id: bc6gdgt0cpq1jmjz
     name: Eurom Sani LBH-63
+  - id: 7pojgyvxlwa4igrm
+    name: Eurom Sani LBH-63A
 primary_entity:
   entity: climate
   translation_key: heater
@@ -49,14 +51,8 @@ primary_entity:
       type: integer
       optional: true
       hidden: true
-    - id: 12
-      name: error
-      type: bitfield
-      mapping:
-        - dps_val: 0
-          value: OK
     - id: 101
-      type: string
+      type: boolean
       name: hvac_action
       mapping:
         - dps_val: true
@@ -68,10 +64,6 @@ primary_entity:
               value: drying
         - dps_val: false
           value: idle
-          constraint: hvac_mode
-          conditions:
-            - dps_val: false
-              value: "off"
     - id: 4
       name: mode
       type: string
@@ -115,6 +107,7 @@ secondary_entities:
     dps:
       - id: 105
         type: integer
+        optional: true
         name: sensor
         unit: C
   - entity: sensor
@@ -127,3 +120,17 @@ secondary_entities:
         type: integer
         name: sensor
         unit: C
+  - entity: binary_sensor
+    class: problem
+    category: diagnostic
+    dps:
+      - id: 12
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+      - id: 12
+        type: bitfield
+        name: fault_code

@@ -40,27 +40,14 @@ primary_entity:
           value: program
         - dps_val: Holiday
           value: away
-    - id: 12
-      type: bitfield
-      name: fault_code
     - id: 102
       type: boolean
       name: hvac_action
       mapping:
         - dps_val: true
-          constraint: hvac_mode
-          conditions:
-            - dps_val: false
-              value: "off"
-            - dps_val: true
-              value: heating
+          value: heating
         - dps_val: false
-          constraint: hvac_mode
-          conditions:
-            - dps_val: false
-              value: "off"
-            - dps_val: true
-              value: idle
+          value: idle
     - id: 106
       type: boolean
       name: unknown_106
@@ -208,3 +195,6 @@ secondary_entities:
           - dps_val: 0
             value: false
           - value: true
+      - id: 12
+        type: bitfield
+        name: fault_code

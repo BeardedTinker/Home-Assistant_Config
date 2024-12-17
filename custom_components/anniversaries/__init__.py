@@ -5,7 +5,6 @@ from homeassistant.helpers import discovery
 
 from integrationhelper.const import CC_STARTUP_VERSION
 
-
 from .const import (
     CONF_SENSORS,
     CONF_DATE_TEMPLATE,
@@ -16,80 +15,86 @@ from .const import (
     CONFIG_SCHEMA,
 )
 
-#MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
-
 _LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup(hass, config):
     """Set up this component using YAML."""
     if config.get(DOMAIN) is None:
-        # config flow setup
+        # Config flow setup if no YAML config exists
         return True
 
-    # log startup message
+    # Log startup message
     _LOGGER.info(
         CC_STARTUP_VERSION.format(name=DOMAIN, version=VERSION, issue_link=ISSUE_URL)
     )
+
     platform_config = config[DOMAIN].get(CONF_SENSORS, {})
 
-    # If platform is not enabled, skip.
+    # If no platform is enabled, skip setup
     if not platform_config:
         return False
 
+    # Load platform configuration for each entry
     for entry in platform_config:
         hass.async_create_task(
             discovery.async_load_platform(hass, PLATFORM, DOMAIN, entry, config)
         )
+
+    # Initiate config flow to import YAML config
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data={}
         )
     )
-    return True
 
+    return True
 
 async def async_setup_entry(hass, config_entry):
     """Set up this integration using UI."""
     if config_entry.source == config_entries.SOURCE_IMPORT:
-        # set up using YAML
-        hass.async_create_task(hass.config_entries.async_remove(config_entry.entry_id))
+        # Remove UI config entry if set up via YAML
+        await hass.config_entries.async_remove(config_entry.entry_id)
         return False
-    # log startup message
+
+    # Log startup message
     _LOGGER.info(
         CC_STARTUP_VERSION.format(name=DOMAIN, version=VERSION, issue_link=ISSUE_URL)
     )
 
-    _LOGGER.info("Configuring sensor using config data & options") 
- 
-    if config_entry.options: 
-        _LOGGER.debug("Options found, overwriting config data....") 
-        hass.config_entries.async_update_entry(config_entry, data=config_entry.data) 
- 
-    config = {**config_entry.data} 
-    _LOGGER.debug("Config data: %s", config_entry.data) 
-    _LOGGER.debug("Config options: %s", config_entry.options)
-   
-    # Add sensor
-    hass.async_add_job(
-        hass.config_entries.async_forward_entry_setup(config_entry, PLATFORM)
+    # Safely update entry options if needed
+    hass.config_entries.async_update_entry(
+        config_entry, options=config_entry.data
     )
+
+    # Add update listener for configuration changes
+    config_entry.add_update_listener(update_listener)
+
+    # Set up the platforms using the new `async_forward_entry_setups`
+    await hass.config_entries.async_forward_entry_setups(config_entry, [PLATFORM])
+
     return True
 
+async def async_unload_entry(hass, config_entry):
+    """Unload a config entry."""
+    # Unload the platform using the new `async_forward_entry_unload`
+    if await hass.config_entries.async_forward_entry_unload(config_entry, [PLATFORM]):
+        _LOGGER.info(f"Successfully unloaded {PLATFORM} for {DOMAIN}")
+        return True
+    else:
+        _LOGGER.error(f"Error unloading {PLATFORM} for {DOMAIN}")
+        return False
 
 async def async_remove_entry(hass, config_entry):
-    """Handle removal of an entry."""
-    try:
-        await hass.config_entries.async_forward_entry_unload(config_entry, PLATFORM)
-        _LOGGER.info(
-            "Successfully removed sensor from the Anniversaries integration"
-        )
-    except ValueError:
-        pass
-
+    """Handle removal of a config entry."""
+    # Ensure the platform is unloaded before removing the entry
+    await async_unload_entry(hass, config_entry)
+    _LOGGER.info(f"Successfully removed entry for {DOMAIN}")
 
 async def update_listener(hass, entry):
-    """Update listener."""
-    entry.data = entry.options
-    await hass.config_entries.async_forward_entry_unload(entry, PLATFORM)
-    hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, PLATFORM))
+    """Handle updates to the config entry."""
+    # Update the entry's data based on options
+    hass.config_entries.async_update_entry(entry, data=entry.options)
+
+    # Unload and reload platform to apply new settings
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)

@@ -33,7 +33,7 @@ action:
           service: tts.google_translate_say
           target:
             entity_id: 
-              - media_player.display_me
+              - media_player.clock_me
           data:
             message: 'Google Watch is Full. Come and get it!'
           extra:

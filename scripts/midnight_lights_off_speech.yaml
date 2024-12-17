@@ -5,22 +5,6 @@
 
 midnightlightsoffspeech:
   sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.display_me
-  #     volume_level: 0.2
-  # - delay: 00:00:02
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-  #      {{ [
-  #      "Lights out, nighty night!",
-  #      "Let's get to bed. Lightf off!",
-  #      "Sweet dreams, lights are out",
-  #      "Let there be night! Have a rest",
-  #      "Go to bed, I'm going!",
-  #      ] | random }}
   - alias: "Midnight lights out"
     service: script.turn_on
     target:
@@ -31,7 +15,7 @@ midnightlightsoffspeech:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id: media_player.display_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

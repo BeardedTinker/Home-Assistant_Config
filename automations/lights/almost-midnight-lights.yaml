@@ -23,7 +23,7 @@ action:
       - light.kitchen_lights
       - light.ceiling_lights
       - light.dining_room_lights
-- service: notify.lg_tv
-  data:
-    message: Almost Midnight!
+#- service: notify.lg_tv
+#  data:
+#    message: Almost Midnight!
 - service: script.almostmidnightspeech

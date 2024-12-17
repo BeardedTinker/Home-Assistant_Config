@@ -30,7 +30,7 @@ google_home_resume:
         boolean:
   variables:
     players_screen:
-      - media_player.display_me
+      - media_player.clock_me
     primary_spotcast: "pepijn"
     radio_data:
       Antena Zagreb:

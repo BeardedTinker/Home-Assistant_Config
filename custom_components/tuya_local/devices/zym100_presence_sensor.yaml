@@ -99,7 +99,8 @@ secondary_entities:
           - value: true
       - id: 6
         type: string
-        name: fault_description
+        optional: true
+        name: description
   - entity: sensor
     name: Target distance
     class: distance

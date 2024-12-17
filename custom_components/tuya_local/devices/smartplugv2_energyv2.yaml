@@ -4,6 +4,8 @@ products:
     name: Tongou TO-Q-SY1-JWT
   - id: w906qkrrhd3otiwd
     name: Moes ME322
+  - id: ncwuazeo5y1pujun
+    name: STY-63TM
 primary_entity:
   entity: switch
   class: outlet
@@ -15,9 +17,6 @@ primary_entity:
       type: integer
       name: test_bit
       optional: true
-    - id: 26
-      type: bitfield
-      name: fault_code
     - id: 42
       type: string
       name: cycle_timer
@@ -115,6 +114,9 @@ secondary_entities:
           - dps_val: 0
             value: false
           - value: true
+      - id: 26
+        type: bitfield
+        name: fault_code
   - entity: select
     category: config
     translation_key: initial_state

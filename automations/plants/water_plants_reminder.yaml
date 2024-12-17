@@ -61,9 +61,7 @@ action:
         - alias: "Send TTS message"
           service: tts.google_translate_say
           target:
-            entity_id: 
-              - media_player.display_me
-              - media_player.clock_me
+            entity_id: media_player.clock_me
           data:
             message: '{{ plants_for_message }} need{{"s" if thirsty_plants | count == 1 }} watering'
           extra:

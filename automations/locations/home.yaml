@@ -34,15 +34,11 @@ action:
 
 - service: media_player.volume_set
   data:
-    entity_id:
-      - media_player.display_me
-      - media_player.clock_me
+    entity_id: media_player.clock_me
     volume_level: 0.5
 - service: tts.google_translate_say
   data:
-    entity_id:
-      - media_player.display_me
-      - media_player.clock_me
+    entity_id: media_player.clock_me
     message: "Hey there! Looks like '{{ states.sensor.home_nearest_device }}' is almost home"
 
 mode: single

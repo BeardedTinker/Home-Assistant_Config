@@ -1,7 +1,0 @@
-#####
-# Create camere out of local file - elevator
-#####
-
-platform: local_file
-name: Saved Elevator Image
-file_path: /config/tmp/elevator.jpg

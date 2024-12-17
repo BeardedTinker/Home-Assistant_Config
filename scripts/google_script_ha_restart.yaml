@@ -5,21 +5,6 @@
 
 googlescriptharestart:
   sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.display_me
-  #     volume_level: 0.5
-  # - delay: 00:00:01
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-  #      {{ [
-  #      "Home Assistant is restarting. Hold on.",
-  #      "Home Assistant Restarting, please wait",
-  #      "I''m restarting Home Assistant",
-  #      "Home Assistant started reincarnation",
-  #      ] | random }}
   - alias: "Home Assistant restart"
     service: script.turn_on
     target:
@@ -30,7 +15,7 @@ googlescriptharestart:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id: media_player.display_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

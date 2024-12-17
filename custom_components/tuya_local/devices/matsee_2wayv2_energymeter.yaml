@@ -15,12 +15,13 @@ primary_entity:
       class: total_increasing
     - id: 122
       type: integer
+      optional: true
       name: hourly
       mapping:
         - scale: 100
 secondary_entities:
   - entity: sensor
-    name: Energy produced
+    translation_key: energy_produced
     class: energy
     dps:
       - id: 2
@@ -32,6 +33,7 @@ secondary_entities:
           - scale: 100
       - id: 123
         type: integer
+        optional: true
         name: hourly
         mapping:
           - scale: 100
@@ -128,7 +130,9 @@ secondary_entities:
         mapping:
           - scale: 1000
   - entity: sensor
-    name: Energy consumption B
+    translation_key: energy_consumed_x
+    translation_placeholders:
+      x: B
     class: energy
     category: diagnostic
     dps:
@@ -146,6 +150,7 @@ secondary_entities:
           - scale: 100
       - id: 118
         type: integer
+        optional: true
         name: hourly
         mapping:
           - scale: 100
@@ -156,7 +161,9 @@ secondary_entities:
         mapping:
           - scale: 1000
   - entity: sensor
-    name: Energy produced B
+    translation_key: energy_produced_x
+    translation_placeholders:
+      x: B
     class: energy
     category: diagnostic
     dps:
@@ -174,6 +181,7 @@ secondary_entities:
           - scale: 100
       - id: 119
         type: integer
+        optional: true
         name: hourly
         mapping:
           - scale: 100
@@ -231,7 +239,9 @@ secondary_entities:
         mapping:
           - scale: 1000
   - entity: sensor
-    name: Energy consumption A
+    translation_key: energy_consumed_x
+    translation_placeholders:
+      x: A
     class: energy
     category: diagnostic
     dps:
@@ -249,6 +259,7 @@ secondary_entities:
           - scale: 100
       - id: 120
         type: integer
+        optional: true
         name: hourly
         mapping:
           - scale: 100
@@ -259,7 +270,9 @@ secondary_entities:
         mapping:
           - scale: 1000
   - entity: sensor
-    name: Energy produced A
+    translation_key: energy_produced_x
+    translation_placeholders:
+      x: A
     class: energy
     category: diagnostic
     dps:
@@ -277,6 +290,7 @@ secondary_entities:
           - scale: 100
       - id: 121
         type: integer
+        optional: true
         name: hourly
         mapping:
           - scale: 100

@@ -46,6 +46,8 @@ from .const import (
     MIN_TIME_BETWEEN_SCANS,
     MODEL_IDS,
     PLAY_SCAN_INTERVAL,
+    PUBLIC_URL_ERROR_MESSAGE,
+    STREAMING_ERROR_MESSAGE,
     UPLOAD_PATH,
 )
 from .helpers import _catch_login_errors, add_devices
@@ -585,7 +587,11 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
             self._set_authentication_details(device["auth_info"])
         session = None
         if self.available:
-            _LOGGER.debug("%s: Refreshing %s", self.account, self)
+            _LOGGER.debug(
+                "%s: Refreshing %s",
+                self.account,
+                self if device is None else self._device_name,
+            )
             self._assumed_state = False
             if "PAIR_BT_SOURCE" in self._capabilities:
                 self._source = self._get_source()
@@ -1426,12 +1432,8 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                 f"<audio src='{public_url}local/alexa_tts{output_file_name}' />"
             )
         else:
-            await self.async_send_tts(
-                "To send TTS, please set Announce=true. Music can't be played this way."
-            )
-            _LOGGER.warning(
-                "To send TTS, please set Announce=true. Music can't be played this way."
-            )
+            await self.async_send_tts(STREAMING_ERROR_MESSAGE)
+            _LOGGER.warning(STREAMING_ERROR_MESSAGE)
 
     @_catch_login_errors
     async def async_play_media(self, media_type, media_id, enqueue=None, **kwargs):
@@ -1445,16 +1447,12 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         ].get(CONF_PUBLIC_URL, DEFAULT_PUBLIC_URL)
         if media_type == "music":
             if public_url:
+                # Handle TTS playback
                 await self.async_play_tts_cloud_say(public_url, media_id, **kwargs)
             else:
-                await self.async_send_tts(
-                    "To send TTS, set public url in integration configuration"
-                )
-                _LOGGER.warning(
-                    "To send TTS, set public url in integration configuration"
-                    " Please see the alexa_media wiki for details."
-                    "https://github.com/alandtse/alexa_media_player/wiki/Configuration%3A-Notification-Component#use-the-notifyalexa_media-service"
-                )
+                # Log and notify for missing public URL
+                _LOGGER.warning(PUBLIC_URL_ERROR_MESSAGE)
+                await self.async_send_tts(PUBLIC_URL_ERROR_MESSAGE)
         elif media_type == "sequence":
             _LOGGER.debug(
                 "%s: %s:Running sequence %s with queue_delay %s",

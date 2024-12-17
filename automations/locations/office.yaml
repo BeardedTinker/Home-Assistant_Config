@@ -35,18 +35,6 @@ action:
     color: 'green'
     timeout_sec: 300
 
-# - service: media_player.volume_set
-#   data:
-#     entity_id:
-#       - media_player.display_me
-#       - media_player.clock_me
-#     volume_level: 0.5
-# - service: tts.google_translate_say
-#   data:
-#     entity_id:
-#       - media_player.display_me
-#       - media_player.clock_me
-#     message: "Hey you! Looks like '{{ states.proximity.office.attributes.nearest }}' has left the office"
 - service: script.turn_on
   target:
     entity_id: script.google_home_resume
@@ -56,9 +44,7 @@ action:
         - alias: "Send TTS message"
           service: tts.google_translate_say
           target:
-            entity_id: 
-              - media_player.display_me
-              - media_player.clock_me
+            entity_id: media_player.clock_me
           data:
             message: "Hey you! Looks like '{{ states.sensor.office_nearest_device }}' has left the office"
           extra:

@@ -32,12 +32,6 @@ primary_entity:
           value: activity
         - dps_val: 4
           value: sleep
-    - id: 12
-      type: bitfield
-      name: error
-      mapping:
-        - dps_val: 0
-          value: OK
     - id: 102
       type: integer
       name: sensor
@@ -67,12 +61,7 @@ primary_entity:
         - dps_val: true
           value: heating
         - dps_val: false
-          constraint: hvac_mode
-          conditions:
-            - dps_val: true
-              value: idle
-            - dps_val: false
-              value: "off"
+          value: idle
     - id: 107
       type: boolean
       name: unknown_107
@@ -138,3 +127,17 @@ secondary_entities:
         range:
           min: 1
           max: 9
+  - entity: binary_sensor
+    class: problem
+    category: diagnostic
+    dps:
+      - id: 12
+        type: bitfield
+        name: sensor
+        mapping:
+          - dps_val: 0
+            value: false
+          - value: true
+      - id: 12
+        type: bitfield
+        name: fault_code

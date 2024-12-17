@@ -5,31 +5,6 @@
 
 schoolnight_bedtime_zita:
   sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id:
-  #       - media_player.display_me
-  #       - media_player.mini_me
-  #       - media_player.clock_me
-  #     volume_level: 0.5
-  # - delay: 00:00:01
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-
-  #       {{ [
-  #       "Zita, it's bed time!",
-  #       "9 o'clock, get ready for bed Zita.",
-  #       "Zita, let's go to bathroom and bed.",
-  #       "Getting late Zita, get ready for bed.",
-  #       "Zita! Tomorrow is school day, get ready for sleep.",
-  #       ] | random }}
-#       "Zita, vrijeme je za spavanje!",
-#       "9 sati je, spremi se za krpe Zita.",
-#       "Zitice, ajmo kupaonica i krpe.",
-#       "Kasno je Zita, kreni se spremati",
-#       "Zita! Sutra je škola, kreni se spremati?",
   - alias: "Good morning speech"
     service: script.turn_on
     target:
@@ -40,10 +15,7 @@ schoolnight_bedtime_zita:
           - alias: "Zita bedtime"
             service: tts.google_translate_say
             target:
-              entity_id:
-                - media_player.display_me
-                - media_player.mini_me
-                - media_player.clock_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

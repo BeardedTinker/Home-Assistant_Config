@@ -1,9 +1,0 @@
-#####
-# PM10 increase
-# Using Trend platform with airquality sensor
-#####
-
-platform: trend
-sensors:
-  pm10_increase:
-    entity_id: sensor.luftdaten_43996_p10

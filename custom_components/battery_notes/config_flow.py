@@ -448,20 +448,23 @@ class OptionsFlowHandler(OptionsFlow):
             device_registry = dr.async_get(self.hass)
             device_entry = device_registry.async_get(self.source_device_id)
 
-            _LOGGER.debug(
-                "Looking up device %s %s %s %s",
-                device_entry.manufacturer,
-                device_entry.model,
-                get_device_model_id(device_entry) or "",
-                device_entry.hw_version,
-            )
+            if not device_entry:
+                errors["base"] = "orphaned_battery_note"
+            else:
+                _LOGGER.debug(
+                    "Looking up device %s %s %s %s",
+                    device_entry.manufacturer,
+                    device_entry.model,
+                    get_device_model_id(device_entry) or "",
+                    device_entry.hw_version,
+                )
 
-            self.model_info = ModelInfo(
-                device_entry.manufacturer,
-                device_entry.model,
-                get_device_model_id(device_entry),
-                device_entry.hw_version,
-            )
+                self.model_info = ModelInfo(
+                    device_entry.manufacturer,
+                    device_entry.model,
+                    get_device_model_id(device_entry),
+                    device_entry.hw_version,
+                )
 
         schema = self.build_options_schema()
         if user_input is not None:
@@ -492,6 +495,8 @@ class OptionsFlowHandler(OptionsFlow):
         schema: vol.Schema,
     ) -> dict:
         """Save options, and return errors when validation fails."""
+        errors = {}
+
         device_registry = dr.async_get(self.hass)
         device_entry = device_registry.async_get(
             self.config_entry.data.get(CONF_DEVICE_ID)
@@ -502,12 +507,20 @@ class OptionsFlowHandler(OptionsFlow):
         if source_entity_id:
             entity_registry = er.async_get(self.hass)
             entity_entry = entity_registry.async_get(source_entity_id)
+            if not entity_entry:
+                errors["base"] = "orphaned_battery_note"
+                return errors
+        else:
+            if not device_entry:
+                errors["base"] = "orphaned_battery_note"
+                return errors
 
+        title: Any = ""
         if CONF_NAME in user_input:
             title = user_input.get(CONF_NAME)
-        elif source_entity_id:
+        elif source_entity_id and entity_entry:
             title = entity_entry.name or entity_entry.original_name
-        else:
+        elif device_entry:
             title = device_entry.name_by_user or device_entry.name
 
         self._process_user_input(user_input, schema)

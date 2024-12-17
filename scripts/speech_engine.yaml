@@ -12,7 +12,6 @@ speech_engine:
       media_player: >-
           {% if media_player | length == 0 %}
             {% set media_player = [
-              'media_player.display_me',
               'media_player.clock_me'
             ] %}
           {% endif %}

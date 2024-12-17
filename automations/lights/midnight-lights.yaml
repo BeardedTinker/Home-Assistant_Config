@@ -22,9 +22,9 @@ action:
   entity_id: all
   data:
     transition: 60
-- service: notify.lg_tv
-  data:
-    message: Midnight, lights out!
+#- service: notify.lg_tv
+#  data:
+#    message: Midnight, lights out!
 - service: script.notify_engine
   data:
     who: 'andrej'

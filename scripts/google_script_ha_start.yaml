@@ -5,21 +5,6 @@
 
 googlescripthastart:
   sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id: media_player.display_me
-  #     volume_level: 0.5
-  # - delay: 00:00:01
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-  #      {{ [
-  #      "Home Assistant is ready now!",
-  #      "Home Assistant is operational",
-  #      "Home assistant is back.",
-  #      "Home assistant is alive and kicking",
-  #      ] | random }}
   - alias: "Home Assistant start"
     service: script.turn_on
     target:
@@ -30,7 +15,7 @@ googlescripthastart:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id: media_player.display_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

@@ -1,17 +1,17 @@
 """https://github.com/dummylabs/thewatchman§"""
 
 from datetime import timedelta
-import logging
 import time
-import json
+import asyncio
+from dataclasses import dataclass
+from typing import Any
 import voluptuous as vol
-from anyio import Path
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components import persistent_notification
 from homeassistant.util import dt as dt_util
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.const import (
@@ -20,21 +20,31 @@ from homeassistant.const import (
     EVENT_SERVICE_REMOVED,
     EVENT_STATE_CHANGED,
     EVENT_CALL_SERVICE,
+    SERVICE_RELOAD,
+)
+from homeassistant.components.homeassistant import (
+    SERVICE_RELOAD_CORE_CONFIG,
+    SERVICE_RELOAD_ALL,
 )
 
 from .coordinator import WatchmanCoordinator
+from .utils.logger import _LOGGER, INDENT
 
-from .utils import (
-    is_service,
+from .utils.utils import (
+    async_get_report_path,
+    is_action,
     report,
     parse,
     table_renderer,
     text_renderer,
     get_config,
-    async_get_report_path,
 )
 
 from .const import (
+    CONF_ACTION_NAME,
+    CONFIG_ENTRY_MINOR_VERSION,
+    CONFIG_ENTRY_VERSION,
+    DEFAULT_OPTIONS,
     DOMAIN,
     DOMAIN_DATA,
     DEFAULT_HEADER,
@@ -44,7 +54,6 @@ from .const import (
     CONF_IGNORED_ITEMS,
     CONF_SERVICE_NAME,
     CONF_SERVICE_DATA,
-    CONF_SERVICE_DATA2,
     CONF_INCLUDED_FOLDERS,
     CONF_CHECK_LOVELACE,
     CONF_IGNORED_STATES,
@@ -57,15 +66,21 @@ from .const import (
     CONF_FRIENDLY_NAMES,
     CONF_ALLOWED_SERVICE_PARAMS,
     CONF_TEST_MODE,
+    CONF_SECTION_APPEARANCE_LOCATION,
     EVENT_AUTOMATION_RELOADED,
     EVENT_SCENE_RELOADED,
+    HASS_DATA_CANCEL_HANDLERS,
+    HASS_DATA_COORDINATOR,
+    HASS_DATA_FILES_IGNORED,
+    HASS_DATA_FILES_PARSED,
+    HASS_DATA_PARSE_DURATION,
+    HASS_DATA_PARSED_ENTITY_LIST,
+    HASS_DATA_PARSED_SERVICE_LIST,
     TRACKED_EVENT_DOMAINS,
     MONITORED_STATES,
     PLATFORMS,
     VERSION,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -75,16 +90,10 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_IGNORED_FILES): cv.ensure_list,
                 vol.Optional(CONF_IGNORED_ITEMS): cv.ensure_list,
                 vol.Optional(CONF_HEADER, default=DEFAULT_HEADER): cv.string,
-                vol.Optional(CONF_SERVICE_NAME): cv.string,
                 vol.Optional(CONF_SERVICE_DATA): vol.Schema({}, extra=vol.ALLOW_EXTRA),
                 vol.Optional(CONF_INCLUDED_FOLDERS): cv.ensure_list,
                 vol.Optional(CONF_CHECK_LOVELACE, default=False): cv.boolean,
-                vol.Optional(CONF_CHUNK_SIZE, default=3500): cv.positive_int,
-                vol.Optional(CONF_IGNORED_STATES): [
-                    "missing",
-                    "unavailable",
-                    "unknown",
-                ],
+                vol.Optional(CONF_IGNORED_STATES): MONITORED_STATES,
                 vol.Optional(CONF_COLUMNS_WIDTH): cv.ensure_list,
                 vol.Optional(CONF_STARTUP_DELAY, default=0): cv.positive_int,
                 vol.Optional(CONF_FRIENDLY_NAMES, default=False): cv.boolean,
@@ -94,27 +103,32 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-
-async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up is called when Home Assistant is loading our component."""
-    if config.get(DOMAIN) is None:
-        # We get here if the integration is set up using config flow
-        return True
-
-    hass.data.setdefault(DOMAIN_DATA, config[DOMAIN])
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": SOURCE_IMPORT}, data=hass.data[DOMAIN_DATA]
-        )
-    )
-    # Return boolean to indicate that initialization was successful.
-    return True
+type WMConfigEntry = ConfigEntry[WMData]
+parser_lock = asyncio.Lock()
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+@dataclass
+class WMData:
+    included_folders: list[str]
+    ignored_items: list[str]
+    ignored_states: list[str]
+    ignored_files: list[str]
+    check_lovelace: bool
+    startup_delay: int
+    service: str
+    service_data: str
+    chunk_size: int
+    report_header: str
+    report_path: str
+    columns_width: list[int]
+    friendly_names: bool
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: WMConfigEntry):
     """Set up this integration using UI"""
-    _LOGGER.debug(entry.options)
-    _LOGGER.debug("Home assistant path: %s", hass.config.path(""))
+    _LOGGER.debug(
+        f"::async_setup_entry:: Integration setup in progress. Home assistant path: {hass.config.path("")}"
+    )
 
     coordinator = WatchmanCoordinator(hass, _LOGGER, name=entry.title)
     coordinator.async_set_updated_data(None)
@@ -122,9 +136,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         raise ConfigEntryNotReady
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
-    hass.data[DOMAIN]["coordinator"] = coordinator
-    hass.data[DOMAIN_DATA] = entry.options  # TODO: refactor
-
+    hass.data[DOMAIN][HASS_DATA_COORDINATOR] = coordinator
+    hass.data[DOMAIN_DATA] = {"config_entry_id": entry.entry_id}
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
@@ -148,7 +161,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, config_entry):  # pylint: disable=unused-argument
     """Handle integration unload"""
-    for cancel_handle in hass.data[DOMAIN].get("cancel_handlers", []):
+    for cancel_handle in hass.data[DOMAIN].get(HASS_DATA_CANCEL_HANDLERS, []):
         if cancel_handle:
             cancel_handle()
 
@@ -176,70 +189,48 @@ async def add_services(hass: HomeAssistant):
     """adds report service"""
 
     async def async_handle_report(call):
-        """Handle the service call"""
-        config = hass.data.get(DOMAIN_DATA, {})
-        path = await async_get_report_path(hass, config.get(CONF_REPORT_PATH, None))
+        """Handle the action call"""
+        path = get_config(hass, CONF_REPORT_PATH)
         send_notification = call.data.get(CONF_SEND_NOTIFICATION, False)
         create_file = call.data.get(CONF_CREATE_FILE, True)
         test_mode = call.data.get(CONF_TEST_MODE, False)
-        # validate service params
+        action_data = call.data.get(CONF_SERVICE_DATA, None)
+        chunk_size = call.data.get(CONF_CHUNK_SIZE, 0)
+
+        # validate action params
         for param in call.data:
             if param not in CONF_ALLOWED_SERVICE_PARAMS:
-                await async_notification(
-                    hass,
-                    "Watchman error",
-                    f"Unknown service " f"parameter: `{param}`.",
-                    error=True,
-                )
+                raise HomeAssistantError(f"Unknown action parameter: `{param}`.")
 
-        if not (send_notification or create_file):
-            message = (
-                "Either `send_nofification` or `create_file` should be set to `true` "
-                "in service parameters."
+        action_name = call.data.get(
+            CONF_ACTION_NAME, call.data.get(CONF_SERVICE_NAME, None)
+        )
+
+        if not (action_name or create_file):
+            raise HomeAssistantError(
+                f"Either [{CONF_ACTION_NAME}] or [{CONF_CREATE_FILE}] should be specified."
             )
-            await async_notification(hass, "Watchman error", message, error=True)
+
+        if action_data and not action_name:
+            raise HomeAssistantError(
+                f"Missing [{CONF_ACTION_NAME}] parameter. The [{CONF_SERVICE_DATA}] parameter can only be used "
+                f"in conjunction with [{CONF_ACTION_NAME}] parameter."
+            )
 
         if call.data.get(CONF_PARSE_CONFIG, False):
             await parse_config(hass, reason="service call")
 
-        if send_notification:
-            chunk_size = call.data.get(CONF_CHUNK_SIZE, config.get(CONF_CHUNK_SIZE))
-            service = call.data.get(CONF_SERVICE_NAME, None)
-            service_data = call.data.get(CONF_SERVICE_DATA, None)
-
-            if service_data and not service:
-                await async_notification(
-                    hass,
-                    "Watchman error",
-                    "Missing `service` parameter. The `data` parameter can only be used "
-                    "in conjunction with `service` parameter.",
-                    error=True,
-                )
-
-            if await async_onboarding(hass, service, path):
-                await async_notification(
-                    hass,
-                    "🖖 Achievement unlocked: first report!",
-                    f"Your first watchman report was stored in `{path}` \n\n "
-                    "TIP: set `service` parameter in configuration.yaml file to "
-                    "receive report via notification service of choice. \n\n "
-                    "This is one-time message, it will not bother you in the future.",
-                )
-            else:
-                await async_report_to_notification(
-                    hass, service, service_data, chunk_size
-                )
+        # call notification action even when send notification = False
+        if send_notification or action_name:
+            await async_report_to_notification(
+                hass, action_name, action_data, chunk_size
+            )
 
         if create_file:
             try:
                 await async_report_to_file(hass, path, test_mode=test_mode)
             except OSError as exception:
-                await async_notification(
-                    hass,
-                    "Watchman error",
-                    f"Unable to write report: {exception}",
-                    error=True,
-                )
+                raise HomeAssistantError(f"Unable to write report: {exception}")
 
     hass.services.async_register(DOMAIN, "report", async_handle_report)
 
@@ -256,7 +247,7 @@ async def add_event_handlers(hass: HomeAssistant):
     async def async_delayed_refresh_states(timedate):  # pylint: disable=unused-argument
         """refresh sensors state"""
         # parse_config should be invoked beforehand
-        coordinator = hass.data[DOMAIN]["coordinator"]
+        coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
         await coordinator.async_refresh()
 
     async def async_on_home_assistant_started(event):  # pylint: disable=unused-argument
@@ -265,28 +256,32 @@ async def add_event_handlers(hass: HomeAssistant):
         await async_schedule_refresh_states(hass, startup_delay)
 
     async def async_on_configuration_changed(event):
-        typ = event.event_type
-        if typ == EVENT_CALL_SERVICE:
-            domain = event.data.get("domain", None)
-            service = event.data.get("service", None)
-            if domain in TRACKED_EVENT_DOMAINS and service in [
-                "reload_core_config",
-                "reload",
-            ]:
-                await parse_config(hass, reason="configuration changes")
-                coordinator = hass.data[DOMAIN]["coordinator"]
-                await coordinator.async_refresh()
+        # prevent multiple parse attempts when several events triggered simultaneously
+        if not parser_lock.locked():
+            async with parser_lock:
+                event_type = event.event_type
+                if event_type == EVENT_CALL_SERVICE:
+                    domain = event.data.get("domain", None)
+                    service = event.data.get("service", None)
+                    if domain in TRACKED_EVENT_DOMAINS and service in [
+                        SERVICE_RELOAD_CORE_CONFIG,
+                        SERVICE_RELOAD,
+                        SERVICE_RELOAD_ALL,
+                    ]:
+                        await parse_config(hass, reason=f"{domain}.{service} call")
+                        coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
+                        await coordinator.async_refresh()
 
-        elif typ in [EVENT_AUTOMATION_RELOADED, EVENT_SCENE_RELOADED]:
-            await parse_config(hass, reason="configuration changes")
-            coordinator = hass.data[DOMAIN]["coordinator"]
-            await coordinator.async_refresh()
+                elif event_type in [EVENT_AUTOMATION_RELOADED, EVENT_SCENE_RELOADED]:
+                    await parse_config(hass, reason=f"event: {event_type}")
+                    coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
+                    await coordinator.async_refresh()
 
     async def async_on_service_changed(event):
         service = f"{event.data['domain']}.{event.data['service']}"
-        if service in hass.data[DOMAIN].get("service_list", []):
+        if service in hass.data[DOMAIN].get(HASS_DATA_PARSED_SERVICE_LIST, []):
             _LOGGER.debug("Monitored service changed: %s", service)
-            coordinator = hass.data[DOMAIN]["coordinator"]
+            coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
             await coordinator.async_refresh()
 
     async def async_on_state_changed(event):
@@ -296,14 +291,16 @@ async def add_event_handlers(hass: HomeAssistant):
             """return missing state if entity not found"""
             return "missing" if not event.data[state_id] else event.data[state_id].state
 
-        if event.data["entity_id"] in hass.data[DOMAIN].get("entity_list", []):
-            ignored_states = get_config(hass, CONF_IGNORED_STATES, [])
+        if event.data["entity_id"] in hass.data[DOMAIN].get(
+            HASS_DATA_PARSED_ENTITY_LIST, []
+        ):
+            ignored_states: list[str] = get_config(hass, CONF_IGNORED_STATES, [])
             old_state = state_or_missing("old_state")
             new_state = state_or_missing("new_state")
             checked_states = set(MONITORED_STATES) - set(ignored_states)
             if new_state in checked_states or old_state in checked_states:
                 _LOGGER.debug("Monitored entity changed: %s", event.data["entity_id"])
-                coordinator = hass.data[DOMAIN]["coordinator"]
+                coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
                 await coordinator.async_refresh()
 
     # hass is not started yet, schedule config parsing once it loaded
@@ -314,6 +311,7 @@ async def add_event_handlers(hass: HomeAssistant):
 
     hdlr = []
     hdlr.append(
+        # track service calls which update HA configuration
         hass.bus.async_listen(EVENT_CALL_SERVICE, async_on_configuration_changed)
     )
     hdlr.append(
@@ -327,47 +325,41 @@ async def add_event_handlers(hass: HomeAssistant):
     )
     hdlr.append(hass.bus.async_listen(EVENT_SERVICE_REMOVED, async_on_service_changed))
     hdlr.append(hass.bus.async_listen(EVENT_STATE_CHANGED, async_on_state_changed))
-    hass.data[DOMAIN]["cancel_handlers"] = hdlr
+    hass.data[DOMAIN][HASS_DATA_CANCEL_HANDLERS] = hdlr
 
 
 async def parse_config(hass: HomeAssistant, reason=None):
     """parse home assistant configuration files"""
-    assert hass.data.get(DOMAIN_DATA)
-    start_time = time.time()
-    included_folders = get_included_folders(hass)
-    ignored_files = hass.data[DOMAIN_DATA].get(CONF_IGNORED_FILES, None)
 
-    entity_list, service_list, files_parsed, files_ignored = await parse(
+    start_time = time.time()
+
+    included_folders = get_included_folders(hass)
+    ignored_files = get_config(hass, CONF_IGNORED_FILES, None)
+    _LOGGER.debug(
+        f"::parse_config:: called due to {reason} IGNORED_FILES={ignored_files}"
+    )
+
+    parsed_entity_list, parsed_service_list, files_parsed, files_ignored = await parse(
         hass, included_folders, ignored_files, hass.config.config_dir
     )
-    hass.data[DOMAIN]["entity_list"] = entity_list
-    hass.data[DOMAIN]["service_list"] = service_list
-    hass.data[DOMAIN]["files_parsed"] = files_parsed
-    hass.data[DOMAIN]["files_ignored"] = files_ignored
-    hass.data[DOMAIN]["parse_duration"] = time.time() - start_time
-    _LOGGER.info(
-        "%s files parsed and %s files ignored in %.2fs. due to %s",
-        files_parsed,
-        files_ignored,
-        hass.data[DOMAIN]["parse_duration"],
-        reason,
+    hass.data[DOMAIN][HASS_DATA_PARSED_ENTITY_LIST] = parsed_entity_list
+    hass.data[DOMAIN][HASS_DATA_PARSED_SERVICE_LIST] = parsed_service_list
+    hass.data[DOMAIN][HASS_DATA_FILES_PARSED] = files_parsed
+    hass.data[DOMAIN][HASS_DATA_FILES_IGNORED] = files_ignored
+    hass.data[DOMAIN][HASS_DATA_PARSE_DURATION] = time.time() - start_time
+    _LOGGER.debug(
+        f"{INDENT}Parsing took {hass.data[DOMAIN][HASS_DATA_PARSE_DURATION]:.2f}s."
     )
 
 
 def get_included_folders(hass):
     """gather the list of folders to parse"""
     folders = []
-    config_folders = [hass.config.config_dir]
 
-    if DOMAIN_DATA in hass.data:
-        config_folders = hass.data[DOMAIN_DATA].get("included_folders")
-        if not config_folders:
-            config_folders = [hass.config.config_dir]
-
-    for fld in config_folders:
+    for fld in get_config(hass, CONF_INCLUDED_FOLDERS, None):
         folders.append((fld, "**/*.yaml"))
 
-    if DOMAIN_DATA in hass.data and hass.data[DOMAIN_DATA].get(CONF_CHECK_LOVELACE):
+    if get_config(hass, CONF_CHECK_LOVELACE):
         folders.append((hass.config.config_dir, ".storage/**/lovelace*"))
 
     return folders
@@ -375,7 +367,7 @@ def get_included_folders(hass):
 
 async def async_report_to_file(hass, path, test_mode):
     """save report to a file"""
-    coordinator = hass.data[DOMAIN]["coordinator"]
+    coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
     await coordinator.async_refresh()
     report_chunks = await report(
         hass, table_renderer, chunk_size=0, test_mode=test_mode
@@ -389,43 +381,36 @@ async def async_report_to_file(hass, path, test_mode):
     await hass.async_add_executor_job(write, path)
 
 
-async def async_report_to_notification(hass, service_str, service_data, chunk_size):
-    """send report via notification service"""
-    if not service_str:
-        service_str = get_config(hass, CONF_SERVICE_NAME, None)
-        service_data = get_config(hass, CONF_SERVICE_DATA2, None)
+async def async_report_to_notification(
+    hass: HomeAssistant, action_str: str, service_data: dict[str, Any], chunk_size: int
+):
+    """send report via notification action"""
 
-    if not service_str:
-        await async_notification(
-            hass,
-            "Watchman Error",
-            "You should specify `service` parameter (in integration options or as `service` "
-            "parameter) in order to send report via notification",
+    if not action_str:
+        raise HomeAssistantError(f"Missing `{CONF_ACTION_NAME}` parameter.")
+
+    if action_str and not isinstance(action_str, str):
+        raise HomeAssistantError(
+            f"`action` parameter should be a string, got {action_str}"
         )
-        return
 
-    if not is_service(hass, service_str):
-        await async_notification(
-            hass,
-            "Watchman Error",
-            f"{service_str} is not a valid service for notification",
-        )
-    domain = service_str.split(".")[0]
-    service = ".".join(service_str.split(".")[1:])
+    if not is_action(hass, action_str):
+        raise HomeAssistantError(f"{action_str} is not a valid action for notification")
 
-    data = {} if service_data is None else json.loads(service_data)
+    domain = action_str.split(".")[0]
+    action = ".".join(action_str.split(".")[1:])
 
-    coordinator = hass.data[DOMAIN]["coordinator"]
+    data = {} if service_data is None else service_data
+
+    _LOGGER.debug(f"SERVICE_DATA {data}")
+
+    coordinator = hass.data[DOMAIN][HASS_DATA_COORDINATOR]
     await coordinator.async_refresh()
     report_chunks = await report(hass, text_renderer, chunk_size)
-    for chunk in report_chunks:
-        data["message"] = chunk
-        # blocking=True ensures execution order
-        if not await hass.services.async_call(domain, service, data, blocking=True):
-            _LOGGER.error(
-                "Unable to call service %s.%s due to an error.", domain, service
-            )
-            break
+    for msg_chunk in report_chunks:
+        data["message"] = msg_chunk
+        # blocking=True ensures send order
+        await hass.services.async_call(domain, action, data, blocking=True)
 
 
 async def async_notification(hass, title, message, error=False, n_id="watchman"):
@@ -440,7 +425,78 @@ async def async_notification(hass, title, message, error=False, n_id="watchman")
         raise HomeAssistantError(message.replace("`", ""))
 
 
-async def async_onboarding(hass, service, path):
-    """check if the user runs report for the first time"""
-    service = service or get_config(hass, CONF_SERVICE_NAME, None)
-    return not (service or await Path(path).exists())
+async def async_migrate_entry(hass, config_entry: ConfigEntry):
+    if config_entry.version > 1:
+        # This means the user has downgraded from a future version
+        _LOGGER.error(
+            "Unable to migratre Watchman entry from version %d.%d. If integration version was downgraded, use backup to restore its data.",
+            config_entry.version,
+            config_entry.minor_version,
+        )
+        return False
+    else:
+        # migrate from ConfigEntry.options to ConfigEntry.data
+        _LOGGER.info(
+            "Start Watchman configuration entry migration to version 2. Source data: %s",
+            config_entry.options,
+        )
+        data = DEFAULT_OPTIONS
+
+        data[CONF_INCLUDED_FOLDERS] = (
+            hass.config.path()
+            if CONF_INCLUDED_FOLDERS not in config_entry.options
+            else ",".join(str(x) for x in config_entry.options[CONF_INCLUDED_FOLDERS])
+        )
+
+        data[CONF_IGNORED_STATES] = config_entry.options.get(CONF_IGNORED_STATES, [])
+        data[CONF_CHECK_LOVELACE] = config_entry.options.get(CONF_CHECK_LOVELACE, False)
+
+        if CONF_IGNORED_ITEMS in config_entry.options:
+            data[CONF_IGNORED_ITEMS] = ",".join(
+                str(x) for x in config_entry.options[CONF_IGNORED_ITEMS]
+            )
+
+        if CONF_IGNORED_FILES in config_entry.options:
+            data[CONF_IGNORED_FILES] = ",".join(
+                str(x) for x in config_entry.options[CONF_IGNORED_FILES]
+            )
+
+        if CONF_FRIENDLY_NAMES in config_entry.options:
+            data[CONF_SECTION_APPEARANCE_LOCATION][CONF_FRIENDLY_NAMES] = (
+                config_entry.options[CONF_FRIENDLY_NAMES]
+            )
+
+        data[CONF_SECTION_APPEARANCE_LOCATION][CONF_REPORT_PATH] = (
+            config_entry.options.get(
+                CONF_REPORT_PATH, await async_get_report_path(hass, None)
+            )
+        )
+
+        if CONF_HEADER in config_entry.options:
+            data[CONF_SECTION_APPEARANCE_LOCATION][CONF_HEADER] = config_entry.options[
+                CONF_HEADER
+            ]
+
+        if CONF_COLUMNS_WIDTH in config_entry.options:
+            data[CONF_SECTION_APPEARANCE_LOCATION][CONF_COLUMNS_WIDTH] = ",".join(
+                str(x) for x in config_entry.options[CONF_COLUMNS_WIDTH]
+            )
+
+        if CONF_STARTUP_DELAY in config_entry.options:
+            data[CONF_STARTUP_DELAY] = config_entry.options[CONF_STARTUP_DELAY]
+
+        _LOGGER.info(
+            "Successfully migrated Watchman configuration entry from version %d.%d. to version %d.%d",
+            config_entry.version,
+            config_entry.minor_version,
+            CONFIG_ENTRY_VERSION,
+            CONFIG_ENTRY_MINOR_VERSION,
+        )
+        hass.config_entries.async_update_entry(
+            config_entry,
+            data=data,
+            options={},
+            minor_version=CONFIG_ENTRY_MINOR_VERSION,
+            version=CONFIG_ENTRY_VERSION,
+        )
+        return True

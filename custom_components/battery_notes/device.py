@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from typing import cast
 
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.components.sensor import (
@@ -13,12 +14,9 @@ from homeassistant.const import (
     PERCENTAGE,
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant
-from homeassistant.helpers import (
-    device_registry as dr,
-)
-from homeassistant.helpers import (
-    entity_registry as er,
-)
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.entity_registry import RegistryEntry
 
 from .const import (
@@ -44,11 +42,11 @@ _LOGGER = logging.getLogger(__name__)
 class BatteryNotesDevice:
     """Manages a Battery Note device."""
 
-    config: ConfigEntry = None
-    store: BatteryNotesStorage = None
-    coordinator: BatteryNotesCoordinator = None
-    wrapped_battery: RegistryEntry = None
-    device_name: str = None
+    config: ConfigEntry
+    store: BatteryNotesStorage
+    coordinator: BatteryNotesCoordinator
+    wrapped_battery: RegistryEntry | None = None
+    device_name: str | None = None
 
     def __init__(self, hass: HomeAssistant, config: ConfigEntry) -> None:
         """Initialize the device."""
@@ -94,6 +92,32 @@ class BatteryNotesDevice:
 
         if source_entity_id:
             entity = entity_registry.async_get(source_entity_id)
+
+            if not entity:
+                ir.async_create_issue(
+                    self.hass,
+                    DOMAIN,
+                    f"missing_device_{self.config.entry_id}",
+                    data={
+                        "entry_id": self.config.entry_id,
+                        "device_id": device_id,
+                        "source_entity_id": source_entity_id,
+                    },
+                    is_fixable=True,
+                    severity=ir.IssueSeverity.WARNING,
+                    translation_key="missing_device",
+                    translation_placeholders={
+                            "name": config.title,
+                        },
+                )
+
+                _LOGGER.warning(
+                    "%s is orphaned, unable to find entity %s",
+                    self.config.entry_id,
+                    source_entity_id,
+                )
+                return False
+
             device_class = entity.device_class or entity.original_device_class
             if (
                 device_class == SensorDeviceClass.BATTERY
@@ -150,6 +174,30 @@ class BatteryNotesDevice:
             else:
                 self.device_name = self.config.title
 
+                ir.async_create_issue(
+                    self.hass,
+                    DOMAIN,
+                    f"missing_device_{self.config.entry_id}",
+                    data={
+                        "entry_id": self.config.entry_id,
+                        "device_id": device_id,
+                        "source_entity_id": source_entity_id,
+                    },
+                    is_fixable=True,
+                    severity=ir.IssueSeverity.WARNING,
+                    translation_key="missing_device",
+                    translation_placeholders={
+                            "name": config.title,
+                        },
+                )
+
+                _LOGGER.warning(
+                    "%s is orphaned, unable to find device %s",
+                    self.config.entry_id,
+                    device_id,
+                )
+                return False
+
         self.store = self.hass.data[DOMAIN][DATA_STORE]
         self.coordinator = BatteryNotesCoordinator(
             self.hass, self.store, self.wrapped_battery
@@ -158,9 +206,9 @@ class BatteryNotesDevice:
         self.coordinator.device_id = device_id
         self.coordinator.source_entity_id = source_entity_id
         self.coordinator.device_name = self.device_name
-        self.coordinator.battery_type = config.data.get(CONF_BATTERY_TYPE)
+        self.coordinator.battery_type = cast(str, config.data.get(CONF_BATTERY_TYPE))
         try:
-            self.coordinator.battery_quantity = int(
+            self.coordinator.battery_quantity = cast(int,
                 config.data.get(CONF_BATTERY_QUANTITY)
             )
         except ValueError:
@@ -208,7 +256,7 @@ class BatteryNotesDevice:
                 last_replaced,
             )
 
-            self.coordinator.last_replaced = last_replaced
+            self.coordinator.last_replaced = datetime.fromisoformat(last_replaced) if last_replaced else None
 
         # If there is not a last_reported set to now
         if not self.coordinator.last_reported:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from typing import Any, cast
 
@@ -38,7 +38,6 @@ from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change_event,
     async_track_template_result,
-    async_track_time_interval,
 )
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.typing import ConfigType, StateType
@@ -52,6 +51,7 @@ from custom_components.powercalc.const import (
     ATTR_SOURCE_ENTITY,
     CALCULATION_STRATEGY_CONF_KEYS,
     CONF_CALCULATION_ENABLED_CONDITION,
+    CONF_CUSTOM_MODEL_DIRECTORY,
     CONF_DELAY,
     CONF_DISABLE_EXTENDED_ATTRIBUTES,
     CONF_DISABLE_STANDBY_POWER,
@@ -203,25 +203,27 @@ async def _get_power_profile(
 ) -> PowerProfile | None:
     """Retrieve the power profile based on auto-discovery or manual configuration."""
     discovery_manager: DiscoveryManager = hass.data[DOMAIN][DATA_DISCOVERY_MANAGER]
+    if is_manually_configured(sensor_config):
+        return None
+
     power_profile = None
-    if not is_manually_configured(sensor_config):
-        try:
-            model_info = await discovery_manager.autodiscover_model(source_entity.entity_entry)
-            power_profile = await get_power_profile(
-                hass,
-                sensor_config,
-                model_info=model_info,
+    try:
+        model_info = await discovery_manager.extract_model_info_from_entity(source_entity.entity_entry)
+        power_profile = await get_power_profile(
+            hass,
+            sensor_config,
+            model_info=model_info,
+        )
+        if power_profile and power_profile.sub_profile_select:
+            await _select_sub_profile(hass, power_profile, power_profile.sub_profile_select, source_entity)
+    except ModelNotSupportedError as err:
+        if not is_fully_configured(sensor_config):
+            _LOGGER.error(
+                "%s: Skipping sensor setup: %s",
+                source_entity.entity_id,
+                err,
             )
-            if power_profile and power_profile.sub_profile_select:
-                await _select_sub_profile(hass, power_profile, power_profile.sub_profile_select, source_entity)
-        except ModelNotSupportedError as err:
-            if not is_fully_configured(sensor_config):
-                _LOGGER.error(
-                    "%s: Skipping sensor setup: %s",
-                    source_entity.entity_id,
-                    err,
-                )
-                raise err
+            raise err
     return power_profile
 
 
@@ -293,6 +295,8 @@ def is_manually_configured(sensor_config: ConfigType) -> bool:
     """Check if the user manually configured the sensor.
     We need to skip loading a power profile to make.
     """
+    if CONF_CUSTOM_MODEL_DIRECTORY in sensor_config:
+        return False
     if CONF_MODEL in sensor_config:
         return False
     return any(key in sensor_config for key in CALCULATION_STRATEGY_CONF_KEYS)
@@ -461,13 +465,6 @@ class VirtualPowerSensor(SensorEntity, PowerSensor):
 
         if hasattr(self._strategy_instance, "set_update_callback"):
             self._strategy_instance.set_update_callback(self._update_power_sensor)
-
-        @callback
-        def async_update(__: datetime | None = None) -> None:
-            """Update the entity."""
-            self.async_schedule_update_ha_state(True)
-
-        async_track_time_interval(self.hass, async_update, self._update_frequency)
 
     def init_calculation_enabled_condition(self) -> None:
         if CONF_CALCULATION_ENABLED_CONDITION not in self._sensor_config:

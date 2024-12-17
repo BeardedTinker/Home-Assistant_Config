@@ -12,6 +12,7 @@ from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.issue_registry import (
     IssueSeverity,
@@ -62,7 +63,22 @@ async def async_setup_entry(
     http_session = async_get_clientsession(hass, verify_ssl=False)
     mass_url = entry.data[CONF_URL]
     mass = MusicAssistantClient(mass_url, http_session)
-
+    async_create_issue(
+        hass,
+        DOMAIN,
+        f"move_integration_to_ha_core{DOMAIN}",
+        breaks_in_ha_version="2024.12.0",
+        is_fixable=False,
+        is_persistent=False,
+        learn_more_url="https://music-assistant.io/integration/installation/#migrating-from-the-hacs-integration-to-the-ha-integration",
+        issue_domain=DOMAIN,
+        severity=IssueSeverity.WARNING,
+        translation_key="move_integration_to_ha_core",
+        translation_placeholders={
+            "domain": DOMAIN,
+            "integration_title": "mass",
+        },
+    )
     try:
         async with asyncio.timeout(CONNECT_TIMEOUT):
             await mass.connect()
@@ -172,6 +188,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         mass_entry_data: MusicAssistantEntryData = entry.runtime_data
         mass_entry_data.listen_task.cancel()
         await mass_entry_data.mass.disconnect()
+        ir.async_delete_issue(hass, DOMAIN, f"move_integration_to_ha_core{DOMAIN}")
 
     return unload_ok
 

@@ -1,6 +1,5 @@
 """The blitzortung integration."""
 
-import json
 import logging
 import math
 import time
@@ -14,6 +13,7 @@ from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.event import async_track_time_interval
 
+from homeassistant.util.json import json_loads_object
 from homeassistant.util.unit_system import IMPERIAL_SYSTEM
 from homeassistant.util.unit_conversion import DistanceConverter
 
@@ -271,7 +271,7 @@ class BlitzortungCoordinator:
         def parse_version(version_str):
             return tuple(map(int, version_str.split(".")))
 
-        data = json.loads(message.payload)
+        data = json_loads_object(message.payload)
         latest_version_str = data.get("latest_version")
         if latest_version_str:
             default_message = (
@@ -294,7 +294,7 @@ class BlitzortungCoordinator:
         for callback in self.callbacks:
             callback(message)
         if message.topic.startswith("blitzortung/1.1"):
-            lightning = json.loads(message.payload)
+            lightning = json_loads_object(message.payload)
             self.compute_polar_coords(lightning)
             if lightning[SensorDeviceClass.DISTANCE] < self.radius:
                 _LOGGER.debug("lightning data: %s", lightning)

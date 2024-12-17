@@ -31,7 +31,7 @@ speech_processing:
         {% endif %}
 
   - service: tts.google_translate_say
-    entity_id: media_player.display_me
+    entity_id: media_player.clock_me
     data:
       message: >-
           {{ speech_message }}

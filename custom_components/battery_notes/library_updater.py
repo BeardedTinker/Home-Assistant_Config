@@ -20,6 +20,7 @@ from .const import (
     CONF_ENABLE_AUTODISCOVERY,
     CONF_LIBRARY_URL,
     DATA_LIBRARY_LAST_UPDATE,
+    DEFAULT_LIBRARY_URL,
     DOMAIN,
     DOMAIN_CONFIG,
 )
@@ -28,7 +29,6 @@ from .discovery import DiscoveryManager
 _LOGGER = logging.getLogger(__name__)
 
 BUILT_IN_DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), "data")
-
 
 class LibraryUpdaterClientError(Exception):
     """Exception to indicate a general API error."""
@@ -44,20 +44,28 @@ class LibraryUpdater:
     def __init__(self, hass: HomeAssistant):
         """Initialize the library updater."""
         self.hass = hass
-        self._client = LibraryUpdaterClient(session=async_get_clientsession(hass))
 
-        # Fire the library check every 24 hours from now
+        if DOMAIN_CONFIG in self.hass.data[DOMAIN]:
+            domain_config: dict = self.hass.data[DOMAIN][DOMAIN_CONFIG]
+            url = domain_config.get(CONF_LIBRARY_URL, DEFAULT_LIBRARY_URL)
+        else:
+            url = DEFAULT_LIBRARY_URL
+
+        self._client = LibraryUpdaterClient(library_url=url, session=async_get_clientsession(hass))
+
+        # Fire the library check every 24 hours from just before now
+        refresh_time = datetime.now() - timedelta(hours=0, minutes=1)
         async_track_utc_time_change(
-            hass, self.timer_update, hour=datetime.now().hour, minute=1, second=1
+            hass, self.timer_update, hour=refresh_time.hour, minute=refresh_time.minute, second=refresh_time.second, local=True
         )
 
     @callback
-    async def timer_update(self, time):
+    async def timer_update(self, now: datetime):
         """Need to update the library."""
         if await self.time_to_update_library() is False:
             return
 
-        await self.get_library_updates(time)
+        await self.get_library_updates(now)
 
         if DOMAIN_CONFIG not in self.hass.data[DOMAIN]:
             return
@@ -65,17 +73,17 @@ class LibraryUpdater:
         domain_config: dict = self.hass.data[DOMAIN][DOMAIN_CONFIG]
 
         if domain_config.get(CONF_ENABLE_AUTODISCOVERY):
-            discovery_manager = DiscoveryManager(self.hass, self.hass.config)
+            discovery_manager = DiscoveryManager(self.hass, domain_config)
             await discovery_manager.start_discovery()
         else:
             _LOGGER.debug("Auto discovery disabled")
 
     @callback
-    async def get_library_updates(self, time):
+    async def get_library_updates(self, now: datetime):
         # pylint: disable=unused-argument
         """Make a call to GitHub to get the latest library.json."""
 
-        def _update_library_json(library_file: str, content: str) -> dict[str, Any]:
+        def _update_library_json(library_file: str, content: str) -> None:
             with open(library_file, mode="w", encoding="utf-8") as file:
                 file.write(content)
                 file.close()
@@ -103,8 +111,7 @@ class LibraryUpdater:
 
         except LibraryUpdaterClientError:
             _LOGGER.warning(
-                "Unable to update library, this could be a GitHub or internet "
-                "connectivity issue, will retry later."
+                "Unable to update library, will retry later."
             )
 
     async def time_to_update_library(self) -> bool:
@@ -146,20 +153,23 @@ class LibraryUpdaterClient:
 
     def __init__(
         self,
+        library_url: str,
         session: aiohttp.ClientSession,
     ) -> None:
         """Client to get latest library file from GitHub."""
+        self._library_url = library_url
         self._session = session
 
-    async def async_get_data(self) -> any:
+    async def async_get_data(self) -> Any:
         """Get data from the API."""
-        return await self._api_wrapper(method="get", url=CONF_LIBRARY_URL)
+        _LOGGER.debug(f"Updating library from {self._library_url}")
+        return await self._api_wrapper(method="get", url=self._library_url)
 
     async def _api_wrapper(
         self,
         method: str,
         url: str,
-    ) -> any:
+    ) -> Any:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(10):

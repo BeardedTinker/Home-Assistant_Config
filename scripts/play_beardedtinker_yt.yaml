@@ -8,7 +8,7 @@ play_bt_yt:
   sequence:
   - service: media_extractor.play_media
     entity_id:
-      - media_player.display_me
+      - media_player.clock_me
     data_template:
         media_content_id: "{{state_attr('sensor.beardedtinker', 'url'| string)}}"
         media_content_type: video/youtube

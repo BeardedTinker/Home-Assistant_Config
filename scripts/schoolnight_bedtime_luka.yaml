@@ -4,27 +4,6 @@
 ####
 
 schoolnight_bedtime_luka:
-  sequence:
-  # - service: media_player.volume_set
-  #   data:
-  #     entity_id:
-  #       - media_player.display_me
-  #       - media_player.whatever_me
-  #       - media_player.clock_me
-  #     volume_level: 0.5
-  # - delay: 00:00:01
-  # - service: tts.google_translate_say
-  #   entity_id: media_player.display_me
-  #   data:
-  #     message: >
-
-  #       {{ [
-  #       "Luka, it's bed time!",
-  #       "10 o'clock, get ready for bed Luka.",
-  #       "Luka, let's go to bathroom and bed.",
-  #       "It's getting late Luka. Get ready for bed.",
-  #       "Luka! Tomorrow is school day, get ready for sleep.",
-  #       ] | random }}
   - alias: "Luka bedtime"
     service: script.turn_on
     target:
@@ -35,10 +14,7 @@ schoolnight_bedtime_luka:
           - alias: "Send TTS message"
             service: tts.google_translate_say
             target:
-              entity_id:
-                - media_player.display_me
-                - media_player.whatever_me
-                - media_player.clock_me
+              entity_id: media_player.clock_me
             data:
               message: >
                 {{ [

@@ -56,9 +56,6 @@ primary_entity:
           value: high
         - dps_val: strong
           value: strong
-    - id: 20
-      type: bitfield
-      name: fault_code
     - id: 105
       type: string
       name: sleep_mode
@@ -228,8 +225,7 @@ secondary_entities:
       - id: 123
         type: hex
         name: switch
-        mapping:
-          - mask: "0008"
+        mask: "0008"
   - entity: switch
     name: Beep
     category: config
@@ -237,8 +233,7 @@ secondary_entities:
       - id: 123
         type: hex
         name: switch
-        mapping:
-          - mask: "0010"
+        mask: "0010"
   - entity: binary_sensor
     class: problem
     category: diagnostic
@@ -250,6 +245,9 @@ secondary_entities:
           - dps_val: 0
             value: false
           - value: true
+      - id: 20
+        type: bitfield
+        name: fault_code
   - entity: sensor
     class: pm25
     category: diagnostic
