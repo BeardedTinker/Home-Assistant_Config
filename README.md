@@ -21,7 +21,7 @@ Contents
  * [Integrations](#integrations)
  * [Configuration](#configuration)
  * [Folder and files](#folder-and-files)
- * [Coutners](#counters)
+ * [Counters](#counters)
  * [Missing files?](#missing-files)
 
 
