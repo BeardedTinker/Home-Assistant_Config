@@ -24,7 +24,9 @@ from .const import (
     ATTR_DUE_IN,
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
-    ATTR_RT_UPDATED_AT
+    ATTR_RT_UPDATED_AT,
+    ICON,
+    ICONS
 )    
 from .gtfs_helper import get_gtfs, get_next_departure, check_datasource_index, create_trip_geojson, check_extracting, get_local_stops_next_departures
 from .gtfs_rt_helper import get_next_services, get_rt_alerts
@@ -72,12 +74,13 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
             "name": data["name"],
             "file": data["file"],
             "route_type": data["route_type"],
+            "route": data["route"],
             "extracting": False,
             "next_departure": {},
             "next_departure_realtime_attr": {},
             "alert": {}
         }           
-
+        
         if check_extracting(self.hass, self._data['gtfs_dir'],self._data['file']):    
             _LOGGER.debug("Cannot update this sensor as still unpacking: %s", self._data["file"])
             previous_data["extracting"] = True
@@ -122,6 +125,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                 self._headers = None
                 self._trip_update_url = options.get("trip_update_url", None)
                 self._vehicle_position_url = options.get("vehicle_position_url", None)
+                self._icon = ICONS.get(int(self._data["route_type"]), ICON)
                 self._alerts_url = options.get("alerts_url", None)
                 if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
                   if options.get(CONF_API_KEY, None):
@@ -138,6 +142,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                     _LOGGER.debug("GTFS RT: no route_id in sensor data, using route_id from config_entry")
                     self._route_id = data["route"].split(": ")[0]
                 self._stop_id = self._data["next_departure"]["origin_stop_id"].split(": ")[0]
+                self._stop_sequence = self._data["next_departure"]["origin_stop_sequence"]
                 self._destination_id = data["destination"].split(": ")[0]
                 self._trip_id = self._data.get('next_departure', {}).get('trip_id', None) 
                 self._direction = data["direction"]
@@ -190,7 +195,7 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
                 self._get_next_service = {}
                 """Initialize the info object."""
                 self._route_delimiter = None
-                self._headers = None
+                self._headers = {}
                 self._trip_update_url = options.get("trip_update_url", None)
                 self._vehicle_position_url = options.get("vehicle_position_url", None)
                 self._alerts_url = options.get("alerts_url", None)
@@ -200,9 +205,12 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
                     self._vehicle_position_url = self._vehicle_position_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                     self._alerts_url = self._alerts_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
-                    self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}               
-                if options.get(CONF_ACCEPT_HEADER_PB, False):
-                    self._headers["Accept"] = "application/x-protobuf"
+                    self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}   
+                    self._headers[CONF_API_KEY_LOCATION] = options.get(CONF_API_KEY_LOCATION,None)
+                    self._headers[CONF_API_KEY_NAME] = options.get(CONF_API_KEY_NAME, None)
+                    self._headers[CONF_API_KEY] = options.get(CONF_API_KEY, None)
+                    self._headers[CONF_ACCEPT_HEADER_PB] = options.get(CONF_ACCEPT_HEADER_PB, False)
+                _LOGGER.debug("RT header: %s", self._headers)
         self._pygtfs = get_gtfs(
             self.hass, DEFAULT_PATH, data, False
         )        

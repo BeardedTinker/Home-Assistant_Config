@@ -1,38 +1,80 @@
-dlimg:
-  name: Download Image
-  description: Downloads an image from the web and sends it to an ESL. If it does not fit, the image will be resized
+drawcustom:
+  name: Draw Custom Image
+  description: Draws a custom image on one or more ESL tags
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
   fields:
-    url:
-      name: Url
-      description: Url of the image to download
+    payload:
+      name: Payload
+      description: Payload to draw, see documentation for examples
       required: true
-      example: https://morgenwirdes.de/api/v3/esl1.php?plz=84051
-    rotation:
+      example: >
+        [{"type": "text", "value": "Hello World!", "x": 0, "y": 0, "size": 40}]
+      selector:
+        object:
+    background:
+      name: Background color
+      description: Background color (black, white, accent, red, yellow)
+      required: true
+      example: white
+      selector:
+        select:
+          options:
+            - "white"
+            - "black"
+            - "accent"
+            - "red"
+            - "yellow"
+    rotate:
       name: Rotation
-      description: Rotation to be applied to the image in degrees
-      required: false
-      example: 0
+      description: Rotation in degrees (0, 90, 180, 270)
+      required: true
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 270
+          step: 90
     dither:
       name: Dither
-      description: Whether the AP should dither the image or not
-      required: false
-      example: true
-      
+      description: Dithering option to use
+      required: true
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 2
+          step: 1
+    ttl:
+      name: Time to live
+      description: How long the image should be cached (in seconds)
+      required: true
+      default: 60
+      selector:
+        number:
+          min: 0
+          max: 86400
+          unit_of_measurement: seconds
+    dry-run:
+      name: Dry run
+      description: Generate image but don't send to AP
+      required: true
+      default: false
+      selector:
+        boolean:
+
 setled:
-  name: Set led pattern
-  description: Sets the led flash pattern
+  name: Set LED Pattern
+  description: Sets the LED flash pattern for one or more ESL tags
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
   fields:
     mode:
       name: Mode
-      description: The mode flashing, if set to off, the other options can be ignored
+      description: LED mode (off or flash)
       required: true
-      example: flash
       default: flash
       selector:
         select:
@@ -41,45 +83,37 @@ setled:
             - "flash"
     brightness:
       name: Brightness
-      description: Brightnes of the flashes
+      description: LED brightness (1-16)
       required: false
-      example: 1
       default: 1
       selector:
         number:
           min: 1
           max: 16
           step: 1
-          unit_of_measurement: ""
           mode: slider
-        
     repeats:
       name: Repeats
-      description: Repeats of the flash pattern
+      description: Number of times to repeat the pattern
       required: false
-      example: 2
       default: 2
       selector:
         number:
           min: 1
           max: 255
           step: 1
-          unit_of_measurement: ""
           mode: slider
-      
     color1:
       name: Color 1
-      description: Color of group 1, will internally be converted to rgb332
+      description: First color in the pattern
       required: false
-      example: [255, 0, 0]
       default: [255, 0, 0]
       selector:
         color_rgb:
     flashSpeed1:
-      name: FlashSpeed 1
-      description: Delay between flashes in group 1
+      name: Flash Speed 1
+      description: Flash speed for first color (seconds)
       required: false
-      example: 0.2
       default: 0.2
       selector:
         number:
@@ -89,23 +123,20 @@ setled:
           unit_of_measurement: "s"
           mode: slider
     flashCount1:
-      name: FlashCount1
-      description: Number of flashes in group 1
+      name: Flash Count 1
+      description: Number of flashes for first color
       required: false
-      example: 2
       default: 2
       selector:
         number:
           min: 0
           max: 15
           step: 1
-          unit_of_measurement: ""
           mode: slider
     delay1:
       name: Delay 1
-      description: Delay between group 1 and 2
+      description: Delay after first color
       required: false
-      example: 0.1
       default: 0.1
       selector:
         number:
@@ -113,21 +144,18 @@ setled:
           max: 25.5
           step: 0.1
           unit_of_measurement: "s"
-          mode: slider      
-      
+          mode: slider
     color2:
       name: Color 2
-      description: Color of group 2
+      description: Second color in the pattern
       required: false
-      example: [0, 255, 0]
       default: [0, 255, 0]
       selector:
         color_rgb:
     flashSpeed2:
-      name: FlashSpeed 2
-      description: Delay between flashes in group 2
+      name: Flash Speed 2
+      description: Flash speed for second color (seconds)
       required: false
-      example: 0.2
       default: 0.2
       selector:
         number:
@@ -137,23 +165,20 @@ setled:
           unit_of_measurement: "s"
           mode: slider
     flashCount2:
-      name: FlashCount2
-      description: Number of flashes in group 2
+      name: Flash Count 2
+      description: Number of flashes for second color
       required: false
-      example: 2
       default: 2
       selector:
         number:
           min: 0
           max: 15
           step: 1
-          unit_of_measurement: ""
           mode: slider
     delay2:
       name: Delay 2
-      description: Delay between group 2 and 3
+      description: Delay after second color
       required: false
-      example: 0.1
       default: 0.1
       selector:
         number:
@@ -161,21 +186,18 @@ setled:
           max: 25.5
           step: 0.1
           unit_of_measurement: "s"
-          mode: slider   
-      
+          mode: slider
     color3:
       name: Color 3
-      description: Color of group 3
+      description: Third color in the pattern
       required: false
-      example: [0, 0, 255]
       default: [0, 0, 255]
       selector:
         color_rgb:
     flashSpeed3:
-      name: FlashSpeed 3
-      description: Delay between flashes in group 3
+      name: Flash Speed 3
+      description: Flash speed for third color (seconds)
       required: false
-      example: 0.2
       default: 0.2
       selector:
         number:
@@ -185,23 +207,20 @@ setled:
           unit_of_measurement: "s"
           mode: slider
     flashCount3:
-      name: FlashCount3
-      description: Number of flashes in group 3
+      name: Flash Count 3
+      description: Number of flashes for third color
       required: false
-      example: 2
       default: 2
       selector:
         number:
           min: 0
           max: 15
           step: 1
-          unit_of_measurement: ""
           mode: slider
     delay3:
       name: Delay 3
-      description: Delay between group 3 and 1
+      description: Delay after third color
       required: false
-      example: 0
       default: 0
       selector:
         number:
@@ -209,175 +228,46 @@ setled:
           max: 25.5
           step: 0.1
           unit_of_measurement: "s"
-          mode: slider   
-      
-drawcustom:
-  name: Draw Custom Image
-  description: Draws a custom image
-  target:
-    entity:
-      domain: open_epaper_link
-  fields:
-    payload:
-      name: Payload
-      description: payload to draw
-      required: true
-      example: look into supported_types.md for examples
-    background:
-      name: Backgroundcolor
-      description: black, white, red
-      required: true
-      example: white
-    rotate:
-      name: rotate
-      description: 0, 90, 180, 270
-      required: false
-      example: 90
-    dry-run:
-      name: Dry-run
-      description: Generate image, but don't send it to the AP.
-      required: false
-      example: true
+          mode: slider
 
-lines5:
-  name: 5 Line Display
-  description: Sets an ESL to display 5 lines of text, only for 1.54", you can double a line by adding a newline char to your text
-  target:
-    entity:
-      domain: open_epaper_link
-  fields:
-    line1:
-      name: Line 1
-      description: Line 1 of text to display, 1 new line is allowed
-      required: true
-      example: Test
-    line2:
-      name: Line 2
-      description: Line 2 of text to display, 1 new line is allowed
-      required: true
-      example: waylongertext
-    line3:
-      name: Line 3
-      description: Line 3 of text to display, 1 new line is allowed
-      required: true
-      example: '"Test Text"'
-    line4:
-      name: Line 4
-      description: Line 4 of text to display, 1 new line is allowed
-      required: true
-      example: left
-    line5:
-      name: Line 5
-      description: Line 5 of text to display, 1 new line is allowed
-      required: true
-      example: right
-    border:
-      name: Border
-      description: Color of the border
-      required: false
-      example: r
-    format1:
-      name: Format string 1
-      description: Format string for the first row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mbbw
-    format2:
-      name: Format string 2
-      description: Format string for the second row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mwwb
-    format3:
-      name: Format string 3
-      description: Format string for the third row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mbbw
-    format4:
-      name: Format string 4
-      description: Format string for the fourth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: lrwb
-    format5:
-      name: Format string 5
-      description: Format string for the fifth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: rbrr
-
-lines4:
-  name: 4 Line Display
-  description: Sets an ESL to display 4 lines of text, only for 2.9", you can double a line by adding a newline char to your text
-  target:
-    entity:
-      domain: open_epaper_link
-  fields:
-    line1:
-      name: Line 1
-      description: Line 1 of text to display, 1 new line is allowed
-      required: true
-      example: Test
-    line2:
-      name: Line 2
-      description: Line 2 of text to display, 1 new line is allowed
-      required: true
-      example: waylongertext
-    line3:
-      name: Line 3
-      description: Line 3 of text to display, 1 new line is allowed
-      required: true
-      example: '"Test Text"'
-    line4:
-      name: Line 4
-      description: Line 4 of text to display, 1 new line is allowed
-      required: true
-      example: left
-    border:
-      name: Border
-      description: Color of the border
-      required: false
-      example: r
-    format1:
-      name: Format string 1
-      description: Format string for the first row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mbbw
-    format2:
-      name: Format string 2
-      description: Format string for the second row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mwwb
-    format3:
-      name: Format string 3
-      description: Format string for the third row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: mbbw
-    format4:
-      name: Format string 4
-      description: Format string for the fourth row. Char 1 is for the text alignment, char 2 is for the background color, char 3 is for the border color and char 4 is for the text color
-      required: false
-      example: lrwb
 clear_pending:
   name: Clear Pending
   description: Clears the pending status for one or more ESL tags
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
+
 force_refresh:
   name: Force Refresh
-  description: Forces the ESL to refresh the display
+  description: Forces one or more ESL tags to refresh their display
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
+
 reboot_tag:
   name: Reboot Tag
   description: Reboots one or more ESL tags
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
+
 scan_channels:
   name: Scan Channels
-  description: Lets the ESL scan for channels
+  description: Makes one or more ESL tags scan for channels
   target:
-    entity:
-      domain: open_epaper_link
+    device:
+      integration: open_epaper_link
+
 reboot_ap:
   name: Reboot AP
   description: Reboots the AP
+  target:
+    device:
+      integration: open_epaper_link
+
+refresh_tag_types:
+  name: Refresh Tag Types
+  description: Force refresh of tag type definitions from GitHub
+  target:
+    device:
+      integration: open_epaper_link

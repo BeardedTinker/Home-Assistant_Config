@@ -16,7 +16,7 @@ async def async_setup_entry(
     async_add_entities
 ):
     entities = []
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
 
     for dev_id in coordinator.data.get("devices", {}):
         if coordinator.info_field(dev_id, -1, "openerAdvancedConfig", "doorbellSuppression")  >= 0:

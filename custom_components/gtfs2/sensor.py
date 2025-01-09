@@ -312,6 +312,7 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
         else:
             self._attributes["origin_station_stop_name"] = self._departure.get("origin_stop_name", None)
             self._attributes["origin_station_stop_id"] =  self._departure.get("origin_stop_id", None)
+            self._attributes["origin_station_stop_sequence"] =  self._departure.get("origin_stop_sequence", None)
 
         key = "destination_station_stop_id"
         # exclude check if route_type =2 (trains) as no ID is used
@@ -330,7 +331,7 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
                 )
         else:
             self._attributes["destination_station_stop_name"] = self._departure.get("destination_stop_name", None)  
-            self._attributes["destination_station_stop_id"] = self._departure.get("destination_stop_id", None)            
+            self._attributes["destination_station_stop_id"] = self._departure.get("destination_stop_id", None)          
 
         # Manage Route metadata
         key = "route_id"

@@ -239,7 +239,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_route_type()          
         
     async def async_step_route_type(self, user_input: dict | None = None) -> FlowResult:
-        """Handle the route_type."""
+        """Handle the dummy route_type to split between train (different mechanism) and rest."""
         errors: dict[str, str] = {}
         if user_input is None:
             return self.async_show_form(
@@ -259,7 +259,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_route()          
 
     async def async_step_route(self, user_input: dict | None = None) -> FlowResult:
-        """Handle the route."""
+        """Handle the route and reset the route_type to the proper one."""
         errors: dict[str, str] = {}
         check_data = await self._check_data(self._user_inputs)
         _LOGGER.debug("Source check data: %s", check_data)
@@ -272,18 +272,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._user_inputs,
             False,
         )
-
         if user_input is None:
+            route_list = [
+                selector.SelectOptionDict(value=r, label=r.split('#')[1])
+                for r in get_route_list(self._pygtfs, self._user_inputs)
+                ]
             return self.async_show_form(
                 step_id="route",
                 data_schema=vol.Schema(
                     {
-                        vol.Required(CONF_ROUTE, default = ""): selector.SelectSelector(selector.SelectSelectorConfig(options = get_route_list(self._pygtfs, self._user_inputs), translation_key="route_type",custom_value=True)),
+                        vol.Required(CONF_ROUTE, default = ""): selector.SelectSelector(selector.SelectSelectorConfig(options=route_list, translation_key="route",custom_value=True)),
                         vol.Required(CONF_DIRECTION): selector.SelectSelector(selector.SelectSelectorConfig(options=["0", "1"], translation_key="direction")),
                     },
                 ),
                 errors=errors,
             )
+        user_input[CONF_ROUTE_TYPE] = user_input.get(CONF_ROUTE).split('#')[0] 
+        user_input[CONF_ROUTE] = user_input.get(CONF_ROUTE).split('#')[1].split(":")[0]   
+               
         self._user_inputs.update(user_input)
         _LOGGER.debug(f"UserInputs Route: {self._user_inputs}")
         return await self.async_step_stops()
@@ -295,7 +301,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 stops = get_stop_list(
                     self._pygtfs,
-                    self._user_inputs[CONF_ROUTE].split(": ")[0],
+                    self._user_inputs[CONF_ROUTE],
                     self._user_inputs[CONF_DIRECTION],
                 )
                 last_stop = stops[-1:][0]
@@ -331,7 +337,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 stops = get_stop_list(
                     self._pygtfs,
-                    self._user_inputs[CONF_ROUTE].split(": ")[0],
+                    self._user_inputs[CONF_ROUTE],
                     self._user_inputs[CONF_DIRECTION],
                 )
                 last_stop = stops[-1:][0]
@@ -525,7 +531,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY)) : str,
                         vol.Optional(CONF_API_KEY_NAME, default=self.config_entry.options.get(CONF_API_KEY_NAME,DEFAULT_API_KEY_NAME)) : str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
-                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
+                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = self.config_entry.options.get(CONF_ACCEPT_HEADER_PB,False)): selector.BooleanSelector(),
                     },
                 ),
                 errors=errors,
@@ -541,7 +547,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_API_KEY, default=self.config_entry.options.get(CONF_API_KEY)) : str,
                         vol.Optional(CONF_API_KEY_NAME, default=self.config_entry.options.get(CONF_API_KEY_NAME,DEFAULT_API_KEY_NAME)) : str,
                         vol.Required(CONF_API_KEY_LOCATION, default=self.config_entry.options.get(CONF_API_KEY_LOCATION,DEFAULT_API_KEY_LOCATION)) : selector.SelectSelector(selector.SelectSelectorConfig(options=ATTR_API_KEY_LOCATIONS, translation_key="api_key_location")),
-                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = False): selector.BooleanSelector(),
+                        vol.Optional(CONF_ACCEPT_HEADER_PB, default = self.config_entry.options.get(CONF_ACCEPT_HEADER_PB,False)): selector.BooleanSelector(),
                     },
                 ),
                 errors=errors,

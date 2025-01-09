@@ -5,8 +5,8 @@ Mixins to make writing new platforms easier
 import logging
 
 from homeassistant.const import (
-    AREA_SQUARE_METERS,
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    UnitOfArea,
     UnitOfTemperature,
 )
 from homeassistant.helpers.entity import EntityCategory
@@ -57,7 +57,11 @@ class TuyaLocalEntity:
     @property
     def use_device_name(self):
         """Return whether to use the device name for the entity name"""
-        own_name = self._config.name or self._config.translation_key
+        own_name = (
+            self._config.name
+            or self._config.translation_key
+            or (self._default_to_device_class_name() and self._config.device_class)
+        )
         return not own_name
 
     @property
@@ -123,7 +127,7 @@ UNIT_ASCII_MAP = {
     "C": UnitOfTemperature.CELSIUS.value,
     "F": UnitOfTemperature.FAHRENHEIT.value,
     "ugm3": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    "m2": AREA_SQUARE_METERS,
+    "m2": UnitOfArea.SQUARE_METERS,
 }
 
 

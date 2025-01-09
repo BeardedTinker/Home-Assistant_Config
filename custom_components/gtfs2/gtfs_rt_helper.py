@@ -209,8 +209,14 @@ def get_rt_route_trip_statuses(self):
                 
                 for stop in entity["trip_update"]["stop_time_update"]:
                     stop_id = stop["stop_id"]
-                    if stop_id == self._stop_id:
+                    stop_sequence = stop["stop_sequence"]
+                    if stop_id == self._stop_id or (stop_id == "" and stop_sequence == self._stop_sequence):
                         _LOGGER.debug("Stop found: %s", stop)
+                        # if the data does not contain a stop_id but only a stop_sequence, assume stop_id being the correct stop based on sequence
+                        # this does not have to be always correct but best-guess
+                        if stop_id == "":
+                            stop_id = self._stop_id
+                        
                         if route_id not in departure_times:
                             departure_times[route_id] = {}
                                                
@@ -248,7 +254,8 @@ def get_rt_route_trip_statuses(self):
                         if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
                             departure_times[route_id][direction_id][
                                 stop_id
-                            ]["departures"].append(dt_util.as_utc(datetime.fromtimestamp(stop_time)))
+                            ]["departures"].append(datetime.utcfromtimestamp(stop_time).replace(tzinfo=dt_util.get_time_zone("UTC")))
+                            _LOGGER.debug("RT stoptime: %s, utcfromtimestamp: %s, format utc: %s", stop_time, datetime.utcfromtimestamp(stop_time), datetime.utcfromtimestamp(stop_time).replace(tzinfo=dt_util.get_time_zone("UTC")))
                         else:
                             _LOGGER.debug("Not using realtime stop data for old due-in-minutes: %s", due_in_minutes(datetime.fromtimestamp(stop_time)))
                             
@@ -292,7 +299,7 @@ def get_rt_vehicle_positions(self):
             geojson_element["geometry"]["coordinates"].append(vehicle["position"]["longitude"])
             geojson_element["geometry"]["coordinates"].append(vehicle["position"]["latitude"])
             geojson_element["properties"]["id"] = str(self._route_id) + "(" + str(vehicle["trip"]["direction_id"]) + ")" + str(binascii.crc32((vehicle["trip"]["trip_id"]).encode('utf8')))[-3:]
-            geojson_element["properties"]["title"] = str(self._route_id) + "(" + str(vehicle["trip"]["direction_id"]) + ")" + str(binascii.crc32((vehicle["trip"]["trip_id"]).encode('utf8')))[-3:]
+            geojson_element["properties"]["title"] = str(self._route_id) + "(" + str(vehicle["trip"]["direction_id"]) + ")" + str(binascii.crc32((vehicle["trip"]["trip_id"]).encode('utf8')))[-3:] + "_" + self._icon.split(':')[1]
             geojson_element["properties"]["trip_id"] = vehicle["trip"]["trip_id"]
             geojson_element["properties"]["route_id"] = str(self._route_id)
             geojson_element["properties"]["direction_id"] = vehicle["trip"]["direction_id"]
@@ -400,9 +407,14 @@ def get_gtfs_rt(hass, path, data):
     try:
         r = requests.get(url, headers = _headers , allow_redirects=True)
         open(os.path.join(gtfs_dir, file), "wb").write(r.content)
+        if r.status_code != 200:
+            _LOGGER.error("Ìssues with downloading GTFS RT data, error: %s, content: %s", r.status_code, r.content)
+            return "no_rt_data_file"
     except Exception as ex:  # pylint: disable=broad-except
         _LOGGER.error("Ìssues with downloading GTFS RT data to: %s", os.path.join(gtfs_dir, file))
         return "no_rt_data_file"
+
+    
     if data.get("debug_output", False):
         try:
             data_out = ""

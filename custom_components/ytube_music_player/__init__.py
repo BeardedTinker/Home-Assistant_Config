@@ -20,10 +20,7 @@ async def async_setup_entry(hass, config_entry):
 		config_entry.add_update_listener(async_update_options)
 
 	# Add entities to HA
-	for platform in PLATFORMS:
-		hass.async_create_task(
-			hass.config_entries.async_forward_entry_setup(config_entry, platform)
-		)
+	await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 	return True
 
 
@@ -44,4 +41,4 @@ async def async_update_options(hass, config_entry):
 	_LOGGER.debug("Config updated,reload the entities.")
 	for platform in PLATFORMS:
 		await hass.config_entries.async_forward_entry_unload(config_entry, platform)
-		hass.async_create_task(hass.config_entries.async_forward_entry_setup(config_entry, platform))
+	await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)

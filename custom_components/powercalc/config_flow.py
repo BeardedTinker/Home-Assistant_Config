@@ -797,17 +797,6 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
         self.global_config = global_config
         return global_config
 
-    def get_fixed_power_config_for_smart_switch(self, user_input: dict[str, Any]) -> dict[str, Any]:
-        """Get the fixed power config for smart switch."""
-        if self.selected_profile is None:
-            return {CONF_POWER: 0}  # pragma: no cover
-        self_usage_on = self.selected_profile.fixed_mode_config.get(CONF_POWER, 0) if self.selected_profile.fixed_mode_config else 0
-        power = user_input.get(CONF_POWER, 0)
-        self_usage_included = user_input.get(CONF_SELF_USAGE_INCLUDED, True)
-        if self_usage_included:
-            power += self_usage_on
-        return {CONF_POWER: power}
-
     async def handle_form_step(
         self,
         form_step: PowercalcFormStep,
@@ -949,18 +938,18 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
         if self.selected_profile and await self.selected_profile.has_sub_profiles and not self.selected_profile.sub_profile_select:
             return await self.async_step_sub_profile()
 
-        if self.selected_profile and self.selected_profile.needs_fixed_config:
-            return await self.async_step_fixed()
-
-        if self.selected_profile and self.selected_profile.needs_linear_config:
-            return await self.async_step_linear()
-
         if (
             self.selected_profile
             and self.selected_profile.device_type == DeviceType.SMART_SWITCH
             and self.selected_profile.calculation_strategy == CalculationStrategy.FIXED
         ):
             return await self.async_step_smart_switch()
+
+        if self.selected_profile and self.selected_profile.needs_fixed_config:  # pragma: no cover
+            return await self.async_step_fixed()
+
+        if self.selected_profile and self.selected_profile.needs_linear_config:
+            return await self.async_step_linear()
 
         if self.selected_profile and self.selected_profile.calculation_strategy == CalculationStrategy.MULTI_SWITCH:
             return await self.async_step_multi_switch()
@@ -1043,16 +1032,17 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
     ) -> FlowResult:
         """Asks the user for the power of connect appliance for the smart switch."""
 
+        if self.selected_profile and not self.selected_profile.needs_fixed_config:
+            return self.persist_config_entry()
+
         async def _validate(user_input: dict[str, Any]) -> dict[str, Any]:
             return {
                 CONF_SELF_USAGE_INCLUDED: user_input.get(CONF_SELF_USAGE_INCLUDED),
                 CONF_MODE: CalculationStrategy.FIXED,
-                CONF_FIXED: self.get_fixed_power_config_for_smart_switch(user_input),
+                CONF_FIXED: {CONF_POWER: user_input.get(CONF_POWER, 0)},
             }
 
-        self_usage_on = 0
-        if self.selected_profile and self.selected_profile.fixed_mode_config:
-            self_usage_on = self.selected_profile.fixed_mode_config.get(CONF_POWER, 0)
+        self_usage_on = self.selected_profile.standby_power_on if self.selected_profile else 0
         return await self.handle_form_step(
             PowercalcFormStep(
                 step=Step.SMART_SWITCH,
@@ -1543,7 +1533,7 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize options flow."""
         super().__init__()
-        self.config_entry = config_entry
+        self._config_entry = config_entry
         self.sensor_config = dict(config_entry.data)
         self.sensor_type: SensorType = self.sensor_config.get(CONF_SENSOR_TYPE) or SensorType.VIRTUAL_POWER
         self.source_entity_id: str = self.sensor_config.get(CONF_ENTITY_ID)  # type: ignore
@@ -1554,11 +1544,11 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Handle options flow."""
-        if self.config_entry.unique_id == ENTRY_GLOBAL_CONFIG_UNIQUE_ID:
+        if self._config_entry.unique_id == ENTRY_GLOBAL_CONFIG_UNIQUE_ID:
             self.global_config = self.get_global_powercalc_config()
             return self.async_show_menu(step_id=Step.INIT, menu_options=self.build_global_config_menu())
 
-        self.sensor_config = dict(self.config_entry.data)
+        self.sensor_config = dict(self._config_entry.data)
         if self.source_entity_id:
             self.source_entity = await create_source_entity(
                 self.source_entity_id,
@@ -1686,7 +1676,7 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
     async def async_step_group_custom(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the group options flow."""
         schema = self.fill_schema_defaults(
-            self.create_schema_group_custom(self.config_entry, True),
+            self.create_schema_group_custom(self._config_entry, True),
             self.sensor_config,
         )
         return await self.async_handle_options_step(user_input, schema, Step.GROUP_CUSTOM)
@@ -1768,10 +1758,10 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
 
     def persist_config_entry(self) -> FlowResult:
         """Persist changed options on the config entry."""
-        data = (self.config_entry.unique_id == ENTRY_GLOBAL_CONFIG_UNIQUE_ID and self.global_config) or self.sensor_config
+        data = (self._config_entry.unique_id == ENTRY_GLOBAL_CONFIG_UNIQUE_ID and self.global_config) or self.sensor_config
 
         self.hass.config_entries.async_update_entry(
-            self.config_entry,
+            self._config_entry,
             data=data,
         )
         return self.async_create_entry(title="", data={})
@@ -1788,7 +1778,7 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
         if self.strategy and is_strategy_step:
             if self.selected_profile and self.selected_profile.device_type == DeviceType.SMART_SWITCH:
                 self._process_user_input(user_input, SCHEMA_POWER_SMART_SWITCH)
-                user_input = self.get_fixed_power_config_for_smart_switch(user_input)
+                user_input = {CONF_POWER: user_input.get(CONF_POWER, 0)}
 
             strategy_options = self.build_strategy_config(
                 self.strategy,

@@ -1,10 +1,12 @@
 import base64
 import io
 import os
+import uuid
 import shutil
 import logging
 import time
 import asyncio
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from functools import partial
 from PIL import Image, UnidentifiedImageError
 import numpy as np
@@ -19,6 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 class MediaProcessor:
     def __init__(self, hass, client):
         self.hass = hass
+        self.session = async_get_clientsession(self.hass)
         self.client = client
         self.base64_images = []
         self.filenames = []
@@ -135,6 +138,28 @@ class MediaProcessor:
                 base64_image = await self._encode_image(img)
 
         return base64_image
+    
+    async def _fetch(self, url, max_retries=2, retry_delay=1):
+        """Fetch image from url and return image data"""
+        retries = 0
+        while retries < max_retries:
+            _LOGGER.info(
+                f"Fetching {url} (attempt {retries + 1}/{max_retries})")
+            try:
+                response = await self.session.get(url)
+                if response.status != 200:
+                    _LOGGER.warning(
+                        f"Couldn't fetch frame (status code: {response.status})")
+                    retries += 1
+                    await asyncio.sleep(retry_delay)
+                    continue
+                data = await response.read()
+                return data
+            except Exception as e:
+                _LOGGER.error(f"Fetch failed: {e}")
+                retries += 1
+                await asyncio.sleep(retry_delay)
+        _LOGGER.warning(f"Failed to fetch {url} after {max_retries} retries")
 
     async def record(self, image_entities, duration, max_frames, target_width, include_filename, expose_images):
         """Wrapper for client.add_frame with integrated recorder
@@ -162,7 +187,7 @@ class MediaProcessor:
                 frame_url = base_url + \
                     self.hass.states.get(image_entity).attributes.get(
                         'entity_picture')
-                frame_data = await self.client._fetch(frame_url)
+                frame_data = await self._fetch(frame_url)
 
                 # Skip frame if fetch failed
                 if not frame_data:
@@ -251,7 +276,7 @@ class MediaProcessor:
                     image_url = base_url + \
                         self.hass.states.get(image_entity).attributes.get(
                             'entity_picture')
-                    image_data = await self.client._fetch(image_url)
+                    image_data = await self._fetch(image_url)
 
                     # Skip frame if fetch failed
                     if not image_data:
@@ -294,10 +319,11 @@ class MediaProcessor:
                     raise ServiceValidationError(f"Error: {e}")
         return self.client
 
-    async def add_videos(self, video_paths, event_ids, max_frames, target_width, include_filename, expose_images):
+    async def add_videos(self, video_paths, event_ids, max_frames, target_width, include_filename, expose_images, expose_images_persist, frigate_retry_attempts, frigate_retry_seconds):
         """Wrapper for client.add_frame for videos"""
         tmp_clips_dir = f"/config/custom_components/{DOMAIN}/tmp_clips"
         tmp_frames_dir = f"/config/custom_components/{DOMAIN}/tmp_frames"
+        processed_event_ids = []
 
         if not video_paths:
             video_paths = []
@@ -306,8 +332,9 @@ class MediaProcessor:
                 try:
                     base_url = get_url(self.hass)
                     frigate_url = base_url + "/api/frigate/notifications/" + event_id + "/clip.mp4"
-                    clip_data = await self.client._fetch(frigate_url)
 
+                    clip_data = await self._fetch(frigate_url, max_retries=frigate_retry_attempts, retry_delay=frigate_retry_seconds)
+                    
                     if not clip_data:
                         raise ServiceValidationError(
                             f"Failed to fetch frigate clip {event_id}")
@@ -323,6 +350,7 @@ class MediaProcessor:
                         f"Saved frigate clip to {clip_path} (temporarily)")
                     # append to video_paths
                     video_paths.append(clip_path)
+                    processed_event_ids.append(event_id)
 
                 except AttributeError as e:
                     raise ServiceValidationError(
@@ -331,6 +359,8 @@ class MediaProcessor:
             _LOGGER.debug(f"Processing videos: {video_paths}")
             for video_path in video_paths:
                 try:
+                    current_event_id = str(uuid.uuid4())
+                    processed_event_ids.append(current_event_id)
                     video_path = video_path.strip()
                     if os.path.exists(video_path):
                         # create tmp dir to store extracted frames
@@ -347,8 +377,9 @@ class MediaProcessor:
                         ffmpeg_cmd = [
                             "ffmpeg",
                             "-i", video_path,
-                            "-vf", f"fps=1/{interval},select='eq(n\\,0)+not(mod(n\\,{interval}))'", os.path.join(
-                                tmp_frames_dir, "frame%04d.jpg")
+                            "-vf", f"fps=fps='source_fps',select='eq(n\\,0)+not(mod(n\\,{interval}))'", 
+                            "-fps_mode", "passthrough",
+                            os.path.join(tmp_frames_dir, "frame%04d.jpg")
                         ]
                         # Run ffmpeg command
                         await self.hass.loop.run_in_executor(None, os.system, " ".join(ffmpeg_cmd))
@@ -391,16 +422,17 @@ class MediaProcessor:
                             sorted_frames.append(frames[0])
                         
                         # Add frames to client
-                        counter = 1
-                        for frame_path, _ in sorted_frames:
+                        for counter, (frame_path, _) in enumerate(sorted_frames, start=1):
                             resized_image = await self.resize_image(image_path=frame_path, target_width=target_width)
                             if expose_images:
-                                await self._save_clip(image_path="/config/www/llmvision/" + frame_path.split("/")[-1], image_data=resized_image)
+                                persist_filename = f"/config/www/llmvision/" + frame_path.split("/")[-1]
+                                if expose_images_persist:
+                                    persist_filename = f"/config/www/llmvision/{current_event_id}-" + frame_path.split("/")[-1]
+                                await self._save_clip(image_data=resized_image, image_path=persist_filename)
                             self.client.add_frame(
                                 base64_image=resized_image,
                                 filename=video_path.split('/')[-1].split('.')[-2] + " (frame " + str(counter) + ")" if include_filename else "Video frame " + str(counter)
                             )
-                            counter += 1
 
                     else:
                         raise ServiceValidationError(

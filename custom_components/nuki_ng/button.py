@@ -10,8 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
     entities = []
-    data = entry.as_dict()
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
 
     if coordinator.api.can_bridge():
         entities.append(NukiBridgeRestartButton(coordinator))

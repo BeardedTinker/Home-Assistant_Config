@@ -3,10 +3,10 @@ from .nuki import NukiCoordinator
 from .constants import DOMAIN, PLATFORMS
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import service, entity_registry, device_registry
+from homeassistant.helpers import service
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.config_entries import ConfigEntry
 
-# from homeassistant.helpers import device_registry
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
@@ -24,62 +24,48 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     _LOGGER.debug(f"async_setup_entry: {data}")
 
     coordinator = NukiCoordinator(hass, entry, data)
+    entry.runtime_data = coordinator
     await coordinator.async_config_entry_first_refresh()
-    hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    for p in PLATFORMS:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, p))
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry):
-    await hass.data[DOMAIN][entry.entry_id].unload()
-    for p in PLATFORMS:
-        await hass.config_entries.async_forward_entry_unload(entry, p)
-    hass.data[DOMAIN].pop(entry.entry_id)
+    coordinator = entry.runtime_data
+    await coordinator.unload()
+    await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    entry.runtime_data = None
     return True
 
 
-async def _extract_dev_ids(hass, service_call) -> set[str]:
-    entity_ids = await service.async_extract_entity_ids(hass, service_call)
-    result = set()
-    entity_reg = entity_registry.async_get(hass)
-    device_reg = device_registry.async_get(hass)
-    for id in entity_ids:
-        if entry := entity_reg.async_get(id):
-            if device := device_reg.async_get(entry.device_id):
-                ids = {x[0]: x[1] for x in device.identifiers}
-                result.add((entry.config_entry_id, ids.get("id")))
-    return result
+def _register_coordinator_service(hass: HomeAssistant,  name: str, handler):
+    async def handler_(call):
+        for entry_id in await service.async_extract_config_entry_ids(hass, call):
+            if entry := hass.config_entries.async_get_entry(entry_id):
+                _LOGGER.debug(f"_register_coordinator_service: {name}: {entry.domain}")
+                if entry.domain == DOMAIN:
+                    handler(entry.runtime_data, call.data)
+    hass.services.async_register(DOMAIN, name, handler_)
 
 
 async def async_setup(hass: HomeAssistant, config) -> bool:
-    hass.data[DOMAIN] = dict()
-
-    async def async_reboot(call):
-        for entry_id in await service.async_extract_config_entry_ids(hass, call):
-            await hass.data[DOMAIN][entry_id].do_reboot()
-
-    async def async_fwupdate(call):
-        for entry_id in await service.async_extract_config_entry_ids(hass, call):
-            await hass.data[DOMAIN][entry_id].do_fwupdate()
-
-    async def async_delete_callback(call):
-        for entry_id in await service.async_extract_config_entry_ids(hass, call):
-            await hass.data[DOMAIN][entry_id].do_delete_callback(
-                call.data.get("callback")
-            )
-
-    async def async_exec_action(call):
-        for entry_id, dev_id in await _extract_dev_ids(hass, call):
-            await hass.data[DOMAIN][entry_id].action(dev_id, call.data.get("action"))
-
-    hass.services.async_register(DOMAIN, "bridge_reboot", async_reboot)
-    hass.services.async_register(DOMAIN, "bridge_fwupdate", async_fwupdate)
-    hass.services.async_register(
-        DOMAIN, "bridge_delete_callback", async_delete_callback
+    _register_coordinator_service(
+        hass, "bridge_reboot", 
+        lambda coord, _: hass.async_create_task(coord.do_reboot())
     )
-    hass.services.async_register(DOMAIN, "execute_action", async_exec_action)
+    _register_coordinator_service(
+        hass, "bridge_fwupdate", 
+        lambda coord, _: hass.async_create_task(coord.do_fwupdate())
+    )
+    _register_coordinator_service(
+        hass, "bridge_delete_callback", 
+        lambda coord, data: hass.async_create_task(coord.do_delete_callback(data.get("callback")))
+    )
+    _register_coordinator_service(
+        hass, "execute_action", 
+        lambda coord, data: hass.async_create_task(coord.action_for_devices(data.get("action")))
+    )
 
     return True
 

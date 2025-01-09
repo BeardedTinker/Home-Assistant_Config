@@ -37,10 +37,12 @@ class SemanticIndex(CalendarEntity):
         self._attr_supported_features = (CalendarEntityFeature.DELETE_EVENT)
         # Path to the JSON file where events are stored
         self._file_path = os.path.join(
-            self.hass.config.path("custom_components/llmvision"), "events.json"
+            self.hass.config.path("llmvision"), "events.json"
         )
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(self._file_path), exist_ok=True)
         self.hass.loop.create_task(self.async_update())
-
+        
     def _ensure_datetime(self, dt):
         """Ensure the input is a datetime.datetime object."""
         if isinstance(dt, datetime.date) and not isinstance(dt, datetime.datetime):

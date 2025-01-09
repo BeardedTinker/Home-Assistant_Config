@@ -1,6 +1,0 @@
-####
-# Plant monitor integration. Using LilyGO HiGrow board with pesor firmware
-# https://www.home-assistant.io/integrations/plant
-#####
-
-plant: !include_dir_merge_named ../entities/plants

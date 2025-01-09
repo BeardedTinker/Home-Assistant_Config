@@ -10,5 +10,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/vingerha/gtfs2/issues",
   "requirements": ["pygtfs==0.1.9","gtfs-realtime-bindings==1.0.0","protobuf"],
-  "version": "0.4"
+  "version": "0.5"
 }

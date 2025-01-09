@@ -11,6 +11,6 @@
   "loggers": ["pyuptimekuma"],
   "requirements": ["pyuptimekuma-hass"],
   "ssdp": [],
-  "version": "2.1.0",
+  "version": "2.3.1",
   "zeroconf": []
 }

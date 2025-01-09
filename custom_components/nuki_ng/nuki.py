@@ -502,6 +502,10 @@ class NukiCoordinator(DataUpdateCoordinator):
         except Exception:
             _LOGGER.exception(f"Failed to remove callback")
 
+    async def action_for_devices(self, action: str):
+        for device_id in self.data.get("devices", {}):
+            await self.action(device_id, action)
+
     async def action(self, dev_id: str, action: str):
         if self.api.can_bridge():
             device_type = self.device_data(dev_id).get("deviceType")
