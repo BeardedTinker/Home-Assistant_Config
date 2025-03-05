@@ -25,6 +25,8 @@ from homeassistant.const import (
 from homeassistant.const import __version__ as HA_VERSION  # noqa: N812
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.discovery import async_load_platform
+from homeassistant.helpers.entity_platform import async_get_platforms
+from homeassistant.helpers.reload import async_integration_yaml_config
 from homeassistant.helpers.typing import ConfigType
 
 from .common import validate_name_pattern
@@ -35,6 +37,7 @@ from .const import (
     CONF_CREATE_UTILITY_METERS,
     CONF_DISABLE_EXTENDED_ATTRIBUTES,
     CONF_DISABLE_LIBRARY_DOWNLOAD,
+    CONF_DISCOVERY_EXCLUDE_DEVICE_TYPES,
     CONF_ENABLE_AUTODISCOVERY,
     CONF_ENERGY_INTEGRATION_METHOD,
     CONF_ENERGY_SENSOR_CATEGORY,
@@ -44,6 +47,7 @@ from .const import (
     CONF_ENERGY_SENSOR_UNIT_PREFIX,
     CONF_FIXED,
     CONF_FORCE_UPDATE_FREQUENCY,
+    CONF_GROUP_UPDATE_INTERVAL,
     CONF_IGNORE_UNAVAILABLE_STATE,
     CONF_INCLUDE,
     CONF_INCLUDE_NON_POWERCALC_SENSORS,
@@ -74,6 +78,7 @@ from .const import (
     DEFAULT_ENERGY_SENSOR_PRECISION,
     DEFAULT_ENERGY_UNIT_PREFIX,
     DEFAULT_ENTITY_CATEGORY,
+    DEFAULT_GROUP_UPDATE_INTERVAL,
     DEFAULT_POWER_NAME_PATTERN,
     DEFAULT_POWER_SENSOR_PRECISION,
     DEFAULT_UPDATE_FREQUENCY,
@@ -86,12 +91,14 @@ from .const import (
     ENTRY_GLOBAL_CONFIG_UNIQUE_ID,
     MIN_HA_VERSION,
     SERVICE_CHANGE_GUI_CONFIGURATION,
+    SERVICE_RELOAD,
     SERVICE_UPDATE_LIBRARY,
     PowercalcDiscoveryType,
     SensorType,
     UnitPrefix,
 )
 from .discovery import DiscoveryManager
+from .power_profile.power_profile import DeviceType
 from .sensor import SENSOR_CONFIG
 from .sensors.group.config_entry_utils import (
     get_entries_having_subgroup,
@@ -117,6 +124,10 @@ CONFIG_SCHEMA = vol.Schema(
                         CONF_FORCE_UPDATE_FREQUENCY,
                         default=DEFAULT_UPDATE_FREQUENCY,
                     ): cv.time_period,
+                    vol.Optional(
+                        CONF_GROUP_UPDATE_INTERVAL,
+                        default=DEFAULT_GROUP_UPDATE_INTERVAL,
+                    ): cv.positive_int,
                     vol.Optional(
                         CONF_POWER_SENSOR_NAMING,
                         default=DEFAULT_POWER_NAME_PATTERN,
@@ -189,6 +200,10 @@ CONFIG_SCHEMA = vol.Schema(
                         [SENSOR_CONFIG],
                     ),
                     vol.Optional(CONF_INCLUDE_NON_POWERCALC_SENSORS): cv.boolean,
+                    vol.Optional(CONF_DISCOVERY_EXCLUDE_DEVICE_TYPES): vol.All(
+                        cv.ensure_list,
+                        [cls.value for cls in DeviceType],
+                    ),
                 },
             ),
         ),
@@ -212,7 +227,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     global_config = get_global_configuration(hass, config)
 
-    discovery_manager = DiscoveryManager(hass, config)
+    discovery_manager = await create_discovery_manager_instance(hass, config, global_config)
     hass.data[DOMAIN] = {
         DATA_DISCOVERY_MANAGER: discovery_manager,
         DOMAIN_CONFIG: global_config,
@@ -224,11 +239,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         DATA_STANDBY_POWER_SENSORS: {},
     }
 
-    await hass.async_add_executor_job(register_services, hass)
-
-    if global_config.get(CONF_ENABLE_AUTODISCOVERY):
-        await discovery_manager.setup()
-
+    await register_services(hass)
     await setup_yaml_sensors(hass, config, global_config)
 
     setup_domain_groups(hass, global_config)
@@ -242,6 +253,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
+async def create_discovery_manager_instance(
+    hass: HomeAssistant,
+    ha_config: ConfigType,
+    global_powercalc_config: ConfigType,
+) -> DiscoveryManager:
+    exclude_device_types = [DeviceType(device_type) for device_type in global_powercalc_config.get(CONF_DISCOVERY_EXCLUDE_DEVICE_TYPES, [])]
+
+    manager = DiscoveryManager(hass, ha_config, exclude_device_types=exclude_device_types)
+    if global_powercalc_config.get(CONF_ENABLE_AUTODISCOVERY):
+        await manager.setup()
+    return manager
+
+
 def get_global_configuration(hass: HomeAssistant, config: ConfigType) -> ConfigType:
     global_config = config.get(DOMAIN) or {
         CONF_POWER_SENSOR_NAMING: DEFAULT_POWER_NAME_PATTERN,
@@ -253,6 +277,7 @@ def get_global_configuration(hass: HomeAssistant, config: ConfigType) -> ConfigT
         CONF_ENERGY_SENSOR_CATEGORY: DEFAULT_ENTITY_CATEGORY,
         CONF_ENERGY_SENSOR_UNIT_PREFIX: DEFAULT_ENERGY_UNIT_PREFIX,
         CONF_FORCE_UPDATE_FREQUENCY: DEFAULT_UPDATE_FREQUENCY,
+        CONF_GROUP_UPDATE_INTERVAL: DEFAULT_GROUP_UPDATE_INTERVAL,
         CONF_DISABLE_EXTENDED_ATTRIBUTES: False,
         CONF_IGNORE_UNAVAILABLE_STATE: False,
         CONF_CREATE_DOMAIN_GROUPS: [],
@@ -283,13 +308,13 @@ def get_global_gui_configuration(config_entry: ConfigEntry) -> ConfigType:
     return global_config
 
 
-def register_services(hass: HomeAssistant) -> None:
+async def register_services(hass: HomeAssistant) -> None:
     """Register generic services"""
 
     async def _handle_change_gui_service(call: ServiceCall) -> None:
         await change_gui_configuration(hass, call)
 
-    hass.services.register(
+    hass.services.async_register(
         DOMAIN,
         SERVICE_CHANGE_GUI_CONFIGURATION,
         _handle_change_gui_service,
@@ -297,13 +322,50 @@ def register_services(hass: HomeAssistant) -> None:
     )
 
     async def _handle_update_library_service(_: ServiceCall) -> None:
+        _LOGGER.info("Updating library and rediscovering devices")
         discovery_manager: DiscoveryManager = hass.data[DOMAIN][DATA_DISCOVERY_MANAGER]
         await discovery_manager.update_library_and_rediscover()
 
-    hass.services.register(
+    hass.services.async_register(
         DOMAIN,
         SERVICE_UPDATE_LIBRARY,
         _handle_update_library_service,
+    )
+
+    async def _reload_config(_: ServiceCall) -> None:
+        """Reload powercalc."""
+        reload_config = await async_integration_yaml_config(hass, DOMAIN)
+        reset_platforms = async_get_platforms(hass, DOMAIN)
+        for reset_platform in reset_platforms:
+            await reset_platform.async_reset()
+        if not reload_config:
+            return
+
+        hass.data[DOMAIN][DATA_USED_UNIQUE_IDS] = []
+        hass.data[DOMAIN][DATA_CONFIGURED_ENTITIES] = {}
+        hass.data[DOMAIN][DOMAIN_CONFIG] = get_global_configuration(hass, reload_config)
+
+        # Reload YAML sensors if any
+        if DOMAIN in reload_config:
+            for sensor_config in reload_config[DOMAIN].get(CONF_SENSORS, []):
+                sensor_config.update({DISCOVERY_TYPE: PowercalcDiscoveryType.USER_YAML})
+                await async_load_platform(
+                    hass,
+                    Platform.SENSOR,
+                    DOMAIN,
+                    sensor_config,
+                    reload_config,
+                )
+
+        # Reload all config entries
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            _LOGGER.debug("Reloading config entry %s", entry.entry_id)
+            await hass.config_entries.async_reload(entry.entry_id)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_RELOAD,
+        _reload_config,
     )
 
 
@@ -461,6 +523,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 async def async_remove_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
     """Called after a config entry is removed."""
+    discovery_manager: DiscoveryManager = hass.data[DOMAIN][DATA_DISCOVERY_MANAGER]
+    discovery_manager.remove_initialized_flow(config_entry)
+
     updated_entries: list[ConfigEntry] = []
 
     sensor_type = config_entry.data.get(CONF_SENSOR_TYPE)

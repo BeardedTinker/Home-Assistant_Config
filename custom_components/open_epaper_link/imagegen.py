@@ -17,6 +17,7 @@ import base64
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.network import get_url
 from .const import DOMAIN, SIGNAL_TAG_IMAGE_UPDATE
 from .tag_types import TagType, get_tag_types_manager
 from .util import get_image_path
@@ -46,8 +47,10 @@ class ElementType(str, Enum):
     LINE = "line"
     RECTANGLE = "rectangle"
     RECTANGLE_PATTERN = "rectangle_pattern"
+    POLYGON = "polygon"
     CIRCLE = "circle"
     ELLIPSE = "ellipse"
+    ARC = "arc"
     ICON = "icon"
     DLIMG = "dlimg"
     QRCODE = "qrcode"
@@ -55,6 +58,7 @@ class ElementType(str, Enum):
     PROGRESS_BAR = "progress_bar"
     DIAGRAM = "diagram"
     ICON_SEQUENCE = "icon_sequence"
+    DEBUG_GRID = "debug_grid"
 
     @classmethod
     def required_fields(cls, element_type: 'ElementType') -> list[str]:
@@ -139,15 +143,18 @@ REQUIRED_FIELDS: Dict[ElementType, list[str]] = {
         "x_start", "x_size", "y_start", "y_size",
         "x_repeat", "y_repeat", "x_offset", "y_offset"
     ],
+    ElementType.POLYGON: ["points"],
     ElementType.CIRCLE: ["x", "y", "radius"],
     ElementType.ELLIPSE: ["x_start", "x_end", "y_start", "y_end"],
+    ElementType.ARC: ["x", "y", "radius", "start_angle", "end_angle"],
     ElementType.ICON: ["x", "y", "value", "size"],
     ElementType.DLIMG: ["x", "y", "url", "xsize", "ysize"],
     ElementType.QRCODE: ["x", "y", "data"],
     ElementType.PLOT: ["data"],
     ElementType.PROGRESS_BAR: ["x_start", "x_end", "y_start", "y_end", "progress"],
     ElementType.DIAGRAM: ["x", "height"],
-    ElementType.ICON_SEQUENCE: ["x", "y", "icons", "size"]
+    ElementType.ICON_SEQUENCE: ["x", "y", "icons", "size"],
+    ElementType.DEBUG_GRID: []
 }
 
 def validate_element(element: Dict[str, Any]) -> ElementType:
@@ -198,15 +205,18 @@ class ImageGen:
             ElementType.LINE: self._draw_line,
             ElementType.RECTANGLE: self._draw_rectangle,
             ElementType.RECTANGLE_PATTERN: self._draw_rectangle_pattern,
+            ElementType.POLYGON: self._draw_polygon,
             ElementType.CIRCLE: self._draw_circle,
             ElementType.ELLIPSE: self._draw_ellipse,
+            ElementType.ARC: self._draw_arc,
             ElementType.ICON: self._draw_icon,
             ElementType.DLIMG: self._draw_downloaded_image,
             ElementType.QRCODE: self._draw_qrcode,
             ElementType.PLOT: self._draw_plot,
             ElementType.PROGRESS_BAR: self._draw_progress_bar,
             ElementType.DIAGRAM: self._draw_diagram,
-            ElementType.ICON_SEQUENCE: self._draw_icon_sequence
+            ElementType.ICON_SEQUENCE: self._draw_icon_sequence,
+            ElementType.DEBUG_GRID: self._draw_debug_grid
         }
 
     async def get_tag_info(self, entity_id: str) -> Optional[tuple[TagType, str]]:
@@ -659,15 +669,97 @@ class ImageGen:
         # Get line properties
         fill = self.get_index_color(element.get('fill', "black"))
         width = element.get('width', 1)
+        dashed = element.get('dashed', False)
+        dash_length = element.get('dash_length', 5)
+        space_length = element.get('space_length', 3)
 
-        # Draw line
-        draw.line(
-            [(element['x_start'], y_start), (element['x_end'], y_end)],
-            fill=fill,
-            width=width
-        )
+        x_start = element["x_start"]
+        x_end = element["x_end"]
+
+        if dashed:
+            self._draw_dashed_line(
+                draw,
+                (x_start, y_start),
+                (x_end, y_end),
+                dash_length,
+                space_length,
+                fill, width)
+        else:
+            draw.line(
+                [(element['x_start'], y_start), (element['x_end'], y_end)],
+                fill=fill,
+                width=width
+            )
 
         return max(y_start, y_end)
+
+    @staticmethod
+    def _draw_dashed_line(draw: ImageDraw.ImageDraw,
+                                start: tuple[int, int],
+                                end: tuple[int, int],
+                                dash_length: int,
+                                space_length: int,
+                                fill: tuple[int, int, int, int] = BLACK,
+                                width: int = 1,
+                                ) -> None:
+        """Draw dashed line."""
+        x1, y1 = start
+        x2, y2 = end
+
+        dx = x2 - x1
+        dy = y2 - y1
+        line_length = (dx**2 + dy**2) ** 0.5
+
+        step_x = dx / line_length
+        step_y = dy / line_length
+
+        current_pos = 0.0
+
+        while True:
+            # 1) Draw a dash segment
+            dash_end = current_pos + dash_length
+
+            if dash_end >= line_length:
+                # We have a partial dash that ends exactly or beyond the line_end
+                dash_end = line_length
+                segment_len = dash_end - current_pos
+
+                segment_start_x = x1 + step_x * current_pos
+                segment_start_y = y1 + step_y * current_pos
+                segment_end_x = x1 + step_x * dash_end
+                segment_end_y = y1 + step_y * dash_end
+
+                draw.line(
+                    [(segment_start_x, segment_start_y), (segment_end_x, segment_end_y)],
+                    fill=fill,
+                    width=width
+                )
+                # We're done, because we've reached the end of the line
+                break
+            else:
+                # Normal full dash
+                segment_start_x = x1 + step_x * current_pos
+                segment_start_y = y1 + step_y * current_pos
+                segment_end_x = x1 + step_x * dash_end
+                segment_end_y = y1 + step_y * dash_end
+
+                draw.line(
+                    [(segment_start_x, segment_start_y), (segment_end_x, segment_end_y)],
+                    fill=fill,
+                    width=width
+                )
+
+                # 2) Move current_pos forward past this dash
+                current_pos = dash_end
+
+            # 3) Skip the space segment
+            space_end = current_pos + space_length
+            if space_end >= line_length:
+                # The space would exceed the line's end, so we're done
+                break
+            else:
+                # Jump over the space
+                current_pos = space_end
 
     @staticmethod
     def _get_rounded_corners(corner_string: str) -> tuple[bool, bool, bool, bool]:
@@ -774,6 +866,29 @@ class ImageGen:
 
         return max_y
 
+    async def _draw_polygon(self, img: Image, element: dict, pos_y: int) -> int:
+        """Draw a polygon."""
+        self.check_required_arguments(element, ["points"], "polygon")
+
+        draw = ImageDraw.Draw(img)
+
+        # Parse vertices
+        coords = CoordinateParser(img.width, img.height)
+        vertices = [
+            (coords.parse_x(x), coords.parse_y(y))
+            for x, y in element["points"]
+        ]
+
+        # Get polygon properties
+        fill = self.get_index_color(element.get("fill"))
+        outline = self.get_index_color(element.get("outline", "black"))
+        width = element.get("width", 1)
+
+        # Draw the polygon
+        draw.polygon(vertices, fill=fill, outline=outline)
+
+        return pos_y
+
     async def _draw_circle(self, img: Image, element: dict, pos_y: int) -> int:
         """Draw circle element."""
         self.check_required_arguments(
@@ -836,6 +951,59 @@ class ImageGen:
         )
 
         return y_end
+
+    async def _draw_arc(self, img: Image, element: dict, pos_y: int):
+        """Draw an arc or pie slice."""
+        self.check_required_arguments(
+            element,
+            ["x", "y", "radius", "start_angle", "end_angle"],
+            "arc"
+        )
+
+        draw = ImageDraw.Draw(img)
+        coords = CoordinateParser(img.width, img.height)
+
+        # Parse center coordinates and radius
+        x = coords.parse_x(element["x"])
+        y = coords.parse_y(element["y"])
+        radius = coords.parse_size(element["radius"], is_width=True)
+
+        # Parse angles
+        start_angle = element["start_angle"]
+        end_angle = element["end_angle"]
+
+        # Calculate bounding box of the circle/ellipse
+        bbox = [
+            (x - radius, y - radius),
+            (x + radius, y + radius)
+        ]
+
+        # Get arc properties
+        fill = self.get_index_color(element.get("fill"))  # Used for pie slices
+        outline = self.get_index_color(element.get("outline", "black"))
+        width = element.get("width", 1)
+
+        # Draw the arc
+        if fill:
+            # Filled pie slice
+            draw.pieslice(
+                bbox,
+                start=start_angle,
+                end=end_angle,
+                fill=fill,
+                outline=outline
+            )
+        else:
+            # Outline-only arc
+            draw.arc(
+                bbox,
+                start=start_angle,
+                end=end_angle,
+                fill=outline,
+                width=width
+            )
+
+        return pos_y
 
     async def _draw_icon(self, img: Image, element: dict, pos_y: int) -> int:
         """Draw Material Design Icons."""
@@ -1090,6 +1258,26 @@ class ImageGen:
             pos_y = element['y']
             target_size = (element['xsize'], element['ysize'])
             rotate = element.get('rotate', 0)
+
+            # Check if URL is an image entity
+            if element['url'].startswith('image.') or element['url'].startswith('camera.'):
+                # Get state of the image entity
+                state = self.hass.states.get(element['url'])
+                if not state:
+                    raise HomeAssistantError(f"Image entity {element['url']} not found")
+
+                # Get image URL from entity attributes
+                image_url = state.attributes.get("entity_picture")
+                if not image_url:
+                    raise HomeAssistantError(f"No image URL found for entity {element['url']}")
+
+                # If the URL is relative, make it absolute using HA's base URL
+                if image_url.startswith("/"):
+                    base_url = get_url(self.hass)
+                    image_url = f"{base_url}{image_url}"
+
+                # Update URL to the actual image URL
+                element['url'] = image_url
 
             # Load image based on URL type
             if element['url'].startswith(('http://', 'https://')):
@@ -1573,3 +1761,65 @@ class ImageGen:
                     continue
 
         return pos_y + height
+
+    async def _draw_debug_grid(self, img: Image, element: dict, pos_y: int) -> int:
+
+        draw = ImageDraw.Draw(img)
+        width, height = img.size
+
+        spacing = element.get("spacing", 20)
+        line_color = self.get_index_color(element.get("line_color", "black"))
+        dashed = element.get("dashed", True)
+        dash_length = element.get("dash_length", 2)
+        space_length = element.get("space_length", 4)
+
+        show_labels = element.get("show_labels", True)
+        label_step = element.get("label_step", spacing*2)
+        label_color = self.get_index_color(element.get("label_color", "black"))
+        label_font_size = element.get("label_font_size", 12)
+        font_name = element.get("font", "ppb.ttf")
+
+        # Load a font for labels
+        font_path = os.path.join(os.path.dirname(__file__), font_name)
+        try:
+            font = ImageFont.truetype(font_path, label_font_size)
+        except OSError:
+            font = ImageFont.load_default()
+
+        # Helper to draw one line as dashed or solid
+        def draw_line_segment(p1, p2):
+            if dashed:
+                self._draw_dashed_line(
+                    draw,
+                    p1,
+                    p2,
+                    dash_length,
+                    space_length,
+                    fill=line_color,
+                    width=1
+                )
+            else:
+                draw.line([p1, p2], fill=line_color, width=1)
+
+        # Horizontal lines
+        for y in range(0, height, spacing):
+            draw_line_segment((0, y), (width, y))
+
+            # Labels
+            if show_labels and (y % label_step == 0):
+                label_text = str(y)
+                # Slight offset so text isn't on the line
+                draw.text((2, y + 2), label_text, fill=label_color, font=font)
+
+        # Vertical lines
+        for x in range(0, width, spacing):
+            draw_line_segment((x, 0), (x, height))
+
+            # Labels
+            if show_labels and (x % label_step == 0):
+                label_text = str(x)
+                draw.text((x + 2, 2), label_text, fill=label_color, font=font)
+
+        return pos_y
+
+

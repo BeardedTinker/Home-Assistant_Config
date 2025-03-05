@@ -13,7 +13,7 @@ from .entity import BaseMoonrakerEntity
 
 @dataclass
 class MoonrakerNumberSensorDescription(NumberEntityDescription):
-    """Class describing Mookraker binary_sensor entities."""
+    """Class describing Mookraker number entities."""
 
     sensor_name: str | None = None
     icon: str | None = None

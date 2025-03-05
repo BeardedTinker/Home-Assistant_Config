@@ -10,10 +10,11 @@ import voluptuous as vol
 from google.transit import gtfs_realtime_pb2
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE, CONF_NAME
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 import binascii
-
+import base64
 from .requests_testadapter import Resp
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ from .const import (
     ATTR_DELAY,
     ATTR_NEXT_UP,
     ATTR_NEXT_RT,
+    ATTR_NEXT_RT_DELAYS,
     ATTR_ICON,
     ATTR_UNIT_OF_MEASUREMENT,
     ATTR_DEVICE_CLASS,
@@ -72,18 +74,20 @@ def get_gtfs_feed_entities(url: str, headers, label: str):
     else:
         response = requests.get(url, headers=headers, timeout=20)
 
-    if response.status_code == 200:
+    if response.status_code == 200 and "Bad Gateway" not in response.text and "Not Found" not in response.text :
         _LOGGER.debug("Successfully updated %s", label)
     else:
-        _LOGGER.debug("Updating %s, and got: %s for: %s", label, response.status_code, response.content)
+        _LOGGER.error("Trying to update %s, and got RT response(code): %s with text: %s", label, response.status_code, response.text)
+        return None
 
     if label == "alerts":
         _LOGGER.debug("Feed : %s", feed)
         
     try:
-        json_object = json.loads(response.content)
-        feed = json_object       
+        json_object = json.loads(response.text)    
+        feed = json.loads(response.text)
     except ValueError as e:   
+        _LOGGER.debug("GTFS RT data is not providing format json")
         if label == "vehicle_positions":
             feed = convert_gtfs_realtime_positions_to_json(response.content)
         elif label == "trip_data":
@@ -102,7 +106,10 @@ def get_next_services(self):
     self._direction = self._direction
     _LOGGER.debug("Configuration for RT route: %s, RT trip: %s, RT stop: %s, RT direction: %s", self._route, self._trip, self._stop, self._direction)
     self._rt_group = "route"
-    next_services = get_rt_route_trip_statuses(self).get(self._route, {}).get(self._direction, {}).get(self._stop, {}).get("departures", [])
+    rt_departures = get_rt_route_trip_statuses(self)
+    next_services = rt_departures.get(self._route, {}).get(self._direction, {}).get(self._stop, {}).get("departures", [])
+    next_delays = rt_departures.get(self._route, {}).get(self._direction, {}).get(self._stop, {}).get("delays", [])
+    
     if next_services:
         _LOGGER.debug("Next services: %s", next_services)
     
@@ -125,7 +132,8 @@ def get_next_services(self):
         ATTR_ROUTE: self._route,
         ATTR_TRIP: self._trip,
         ATTR_DIRECTION_ID: self._direction,
-        ATTR_NEXT_RT: next_services
+        ATTR_NEXT_RT: next_services,
+        ATTR_NEXT_RT_DELAYS: next_delays                                        
     }
     
     if len(next_services) > 0:
@@ -141,6 +149,12 @@ def get_next_services(self):
             if len(next_services) > 1
             else "-"
         )
+    if len(next_delays) > 0:
+        attrs[ATTR_DELAY] = (
+            next_delays[0]
+            if len(next_delays) > 0
+            else "-"
+        )                 
     if self._relative :
         attrs[ATTR_UNIT_OF_MEASUREMENT] = "min"
     else :
@@ -170,6 +184,11 @@ def get_rt_route_trip_statuses(self):
         url=self._trip_update_url, headers=self._headers, label="trip_data"
     )
     self._feed_entities = feed_entities
+    
+    if not feed_entities:
+        _LOGGER.debug("No proper RT feed entities: %s", feed_entities)
+        return {}
+
     _LOGGER.debug("Search departure times for route: %s, trip: %s, type: %s, direction: %s", self._route_id, self._trip_id, self._rt_group, self._direction)
     for entity in feed_entities:
 
@@ -201,9 +220,11 @@ def get_rt_route_trip_statuses(self):
             if self._rt_group == "trip":
                 direction_id = self._direction   
 
-            trip_id = entity["trip_update"]["trip"]["trip_id"]                     
+            trip_id = entity["trip_update"]["trip"]["trip_id"]
                         
-            if (self._rt_group == "route" and (route_id == self._route_id and direction_id == self._direction) or (trip_id == self._trip_id and direction_id == "nn") ) or  (self._rt_group == "trip" and trip_id == self._trip_id ):
+            # first part covers start/end and thus multiple RT are possible for the same stop, also, for SIRI route_id do not match so a 'in' is used 
+            # the second part covers local stops, i.e. per trip, so only one RT possible for that stop         
+            if (self._rt_group == "route" and (str(direction_id) == str(self._direction) and (route_id == self._route_id or self._route_id in route_id)) or (direction_id == "nn" and trip_id == self._trip_id) or (self._trip_id in trip_id)) or (self._rt_group == "trip" and (trip_id == self._trip_id or self._trip_id in trip_id)):
                 
                 _LOGGER.debug("Entity found params - group: %s, route_id: %s, direction_id: %s, self_trip_id: %s, with rt trip: %s", self._rt_group, route_id, direction_id, self._trip_id, entity["trip_update"]["trip"])
                 
@@ -217,25 +238,25 @@ def get_rt_route_trip_statuses(self):
                         if stop_id == "":
                             stop_id = self._stop_id
                         
-                        if route_id not in departure_times:
-                            departure_times[route_id] = {}
+                        if self._route_id not in departure_times:
+                            departure_times[self._route_id] = {}
                                                
                         if direction_id == "nn": # i this case the trip_id serves as a basis so one can safely set direction to the requesting entity direction
                             direction_id = self._direction
 
-                        if direction_id not in departure_times[route_id]:
-                            departure_times[route_id][direction_id] = {}
+                        if direction_id not in departure_times[self._route_id]:
+                            departure_times[self._route_id][direction_id] = {}
                             
-                        if not departure_times[route_id][direction_id].get(
+                        if not departure_times[self._route_id][direction_id].get(
                             stop_id
                         ):
-                            departure_times[route_id][direction_id][stop_id] = {}
+                            departure_times[self._route_id][direction_id][stop_id] = {}
                         
-                        if not departure_times[route_id][direction_id][stop_id].get(
+                        if not departure_times[self._route_id][direction_id][stop_id].get(
                             "departures"
                         ):                 
-                            departure_times[route_id][direction_id][stop_id]["departures"] = []
-                            departure_times[route_id][direction_id][stop_id]["delays"] = []
+                            departure_times[self._route_id][direction_id][stop_id]["departures"] = []
+                            departure_times[self._route_id][direction_id][stop_id]["delays"] = []
                         
                         # Use stop arrival time;
                         # fall back on departure time if not available                            
@@ -252,22 +273,22 @@ def get_rt_route_trip_statuses(self):
                         # Ignore arrival times in the past
                         
                         if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
-                            departure_times[route_id][direction_id][
+                            departure_times[self._route_id][direction_id][
                                 stop_id
                             ]["departures"].append(datetime.utcfromtimestamp(stop_time).replace(tzinfo=dt_util.get_time_zone("UTC")))
                             _LOGGER.debug("RT stoptime: %s, utcfromtimestamp: %s, format utc: %s", stop_time, datetime.utcfromtimestamp(stop_time), datetime.utcfromtimestamp(stop_time).replace(tzinfo=dt_util.get_time_zone("UTC")))
                         else:
                             _LOGGER.debug("Not using realtime stop data for old due-in-minutes: %s", due_in_minutes(datetime.fromtimestamp(stop_time)))
                             
-                        departure_times[route_id][direction_id][stop_id]["delays"].append(delay)
+                        departure_times[self._route_id][direction_id][stop_id]["delays"].append(delay)
 
                         
     # Sort by time
     for route in departure_times:
-        for direction in departure_times[route]:
-            for stop in departure_times[route][direction]:
-                for t in departure_times[route][direction][stop]["departures"]:
-                    departure_times[route][direction][stop]["departures"].sort()
+        for direction in departure_times[self._route_id]:
+            for stop in departure_times[self._route_id][direction]:
+                for t in departure_times[self._route_id][direction][stop]["departures"]:
+                    departure_times[self._route_id][direction][stop]["departures"].sort()
 
     self.info = departure_times
     _LOGGER.debug("Departure times Route Trip: %s", departure_times)
@@ -391,7 +412,8 @@ def update_geojson(self):
 def get_gtfs_rt(hass, path, data):
     """Get gtfs rt data."""
     _LOGGER.debug("Getting gtfs rt locally with data: %s", data)
-    _headers = None
+    _headers = data.get('headers','')
+    _source_format = data.get('source_format',None)                                                  
     gtfs_dir = hass.config.path(path)
     os.makedirs(gtfs_dir, exist_ok=True)
     url = data["url"]
@@ -401,9 +423,31 @@ def get_gtfs_rt(hass, path, data):
         url = url + "?" + data[CONF_API_KEY_NAME] + "=" + data[CONF_API_KEY]
     if data.get(CONF_API_KEY_LOCATION, None) == "header":
         _headers = {data[CONF_API_KEY_NAME]: data[CONF_API_KEY]}
-    if data.get(CONF_ACCEPT_HEADER_PB, False):
-        _headers["Accept"] = "application/x-protobuf"
+        if data.get(CONF_ACCEPT_HEADER_PB, False):
+            _headers["Accept"] = "application/x-protobuf"
     _LOGGER.debug("Getting gtfs rt locally with headers: %s", _headers)
+    
+    if data.get('entity_for_siri',None):
+        _LOGGER.debug("Getting siri RT departures with data: %s", data)
+        entity_registry = er.async_get(hass)
+        entity = er.async_get(hass).async_get(data["entity_for_siri"])
+        _LOGGER.debug("entity: %s", entity)
+        _LOGGER.debug("entity cfg id: %s", entity.config_entry_id)
+        config_entry = hass.config_entries.async_get_entry(entity.config_entry_id)
+        cf_data = config_entry.data
+        cf_options = config_entry.options
+        _stop_id = cf_data["origin"].split(':')[0]
+        _LOGGER.debug("_stop_id: %s", _stop_id)
+        _LOGGER.debug("config entry data: %s, options: %s", cf_data, cf_options)
+        file = data["file"] + "_rt.json"
+        #try:
+        r = convert_realtime_siri_trips_to_json(url,_headers,_stop_id)
+        open(os.path.join(gtfs_dir, file), "w").write(json.dumps(r))
+        return "ok"
+        #except Exception as ex:  # pylint: disable=broad-except
+        #    _LOGGER.error("Ìssues with downloading GTFS RT SIRI data to: %s with error: 5s", os.path.join(gtfs_dir, file), ex)
+        #    return "no_rt_data_file" 
+        return "ok"                                
     try:
         r = requests.get(url, headers = _headers , allow_redirects=True)
         open(os.path.join(gtfs_dir, file), "wb").write(r.content)
@@ -559,3 +603,79 @@ def convert_gtfs_realtime_alerts_to_json(gtfs_realtime_data):
         json_data["entity"].append(entity_dict)
         _LOGGER.debug("Alert entity JSON: %s", json_data["entity"])
     return json_data      
+    
+def convert_realtime_siri_trips_to_json(url,headers,stop_id):
+    
+    #Used for Strasbourg, but they differ on output too
+    ##the Basic token is a base64 conversion of: d6452e5d-4894-4ee1-8d5b-11ce235eeef6	
+    ## ZDY0NTJlNWQtNDg5NC00ZWUxLThkNWItMTFjZTIzNWVlZWY2
+    ## ZDY0NTJlNWQtNDg5NC00ZWUxLThkNWItMTFjZTIzNWVlZWY2Og==    
+    #_encoded = base64.b64encode(b'd6452e5d-4894-4ee1-8d5b-11ce235eeef6:').decode("utf-8") 
+    #_headers = { "Authorization": f"Basic {_encoded}" }
+    #url = "https://api.cts-strasbourg.eu/v1/siri/2.0/stop-monitoring?MonitoringRef=GACEN_20"
+
+    #url = "https://bustime.mta.info/api/siri/stop-monitoring.json?key=f4f9c18e-0550-4cc7-bc36-275715015673&OperatorRef=MTA"
+    
+    url = url + f"&MonitoringRef={stop_id}"
+    response = requests.get(url, headers=headers, timeout=20)
+
+    json_object = json.loads(response.content)
+    feed = json_object
+
+    if feed.get('Siri'):
+        try:
+            feed_entities = feed['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
+            feed = feed['Siri']
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.error("Ìssues getting GTFS RT SIRI data: %s", ex)
+            return 'issues with getting siri data'        
+    else:  
+        try:
+            feed_entities = feed['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.error("Ìssues getting GTFS RT SIRI data: %s", ex)
+            return 'issues with getting siri data'
+        
+    _LOGGER.debug("Feed entities: %s", feed_entities)
+
+    tt = datetime.fromisoformat(feed['ServiceDelivery']['ResponseTimestamp'])
+    json_data = {
+        "header": {
+            "gtfs_realtime_version": feed['ServiceDelivery']['StopMonitoringDelivery'][0].get('version','not_provided'),
+            "timestamp": feed['ServiceDelivery']['ResponseTimestamp'],
+            "incrementality": "n/a"
+        },
+        "entity": []
+    }
+
+
+    for entity in feed_entities:
+        entity_dict = {
+            "id": entity['MonitoredVehicleJourney']['FramedVehicleJourneyRef']['DatedVehicleJourneyRef'],
+            "trip_update": {
+                "trip": {
+                    "trip_id": entity['MonitoredVehicleJourney']['FramedVehicleJourneyRef']['DatedVehicleJourneyRef'],
+                    "start_time": datetime.fromisoformat(entity['MonitoredVehicleJourney']['MonitoredCall'].get('ExpectedDepartureTime',entity['MonitoredVehicleJourney']['MonitoredCall'].get('AimedDepartureTime',None))).timestamp(),
+                    "start_date": datetime.fromisoformat(entity['MonitoredVehicleJourney']['MonitoredCall'].get('ExpectedDepartureTime',entity['MonitoredVehicleJourney']['MonitoredCall'].get('AimedDepartureTime',None))).timestamp(),
+                    "route_id": entity['MonitoredVehicleJourney']['LineRef'],
+                    "direction_id": str(entity['MonitoredVehicleJourney']['DirectionRef'])
+                },
+                "stop_time_update": [{
+                    "stop_sequence": "n.a",
+                    "stop_id": stop_id,
+                    "arrival": {
+                        "delay": '',
+                        "time": datetime.fromisoformat(entity['MonitoredVehicleJourney']['MonitoredCall'].get('ExpectedArrivlTime',entity['MonitoredVehicleJourney']['MonitoredCall'].get('AimedArrivalTime',None))).timestamp()
+                    },
+                    "departure": {
+                        "delay": '',
+                        "time": datetime.fromisoformat(entity['MonitoredVehicleJourney']['MonitoredCall'].get('ExpectedDepartureTime',entity['MonitoredVehicleJourney']['MonitoredCall'].get('AimedDepartureTime',None))).timestamp()
+                    }
+                }]
+            }
+        }
+        
+        json_data["entity"].append(entity_dict)
+        
+    _LOGGER.debug("json data: %s", json.dumps(json_data))
+    return json_data

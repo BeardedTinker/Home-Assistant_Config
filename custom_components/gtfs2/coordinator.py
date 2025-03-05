@@ -107,7 +107,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
 
             try:
                 self._data["next_departure"] = await self.hass.async_add_executor_job(
-                    get_next_departure, self
+                    get_next_departure, self.hass, self._data
                 )
                 self._data["gtfs_updated_at"] = dt_util.utcnow().isoformat()
             except Exception as ex:  # pylint: disable=broad-except
@@ -134,8 +134,8 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                     self._alerts_url = self._alerts_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
                     self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}               
-                if options.get(CONF_ACCEPT_HEADER_PB, False):
-                    self._headers["Accept"] = "application/x-protobuf"
+                    if options.get(CONF_ACCEPT_HEADER_PB, False):
+                        self._headers["Accept"] = "application/x-protobuf"
                 self.info = {}
                 self._route_id = self._data["next_departure"].get("route_id", None)
                 if self._route_id == None:
@@ -145,7 +145,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                 self._stop_sequence = self._data["next_departure"]["origin_stop_sequence"]
                 self._destination_id = data["destination"].split(": ")[0]
                 self._trip_id = self._data.get('next_departure', {}).get('trip_id', None) 
-                self._direction = data["direction"]
+                self._direction = str(self._data.get('next_departure', {}).get('trip_direction_id', data["direction"]))
                 self._relative = False
                 try:
                     self._get_rt_alerts = await self.hass.async_add_executor_job(get_rt_alerts, self)
@@ -155,7 +155,7 @@ class GTFSUpdateCoordinator(DataUpdateCoordinator):
                     self._data["alert"] = self._get_rt_alerts
                 except Exception as ex:  # pylint: disable=broad-except
                   _LOGGER.error("Error getting gtfs realtime data, for origin: %s with error: %s", data["origin"], ex)
-                  raise UpdateFailed(f"Error in getting start/end stop data: {ex}")
+                  return self._data
             else:
                 _LOGGER.debug("GTFS RT: RealTime = false, selected in entity options")            
         else:
@@ -202,8 +202,6 @@ class GTFSLocalStopUpdateCoordinator(DataUpdateCoordinator):
                 if options.get(CONF_API_KEY_LOCATION, None) == "query_string":
                   if options.get(CONF_API_KEY, None):
                     self._trip_update_url = self._trip_update_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
-                    self._vehicle_position_url = self._vehicle_position_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
-                    self._alerts_url = self._alerts_url + "?" + options[CONF_API_KEY_NAME] + "=" + options[CONF_API_KEY]
                 if options.get(CONF_API_KEY_LOCATION, None) == "header":
                     self._headers = {options[CONF_API_KEY_NAME]: options[CONF_API_KEY]}   
                     self._headers[CONF_API_KEY_LOCATION] = options.get(CONF_API_KEY_LOCATION,None)

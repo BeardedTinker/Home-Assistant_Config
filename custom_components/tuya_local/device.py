@@ -153,7 +153,8 @@ class TuyaLocalDevice(object):
     @property
     def has_returned_state(self):
         """Return True if the device has returned some state."""
-        return len(self._get_cached_state()) > 1
+        cached = self._get_cached_state()
+        return len(cached) > 1 or cached.get("updated_at", 0) > 0
 
     @callback
     def actually_start(self, event=None):
@@ -333,11 +334,16 @@ class TuyaLocalDevice(object):
 
                 if poll:
                     if "Error" in poll:
-                        _LOGGER.warning(
-                            "%s error reading: %s", self.name, poll["Error"]
-                        )
+                        if self._api_working_protocol_failures == 0:
+                            _LOGGER.warning(
+                                "%s error reading: %s", self.name, poll["Error"]
+                            )
+                        else:
+                            _LOGGER.debug(
+                                "%s error reading: %s", self.name, poll["Error"]
+                            )
                         if "Payload" in poll and poll["Payload"]:
-                            _LOGGER.info(
+                            _LOGGER.debug(
                                 "%s err payload: %s",
                                 self.name,
                                 poll["Payload"],
@@ -435,7 +441,7 @@ class TuyaLocalDevice(object):
 
     async def async_refresh(self):
         _LOGGER.debug("Refreshing device state for %s", self.name)
-        if self.should_poll:
+        if not self._running:
             await self._retry_on_failed_connection(
                 lambda: self._refresh_cached_state(),
                 f"Failed to refresh device state for {self.name}.",
@@ -466,7 +472,7 @@ class TuyaLocalDevice(object):
 
     def _refresh_cached_state(self):
         new_state = self._api.status()
-        if new_state:
+        if new_state and "Err" not in new_state:
             self._cached_state = self._cached_state | new_state.get("dps", {})
             self._cached_state["updated_at"] = time()
             for entity in self._children:
@@ -481,16 +487,25 @@ class TuyaLocalDevice(object):
             log_json(new_state),
         )
         if "Err" in new_state:
-            _LOGGER.warning(
-                "%s protocol error %s: %s",
-                self.name,
-                new_state.get("Err"),
-                new_state.get("Error", "message not provided"),
-            )
+            if self._api_working_protocol_failures == 1:
+                _LOGGER.warning(
+                    "%s protocol error %s: %s",
+                    self.name,
+                    new_state.get("Err"),
+                    new_state.get("Error", "message not provided"),
+                )
+            else:
+                _LOGGER.debug(
+                    "%s protocol error %s: %s",
+                    self.name,
+                    new_state.get("Err"),
+                    new_state.get("Error", "message not provided"),
+                )
         _LOGGER.debug(
             "new state (incl pending): %s",
             log_json(self._get_cached_state()),
         )
+        return new_state
 
     async def async_set_properties(self, properties):
         if len(properties) == 0:
@@ -608,7 +623,7 @@ class TuyaLocalDevice(object):
                     if self._api_working_protocol_failures == 1:
                         _LOGGER.error(error_message)
                     else:
-                        _LOGGER.info(error_message)
+                        _LOGGER.debug(error_message)
 
                 if not self._api_protocol_working:
                     await self._rotate_api_protocol_version()
@@ -661,11 +676,18 @@ class TuyaLocalDevice(object):
             self._api_protocol_version_index = 0
 
         new_version = API_PROTOCOL_VERSIONS[self._api_protocol_version_index]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Setting protocol version for %s to %0.1f",
             self.name,
             new_version,
         )
+        # Only enable tinytuya's auto-detect when using 3.22
+        if new_version == 3.22:
+            new_version = 3.3
+            self._api.disabledetect = False
+        else:
+            self._api.disabledetect = True
+
         await self._hass.async_add_executor_job(
             self._api.set_version,
             new_version,

@@ -93,6 +93,15 @@ BUTTONS: tuple[MoonrakerButtonDescription, ...] = [
         ),
         icon="mdi:refresh",
     ),
+    MoonrakerButtonDescription(
+        key="reset_totals",
+        name="Reset Totals",
+        entity_registry_enabled_default=False,
+        press_fn=lambda button: button.coordinator.async_send_data(
+            METHODS.SERVER_HISTORY_RESET_TOTALS
+        ),
+        icon="mdi:history",
+    ),
 ]
 
 

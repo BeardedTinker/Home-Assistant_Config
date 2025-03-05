@@ -128,7 +128,7 @@ update_gtfs_rt_local:
         
     rt_type:
       name: Indicate type of realtime data 
-      description: Select if you update from url or zip
+      description: Select type of realtime data from source
       required: true
       default: "trip_data"
       selector:
@@ -138,6 +138,14 @@ update_gtfs_rt_local:
             - "trip_data"
             - "vehicle_positions"   
             - "alerts"
+            
+    entity_for_siri:
+      name: SIRI RT Route
+      description: For SIRI realtime only (!) select your configuration
+      required: false
+      selector:
+        entity:
+          integration: "gtfs2"            
       
     debug_output:
       name: Save all to local file in readable format
@@ -158,4 +166,23 @@ update_gtfs_local_stops:
       example: "zone.home"
       selector:
         entity:
-          domain: ["person", "zone"]          
+          domain: ["person", "zone"]
+          
+          
+extract_departures: 
+  name: Extract Departures
+  description: Extracts all next departures from your entity up-until tomorrow EOD
+  fields:       
+    config_entry:
+      name: Route
+      description: Select your start/stop configuration
+      required: true
+      selector:
+        config_entry:
+          integration: "gtfs2"
+    from_time:
+      name: The time after which departures are collected
+      required: false
+      description: "The time after which you would like to receive the slots.\n If left empty then all future slots will be extracted for today/tomorrow.\n In yaml this has to be 24H format"
+      selector:
+        time: {}   

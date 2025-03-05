@@ -1,45 +1,47 @@
 name: Portable EV charger
 products:
   - id: otugaigzdqfyc9er
-    name: Vevor SS EU Mode2 7kW
+    manufacturer: Vevor
+    model: SS EU Mode2 7kW
   - id: w7lvyyxyevpwf20e
-    name: Vevor SS US 7kW
+    manufacturer: Vevor
+    model: SS US 7kW
   - id: ypdfdnwauasb8rje
-    name: Vevor SS EU Mode2 3.7kW
-primary_entity:
-  entity: sensor
-  translation_key: status
-  class: enum
-  icon: "mdi:ev-station"
-  dps:
-    - id: 3
-      type: string
-      name: sensor
-      mapping:
-        - dps_val: charger_free
-          value: available
-        - dps_val: charger_insert
-          value: plugged_in
-        - dps_val: charger_free_fault
-          value: fault_unplugged
-        - dps_val: charger_wait
-          value: waiting
-        - dps_val: charger_charging
-          value: charging
-        - dps_val: charger_pause
-          value: paused
-        - dps_val: charger_end
-          value: charged
-        - dps_val: charger_fault
-          value: fault
-    - id: 23
-      type: string
-      name: system_version
-    - id: 33
-      type: string
-      optional: true
-      name: mode_set
-secondary_entities:
+    manufacturer: Vevor
+    model: SS EU Mode2 3.7kW
+entities:
+  - entity: sensor
+    translation_key: status
+    class: enum
+    icon: "mdi:ev-station"
+    dps:
+      - id: 3
+        type: string
+        name: sensor
+        mapping:
+          - dps_val: charger_free
+            value: available
+          - dps_val: charger_insert
+            value: plugged_in
+          - dps_val: charger_free_fault
+            value: fault_unplugged
+          - dps_val: charger_wait
+            value: waiting
+          - dps_val: charger_charging
+            value: charging
+          - dps_val: charger_pause
+            value: paused
+          - dps_val: charger_end
+            value: charged
+          - dps_val: charger_fault
+            value: fault
+      - id: 23
+        type: string
+        name: system_version
+      - id: 33
+        type: string
+        optional: true
+        name: mode_set
   - entity: sensor
     class: energy
     dps:
@@ -217,19 +219,23 @@ secondary_entities:
         unit: kWh
         mapping:
           - scale: 100
-  - entity: binary_sensor
-    class: connectivity
-    category: diagnostic
+
+  - entity: switch
+    category: config
+    name: Live updates
+    icon: "mdi:chart-bar"
     dps:
       - id: 27
         type: string
-        name: sensor
+        name: switch
         optional: true
         mapping:
           - dps_val: online
             value: true
           - dps_val: offline
             value: false
+          - value: false
+            hidden: true
   - entity: number
     name: Delay time
     category: config

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 
 from datetime import timedelta
 
@@ -11,7 +11,7 @@ from .const import DOMAIN, PLATFORMS, DEFAULT_PATH, DEFAULT_PATH_RT, DEFAULT_REF
 from homeassistant.const import CONF_HOST
 from .coordinator import GTFSUpdateCoordinator, GTFSLocalStopUpdateCoordinator
 import voluptuous as vol
-from .gtfs_helper import get_gtfs, update_gtfs_local_stops
+from .gtfs_helper import get_gtfs, update_gtfs_local_stops, get_route_departures
 from .gtfs_rt_helper import get_gtfs_rt
 
 _LOGGER = logging.getLogger(__name__)
@@ -112,7 +112,7 @@ def setup(hass, config):
     """Setup the service component."""
 
     def update_gtfs(call):
-        """My GTFS service."""
+        """My GTFS Update service."""
         _LOGGER.debug("Updating GTFS with: %s", call.data)
         get_gtfs(hass, DEFAULT_PATH, call.data, True)
         return True     
@@ -124,17 +124,25 @@ def setup(hass, config):
         return True  
 
     async def update_local_stops(call):
-        """My GTFS RT service."""
+        """My GTFS Update Local Stops service."""
         _LOGGER.debug("Updating GTFS Local Stops with: %s", call.data)
         await update_gtfs_local_stops(hass, call.data)
-        return True           
+        return True
+    
+    async def extract_departures(call):
+        """My GTFS Departures service."""
+        _LOGGER.debug("Retrieving next departures with: %s", call.data)
+        departures = await get_route_departures(hass, call.data)
+        return departures
 
     hass.services.register(
         DOMAIN, "update_gtfs", update_gtfs)
     hass.services.register(
         DOMAIN, "update_gtfs_rt_local", update_gtfs_rt_local)     
     hass.services.register(
-        DOMAIN, "update_gtfs_local_stops", update_local_stops)        
+        DOMAIN, "update_gtfs_local_stops", update_local_stops)
+    hass.services.register(
+        DOMAIN, "extract_departures", extract_departures,supports_response=SupportsResponse.OPTIONAL)
      
     return True
 

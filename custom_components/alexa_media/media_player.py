@@ -253,6 +253,8 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         self._shuffle = None
         self._repeat = None
         self._playing_parent = None
+        self._player_info = None
+        self._waiting_media_id = None
         # Last Device
         self._last_called = None
         self._last_called_timestamp = None
@@ -351,6 +353,16 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                 )
                 await self.async_update()
 
+        async def _wait_player_info(media_id, timeout=3):
+            self._player_info = None
+            start = util.dt.as_timestamp(util.utcnow())
+            while (
+                self._player_info is None
+                and media_id == self._waiting_media_id
+                and (start + timeout >= util.dt.as_timestamp(util.utcnow()))
+            ):
+                await asyncio.sleep(0.1)
+
         try:
             if not self.enabled:
                 return
@@ -386,6 +398,36 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
             event_serial = (
                 event.get("push_activity", {}).get("key", {}).get("serialNumber")
             )
+        elif "now_playing" in event:
+            player_info = (
+                event.get("now_playing", {})
+                .get("update", {})
+                .get("update", {})
+                .get("nowPlayingData", {})
+            )
+            media_id = player_info.get("mediaId")
+            if self._waiting_media_id and media_id in self._waiting_media_id:
+                if player_info.get("playerState"):
+                    player_info["state"] = player_info["playerState"]
+                if player_info.get("progress", {}).get("mediaProgress"):
+                    player_info["progress"]["mediaProgress"] = int(
+                        player_info["progress"]["mediaProgress"] / 1000
+                    )
+                if player_info.get("progress", {}).get("mediaLength"):
+                    player_info["progress"]["mediaLength"] = int(
+                        player_info["progress"]["mediaLength"] / 1000
+                    )
+                if player_info.get("mainArt", {}).get("url") is None:
+                    if not player_info.get("mainArt"):
+                        player_info["mainArt"] = {}
+                    player_info["mainArt"]["url"] = player_info["mainArt"].get(
+                        "fullUrl"
+                    )
+                player_info["last_update"] = util.utcnow()
+                _LOGGER.debug(
+                    f"Match media_id: {media_id} in waiting_media_id:{self._waiting_media_id} , player_info: {player_info}"
+                )
+                self._player_info = player_info
         if not event_serial:
             return
         if event_serial == self.device_serial_number:
@@ -459,8 +501,15 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                         self.name,
                         player_state["audioPlayerState"],
                     )
-                    # allow delay before trying to refresh to avoid http 400 errors
-                    await asyncio.sleep(2)
+                    media_id = player_state.get("mediaReferenceId")
+                    if media_id:
+                        self._waiting_media_id = media_id
+                        await _wait_player_info(media_id)
+                        if self._waiting_media_id != media_id:
+                            return
+                    if not media_id and self._player_info is None:
+                        # allow delay before trying to refresh to avoid http 400 errors
+                        await asyncio.sleep(2)
                     await self.async_update()
                     already_refreshed = True
                 elif "mediaReferenceId" in player_state:
@@ -553,8 +602,11 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         self._customer_name = auth["customerName"]
 
     @util.Throttle(MIN_TIME_BETWEEN_SCANS, MIN_TIME_BETWEEN_FORCED_SCANS)
+    async def _api_get_state(self):
+        return await self.alexa_api.get_state()
+
     @_catch_login_errors
-    async def refresh(self, device=None, skip_api: bool = False):
+    async def refresh(self, device=None, skip_api: bool = False, no_throttle=False):
         # pylint: disable=too-many-branches,too-many-statements
         """Refresh device data.
 
@@ -658,12 +710,21 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                     session = {"playerInfo": session}
                 else:
                     self._playing_parent = None
-                    session = await self.alexa_api.get_state()
+                    if self._player_info:
+                        session = {"playerInfo": self._player_info.copy()}
+                    else:
+                        session = await self._api_get_state(no_throttle=no_throttle)
+                        if session is None:
+                            # _LOGGER.warning(
+                            #     "%s: Can't get session state by alexa_api.get_state() of %s. Probably a re-login occurred, so ignore it this time.",
+                            #     self.account,
+                            #     self if device is None else self._device_name,
+                            # )
+                            return
         self._clear_media_details()
         # update the session if it exists
-        self._session = session if session else None
-        if self._session and self._session.get("playerInfo"):
-            self._session = self._session["playerInfo"]
+        self._session = session.get("playerInfo") if session else None
+        if self._session:
             if self._session.get("transport"):
                 self._shuffle = (
                     self._session["transport"]["shuffle"] == "SELECTED"
@@ -970,57 +1031,60 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         # Safely access 'http2' setting
         push_enabled = accounts_data[email].get("http2")
 
-        if (
-            self.state in [MediaPlayerState.PLAYING]
-            and
-            # Only enable polling if websocket not connected
-            (
-                not push_enabled
-                or not seen_commands
-                or not (
-                    "PUSH_AUDIO_PLAYER_STATE" in seen_commands
-                    or "PUSH_MEDIA_CHANGE" in seen_commands
-                    or "PUSH_MEDIA_PROGRESS_CHANGE" in seen_commands
-                )
-            )
-        ):
-            self._should_poll = False  # disable polling since manual update
+        if not push_enabled:
             if (
-                self._last_update == 0
-                or util.dt.as_timestamp(util.utcnow())
-                - util.dt.as_timestamp(self._last_update)
-                > PLAY_SCAN_INTERVAL
+                self.state in [MediaPlayerState.PLAYING]
+                and
+                # Only enable polling if websocket not connected
+                (
+                    not push_enabled
+                    or not seen_commands
+                    or not (
+                        "PUSH_AUDIO_PLAYER_STATE" in seen_commands
+                        or "PUSH_MEDIA_CHANGE" in seen_commands
+                        or "PUSH_MEDIA_PROGRESS_CHANGE" in seen_commands
+                    )
+                )
             ):
-                _LOGGER.debug(
-                    "%s: %s playing; scheduling update in %s seconds",
-                    hide_email(email),
-                    self.name,
-                    PLAY_SCAN_INTERVAL,
-                )
-                async_call_later(
-                    self.hass,
-                    PLAY_SCAN_INTERVAL,
-                    self.async_schedule_update_ha_state,
-                )
-        elif self._should_poll:  # Not playing, one last poll
+                self._should_poll = False  # disable polling since manual update
+                if (
+                    self._last_update == 0
+                    or util.dt.as_timestamp(util.utcnow())
+                    - util.dt.as_timestamp(self._last_update)
+                    > PLAY_SCAN_INTERVAL
+                ):
+                    _LOGGER.debug(
+                        "%s: %s playing; scheduling update in %s seconds",
+                        hide_email(email),
+                        self.name,
+                        PLAY_SCAN_INTERVAL,
+                    )
+                    async_call_later(
+                        self.hass,
+                        PLAY_SCAN_INTERVAL,
+                        self.async_schedule_update_ha_state,
+                    )
+            elif self._should_poll:  # Not playing, one last poll
+                self._should_poll = False
+                if not push_enabled:
+                    _LOGGER.debug(
+                        "%s: Disabling polling and scheduling last update in 300 seconds for %s",
+                        hide_email(email),
+                        self.name,
+                    )
+                    async_call_later(
+                        self.hass,
+                        300,
+                        self.async_schedule_update_ha_state,
+                    )
+                else:
+                    _LOGGER.debug(
+                        "%s: Disabling polling for %s",
+                        hide_email(email),
+                        self.name,
+                    )
+        else:
             self._should_poll = False
-            if not push_enabled:
-                _LOGGER.debug(
-                    "%s: Disabling polling and scheduling last update in 300 seconds for %s",
-                    hide_email(email),
-                    self.name,
-                )
-                async_call_later(
-                    self.hass,
-                    300,
-                    self.async_schedule_update_ha_state,
-                )
-            else:
-                _LOGGER.debug(
-                    "%s: Disabling polling for %s",
-                    hide_email(email),
-                    self.name,
-                )
         self._last_update = util.utcnow()
         self.schedule_update_ha_state()
 
@@ -1054,7 +1118,11 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
     @property
     def media_position_updated_at(self):
         """When was the position of the current playing media valid."""
-        return self._last_update
+        return (
+            self._player_info["last_update"]
+            if self._player_info and self._player_info.get("last_update")
+            else self._last_update
+        )
 
     @property
     def media_image_url(self) -> Optional[str]:

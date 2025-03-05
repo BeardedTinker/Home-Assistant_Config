@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 # Base component constants
 DOMAIN = "moonraker"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.5.1"
+VERSION = "1.6.0"
 MANIFACTURER = "@marcolivierarsenault"
 
 # Platforms
@@ -18,6 +18,7 @@ PLATFORMS = [
     Platform.BINARY_SENSOR,
     Platform.SWITCH,
     Platform.NUMBER,
+    Platform.LIGHT,
 ]
 
 CONF_API_KEY = "api_key"
@@ -56,12 +57,14 @@ class METHODS(Enum):
     PRINTER_GCODE_SCRIPT = "printer.gcode.script"
     PRINTER_OBJECTS_LIST = "printer.objects.list"
     PRINTER_OBJECTS_QUERY = "printer.objects.query"
+    PRINTER_OBJECTS_SUBSCRIBE = "printer.objects.subscribe"
     PRINTER_PRINT_CANCEL = "printer.print.cancel"
     PRINTER_PRINT_PAUSE = "printer.print.pause"
     PRINTER_PRINT_RESUME = "printer.print.resume"
     PRINTER_FIRMWARE_RESTART = "printer.firmware_restart"
     SERVER_FILES_METADATA = "server.files.metadata"
     SERVER_HISTORY_TOTALS = "server.history.totals"
+    SERVER_HISTORY_RESET_TOTALS = "server.history.reset_totals"
     SERVER_JOB_QUEUE_STATUS = "server.job_queue.status"
     SERVER_RESTART = "server.restart"
     SERVER_WEBCAMS_LIST = "server.webcams.list"

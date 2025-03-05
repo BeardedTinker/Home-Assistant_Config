@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Final
 
-from switchbot.adv_parser import model
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,

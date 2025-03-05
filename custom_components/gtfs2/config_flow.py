@@ -19,7 +19,6 @@ from .const import (
     DEFAULT_LOCAL_STOP_REFRESH_INTERVAL,
     DEFAULT_LOCAL_STOP_TIMERANGE,
     DEFAULT_LOCAL_STOP_RADIUS,
-    DEFAULT_MAX_LOCAL_STOPS,
     DEFAULT_OFFSET,
     CONF_API_KEY_LOCATION, 
     CONF_API_KEY,
@@ -49,7 +48,9 @@ from .const import (
     CONF_OFFSET,
     CONF_REAL_TIME,
     CONF_SOURCE_TIMEZONE_CORRECTION,
-    ATTR_API_KEY_LOCATIONS
+    ATTR_API_KEY_LOCATIONS,
+    DEFAULT_MAX_LOCAL_STOPS,
+    CONF_MAX_LOCAL_STOPS
 )    
 
 from .gtfs_helper import (
@@ -432,7 +433,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
         try:
             self._data["next_departure"] = await self.hass.async_add_executor_job(
-                get_next_departure, self
+                get_next_departure, self.hass, self._data
             )
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.error(
@@ -492,6 +493,7 @@ class GTFSOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(CONF_RADIUS, default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_LOCAL_STOP_RADIUS)): vol.All(vol.Coerce(int), vol.Range(min=50, max=5000)),
                     vol.Optional(CONF_TIMERANGE, default=self.config_entry.options.get(CONF_TIMERANGE, DEFAULT_LOCAL_STOP_TIMERANGE)): vol.All(vol.Coerce(int), vol.Range(min=15, max=120)),
                     vol.Optional(CONF_OFFSET, default=self.config_entry.options.get(CONF_OFFSET, DEFAULT_OFFSET)): int,
+                    vol.Required(CONF_MAX_LOCAL_STOPS, default=self.config_entry.options.get(CONF_MAX_LOCAL_STOPS, DEFAULT_MAX_LOCAL_STOPS)): int,
                     vol.Optional(CONF_REAL_TIME, default=self.config_entry.options.get(CONF_REAL_TIME)): selector.BooleanSelector()
                 }
             return self.async_show_form(

@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any
 
@@ -79,6 +78,7 @@ class Cloud:
             self.__qr_code = response[TUYA_RESPONSE_RESULT][TUYA_RESPONSE_QR_CODE]
             return self.__qr_code
 
+        _LOGGER.error("Failed to get QR code: %s", response)
         self.__error_code = response.get(TUYA_RESPONSE_CODE, {})
         self.__error_msg = response.get(TUYA_RESPONSE_MSG, "Unknown error")
 
@@ -111,6 +111,7 @@ class Cloud:
             }
             self.__hass.data[DOMAIN]["auth_cache"] = self.__authentication
         else:
+            _LOGGER.warning("Login failed: %s", info)
             self.__error_code = info.get(TUYA_RESPONSE_CODE, {})
             self.__error_msg = info.get(TUYA_RESPONSE_MSG, "Unknown error")
 
@@ -185,13 +186,24 @@ class Cloud:
         )
         response = await self.__hass.async_add_executor_job(
             manager.customer_api.get,
-            f"/v2.0/cloud/things/{device_id}/model",
+            f"/v1.0/m/life/devices/{device_id}/status",
         )
+        _LOGGER.debug("Datamodel response: %s", response)
         if response.get("result"):
             response = response["result"]
-        if response.get("model"):
-            return json.loads(response["model"])
-        return response
+        transform = []
+        for entry in response.get("dpStatusRelationDTOS"):
+            if entry["supportLocal"]:
+                transform.append(
+                    {
+                        "id": entry["dpId"],
+                        "name": entry["dpCode"],
+                        "type": entry["valueType"],
+                        "format": entry["valueDesc"],
+                        "enumMap": entry["enumMappingMap"],
+                    }
+                )
+        return transform
 
     @property
     def is_authenticated(self) -> bool:
@@ -219,12 +231,17 @@ class DeviceListener(SharingDeviceListener):
         self.__hass = hass
         self._manager = manager
 
-    def update_device(self, device: CustomerDevice) -> None:
+    def update_device(
+        self,
+        device: CustomerDevice,
+        updated_status_properties: list[str] | None,
+    ) -> None:
         """Device status has updated."""
         _LOGGER.debug(
-            "Received update for device %s: %s",
+            "Received update for device %s: %s (properties %s)",
             device.id,
             self._manager.device_map[device.id].status,
+            updated_status_properties,
         )
 
     def add_device(self, device: CustomerDevice) -> None:

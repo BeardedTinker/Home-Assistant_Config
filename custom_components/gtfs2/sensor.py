@@ -18,6 +18,7 @@ from .const import (
     ATTR_DAY,
     ATTR_DUE_IN,
     ATTR_NEXT_RT,
+    ATTR_NEXT_RT_DELAYS,
     ATTR_DROP_OFF_DESTINATION,
     ATTR_DROP_OFF_ORIGIN,
     ATTR_FIRST,
@@ -440,6 +441,12 @@ class GTFSDepartureSensor(CoordinatorEntity, SensorEntity):
                 else:
                     self._attributes["next_departure_realtime"] = '-'
                     self._attributes["next_departures_realtime"] = '-'
+                if self._departure_rt.get(ATTR_NEXT_RT_DELAYS, None):
+                    self._attributes["next_delay_realtime"] = self._departure_rt[ATTR_NEXT_RT_DELAYS][0]
+                    self._attributes["next_delays_realtime"] = self._departure_rt[ATTR_NEXT_RT_DELAYS]
+                else:
+                    self._attributes["next_delay_realtime"] = '-'
+                    self._attributes["next_delays_realtime"] = '-'
             if ATTR_INFO_RT in self._attributes:
                 del self._attributes[ATTR_INFO_RT]    
         else:

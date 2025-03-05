@@ -1,54 +1,54 @@
 name: Light strip
 products:
   - id: szzsfdqcrqkczzfi
-    name: Tech Inc 3m neon
-primary_entity:
-  entity: light
-  dps:
-    - id: 20
-      type: boolean
-      name: switch
-    - id: 21
-      type: string
-      name: effect
-      mapping:
-        - dps_val: colour
-          value: "off"
-        - dps_val: scene
-          value: Scene
-        - dps_val: music
-          value: Music
-    - id: 22
-      name: brightness
-      type: integer
-      optional: true
-      range:
-        min: 10
-        max: 1000
-      mapping:
-        - dps_val: null
-          value: 0
-    - id: 24
-      name: rgbhsv
-      type: hex
-      optional: true
-      format:
-        - name: h
-          bytes: 2
-          range:
-            min: 0
-            max: 360
-        - name: s
-          bytes: 2
-          range:
-            min: 0
-            max: 1000
-        - name: v
-          bytes: 2
-          range:
-            min: 0
-            max: 1000
-secondary_entities:
+    manufacturer: Tech Inc
+    model: "3m Neon"
+entities:
+  - entity: light
+    dps:
+      - id: 20
+        type: boolean
+        name: switch
+      - id: 21
+        type: string
+        name: effect
+        mapping:
+          - dps_val: colour
+            value: "off"
+          - dps_val: scene
+            value: Scene
+          - dps_val: music
+            value: Music
+      - id: 22
+        name: brightness
+        type: integer
+        optional: true
+        range:
+          min: 10
+          max: 1000
+        mapping:
+          - dps_val: null
+            value: 0
+      - id: 24
+        name: rgbhsv
+        type: hex
+        optional: true
+        format:
+          - name: h
+            bytes: 2
+            range:
+              min: 0
+              max: 360
+          - name: s
+            bytes: 2
+            range:
+              min: 0
+              max: 1000
+          - name: v
+            bytes: 2
+            range:
+              min: 0
+              max: 1000
   - entity: number
     translation_key: timer
     class: duration
@@ -66,9 +66,17 @@ secondary_entities:
           - scale: 60
             step: 60
           - dps_val: null
+  - entity: text
+    translation_key: scene
+    category: config
+    hidden: true
+    dps:
+      - id: 51
+        name: value
+        type: base64
+        optional: true
   - entity: select
-    name: Scene
-    icon: "mdi:palette"
+    translation_key: scene
     category: config
     dps:
       - id: 51
@@ -117,21 +125,21 @@ secondary_entities:
           - dps_val: "AVAQMjIAAABkAOZHAGQ8ARlNALg5"
             value: "Dream Sea"
           - dps_val: "AR8CX19gAABkARBkANJkAK1kAItk"
-            value: "Gamne"
+            value: gaming
           - dps_val: "ASAKVVVgAABkAMJYAT4zAP9GAR1k"
-            value: "Holiday"
+            value: vacation
           - dps_val: "ASEDPDxgAABkAL8YAQQX"
-            value: "Work"
+            value: working
           - dps_val: "ASIEZGRgAABkANdcALxTADceACw/AWE/"
-            value: "Party"
+            value: party
           - dps_val: "ASMCZGRgAABkAQhLALEvAM1X"
             value: "Trend"
           - dps_val: "ASQKS0tgAABkALwmANZVARhkAPlN"
             value: "Sports"
           - dps_val: "ASUDQ0NgAABkALc1AJtUAM1h"
-            value: "Meditation"
+            value: relax
           - dps_val: "ASYBWVngAABkARlHAUk9AM1hACZk"
-            value: "Dating"
+            value: romantic
           - dps_val: "ASkCYWHgAABkAAtkANlkACtkAJFkALlk"
             value: "Christmas"
           - dps_val: "ASoBZGRgAABkARVkAQVkAUVkAS9k"

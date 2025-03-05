@@ -46,6 +46,7 @@ from .common import (
 )
 from .const import (
     CONF_AND,
+    CONF_AVAILABILITY_ENTITY,
     CONF_CALCULATION_ENABLED_CONDITION,
     CONF_CALIBRATE,
     CONF_COMPOSITE,
@@ -65,6 +66,7 @@ from .const import (
     CONF_FIXED,
     CONF_FORCE_CALCULATE_GROUP_ENERGY,
     CONF_FORCE_ENERGY_SENSOR_CREATION,
+    CONF_GROUP_ENERGY_START_AT_ZERO,
     CONF_GROUP_TYPE,
     CONF_HIDE_MEMBERS,
     CONF_IGNORE_UNAVAILABLE_STATE,
@@ -141,7 +143,7 @@ from .sensors.daily_energy import (
     create_daily_fixed_energy_sensor,
 )
 from .sensors.energy import EnergySensor, create_energy_sensor
-from .sensors.group.config_entry_utils import add_to_associated_group
+from .sensors.group.config_entry_utils import add_to_associated_groups
 from .sensors.group.custom import GroupedSensor
 from .sensors.group.factory import create_group_sensors
 from .sensors.group.standby import StandbyPowerSensor
@@ -161,6 +163,7 @@ MAX_GROUP_NESTING_LEVEL = 5
 SENSOR_CONFIG = {
     vol.Optional(CONF_NAME): cv.string,
     vol.Optional(CONF_ENTITY_ID): cv.entity_id,
+    vol.Optional(CONF_AVAILABILITY_ENTITY): cv.entity_id,
     vol.Optional(CONF_UNIQUE_ID): cv.string,
     vol.Optional(CONF_MODEL): cv.string,
     vol.Optional(CONF_MANUFACTURER): cv.string,
@@ -193,6 +196,7 @@ SENSOR_CONFIG = {
     vol.Optional(CONF_ENERGY_INTEGRATION_METHOD): vol.In(ENERGY_INTEGRATION_METHODS),
     vol.Optional(CONF_ENERGY_SENSOR_UNIT_PREFIX): vol.In([cls.value for cls in UnitPrefix]),
     vol.Optional(CONF_CREATE_GROUP): cv.string,
+    vol.Optional(CONF_GROUP_ENERGY_START_AT_ZERO): cv.boolean,
     vol.Optional(CONF_GROUP_TYPE): vol.In([cls.value for cls in GroupType]),
     vol.Optional(CONF_SUBTRACT_ENTITIES): vol.All(cv.ensure_list, [cv.entity_id]),
     vol.Optional(CONF_HIDE_MEMBERS): cv.boolean,
@@ -285,6 +289,8 @@ async def async_setup_platform(
     if CONF_CREATE_GROUP in config:
         config[CONF_NAME] = config[CONF_CREATE_GROUP]
 
+    register_entity_services()
+
     await _async_setup_entities(
         hass,
         config,
@@ -324,7 +330,7 @@ async def async_setup_entry(
     )
 
     # Add entry to an existing group
-    await add_to_associated_group(hass, entry)
+    await add_to_associated_groups(hass, entry)
 
 
 async def _async_setup_entities(
@@ -334,8 +340,6 @@ async def _async_setup_entities(
     config_entry: ConfigEntry | None = None,
 ) -> None:
     """Main routine to setup power/energy sensors from provided configuration."""
-    register_entity_services()
-
     try:
         entities = await create_sensors(hass, config, config_entry)
         if config_entry:
