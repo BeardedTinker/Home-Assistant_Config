@@ -30,29 +30,29 @@ jobs:
         continue-on-error: true
         with:
           args: "remark --no-stdout --color --frail --use preset-lint-recommended ."
-  home_assistant_current:
-    runs-on: ubuntu-latest
-    needs: [yamllint, remarklint]
-    steps:
-      - name: Getting your configuration from GitHub
-        uses: actions/checkout@v3
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-      - name: Copy stub files into configuration folder
-        run: |
-          cp -R secrets_github.yaml secrets.yaml
-          cp -R customize_sample.yaml customize.yaml
-          cp -R service_account_ga_sample.json service_account_ga.json
-          sudo mkdir -p /github/workspace/tmp
-          #sudo touch fullchain.pem
-          #sudo touch privkey.pem
-          HA_VERSION=$(<.HA_VERSION)
-      - name: Install Home Assistant
-        run: pip3 install homeassistant==$(cat .HA_VERSION)
-      - name: Check config
-        run: hass -c . --script check_config --info all --system
+#  home_assistant_current:
+#    runs-on: ubuntu-latest
+#    needs: [yamllint, remarklint]
+#    steps:
+#      - name: Getting your configuration from GitHub
+#        uses: actions/checkout@v3
+#      - name: Set up Python 3.12
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.12'
+#      - name: Copy stub files into configuration folder
+#        run: |
+#          cp -R secrets_github.yaml secrets.yaml
+#          cp -R customize_sample.yaml customize.yaml
+#          cp -R service_account_ga_sample.json service_account_ga.json
+#          sudo mkdir -p /github/workspace/tmp
+#          #sudo touch fullchain.pem
+#          #sudo touch privkey.pem
+#          HA_VERSION=$(<.HA_VERSION)
+#      - name: Install Home Assistant
+#        run: pip3 install homeassistant==$(cat .HA_VERSION)
+#      - name: Check config
+#        run: hass -c . --script check_config --info all --system
   home_assistant_stable:
     runs-on: ubuntu-latest
     needs: [yamllint, remarklint]
