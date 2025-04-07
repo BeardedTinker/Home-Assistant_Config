@@ -118,6 +118,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
+    async def send_gcode_service(service_call):
+        """Handle the service call to send g-code."""
+        gcode = service_call.data["gcode"]
+        device_id = service_call.data["device_id"][0]
+        dev_reg = dr.async_get(hass)
+
+        device = dev_reg.async_get(device_id)
+        entry_id = device.primary_config_entry
+        await hass.data[DOMAIN][entry_id].async_send_data(
+            METHODS.PRINTER_GCODE_SCRIPT,
+            {"script": gcode},
+        )
+
+    # Register the new service
+    hass.services.async_register(DOMAIN, "send_gcode", send_gcode_service)
+
     return True
 
 

@@ -42,13 +42,22 @@ drawcustom:
       required: true
       default: 2
       selector:
-        number:
-          min: 0
-          max: 2
-          step: 1
+        select:
+          options:
+            - label: "No dithering"
+              value: "0"
+            - label: "Floyd-Steinberg (best for photos)"
+              value: "1"
+            - label: "Ordered (best for halftone colors)"
+              value: "2"
     ttl:
       name: Time to live
-      description: How long the image should be cached (in seconds)
+      description: >
+        How long the tag will sleep before checking in again (in seconds).
+        
+        Notes:
+        - The TTL applies only once after each image update
+        - Setting a very long TTL means you cannot update the tag again until that time has passed
       required: true
       default: 60
       selector:

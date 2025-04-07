@@ -1,4 +1,4 @@
-"""Config flow for Adaptive Lighting integration."""
+"""Config flow for Powercalc integration."""
 
 from __future__ import annotations
 
@@ -134,6 +134,7 @@ from .const import (
 from .discovery import get_power_profile_by_source_entity
 from .errors import ModelNotSupportedError, StrategyConfigurationError
 from .flow_helper.dynamic_field_builder import build_dynamic_field_schema
+from .flow_helper.schema import build_sub_profile_schema
 from .group_include.include import find_entities
 from .power_profile.factory import get_power_profile
 from .power_profile.library import ModelInfo, ProfileLibrary
@@ -615,6 +616,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
         self.source_entity: SourceEntity | None = None
         self.source_entity_id: str | None = None
         self.selected_profile: PowerProfile | None = None
+        self.selected_sub_profile: str | None = None
         self.is_library_flow: bool = False
         self.skip_advanced_step: bool = False
         self.selected_sensor_type: str | None = None
@@ -889,7 +891,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
             if key in options and isinstance(key, vol.Marker):
                 if isinstance(key, vol.Optional) and callable(key.default) and key.default():
                     new_key = vol.Optional(key.schema, default=options.get(key))  # type: ignore
-                else:
+                elif "suggested_value" not in (new_key.description or {}):
                     new_key = copy.copy(key)
                     new_key.description = {"suggested_value": options.get(key)}  # type: ignore
             schema[new_key] = val
@@ -1037,9 +1039,10 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
             library = await ProfileLibrary.factory(self.hass)
             device_types = DOMAIN_DEVICE_TYPE_MAPPING.get(self.source_entity.domain, set()) if self.source_entity else None
             models = [selector.SelectOptionDict(value=model, label=model) for model in await library.get_model_listing(manufacturer, device_types)]
+            model = self.selected_profile.model if self.selected_profile else self.sensor_config.get(CONF_MODEL)
             return vol.Schema(
                 {
-                    vol.Required(CONF_MODEL, default=self.sensor_config.get(CONF_MODEL)): selector.SelectSelector(
+                    vol.Required(CONF_MODEL, description={"suggested_value": model}, default=model): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=models,
                             mode=selector.SelectSelectorMode.DROPDOWN,
@@ -1078,11 +1081,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
             if result:
                 return result
 
-        if (
-            Step.SUB_PROFILE not in self.handled_steps
-            and await self.selected_profile.has_sub_profiles
-            and not self.selected_profile.sub_profile_select
-        ):
+        if Step.SUB_PROFILE not in self.handled_steps and await self.selected_profile.requires_manual_sub_profile_selection:
             return await self.async_step_sub_profile()
 
         if (
@@ -1153,28 +1152,6 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
         async def _validate(user_input: dict[str, Any]) -> dict[str, str]:
             return {CONF_MODEL: f"{self.sensor_config.get(CONF_MODEL)}/{user_input.get(CONF_SUB_PROFILE)}"}
 
-        async def _create_schema(
-            profile: PowerProfile,
-        ) -> vol.Schema:
-            """Create sub profile schema."""
-            sub_profiles = [
-                selector.SelectOptionDict(
-                    value=sub_profile[0],
-                    label=sub_profile[1]["name"] if "name" in sub_profile[1] else sub_profile[0],
-                )
-                for sub_profile in await profile.get_sub_profiles()
-            ]
-            return vol.Schema(
-                {
-                    vol.Required(CONF_SUB_PROFILE): selector.SelectSelector(
-                        selector.SelectSelectorConfig(
-                            options=sub_profiles,
-                            mode=selector.SelectSelectorMode.DROPDOWN,
-                        ),
-                    ),
-                },
-            )
-
         library = await ProfileLibrary.factory(self.hass)
         profile = await library.get_profile(
             ModelInfo(
@@ -1190,7 +1167,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
         return await self.handle_form_step(
             PowercalcFormStep(
                 step=Step.SUB_PROFILE,
-                schema=await _create_schema(profile),
+                schema=await build_sub_profile_schema(profile, self.selected_sub_profile),
                 next_step=Step.POWER_ADVANCED,
                 validate_user_input=_validate,
                 form_kwarg={
@@ -2051,6 +2028,7 @@ class PowercalcOptionsFlow(PowercalcCommonFlow, OptionsFlow):
     async def async_step_library_options(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the basic options flow."""
         self.is_library_flow = True
+        self.selected_sub_profile = self.selected_profile.sub_profile  # type: ignore
         if user_input is not None:
             return await self.async_step_manufacturer()
 

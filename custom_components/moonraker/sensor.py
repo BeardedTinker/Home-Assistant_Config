@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfPressure,
     UnitOfTemperature,
     UnitOfTime,
+    REVOLUTIONS_PER_MINUTE,
 )
 from homeassistant.core import callback
 
@@ -103,13 +104,14 @@ SENSORS: tuple[MoonrakerSensorDescription, ...] = [
                 else 0,
                 2,
             )
+            / 3600
         ),
         subscriptions=[
             ("print_stats", "total_duration"),
             ("display_status", "progress"),
         ],
         icon="mdi:timer",
-        unit=UnitOfTime.SECONDS,
+        unit=UnitOfTime.HOURS,
         device_class=SensorDeviceClass.DURATION,
     ),
     MoonrakerSensorDescription(
@@ -126,13 +128,14 @@ SENSORS: tuple[MoonrakerSensorDescription, ...] = [
                 - sensor.coordinator.data["status"]["print_stats"]["print_duration"],
                 2,
             )
+            / 3600
         ),
         subscriptions=[
             ("print_stats", "print_duration"),
             ("display_status", "progress"),
         ],
         icon="mdi:timer",
-        unit=UnitOfTime.SECONDS,
+        unit=UnitOfTime.HOURS,
         device_class=SensorDeviceClass.DURATION,
     ),
     MoonrakerSensorDescription(
@@ -150,24 +153,30 @@ SENSORS: tuple[MoonrakerSensorDescription, ...] = [
         key="slicer_print_duration_estimate",
         name="Slicer Print Duration Estimate",
         value_fn=lambda sensor: sensor.empty_result_when_not_printing(
-            sensor.coordinator.data["estimated_time"]
+            sensor.coordinator.data["estimated_time"] / 3600
         ),
         subscriptions=[],
         icon="mdi:timer",
         device_class=SensorDeviceClass.DURATION,
-        unit=UnitOfTime.SECONDS,
+        unit=UnitOfTime.HOURS,
     ),
     MoonrakerSensorDescription(
         key="slicer_print_time_left_estimate",
         name="Slicer Print Time Left Estimate",
         value_fn=lambda sensor: sensor.empty_result_when_not_printing(
-            sensor.coordinator.data["estimated_time"]
-            - sensor.coordinator.data["status"]["print_stats"]["print_duration"]
+            round(
+                (
+                    sensor.coordinator.data["estimated_time"]
+                    - sensor.coordinator.data["status"]["print_stats"]["print_duration"]
+                )
+                / 3600,
+                2,
+            )
         ),
         subscriptions=[("print_stats", "print_duration")],
         icon="mdi:timer",
         device_class=SensorDeviceClass.DURATION,
-        unit=UnitOfTime.SECONDS,
+        unit=UnitOfTime.HOURS,
     ),
     MoonrakerSensorDescription(
         key="print_duration",
@@ -490,6 +499,29 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 state_class=SensorStateClass.MEASUREMENT,
             )
             sensors.append(desc)
+
+            query_obj = {OBJ: {obj: ["rpm"]}}
+            fan_data = await coordinator.async_fetch_data(
+                METHODS.PRINTER_OBJECTS_QUERY, query_obj, quiet=True
+            )
+
+            if fan_data["status"][obj]["rpm"]:
+                desc = MoonrakerSensorDescription(
+                    key=f"{split_obj[0]}_{split_obj[1]}_rpm",
+                    status_key=obj,
+                    name=f"{split_obj[1].replace('_', ' ').title()} RPM",
+                    value_fn=lambda sensor: int(
+                        sensor.coordinator.data["status"][sensor.status_key]["rpm"]
+                    )
+                    if sensor.coordinator.data["status"][sensor.status_key]["rpm"]
+                    is not None
+                    else None,
+                    subscriptions=[(obj, "rpm")],
+                    icon="mdi:fan",
+                    unit=REVOLUTIONS_PER_MINUTE,
+                    state_class=SensorStateClass.MEASUREMENT,
+                )
+                sensors.append(desc)
         elif obj == "fan":
             desc = MoonrakerSensorDescription(
                 key="fan_speed",
@@ -503,6 +535,27 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 state_class=SensorStateClass.MEASUREMENT,
             )
             sensors.append(desc)
+
+            query_obj = {OBJ: {"fan": ["rpm"]}}
+            fan_data = await coordinator.async_fetch_data(
+                METHODS.PRINTER_OBJECTS_QUERY, query_obj, quiet=True
+            )
+
+            if fan_data["status"]["fan"]["rpm"]:
+                desc = MoonrakerSensorDescription(
+                    key="fan_rpm",
+                    name="Fan RPM",
+                    value_fn=lambda sensor: int(
+                        sensor.coordinator.data["status"]["fan"]["rpm"]
+                    )
+                    if sensor.coordinator.data["status"]["fan"]["rpm"] is not None
+                    else None,
+                    subscriptions=[("fan", "rpm")],
+                    icon="mdi:fan",
+                    unit=REVOLUTIONS_PER_MINUTE,
+                    state_class=SensorStateClass.MEASUREMENT,
+                )
+                sensors.append(desc)
         elif obj == "gcode_move":
             desc = MoonrakerSensorDescription(
                 key="speed_factor",
@@ -539,7 +592,7 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
             desc = MoonrakerSensorDescription(
                 key=f"{split_obj[0]}_{split_obj[1]}_temperature",
                 status_key=obj,
-                name=f"{split_obj[1].replace('_',' ')} Temperature".title(),
+                name=f"{split_obj[1].replace('_', ' ')} Temperature".title(),
                 value_fn=lambda sensor: (
                     round(
                         sensor.coordinator.data["status"][sensor.status_key][
@@ -563,7 +616,7 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
             desc = MoonrakerSensorDescription(
                 key=f"{split_obj[0]}_{split_obj[1]}_target",
                 status_key=obj,
-                name=f"{split_obj[1].replace('_',' ')} Target".title(),
+                name=f"{split_obj[1].replace('_', ' ')} Target".title(),
                 value_fn=lambda sensor: sensor.coordinator.data["status"][
                     sensor.status_key
                 ]["target"],
@@ -599,21 +652,6 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                     else None
                 ),
                 subscriptions=[(obj, "temperature")],
-                icon=icon,
-                unit=UnitOfTemperature.CELSIUS,
-                state_class=SensorStateClass.MEASUREMENT,
-            )
-            sensors.append(desc)
-
-            desc = MoonrakerSensorDescription(
-                key=f"{obj}_target",
-                status_key=obj,
-                name=f"{base_name} Target".title(),
-                value_fn=lambda sensor: float(
-                    sensor.coordinator.data["status"][sensor.status_key]["target"]
-                    or 0.0
-                ),
-                subscriptions=[(obj, "target")],
                 icon=icon,
                 unit=UnitOfTemperature.CELSIUS,
                 state_class=SensorStateClass.MEASUREMENT,
@@ -716,7 +754,7 @@ async def _queue_updater(coordinator):
 async def async_setup_queue_sensors(coordinator, entry, async_add_entities):
     """Job queue sensors."""
     queue = await coordinator.async_fetch_data(METHODS.SERVER_JOB_QUEUE_STATUS)
-    if queue.get("error"):
+    if queue.get("queue_state") is None or queue.get("queued_jobs") is None:
         return
 
     coordinator.add_data_updater(_queue_updater)

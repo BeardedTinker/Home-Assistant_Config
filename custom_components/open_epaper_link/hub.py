@@ -3,17 +3,19 @@ from datetime import datetime, timedelta
 from typing import Final, Dict
 
 import json
-
+import requests
 import aiohttp
 import async_timeout
 import websockets
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant, CALLBACK_TYPE, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 import logging
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -52,6 +54,7 @@ class Hub:
         self._ap_data: dict[str, any] = {}
         self.ap_config: dict[str, any] = {}
         self._known_tags: set[str] = set()
+        self._last_record_count = None
 
         self._unsub_callbacks: list[CALLBACK_TYPE] = []
         self.online = False
@@ -98,6 +101,11 @@ class Hub:
                     self._handle_shutdown
                 )
 
+            # Load all tags from AP
+            try:
+                await self.async_load_all_tags()
+            except Exception as err:
+                _LOGGER.warning("Could not load initial tags from AP: %s", str(err))
             return True
 
         except Exception as err:
@@ -182,6 +190,9 @@ class Hub:
                     self.online = True
                     _LOGGER.debug("Connected to websocket at %s", ws_url)
                     async_dispatcher_send(self.hass, f"{DOMAIN}_connection_status", True)
+
+                    # Run verification on each connection to catch deletions that happened while offline
+                    await self._verify_and_cleanup_tags()
 
                     while not self._shutdown.is_set():
                         try:
@@ -314,17 +325,74 @@ class Hub:
             "low_battery_count": sys_data.get("lowbattcount", current_low_batt),
             "timeout_count": sys_data.get("timeoutcount", current_timeout),
         }
+
+        if "recordcount" in sys_data:
+            self._track_record_count_changes(sys_data.get("recordcount", 0))
+
         async_dispatcher_send(self.hass, SIGNAL_AP_UPDATE)
 
     @callback
     async def _handle_tag_message(self, tag_data: dict) -> None:
         """Process a tag message."""
         tag_mac = tag_data.get("mac")
+        if not tag_mac:
+            return
+
+        # Process tag data
+        is_new_tag = await self._process_tag_data(tag_mac, tag_data)
+        # Save to storage if this was a new tag
+        if is_new_tag:
+            await self._store.async_save({"tags": self._data})
+        else:
+            # Schedule a save with a delay to avoid constant writes
+            # Will be implemented in the future
+            await self._store.async_save({"tags": self._data})
+
+
+    async def _handle_log_message(self, log_msg: str) -> None:
+        """Process a log message."""
+        if "block request" in log_msg:
+            # Extract MAC address from block request message
+            # Example: "0000000000123456 block request /current/0000000000123456_452783.pending block 0"
+            parts = log_msg.split()
+            if len(parts) > 0:
+                tag_mac = parts[0].upper()
+                if tag_mac in self._data:
+                    block_requests = self._data[tag_mac].get("block_requests", 0) + 1
+                    self._data[tag_mac]["block_requests"] = block_requests
+                    # Notify of update
+                    async_dispatcher_send(self.hass, f"{SIGNAL_TAG_UPDATE}_{tag_mac}")
+        if "reports xfer complete" in log_msg:
+            # Extract MAC address from block request message
+            parts = log_msg.split()
+            if len(parts) > 0:
+                tag_mac = parts[0].upper()
+                if tag_mac in self._data:
+                    # Notify of update
+                    async_dispatcher_send(self.hass, f"{SIGNAL_TAG_IMAGE_UPDATE}_{tag_mac}", True)
+
+    async def _process_tag_data(self, tag_mac: str, tag_data: dict, is_initial_load: bool = False) -> bool:
+        """Process tag data and update internal state.
+
+        Args:
+            tag_mac: The MAC address of the tag
+            tag_data: The tag data dictionary from the AP
+            is_initial_load: True if this is part of initial loading, which affects event triggering
+
+        Returns:
+            True if this was a new tag, False if it was an update
+        """
 
         # Skip blacklisted tags
         if tag_mac in self._blacklisted_tags:
             _LOGGER.debug("Ignoring blacklisted tag: %s", tag_mac)
-            return
+            return False
+
+        # Check if this is a new tag
+        is_new_tag = tag_mac not in self._known_tags
+
+        # Get existing data to calculate runtime and update counters
+        existing_data = self._data.get(tag_mac, {})
 
         tag_name = tag_data.get("alias") or tag_mac
         last_seen = tag_data.get("lastseen")
@@ -350,23 +418,38 @@ class Hub:
         version = tag_data.get("ver")
         update_count = tag_data.get("updatecount")
 
-        is_new_tag = tag_mac not in self._known_tags
+        # Check if name has changed
+        old_name = existing_data.get("tag_name")
+        if old_name and old_name != tag_name:
+            _LOGGER.debug("Tag name changed from '%s' to '%s'", old_name, tag_name)
+            # Update device name in device registry
+            device_registry = dr.async_get(self.hass)
+            device = device_registry.async_get_device(
+                identifiers={(DOMAIN, tag_mac)}
+            )
+            if device:
+                device_registry.async_update_device(
+                    device.id,
+                    name=tag_name
+                )
 
-        # Get existing data to calculate runtime and update counters
-        existing_data = self._data.get(tag_mac, {})
-
-        # Calculate runtime delta
-        runtime_delta = self._calculate_runtime_delta(tag_data, existing_data)
-        runtime_total = existing_data.get("runtime", 0) + runtime_delta
+        # Calculate runtime delta (only if this is not the initial load)
+        runtime_delta = 0
+        runtime_total =  existing_data.get("runtime", 0)
+        if not is_initial_load and existing_data:
+            runtime_delta = self._calculate_runtime_delta(tag_data, existing_data)
+            runtime_total += runtime_delta
 
         # Update boot count if this is a power-on event
         boot_count = existing_data.get("boot_count", 1)
-        if tag_data.get("wakeupReason") in [1, 252, 254]:  # BOOT, FIRSTBOOT, WDT_RESET
+        if not is_initial_load and wakeup_reason in [1, 252, 254]:  # BOOT, FIRSTBOOT, WDT_RESET
             boot_count += 1
             runtime_total = 0  # Reset runtime on boot
 
         # Update check-in counter
-        checkin_count = existing_data.get("checkin_count", 0) + 1
+        checkin_count = existing_data.get("checkin_count", 0)
+        if not is_initial_load:
+            checkin_count += 1
 
         # Get existing block request count
         block_requests = existing_data.get("block_requests", 0)
@@ -410,19 +493,13 @@ class Hub:
             _LOGGER.debug("Discovered new tag: %s", tag_mac)
             # Fire discovery event before saving
             async_dispatcher_send(self.hass, f"{DOMAIN}_tag_discovered", tag_mac)
-            # Save to storage
-            # await self._store.async_save({
-            #     "tags": self._data
-            # })
-        # Always save data after any update
-        await self._store.async_save({"tags": self._data})
 
         # Fire state update event
         async_dispatcher_send(self.hass, f"{SIGNAL_TAG_UPDATE}_{tag_mac}")
 
-        # Handle wakeup event if needed
+        # Handle wakeup event if needed and not initial load
         wakeup_reason = tag_data.get("wakeupReason")
-        if wakeup_reason is not None:
+        if not is_initial_load and wakeup_reason is not None:
             reason_string = self._get_wakeup_reason_string(wakeup_reason)
 
             should_fire = True
@@ -457,27 +534,172 @@ class Hub:
                         "device_id": device.id,
                         "type": reason_string
                     })
-    async def _handle_log_message(self, log_msg: str) -> None:
-        """Process a log message."""
-        if "block request" in log_msg:
-            # Extract MAC address from block request message
-            # Example: "0000000000123456 block request /current/0000000000123456_452783.pending block 0"
-            parts = log_msg.split()
-            if len(parts) > 0:
-                tag_mac = parts[0].upper()
-                if tag_mac in self._data:
-                    block_requests = self._data[tag_mac].get("block_requests", 0) + 1
-                    self._data[tag_mac]["block_requests"] = block_requests
-                    # Notify of update
-                    async_dispatcher_send(self.hass, f"{SIGNAL_TAG_UPDATE}_{tag_mac}")
-        if "reports xfer complete" in log_msg:
-            # Extract MAC address from block request message
-            parts = log_msg.split()
-            if len(parts) > 0:
-                tag_mac = parts[0].upper()
-                if tag_mac in self._data:
-                    # Notify of update
-                    async_dispatcher_send(self.hass, f"{SIGNAL_TAG_IMAGE_UPDATE}_{tag_mac}", True)
+
+        return is_new_tag
+
+    async def _fetch_all_tags_from_ap(self) -> dict:
+        """Fetch complete list of tags from the AP.
+
+        Returns:
+            A dictionary mapping MAC addresses to their complete tag data
+        """
+        result = {}
+        position = 0
+
+        while True:
+            url = f"http://{self.host}/get_db"
+            if position > 0:
+                url += f"?pos={position}"
+
+            try:
+                response = await self.hass.async_add_executor_job(
+                    lambda: requests.get(url, timeout=10)
+                )
+
+                if response.status_code != 200:
+                    _LOGGER.error("Failed to fetch all tags from AP: %s", response.text)
+                    break
+
+                data = response.json()
+
+                # Add tags to set
+                for tag in data.get("tags", []):
+                    if "mac" in tag:
+                        result[tag["mac"]] = tag
+
+                # Check for pagination
+                if "continu" in data and data["continu"] > 0:
+                    position = data["continu"]
+                else:
+                    break
+
+            except Exception as err:
+                _LOGGER.error("Failed to fetch all tags from AP: %s", str(err))
+                break
+
+        return result
+
+    async def async_load_all_tags(self) -> None:
+        """Load all tags from the AP at startup."""
+        try:
+            _LOGGER.info("Loading existing tags from AP...")
+
+            # Track how many tags we've processed
+            new_tags_count = 0
+            updated_tags_count = 0
+
+            # Get all tag data from AP
+            all_tags = await self._fetch_all_tags_from_ap()
+
+            # Process each tag using our common helper function
+            for tag_mac, tag_data in all_tags.items():
+                # Process tag with the initial load flag set
+                is_new = await self._process_tag_data(tag_mac, tag_data, is_initial_load=True)
+
+                # Update counters
+                if is_new:
+                    new_tags_count += 1
+                else:
+                    updated_tags_count += 1
+
+            # Save to persistent storage
+            await self._store.async_save({"tags": self._data})
+
+            if new_tags_count > 0 or updated_tags_count > 0:
+                _LOGGER.info("Loaded %d new tags and updated %d existing tags from AP",
+                             new_tags_count, updated_tags_count)
+
+        except Exception as err:
+            _LOGGER.error("Failed to load tags from AP: %s", err)
+            raise
+
+    def _track_record_count_changes(self, new_record_count: int) -> None:
+        """Track changes in record count to detect tag deletions."""
+        if self._last_record_count is not None and new_record_count < self._last_record_count:
+            # Record count has decreased, indicating a possible tag deletion
+            _LOGGER.info(f"AP record count decreased from {self._last_record_count} to {new_record_count}. Checking for deleted tags...")
+
+            # Cancel existing cleanup task if any
+            if self._cleanup_task and not self._cleanup_task.done():
+                self._cleanup_task.cancel()
+
+            # Schedule cleanup task to verify and clean up any deleted tags
+            self._cleanup_task = self.hass.async_create_task(
+                self._verify_and_cleanup_tags(),
+                f"{DOMAIN}_tag_verification"
+            )
+
+        # Update the last known record count
+        self._last_record_count = new_record_count
+
+    async def _verify_and_cleanup_tags(self) -> None:
+        """Verify which tags exist on the AP and clean up deleted tags."""
+        try:
+            # Get current tags from AP
+            ap_tags = await self._fetch_all_tags_from_ap()
+
+            # Map tags to mac addresses
+            ap_macs = set(ap_tags.keys())
+
+            ap_macs_upper = {mac.upper() for mac in ap_macs}
+            known_macs_upper = {mac.upper() for mac in self._known_tags}
+
+            # Find locally known tags that are missing from the AP
+            deleted_tags = known_macs_upper - ap_macs_upper
+
+            if deleted_tags:
+                _LOGGER.info(f"Detected {len(deleted_tags)} deleted tags from AP: {deleted_tags}")
+
+                # Map back to original case if needed
+                for tag_mac in list(self._known_tags):  # Create a copy for safe iteration
+                    if tag_mac.upper() in deleted_tags:
+                        await self._remove_tag(tag_mac)
+
+        except Exception as err:
+            _LOGGER.error(f"Error while verifying AP tags: {err}")
+
+    async def _remove_tag(self, tag_mac: str) -> None:
+        """Remove a tag from HA."""
+        _LOGGER.info(f"Removing tag {tag_mac} as it no longer exists on the AP")
+
+        # Remove from known tags and data
+        if tag_mac in self._known_tags:
+            self._known_tags.remove(tag_mac)
+            self._data.pop(tag_mac, None)
+
+            # Notify that this tag has been removed
+            async_dispatcher_send(self.hass, f"{SIGNAL_TAG_UPDATE}_{tag_mac}")
+
+            # Remove related devices and entities
+            device_registry = dr.async_get(self.hass)
+            entity_registry = er.async_get(self.hass)
+
+            # Find and remove entities for this tag
+            entities_to_remove = []
+            devices_to_remove = set()
+
+            for entity in entity_registry.entities.values():
+                if entity.config_entry_id == self.entry.entry_id:
+                    device = device_registry.async_get(entity.device_id) if entity.device_id else None
+                    if device:
+                        for identifier in device.identifiers:
+                            if identifier[0] == DOMAIN and identifier[1] == tag_mac:
+                                entities_to_remove.append(entity.entity_id)
+                                devices_to_remove.add(device.id)
+                                break
+
+            # Remove entities
+            for entity_id in entities_to_remove:
+                entity_registry.async_remove(entity_id)
+                _LOGGER.debug(f"Removed entity {entity_id} for deleted tag {tag_mac}")
+
+            # Remove devices
+            for device_id in devices_to_remove:
+                device_registry.async_remove_device(device_id)
+                _LOGGER.debug(f"Removed device {device_id} for deleted tag {tag_mac}")
+
+            # Update storage
+            await self._store.async_save({"tags": self._data})
 
     async def async_reload_blacklist(self):
         """Reload blacklist from config entry."""

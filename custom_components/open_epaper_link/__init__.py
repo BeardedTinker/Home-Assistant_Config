@@ -79,9 +79,9 @@ async def async_remove_storage_files(hass: HomeAssistant) -> None:
 
     # Remove tag types file
     tag_types_file = hass.config.path("open_epaper_link_tagtypes.json")
-    if os.path.exists(tag_types_file):
+    if await hass.async_add_executor_job(os.path.exists, tag_types_file):
         try:
-            os.remove(tag_types_file)
+            await hass.async_add_executor_job(os.remove, tag_types_file)
             _LOGGER.debug("Removed tag types file")
         except OSError as err:
             _LOGGER.error("Error removing tag types file: %s", err)
@@ -89,20 +89,27 @@ async def async_remove_storage_files(hass: HomeAssistant) -> None:
     # Remove tag storage file
     storage_dir = hass.config.path(".storage")
     tags_file = os.path.join(storage_dir, f"{DOMAIN}_tags")
-    if os.path.exists(tags_file):
+    if await hass.async_add_executor_job(os.path.exists, tags_file):
         try:
-            os.remove(tags_file)
+            await hass.async_add_executor_job(os.remove, tags_file)
             _LOGGER.debug("Removed tag storage file")
         except OSError as err:
             _LOGGER.error("Error removing tag storage file: %s", err)
 
     # Remove image directory
     image_dir = hass.config.path("www/open_epaper_link")
-    if os.path.exists(image_dir):
+    if await hass.async_add_executor_job(os.path.exists, image_dir):
         try:
-            for file in os.listdir(image_dir):
-                os.remove(os.path.join(image_dir, file))
-            os.rmdir(image_dir)
+            # Get file list in executor
+            files = await hass.async_add_executor_job(os.listdir, image_dir)
+
+            # Remove each file in executor
+            for file in files:
+                file_path = os.path.join(image_dir, file)
+                await hass.async_add_executor_job(os.remove, file_path)
+
+            # Remove directory in executor
+            await hass.async_add_executor_job(os.rmdir, image_dir)
             _LOGGER.debug("Removed image directory")
         except OSError as err:
             _LOGGER.error("Error removing image directory: %s", err)

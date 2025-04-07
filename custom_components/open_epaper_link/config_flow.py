@@ -15,7 +15,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.selector import Selector
+from homeassistant.helpers.selector import Selector, TextSelectorType
 
 from .const import DOMAIN
 import logging
@@ -143,6 +143,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._blacklisted_tags = self.config_entry.options.get("blacklisted_tags", [])
         self._button_debounce = self.config_entry.options.get("button_debounce", 0.5)
         self._nfc_debounce = self.config_entry.options.get("nfc_debounce", 1.0)
+        self._custom_font_dirs = self.config_entry.options.get("custom_font_dirs", "")
 
     async def async_step_init(self, user_input=None):
         """Manage blacklisted tags."""
@@ -154,6 +155,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "blacklisted_tags": user_input.get("blacklisted_tags", []),
                     "button_debounce": user_input.get("button_debounce", 0.5),
                     "nfc_debounce": user_input.get("nfc_debounce", 1.0),
+                    "custom_font_dirs": user_input.get("custom_font_dirs", ""),
                 }
             )
 
@@ -205,6 +207,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         step=0.1,
                         unit_of_measurement="s",
                         mode=selector.NumberSelectorMode.SLIDER
+                    )
+                ),
+                vol.Optional(
+                    "custom_font_dirs",
+                    default=self._custom_font_dirs,
+                    description={
+                        "suggested_value": None
+                    }
+                ): selector.TextSelector(
+                    selector.TextSelectorConfig(
+                        type=TextSelectorType.TEXT,
+                        autocomplete="path"
                     )
                 ),
             }),

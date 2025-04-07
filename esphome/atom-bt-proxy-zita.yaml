@@ -2,7 +2,7 @@ substitutions:
   name: "atom-bt-proxy-zita"
   friendly_name: Bluetooth Proxy Zita
 packages:
-  esphome.bluetooth-proxy: github://esphome/firmware/bluetooth-proxy/esp32-generic.yaml@main
+  esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/m5stack/m5stack-atom-lite.yaml@main
 esphome:
   name: ${name}
   name_add_mac_suffix: false

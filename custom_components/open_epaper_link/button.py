@@ -39,6 +39,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             ForceRefreshButton(hass, tag_mac, hub),
             RebootTagButton(hass, tag_mac, hub),
             ScanChannelsButton(hass, tag_mac, hub),
+            DeepSleepButton(hass, tag_mac, hub),
         ]
         async_add_entities(new_buttons)
 
@@ -226,6 +227,37 @@ class ScanChannelsButton(ButtonEntity):
 
     async def async_press(self) -> None:
         await send_tag_cmd(self.hass, self._entity_id, "scan")
+
+class DeepSleepButton(ButtonEntity):
+    def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
+        """Initialize the button."""
+        self.hass = hass
+        self._tag_mac = tag_mac
+        self._entity_id = f"{DOMAIN}.{tag_mac}"
+        self._hub = hub
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "deep_sleep"
+        # self._attr_name = f"{hub._data[tag_mac]['tag_name']} Scan Channels"
+        self._attr_unique_id = f"{tag_mac}_deep_sleep"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_icon = "mdi:sleep"
+
+    @property
+    def device_info(self):
+        """Return device info."""
+        tag_name = self._hub._data[self._tag_mac]['tag_name']
+        return {
+            "identifiers": {(DOMAIN, self._tag_mac)},
+            "name": tag_name,
+        }
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self._tag_mac not in self._hub.get_blacklisted_tags()
+
+    async def async_press(self) -> None:
+        await send_tag_cmd(self.hass, self._entity_id, "deepsleep")
 
 class RebootAPButton(ButtonEntity):
     def __init__(self, hass: HomeAssistant, hub) -> None:

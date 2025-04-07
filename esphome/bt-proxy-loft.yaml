@@ -1,0 +1,17 @@
+substitutions:
+  name: bt-proxy-loft
+  friendly_name: BT Proxy Loft
+packages:
+  esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/m5stack/m5stack-atom-lite.yaml@main
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+  encryption:
+    key: I/+xRB2TTXs6YK4AiGaDI+CTXcmfvOOhFF+Fre14NUA=
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

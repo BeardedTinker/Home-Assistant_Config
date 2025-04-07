@@ -1,0 +1,17 @@
+substitutions:
+  name: m5stack-atom-lite-088eb0
+  friendly_name: Bluetooth Proxy 088eb0
+packages:
+  esphome.bluetooth-proxy: github://esphome/bluetooth-proxies/m5stack/m5stack-atom-lite.yaml@main
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+  encryption:
+    key: TKen0Mpr21bBfVZgBasWVVtvsj1bNvOL4JzUbGvxw68=
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

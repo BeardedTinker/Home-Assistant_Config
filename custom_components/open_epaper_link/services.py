@@ -235,12 +235,15 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         _LOGGER.debug("Upload parameters: dither=%d, ttl=%d, preload_type=%d, preload_lut=%d",
                       dither, ttl, preload_type, preload_lut)
 
+        # Convert TTL fom seconds to minutes for the AP
+        ttl_minutes = max(1, ttl // 60)
+
         # Prepare multipart form data
         fields = {
             'mac': mac,
             'contentmode': "25",
             'dither': str(dither),
-            'ttl': str(ttl),
+            'ttl': str(ttl_minutes),
             'image': ('image.jpg', img, 'image/jpeg'),
         }
 

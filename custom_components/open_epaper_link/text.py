@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from homeassistant.components.text import TextEntity
+import requests
+
+from homeassistant.components.text import TextEntity, TextMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -15,7 +17,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 # Define text field configurations
-TEXT_ENTITIES = [
+AP_TEXT_ENTITIES = [
     {
         "key": "alias",
         "name": "Alias",
@@ -27,6 +29,14 @@ TEXT_ENTITIES = [
         "name": "Repository",
         "icon": "mdi:source-repository",
         "description": "GitHub repository for tag type definitions"
+    }
+]
+TAG_TEXT_ENTITIES = [
+    {
+        "key": "alias",
+        "name": "Alias",
+        "icon": "mdi:rename-box",
+        "description": "Tag display name"
     }
 ]
 
@@ -104,6 +114,89 @@ class APConfigText(TextEntity):
                 self._handle_connection_status,
             )
         )
+class TagNameText(TextEntity):
+    """Text entity for tag name/alias."""
+
+    def __init__(self, hub, tag_mac: str) -> None:
+        """Initialize the text entity."""
+        self._hub = hub
+        self._tag_mac = tag_mac
+        self._attr_unique_id = f"{tag_mac}_alias"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "tag_alias"
+        self._attr_native_min = 0
+        self._attr_mode = TextMode.TEXT
+        self._attr_icon = "mdi:rename"
+
+    @property
+    def device_info(self):
+        """Return device info."""
+        tag_data = self._hub.get_tag_data(self._tag_mac)
+        return {
+            "identifiers": {(DOMAIN, self._tag_mac)},
+            "name": tag_data.get("tag_name", self._tag_mac),
+        }
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return (
+                self._hub.online and
+                self._tag_mac in self._hub.tags and
+                self._tag_mac not in self._hub.get_blacklisted_tags()
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the current value."""
+        if not self.available:
+            return None
+        tag_data = self._hub.get_tag_data(self._tag_mac)
+        return tag_data.get("tag_name", "")
+
+    async def async_set_value(self, value: str) -> None:
+        """Set the text value."""
+        if not value:
+            value = self._tag_mac
+
+        if value != self.native_value:
+            url = f"http://{self._hub.host}/save_cfg"
+            data = {
+                'mac': self._tag_mac,
+                'alias': value
+            }
+            try:
+                result = await self.hass.async_add_executor_job(
+                    lambda: requests.post(url, data=data)
+                )
+                if result.status_code != 200:
+                    _LOGGER.error(
+                        "Failed to update tag name %s: HTTP %s",
+                        self._tag_mac,
+                        result.status_code
+                    )
+            except Exception as err:
+                _LOGGER.error(
+                    "Error updating tag name for %s: %s",
+                    self._tag_mac,
+                    str(err)
+                )
+
+    @callback
+    def _handle_tag_update(self):
+        """Handle tag updates."""
+        self.async_write_ha_state()
+
+    async def async_added_to_hass(self):
+        """Register callbacks."""
+        # Listen for tag updates
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                f"{DOMAIN}_tag_update_{self._tag_mac}",
+                self._handle_tag_update,
+            )
+        )
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up text entities for AP configuration."""
@@ -115,8 +208,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     entities = []
 
-    # Create text entities from configuration
-    for config in TEXT_ENTITIES:
+    # Create AP text entities from configuration
+    for config in AP_TEXT_ENTITIES:
         entities.append(
             APConfigText(
                 hub,
@@ -127,4 +220,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             )
         )
 
+    # Add tag name/alias text entities
+    for tag_mac in hub.tags:
+        if tag_mac not in hub.get_blacklisted_tags():
+            entities.append(TagNameText(hub, tag_mac))
+
     async_add_entities(entities)
+
+    # Set up callback for new tag discovery
+    async def async_add_tag_text(tag_mac: str) -> None:
+        """Add text entities for a newly discovered tag."""
+        if tag_mac not in hub.get_blacklisted_tags():
+            async_add_entities([TagNameText(hub, tag_mac)])
+
+    entry.async_on_unload(
+        async_dispatcher_connect(
+            hass,
+            f"{DOMAIN}_tag_discovered",
+            async_add_tag_text
+        )
+    )

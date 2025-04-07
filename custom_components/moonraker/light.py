@@ -1,10 +1,13 @@
 """Light platform for Moonraker integration."""
+
 import logging
 from dataclasses import dataclass
 
-from homeassistant.components.light import (LightEntity,
-                                            LightEntityDescription,
-                                            ColorMode)
+from homeassistant.components.light import (
+    LightEntity,
+    LightEntityDescription,
+    ColorMode,
+)
 from homeassistant.core import callback
 from homeassistant.util import color
 
@@ -41,7 +44,8 @@ async def async_setup_light(coordinator, entry, async_add_entities):
 
     lights = []
     for obj in object_list["objects"]:
-        if (not obj.startswith("led ")
+        if (
+            not obj.startswith("led ")
             and not obj.startswith("neopixel ")
             and not obj.startswith("dotstar ")
             and not obj.startswith("pca9533 ")
@@ -77,22 +81,19 @@ async def async_setup_light(coordinator, entry, async_add_entities):
         elif led_type == "pca9533":
             color_mode = ColorMode.RGBW
 
-
         desc = MoonrakerLightSensorDescription(
             key=obj,
             sensor_name=obj,
             name=obj.replace("_", " ").title(),
             icon="mdi:led-variant-on",
             subscriptions=[(obj, "color_data")],
-            color_mode=color_mode
+            color_mode=color_mode,
         )
         lights.append(desc)
 
     coordinator.load_sensor_data(lights)
     await coordinator.async_refresh()
-    async_add_entities(
-        [MoonrakerLED(coordinator, entry, desc) for desc in lights]
-    )
+    async_add_entities([MoonrakerLED(coordinator, entry, desc) for desc in lights])
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -131,15 +132,35 @@ class MoonrakerLED(BaseMoonrakerEntity, LightEntity):
         if rgb_color:
             await self._set_rgbw(*rgb_color, 0)
         else:
-            if brightness is None:
+            if brightness is None or not self._attr_is_on:
                 brightness = 255
-            await self._set_rgbw(brightness, brightness, brightness, brightness)
+                self._attr_is_on = True
+                await self._set_rgbw(brightness, brightness, brightness, brightness)
+            elif self._attr_is_on:
+                color_data = self.coordinator.data["status"][self.sensor_name][
+                    "color_data"
+                ][0]
+                multiplier = brightness / (
+                    max(color_data[0], color_data[1], color_data[2], color_data[3])
+                    * 255
+                )
+                await self._set_rgbw(
+                    (color_data[0] * 255 * multiplier),
+                    (color_data[1] * 255 * multiplier),
+                    (color_data[2] * 255 * multiplier),
+                    (color_data[3] * 255 * multiplier),
+                )
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn off the light."""
+        self._attr_is_on = False
         await self._set_rgbw(0, 0, 0, 0)
 
     async def _set_rgbw(self, r: int, g: int, b: int, w: int) -> None:
+        """Update HA attributes."""
+        self._attr_rgb_color = (r, g, b)
+        self._attr_rgbw_color = (r, g, b, w)
+        self._attr_brightness = max(r, g, b, w)
         """Set native Value."""
         f_r = round(color.brightness_to_value((1, 100), r) / 100, 2)
         f_g = round(color.brightness_to_value((1, 100), g) / 100, 2)
@@ -147,22 +168,36 @@ class MoonrakerLED(BaseMoonrakerEntity, LightEntity):
         f_w = round(color.brightness_to_value((1, 100), w) / 100, 2)
         await self.coordinator.async_send_data(
             METHODS.PRINTER_GCODE_SCRIPT,
-            {"script": f"SET_LED LED=\"{self.led_name}\" RED={f_r} GREEN={f_g} BLUE={f_b} WHITE={f_w} SYNC=0 TRANSMIT=1"},
+            {
+                "script": f'SET_LED LED="{self.led_name}" RED={f_r} GREEN={f_g} BLUE={f_b} WHITE={f_w} SYNC=0 TRANSMIT=1'
+            },
         )
         self._attr_rgbw_color = (r, g, b, w)
         self.async_write_ha_state()
 
     def _set_attributes_from_coordinator(self) -> None:
         color_data = self.coordinator.data["status"][self.sensor_name]["color_data"][0]
-        r = color.value_to_brightness((1, 100), color_data[0] * 100)
-        g = color.value_to_brightness((1, 100), color_data[1] * 100)
-        b = color.value_to_brightness((1, 100), color_data[2] * 100)
-        w = color.value_to_brightness((1, 100), color_data[3] * 100)
+        if color_data[0] != 0:
+            r = color.value_to_brightness((1, 100), color_data[0] * 100)
+        else:
+            r = 0
+        if color_data[1] != 0:
+            g = color.value_to_brightness((1, 100), color_data[1] * 100)
+        else:
+            g = 0
+        if color_data[2] != 0:
+            b = color.value_to_brightness((1, 100), color_data[2] * 100)
+        else:
+            b = 0
+        if color_data[3] != 0:
+            w = color.value_to_brightness((1, 100), color_data[3] * 100)
+        else:
+            w = 0
         self._set_attributes(r, g, b, w)
 
     def _set_attributes(self, r: int, g: int, b: int, w: int) -> None:
         self._attr_is_on = r > 0 or g > 0 or b > 0 or w > 0
-        self._attr_brightness = w
+        self._attr_brightness = max(r, g, b, w)
         self._attr_rgb_color = (r, g, b)
         self._attr_rgbw_color = (r, g, b, w)
 

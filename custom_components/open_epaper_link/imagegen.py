@@ -188,6 +188,245 @@ class TextSegment:
     color: str
     start_x: int = 0
 
+class FontManager:
+    """Class for managing font loading, caching and path resolution."""
+    def __init__(self, hass: HomeAssistant, entry=None):
+        """Initialize the font manager.
+
+        Args:
+            hass: Home Assistant instance for config path resolution
+            entry: Config entry for accessing user-configured font directories
+        """
+        self._hass = hass
+        self._entry = entry
+        self._font_cache: Dict[Tuple[str, int], ImageFont.FreeTypeFont] = {}
+        self._known_dirs = []
+
+        # Standsrd font directories to search
+        self._font_dirs = []
+        self._setup_font_dirs()
+
+        # Default font names
+        self._default_fonts = ["ppb.ttf", "rbm.ttf"]
+
+        # Load initial custom font directories if entry is provided
+        if entry:
+            self._load_custom_font_dirs()
+
+    def _setup_font_dirs(self):
+        """Set up font directories based on the Home Assistant environment.
+
+        Follows the documented search order:
+        1. Integration directory (for default fonts)
+        2. Web directory (/config/www/fonts/)
+        3. Media directory (/media/fonts/)
+        """
+        # Clear existing dirs
+        self._font_dirs = []
+
+        # Integration directory
+        self._font_dirs.append(os.path.dirname(__file__))
+
+        # Web directory
+        www_fonts_dir = self._hass.config.path("www/fonts")
+        if os.path.exists(www_fonts_dir):
+            self._font_dirs.append(www_fonts_dir)
+            _LOGGER.debug(f"Found {www_fonts_dir} in Home Assistant")
+
+        # Try to locate the media directory based on installation type
+        # Home Assistant OS/Supervised installations use /media
+        # Core/Container installations typically use /config/media
+        media_paths = [
+            self._hass.config.path("media/fonts"),      # /config/media/fonts (Core/Container)
+            "/media/fonts",                             # /media/fonts (OS/Supervised)
+        ]
+
+        # Add media paths
+        for path in media_paths:
+            if os.path.exists(path):
+                if path not in self._font_dirs:
+                    self._font_dirs.append(path)
+                    _LOGGER.debug(f"Found {path} in Home Assistant")
+
+
+
+    def get_font(self, font_name: str, size: int) -> ImageFont.FreeTypeFont:
+        """Get a font, loading it if necessary.
+
+        Args:
+            font_name: Font filename or absolute path
+            size: Font size in pixels
+
+        Returns:
+            Loaded font object
+        """
+        # Check if config has changed since last load
+        if self._entry:
+            custom_dirs_str = self._entry.options.get("custom_font_dirs", "")
+            current_dirs = [d.strip() for d in custom_dirs_str.split(";") if d.strip()]
+            if current_dirs != self._known_dirs:
+                _LOGGER.debug("Font directories changed, updating...")
+
+                # Clear current cache
+                self.clear_cache()
+
+                # Reset known dirs and load new ones
+                self._font_dirs = [
+                    os.path.dirname(__file__),              # Integration directory
+                    self._hass.config.path("www/fonts"),    # /config/www/fonts directory
+                    self._hass.config.path("media/fonts")   # /config/media/fonts directory
+                ]
+                for directory in current_dirs:
+                    if directory and directory.strip():
+                        self.add_font_directory(directory.strip())
+
+                # Update known dirs
+                self._known_dirs = current_dirs
+
+        # Create cache key (font name, size)
+        cache_key = (font_name, size)
+
+        # Return cached font if available
+        if cache_key in self._font_cache:
+            return self._font_cache[cache_key]
+
+        # Load font from file
+        font = self._load_font(font_name, size)
+
+        # Cache font
+        self._font_cache[cache_key] = font
+        return font
+
+    def get_available_fonts(self) -> List[str]:
+        """Get list of available font names from all directories.
+
+        Returns:
+            List of font filenames
+        """
+        fonts = set()
+
+        # Scan all directories
+        for directory in self._font_dirs:
+            if not os.path.exists(directory):
+                continue
+
+            try:
+                # Get all TTF files in the directory
+                for file in os.listdir(directory):
+                    if file.lower().endswith(('.ttf', '.otf')):
+                        fonts.add(file)
+            except (OSError, IOError) as err:
+                _LOGGER.warning("Error scanning font directory %s: %s", directory, err)
+
+        return sorted(list(fonts))
+
+    def _load_font(self, font_name: str, size: int) -> ImageFont.FreeTypeFont:
+        """Load a font from disk.
+
+        Args:
+            font_name: Font filename or absolute path
+            size: Font size in pixels
+
+        Returns:
+            Loaded font object
+        """
+        # If font name is an absolute path, load directly
+        if os.path.isabs(font_name):
+            try:
+                return ImageFont.truetype(font_name, size)
+            except (OSError, IOError) as err:
+                _LOGGER.warning(
+                    "Could not load font from absolute path %s: %s. "
+                    "Will try standard font locations.",
+                    font_name, err
+                )
+
+        for font_dir in self._font_dirs:
+            try:
+                if not os.path.exists(font_dir):
+                    continue
+
+                font_path = os.path.join(font_dir, font_name)
+                if not os.path.exists(font_path):
+                    continue
+
+                return ImageFont.truetype(font_path, size)
+            except (OSError, IOError) as err:
+                continue
+
+        # Font was not found in any standard location
+        _LOGGER.warning(
+            "Font '%s' not found in any of the standard locations. "
+            "Place fonts in /config/www/fonts/ or /config/media/fonts/ or provide absolute path. "
+            "Falling back to default font.",
+            font_name
+        )
+
+        # Try default fonts as fallback
+        for default_font in self._default_fonts:
+            try:
+                default_path = os.path.join(os.path.dirname(__file__), default_font)
+                return ImageFont.truetype(default_path, size)
+            except (OSError, IOError) as err:
+                continue
+
+        _LOGGER.error(
+            "Could not load any font, even defaults. "
+            "This indicates a problem with the integration installation."
+        )
+        raise HomeAssistantError("Could not load any font")
+
+
+
+    def _load_custom_font_dirs(self) -> None:
+        """Load custom font directories from config entry."""
+        if not self._entry:
+            return
+
+        # Get custom font directory from config
+        custom_dirs_str = self._entry.options.get("custom_font_dirs", "")
+        custom_dirs = [d.strip() for d in custom_dirs_str.split(";") if d.strip()]
+
+        # Save current dirs for comparison
+        self._known_dirs = custom_dirs
+
+        # Add each directory
+        for directory in custom_dirs:
+            if directory and directory.strip():
+                self.add_font_directory(directory.strip())
+
+    def add_font_directory(self, directory: str) -> bool:
+        """Add a custom font directory to search.
+
+        Args:
+            directory: Absolute path to directory containing fonts
+
+        Returns:
+            True if directory was added, False otherwise
+        """
+        if not os.path.isabs(directory):
+            _LOGGER.warning(
+                "Custom font directory '%s' is not an absolute path, skipping", directory
+            )
+            return False
+
+        if not os.path.isdir(directory):
+            _LOGGER.warning(
+                "Custom font directory '%s' does not exist, skipping", directory
+            )
+            return False
+
+        if directory not in self._font_dirs:
+            self._font_dirs.insert(0, directory)
+            return True
+
+        return False
+
+    def clear_cache(self) -> None:
+        """Clear the font cache."""
+        self._font_cache.clear()
+
+
 class ImageGen:
     """Handles custom image generation for ESLs."""
 
@@ -198,6 +437,15 @@ class ImageGen:
         self._running = False
         self._not_setup = True
         self._last_interaction_file = os.path.join(os.path.dirname(__file__), "lastapinteraction.txt")
+
+        # Load font manager
+        self._entry = None
+        if DOMAIN in hass.data and hass.data[DOMAIN]:
+            entry_id = list(hass.data[DOMAIN].keys())[0]
+            self._entry = hass.data[DOMAIN][entry_id].entry
+
+        self._font_manager = FontManager(self.hass, self._entry)
+
         # Initialize handler mapping
         self._draw_handlers = {
             ElementType.TEXT: self._draw_text,
@@ -438,8 +686,7 @@ class ImageGen:
         # Get text properties
         size = coords.parse_size(element.get('size', 20), is_width=False)
         font_name = element.get('font', "ppb.ttf")
-        font_path = os.path.join(os.path.dirname(__file__), font_name)
-        font = ImageFont.truetype(font_path, size)
+        font = self._font_manager.get_font(font_name, size)
 
         # Get alignment and default color
         align = element.get('align', "left")
@@ -552,7 +799,7 @@ class ImageGen:
 
         segments = []
         current_pos = 0
-        pattern = r'\[(black|white|red|yellow|accent)\](.*?)\[/\1\]'
+        pattern = r'\[(black|white|red|yellow|accent|half_black|half_red|half_yellow|half_accent|gray|grey|g|hb|hr|hy|ha)\](.*?)\[/\1\]'
 
         for match in re.finditer(pattern, text):
             # Add any text before the match with default color
@@ -625,9 +872,9 @@ class ImageGen:
         # Get text properties
         size = element.get('size', 20)
         font_name = element.get('font', "ppb.ttf")
-        font_path = os.path.join(os.path.dirname(__file__), font_name)
-        font = ImageFont.truetype(font_path, size)
+        font = self._font_manager.get_font(font_name, size)
         color = self.get_index_color(element.get('color', "black"))
+        align = element.get('align', "left")
         anchor = element.get('anchor', "lm")
         stroke_width = element.get('stroke_width', 0)
         stroke_fill = self.get_index_color(element.get('stroke_fill', 'white'))
@@ -638,15 +885,46 @@ class ImageGen:
 
         max_y = current_y
         for line in lines:
-            draw.text(
-                (element['x'], current_y),
-                str(line),
-                fill=color,
-                font=font,
-                anchor=anchor,
-                stroke_width=stroke_width,
-                stroke_fill=stroke_fill
-            )
+            if element.get('parse_colors', False):
+                segments = self._parse_colored_text(str(line))
+                segments, total_width = self._calculate_segment_positions(
+                    segments, font, element["x"], align
+                )
+
+                for segment in segments:
+                    color = self.get_index_color(segment.color, element.get('accent_color', 'red'))
+                    bbox = draw.textbbox(
+                        (segment.start_x, current_y),
+                        segment.text,
+                        font=font,
+                        anchor=anchor
+                    )
+                    draw.text(
+                        (segment.start_x, current_y),
+                        segment.text,
+                        fill=color,
+                        font=font,
+                        anchor=anchor,
+                        stroke_width=stroke_width,
+                        stroke_fill=stroke_fill
+                    )
+            else:
+                bbox = draw.textbbox(
+                    (element['x'], current_y),
+                    str(line),
+                    font=font,
+                    anchor=anchor,
+                    align=align
+                )
+                draw.text(
+                    (element['x'], current_y),
+                    str(line),
+                    fill=color,
+                    font=font,
+                    anchor=anchor,
+                    stroke_width=stroke_width,
+                    stroke_fill=stroke_fill
+                )
             current_y += element['offset_y']
             max_y = current_y
 
@@ -1357,37 +1635,10 @@ class ImageGen:
             end = dt.utcnow()
             start = end - duration
 
-            # Set up fonts
-            size = element.get("size", 10)
-            font_file = element.get("font", "ppb.ttf")
-            font_path = os.path.join(os.path.dirname(__file__), font_file)
-            font = ImageFont.truetype(font_path, size)
+            # Set up font
+            font_name = element.get("font", "ppb.ttf")
 
-            # Configure legend
-            ylegend = element.get("ylegend", {})
-            ylegend_width = ylegend.get("width", -1) if ylegend else 0
-            if ylegend:
-                ylegend_color = self.get_index_color(ylegend.get("color", "black"))
-                ylegend_pos = ylegend.get("position", "left")
-                if ylegend_pos not in ("left", "right", None):
-                    ylegend_pos = "left"
-
-                ylegend_font = font
-                if ylegend.get("font") != font_file or ylegend.get("size") != size:
-                    ylegend_path = os.path.join(os.path.dirname(__file__), ylegend.get("font", font_file))
-                    ylegend_font = ImageFont.truetype(ylegend_path, ylegend.get("size", size))
-
-            # Configure axis
-            yaxis = element.get("yaxis", {})
-            if yaxis:
-                yaxis_width = yaxis.get("width", 1)
-                yaxis_color = self.get_index_color(yaxis.get("color", "black"))
-                yaxis_tick_width = yaxis.get("tick_width", 2)
-                yaxis_tick_every = float(yaxis.get("tick_every", 1))
-                yaxis_grid = yaxis.get("grid", 5)
-                yaxis_grid_color = self.get_index_color(yaxis.get("grid_color", "black"))
-
-            # Get min/max values
+            # Get min/max values from config
             min_v = element.get("low")
             max_v = element.get("high")
 
@@ -1416,9 +1667,10 @@ class ImageGen:
 
                 # Convert states to points
                 points = []
+                value_scale = plot.get("value_scale", 1.0)
                 for state in states:
                     try:
-                        value = float(state["state"])
+                        value = float(state["state"]) * value_scale
                         timestamp = datetime.fromisoformat(state["last_changed"])
                         points.append((timestamp, value))
                     except (ValueError, TypeError):
@@ -1444,25 +1696,115 @@ class ImageGen:
             if not raw_data:
                 raise HomeAssistantError("No valid data points found")
 
-            # Adjust min/max
-            max_v = math.ceil(max_v)
-            min_v = math.floor(min_v)
+            # Apply rounding if requested
+            if element.get("round_values", False):
+                max_v = math.ceil(max_v)
+                min_v = math.floor(min_v)
             if max_v == min_v:
                 min_v -= 1
             spread = max_v - min_v
 
-            # Calculate legend width
-            if ylegend_width == -1:
-                ylegend_width = math.ceil(max(
-                    draw.textlength(str(max_v), font=ylegend_font),
-                    draw.textlength(str(min_v), font=ylegend_font)
-                ))
+            # Configure y legend
+            y_legend = element.get("ylegend", {})
+            y_legend_width = -1
+            y_legend_pos = None
+            y_legend_color = None
+            y_legend_size = None
+            y_legend_font = None
+
+            if y_legend:
+                y_legend_width = y_legend.get("width", -1)
+                y_legend_color = self.get_index_color(y_legend.get("color", "black"))
+                y_legend_pos = y_legend.get("position", "left")
+                if y_legend_pos not in ("left", "right", None):
+                    y_legend_pos = "left"
+                y_legend_size = y_legend.get("size", 10)
+
+            # Calculate y legend width if auto width is requested
+            if y_legend and y_legend_width == -1:
+                y_legend_font = self._font_manager.get_font(font_name, y_legend_size)
+                max_bbox = y_legend_font.getbbox(str(max_v))
+                min_bbox = y_legend_font.getbbox(str(min_v))
+                max_width = max_bbox[2] - max_bbox[0]
+                min_width = min_bbox[2] - min_bbox[0]
+                y_legend_width = math.ceil(max(max_width, min_width) )  # Add padding
+
+            # Configure y axis
+            y_axis = element.get("yaxis")
+            y_axis_width = -1
+            y_axis_color = None
+            y_axis_tick_length = 0
+            y_axis_tick_width = 1
+            y_axis_tick_every = 0
+            y_axis_grid = None
+            y_axis_grid_color = None
+            y_axis_grid_style = None
+
+            if y_axis:
+                y_axis_width = y_axis.get("width", 1)
+                y_axis_color = self.get_index_color(y_axis.get("color", "black"))
+                y_axis_tick_length = y_axis.get("tick_length", 4)
+                y_axis_tick_width = y_axis.get("tick_width", 2)
+                y_axis_tick_every = float(y_axis.get("tick_every", 1))
+                y_axis_grid = y_axis.get("grid", True)
+                y_axis_grid_color = self.get_index_color(y_axis.get("grid_color", "black"))
+                y_axis_grid_style = y_axis.get("grid_style", "dotted")
+
+            # Configure x legend
+            x_legend = element.get("xlegend", {})
+            time_format = "%H:%M"
+            time_interval = duration.total_seconds() / 4  # Default to 4 labels
+            time_font = None
+            time_color = None
+            time_position = None
+            x_legend_height = None
+
+            if x_legend:
+                time_format = x_legend.get("format", "%H:%M")
+                time_interval = x_legend.get("interval", time_interval)
+                time_size = x_legend.get("size", 10)
+                time_font = self._font_manager.get_font(font_name, time_size)
+                time_color = self.get_index_color(x_legend.get("color", "black"))
+                time_position = x_legend.get("position", "bottom")
+                x_legend_height = x_legend.get("height", -1)
+                if time_position not in ("top", "bottom", None):
+                    time_position = "bottom"
+
+            # Configure x axis
+            x_axis = element.get("xaxis", {})
+            x_axis_width = 1
+            x_axis_color = None
+            x_axis_tick_length = 0
+            x_axis_tick_width = 0
+            x_axis_grid = None
+            x_axis_grid_color = None
+            x_axis_grid_style = None
+
+            if x_axis:
+                x_axis_width = x_axis.get("width", 1)
+                x_axis_color = self.get_index_color(x_axis.get("color", "black"))
+                x_axis_tick_length = x_axis.get("tick_length", 4)
+                x_axis_tick_width = x_axis.get("tick_width", 2)
+                x_axis_grid = x_axis.get("grid", True)
+                x_axis_grid_color = self.get_index_color(x_axis.get("grid_color", "black"))
+                x_axis_grid_style = x_axis.get("grid_style", "dotted")
+
+            x_label_height = 0
+            if x_legend:
+                if x_legend_height == 0:
+                    x_label_height = 0
+                else:
+                    if x_legend_height > 0:
+                        x_label_height = x_legend_height
+                    else:
+                        x_label_height = time_font.getbbox("00:00")[3]
+                        x_label_height += x_axis_tick_width + 2
 
             # Calculate effective diagram dimensions
-            diag_x = x_start + (ylegend_width if ylegend_pos == "left" else 0)
-            diag_y = y_start
-            diag_width = width - ylegend_width
-            diag_height = height
+            diag_x = x_start + (y_legend_width if y_legend_pos == "left" else 0)
+            diag_y = y_start + (x_label_height if time_position == "top" and x_legend_height != 0 else 0)
+            diag_width = width - (y_legend_width if y_legend_pos == "left" or y_legend_pos == "right" else 0)
+            diag_height = height - x_label_height
 
             # Draw debug borders if requested
             if element.get("debug", False):
@@ -1478,21 +1820,314 @@ class ImageGen:
                     outline=self.get_index_color("red"),
                     width=1
                 )
+            # Draw y legend
+            if y_legend:
 
-            # Draw grid
-            if yaxis and yaxis_grid is not None:
-                grid_points = []
-                curr = min_v
-                while curr <= max_v:
-                    curr_y = round(diag_y + (1 - ((curr - min_v) / spread)) * (diag_height - 1))
-                    grid_points.extend(
-                        (x, curr_y)
-                        for x in range(diag_x, diag_x + diag_width, yaxis_grid)
+                top_y = y_start
+                bottom_y = y_end - x_label_height
+                if time_position == "top" and x_legend_height != 0:
+                    top_y += x_label_height
+                    bottom_y += x_label_height
+
+                # Draw labels for each grid line
+                if y_axis_tick_every > 0:
+                    curr = min_v
+                    # Track if we've drawn the max value
+                    max_value_drawn = False
+
+                    while curr <= max_v:
+                        # Calculate y position for this value
+                        curr_y = round(diag_y + (1 - ((curr - min_v) / spread)) * (diag_height - 1))
+
+                        # Format the value with appropriate rounding
+                        formatted_value = curr
+                        if isinstance(curr, float):
+                            # Check if it's a whole number
+                            if curr.is_integer():
+                                formatted_value = int(curr)
+                            else:
+                                # Round to 2 decimal places
+                                formatted_value = round(curr, 2)
+                                # Remove trailing zeros
+                                formatted_value = float(f"{formatted_value:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_value:.2f}" else formatted_value)
+
+                        if y_legend_pos == "left":
+                            draw.text(
+                                (x_start, curr_y),
+                                str(formatted_value),
+                                fill=y_legend_color,
+                                font=y_legend_font,
+                                anchor="lm"  # Left-middle alignment
+                            )
+                        elif y_legend_pos == "right":
+                            draw.text(
+                                (x_end, curr_y),
+                                str(formatted_value),
+                                fill=y_legend_color,
+                                font=y_legend_font,
+                                anchor="rm"  # Right-middle alignment
+                            )
+
+                        # Check if this is the max value or very close to it
+                        if abs(curr - max_v) < 0.0001:
+                            max_value_drawn = True
+
+                        curr += y_axis_tick_every
+
+                    # If we haven't drawn the max value and it's not equal to min_v, draw it now
+                    if not max_value_drawn and abs(max_v - min_v) > 0.0001:
+                        # Calculate y position for max value
+                        max_y = round(diag_y + (1 - ((max_v - min_v) / spread)) * (diag_height - 1))
+
+                        # Format the max value with appropriate rounding
+                        formatted_max = max_v
+                        if isinstance(max_v, float):
+                            # Check if it's a whole number
+                            if max_v.is_integer():
+                                formatted_max = int(max_v)
+                            else:
+                                # Round to 2 decimal places
+                                formatted_max = round(max_v, 2)
+                                # Remove trailing zeros
+                                formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_max:.2f}" else formatted_max)
+
+                        if y_legend_pos == "left":
+                            draw.text(
+                                (x_start, max_y),
+                                str(formatted_max),
+                                fill=y_legend_color,
+                                font=y_legend_font,
+                                anchor="lm"  # Left-middle alignment
+                            )
+                        elif y_legend_pos == "right":
+                            draw.text(
+                                (x_end, max_y),
+                                str(formatted_max),
+                                fill=y_legend_color,
+                                font=y_legend_font,
+                                anchor="rm"  # Right-middle alignment
+                            )
+                else:
+                    # Fallback to just min/max if no tick interval is defined
+                    # Format the min/max values with appropriate rounding
+                    formatted_max = max_v
+                    formatted_min = min_v
+
+                    if isinstance(max_v, float):
+                        # Check if it's a whole number
+                        if max_v.is_integer():
+                            formatted_max = int(max_v)
+                        else:
+                            # Round to 2 decimal places
+                            formatted_max = round(max_v, 2)
+                            # Remove trailing zeros
+                            formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_max:.2f}" else formatted_max)
+
+                    if isinstance(min_v, float):
+                        # Check if it's a whole number
+                        if min_v.is_integer():
+                            formatted_min = int(min_v)
+                        else:
+                            # Round to 2 decimal places
+                            formatted_min = round(min_v, 2)
+                            # Remove trailing zeros
+                            formatted_min = float(f"{formatted_min:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_min:.2f}" else formatted_min)
+
+                    if y_legend_pos == "left":
+                        draw.text(
+                            (x_start, top_y),
+                            str(formatted_max),
+                            fill=y_legend_color,
+                            font=y_legend_font,
+                            anchor="lt"
+                        )
+                        draw.text(
+                            (x_start, bottom_y),
+                            str(formatted_min),
+                            fill=y_legend_color,
+                            font=y_legend_font,
+                            anchor="ls"
+                        )
+                    elif y_legend_pos == "right":
+                        draw.text(
+                            (x_end, top_y),
+                            str(formatted_max),
+                            fill=y_legend_color,
+                            font=y_legend_font,
+                            anchor="rt"
+                        )
+                        draw.text(
+                            (x_end, bottom_y),
+                            str(formatted_min),
+                            fill=y_legend_color,
+                            font=y_legend_font,
+                            anchor="rs"
+                        )
+
+            # Draw y-axis and grid
+            if y_axis:
+                # Y Axis line
+                if y_axis_width > 0 and y_axis_color:
+                    draw.rectangle(
+                        (diag_x, diag_y, diag_x + y_axis_width - 1, diag_y + diag_height - 1),
+                        fill=y_axis_color
                     )
-                    curr += yaxis_tick_every
-                if grid_points:
-                    draw.point(grid_points, fill=yaxis_grid_color)
+                # Y Tick marks
+                if y_axis_tick_length > 0 and y_axis_color:
+                    curr = min_v
+                    while curr <= max_v:
+                        curr_y = round(diag_y + (1 - ((curr - min_v) / spread)) * (diag_height - 1))
+                        draw.line(
+                            (diag_x, curr_y, diag_x + y_axis_tick_length - 1, curr_y),
+                            fill=y_axis_color,
+                            width=y_axis_tick_width
+                        )
+                        curr += y_axis_tick_every
 
+                # Y Grid
+                if y_axis_grid and y_axis_grid_color:
+                    curr = min_v
+                    while curr <= max_v:
+                        curr_y = round(diag_y + (1 - ((curr - min_v) / spread)) * (diag_height - 1))
+
+                        if y_axis_grid_style == "lines":
+                            # Solid line
+                            draw.line(
+                                [(diag_x, curr_y), (diag_x + diag_width, curr_y)],
+                                fill=y_axis_grid_color,
+                                width=1
+                            )
+                        elif y_axis_grid_style == "dashed":
+                            # Dashed line
+                            x_pos = diag_x
+                            dash_length = 5
+                            gap_length = 3
+                            while x_pos < diag_x + diag_width:
+                                end_x = min(x_pos + dash_length, diag_x + diag_width)
+                                draw.line(
+                                    [(x_pos, curr_y), (end_x, curr_y)],
+                                    fill=y_axis_grid_color,
+                                    width=1
+                                )
+                                x_pos += dash_length + gap_length
+                        elif y_axis_grid_style == "dotted":
+                            # Dotted line
+                            for x in range(int(diag_x), int(diag_x + diag_width), 5):
+                                draw.point((x, curr_y), fill=y_axis_grid_color)
+                        curr += y_axis_tick_every
+
+
+            # Determine time range for x-axis labels and grid
+            if x_legend and x_legend_height != 0 and x_legend.get("snap_to_hours", True):
+                # Round start time to the nearest hour
+                curr_time = start.replace(minute=0, second=0, microsecond=0)
+                # Round end time to the nearest hour
+                end_time = end.replace(minute=0, second=0, microsecond=0)
+                if end > end_time:
+                    end_time += timedelta(hours=1)
+            else:
+                curr_time = start
+                end_time = end
+
+            # Draw X Axis and grid
+            if x_axis:
+                # X Axis line
+                if x_axis_width > 0 and x_axis_color:
+                    draw.line(
+                        [(diag_x, diag_y + diag_height), (diag_x + diag_width, diag_y + diag_height)],
+                        fill=x_axis_color,
+                        width=x_axis_width
+                    )
+                # X Tick marks
+                if x_axis_tick_length > 0 and x_axis_color:
+                    curr = curr_time
+                    while curr <= end_time:
+                        rel_x = (curr - start) / duration
+                        x = round(diag_x + rel_x * (diag_width - 1))
+                        # Only draw tick marks within the diagram area
+                        if diag_x <= x <= diag_x + diag_width:
+                            draw.line(
+                                [(x, diag_y + diag_height), (x, diag_y + diag_height - x_axis_tick_length)],
+                                fill=x_axis_color,
+                                width=x_axis_tick_width
+                            )
+                        curr += timedelta(seconds=time_interval)
+                # X Grid
+                if x_axis_grid and x_axis_grid_color:
+                    curr = curr_time
+                    while curr <= end_time:
+                        rel_x = (curr - start) / duration
+                        x = round(diag_x + rel_x * (diag_width - 1))
+
+                        # Only draw grid lines within the diagram area
+                        if diag_x <= x <= diag_x + diag_width:
+                            if x_axis_grid_style == "lines":
+                                # Solid line
+                                draw.line(
+                                    [(x, diag_y), (x, diag_y + diag_height)],
+                                    fill=x_axis_grid_color,
+                                    width=1
+                                )
+                            elif x_axis_grid_style == "dashed":
+                                # Dashed line
+                                y_pos = diag_y
+                                dash_length = 5
+                                gap_length = 3
+                                while y_pos < diag_y + diag_height:
+                                    end_y = min(y_pos + dash_length, diag_y + diag_height)
+                                    draw.line(
+                                        [(x, y_pos), (x, end_y)],
+                                        fill=x_axis_grid_color,
+                                        width=1
+                                    )
+                                    y_pos += dash_length + gap_length
+                            elif x_axis_grid_style == "dotted":
+                                # Dotted line
+                                for y in range(int(diag_y), int(diag_y + diag_height), 5):
+                                    draw.point((x, y), fill=x_axis_grid_color)
+                        curr += timedelta(seconds=time_interval)
+
+            # Draw X Axis time labels
+            if x_legend and x_legend_height != 0:
+
+                while curr_time <= end_time:
+                    rel_x = (curr_time - start) / duration
+                    x = round(diag_x + rel_x * (diag_width - 1))
+
+                    if diag_x <= x <= diag_x + diag_width:
+                        if time_position == 'bottom':
+                            if x_axis_width > 0 and x_axis_color:
+                                draw.line(
+                                    [(x, diag_y + diag_height), (x, diag_y + diag_height - x_axis_tick_width)],
+                                    fill=x_axis_color,
+                                    width=x_axis_width
+                                )
+                            text = curr_time.strftime(time_format)
+                            draw.text(
+                                (x, diag_y + diag_height + x_axis_tick_width + 2),
+                                text,
+                                fill=time_color,
+                                font=time_font,
+                                anchor="mt"
+                            )
+                        else:  # time_position == "top"
+                            # Draw tick mark at top
+                            if x_axis_width > 0 and x_axis_color:
+                                draw.line(
+                                    [(x, diag_y), (x, diag_y + x_axis_tick_width)],
+                                    fill=x_axis_color,
+                                    width=x_axis_width
+                                )
+                            # Draw time label above
+                            text = curr_time.strftime(time_format)
+                            draw.text(
+                                (x, y_start),
+                                text,
+                                fill=time_color,
+                                font=time_font,
+                                anchor="mt"
+                            )
+                    curr_time += timedelta(seconds=time_interval)
             # Draw data
             for plot_data, plot_config in zip(raw_data, element["data"]):
                 # Convert data points to screen coordinates
@@ -1506,63 +2141,96 @@ class ImageGen:
 
                 # Draw line
                 if len(points) > 1:
-                    draw.line(
-                        points,
-                        fill=self.get_index_color(plot_config.get("color", "black")),
-                        width=plot_config.get("width", 1),
-                        joint=plot_config.get("joint")
-                    )
+                    # Get line style
+                    line_color = self.get_index_color(plot_config.get("color", "black"))
+                    line_width = plot_config.get("width", 1)
+                    smooth = plot_config.get("smooth", False)
+                    steps = plot_config.get("smooth_steps", 10)
 
-            # Draw legend
-            if ylegend:
-                if ylegend_pos == "left":
-                    draw.text(
-                        (x_start, y_start),
-                        str(max_v),
-                        fill=ylegend_color,
-                        font=ylegend_font,
-                        anchor="lt"
-                    )
-                    draw.text(
-                        (x_start, y_end),
-                        str(min_v),
-                        fill=ylegend_color,
-                        font=ylegend_font,
-                        anchor="ls"
-                    )
-                elif ylegend_pos == "right":
-                    draw.text(
-                        (x_end, y_start),
-                        str(max_v),
-                        fill=ylegend_color,
-                        font=ylegend_font,
-                        anchor="rt"
-                    )
-                    draw.text(
-                        (x_end, y_end),
-                        str(min_v),
-                        fill=ylegend_color,
-                        font=ylegend_font,
-                        anchor="rs"
-                    )
+                    if smooth and len(points) > 2:
+                        # Create a smoothed line using quadratic Bézier curves
+                        smooth_coords = []
 
-            # Draw axis
-            if yaxis:
-                draw.rectangle(
-                    (diag_x, diag_y, diag_x + yaxis_width - 1, diag_y + diag_height - 1),
-                    fill=yaxis_color
-                )
+                        def catmull_rom(p0, p1, p2, p3, t):
+                            t2 = t * t
+                            t3 = t2 * t
 
-                if yaxis_tick_width > 0:
-                    curr = min_v
-                    while curr <= max_v:
-                        curr_y = round(diag_y + (1 - ((curr - min_v) / spread)) * (diag_height - 1))
-                        draw.rectangle(
-                            (diag_x + yaxis_width, curr_y, diag_x + yaxis_width + yaxis_tick_width - 1, curr_y),
-                            fill=yaxis_color
+                            return (
+                                int(0.5 * (
+                                        (-t3 + 2*t2 - t) * p0[0] +
+                                        (3*t3 - 5*t2 + 2) * p1[0] +
+                                        (-3*t3 + 4*t2 + t) * p2[0] +
+                                        (t3 - t2) * p3[0]
+                                )),
+                                int(0.5 * (
+                                        (-t3 + 2*t2 - t) * p0[1] +
+                                        (3*t3 - 5*t2 + 2) * p1[1] +
+                                        (-3*t3 + 4*t2 + t) * p2[1] +
+                                        (t3 - t2) * p3[1]
+                                ))
+                            )
+
+                        smooth_coords.append(points[0])
+                        # Handle first segment specially (duplicate first point)
+                        if len(points) > 3:
+                            p0 = points[0]
+                            p1 = points[0]
+                            p2 = points[1]
+                            p3 = points[2]
+
+                            for i in range(1, steps):
+                                t = i / steps
+                                point = catmull_rom(p0, p1, p2, p3, t)
+                                smooth_coords.append(point)
+
+                        # Handle middle segments
+                        for i in range(len(points) - 3):
+                            p0 = points[i]
+                            p1 = points[i + 1]
+                            p2 = points[i + 2]
+                            p3 = points[i + 3]
+
+                            for j in range(steps):
+                                t = j / steps
+                                point = catmull_rom(p0, p1, p2, p3, t)
+                                smooth_coords.append(point)
+
+                        # Handle last segment specially (duplicate last point)
+                        if len(points) > 3:
+                            p0 = points[-3]
+                            p1 = points[-2]
+                            p2 = points[-1]
+                            p3 = points[-1]
+
+                            for i in range(1, steps):
+                                t = i / steps
+                                point = catmull_rom(p0, p1, p2, p3, t)
+                                smooth_coords.append(point)
+
+                        # Add last point
+                        smooth_coords.append(points[-1])
+
+                        draw.line(
+                            smooth_coords,
+                            fill=line_color,
+                            width=line_width,
+                            joint="curve"
                         )
-                        curr += yaxis_tick_every
 
+                    else:
+                        draw.line(
+                            points,
+                            fill=line_color,
+                            width=line_width
+                        )
+                    if plot_config.get("show_points", False):
+                        point_size = plot_config.get("point_size", 3)
+                        point_color = self.get_index_color(plot_config.get("point_color", "black"))
+                        for x, y in points:
+                            draw.ellipse(
+                                [(x - point_size, y - point_size), (x + point_size, y + point_size)],
+                                fill=point_color
+                            )
             return y_end
 
         except Exception as e:
@@ -1591,6 +2259,7 @@ class ImageGen:
         outline = self.get_index_color(element.get('outline', 'black'))
         width = element.get('width', 1)
         show_percentage = element.get('show_percentage', False)
+        font_name = element.get('font_name', 'ppb.ttf')
 
         # Draw background
         draw.rectangle(
@@ -1642,8 +2311,7 @@ class ImageGen:
         if show_percentage:
             # Calculate font size based on bar dimensions
             font_size = min(y_end - y_start - 4, x_end - x_start - 4, 20)
-            font_path = os.path.join(os.path.dirname(__file__), 'ppb.ttf')
-            font = ImageFont.truetype(font_path, font_size)
+            font = self._font_manager.get_font(font_name, font_size)
 
             percentage_text = f"{progress}%"
 
@@ -1704,6 +2372,7 @@ class ImageGen:
             bar_margin = bar_config.get('margin', 10)
             bar_data = bar_config["values"].split(";")
             bar_count = len(bar_data)
+            font_name = bar_config.get("font", "ppb.ttf")
 
             # Calculate bar width
             bar_width = math.floor(
@@ -1712,8 +2381,7 @@ class ImageGen:
 
             # Set up font for legends
             size = bar_config.get('legend_size', 10)
-            font_path = os.path.join(os.path.dirname(__file__), element.get('font', 'ppb.ttf'))
-            font = ImageFont.truetype(font_path, size)
+            font = self._font_manager.get_font(font_name, size)
             legend_color = self.get_index_color(bar_config.get('legend_color', "black"))
 
             # Find maximum value for scaling
@@ -1778,13 +2446,7 @@ class ImageGen:
         label_color = self.get_index_color(element.get("label_color", "black"))
         label_font_size = element.get("label_font_size", 12)
         font_name = element.get("font", "ppb.ttf")
-
-        # Load a font for labels
-        font_path = os.path.join(os.path.dirname(__file__), font_name)
-        try:
-            font = ImageFont.truetype(font_path, label_font_size)
-        except OSError:
-            font = ImageFont.load_default()
+        font = self._font_manager.get_font(font_name, label_font_size)
 
         # Helper to draw one line as dashed or solid
         def draw_line_segment(p1, p2):
@@ -1821,5 +2483,3 @@ class ImageGen:
                 draw.text((x + 2, 2), label_text, fill=label_color, font=font)
 
         return pos_y
-
-

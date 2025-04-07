@@ -1,0 +1,14 @@
+send_gcode:
+  name: "Send G-code"
+  description: "Send a custom G-code command to the printer"
+  target:
+    device:
+      integration: moonraker
+  fields:
+    gcode:
+      name: "G-code"
+      description: "G-code command to send to the printer"
+      required: true
+      example: "G28"
+      selector:
+        text:
