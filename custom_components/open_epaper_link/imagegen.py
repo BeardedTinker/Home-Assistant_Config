@@ -22,6 +22,7 @@ from .const import DOMAIN, SIGNAL_TAG_IMAGE_UPDATE
 from .tag_types import TagType, get_tag_types_manager
 from .util import get_image_path
 from PIL import Image, ImageDraw, ImageFont
+from resizeimage import resizeimage
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.history import get_significant_states
@@ -39,8 +40,17 @@ HALF_RED = (255, 127, 127, 255)
 YELLOW = (255, 255, 0, 255)
 HALF_YELLOW = (255, 255, 127, 255)
 
+
 class ElementType(str, Enum):
-    """Enum for supported element types."""
+    """Enum for supported element types.
+
+    Defines all the drawable element types supported by the ImageGen class.
+    Each type corresponds to a specific drawing method that handles the
+    rendering of that element type.
+
+    The enum values are used in the payload to identify the type of each element,
+    and the required_fields class method provides validation requirements for each type.
+    """
 
     TEXT = "text"
     MULTILINE = "multiline"
@@ -62,18 +72,49 @@ class ElementType(str, Enum):
 
     @classmethod
     def required_fields(cls, element_type: 'ElementType') -> list[str]:
-        """Get required fields for each element type."""
+        """Get required fields for each element type.
+
+        Returns a list of field names that must be present in an element
+        of the specified type for it to be valid.
+
+        Args:
+            element_type: The element type to get required fields for
+
+        Returns:
+            list[str]: List of required field names
+        """
         return REQUIRED_FIELDS.get(element_type, [])
 
     def __str__(self) -> str:
-        """Return the string value of the enum."""
+        """Return the string value of the enum.
+
+        Returns:
+            str: The string value of the enum
+        """
+
         return self.value
 
+
 class CoordinateParser:
-    """Helper class for parsing coordinates with percentage support."""
+    """Helper class for parsing coordinates with percentage support.
+
+    This class handles the conversion of coordinates from different formats
+    (absolute pixels or percentages) to absolute pixel values based on the
+    canvas dimensions. It simplifies positioning elements in relation to
+    the canvas size.
+
+    Attributes:
+        width: Canvas width in pixels
+        height: Canvas height in pixels
+    """
 
     def __init__(self, canvas_width: int, canvas_height: int):
-        """Initialize with canvas dimensions."""
+        """Initialize with canvas dimensions.
+
+        Args:
+            canvas_width: Width of the canvas in pixels
+            canvas_height: Height of the canvas in pixels
+        """
         self.width = canvas_width
         self.height = canvas_height
 
@@ -104,15 +145,47 @@ class CoordinateParser:
             return 0
 
     def parse_x(self, value: str | int | float) -> int:
-        """Parse x coordinate value."""
+        """Parse x coordinate value.
+
+        Converts an x-coordinate from any supported format to absolute pixels.
+        Handles percentage values relative to canvas width.
+
+        Args:
+            value: The x coordinate in pixels or percentage
+
+        Returns:
+            int: The x coordinate in absolute pixels
+        """
         return self._parse_dimension(value, self.width)
 
     def parse_y(self, value: str | int | float) -> int:
-        """Parse y coordinate value."""
+        """Parse y coordinate value.
+
+        Converts a y-coordinate from any supported format to absolute pixels.
+        Handles percentage values relative to canvas height.
+
+        Args:
+            value: The y coordinate in pixels or percentage
+
+        Returns:
+            int: The y coordinate in absolute pixels
+        """
         return self._parse_dimension(value, self.height)
 
     def parse_size(self, value: str | int | float, is_width: bool = True) -> int:
-        """Parse size value."""
+        """Parse size value.
+
+        Converts a size value from any supported format to absolute pixels.
+        For percentage sizes, uses the appropriate dimension (width or height)
+        as the base for calculation.
+
+        Args:
+            value: The size in pixels or percentage
+            is_width: Whether this is a width (True) or height (False) value
+
+        Returns:
+            int: The size in absolute pixels
+        """
         return self._parse_dimension(value, self.width if is_width else self.height)
 
     def parse_coordinates(self, element: dict, prefix: str = '') -> tuple[int, int]:
@@ -132,6 +205,7 @@ class CoordinateParser:
         y = self.parse_y(element.get(y_key, 0))
 
         return x, y
+
 
 # Define required fields for each element type
 REQUIRED_FIELDS: Dict[ElementType, list[str]] = {
@@ -157,8 +231,22 @@ REQUIRED_FIELDS: Dict[ElementType, list[str]] = {
     ElementType.DEBUG_GRID: []
 }
 
+
 def validate_element(element: Dict[str, Any]) -> ElementType:
-    """Validate element and return its type."""
+    """Validate element and return its type.
+
+    Checks that the element has a valid type and all required fields for that type.
+
+    Args:
+        element: The element dictionary to validate
+
+    Returns:
+        ElementType: The validated element type
+
+    Raises:
+        ValueError: If the element has no type or an invalid type
+        KeyError: If the element is missing required fields
+    """
 
     if "type" not in element:
         raise ValueError("Element missing required 'type' field")
@@ -181,15 +269,32 @@ def validate_element(element: Dict[str, Any]) -> ElementType:
 
     return element_type
 
+
 @dataclass
 class TextSegment:
-    """Represents a segment of text with its color."""
+    """Represents a segment of text with its color.
+
+    Used for handling colored text markup, where different parts of a text
+    string can have different colors (e.g., "[red]Text[/red]").
+
+    Attributes:
+        text: The text content
+        color: The color name for this segment
+        start_x: Starting x position for rendering (calculated during layout)
+    """
     text: str
     color: str
     start_x: int = 0
 
+
 class FontManager:
-    """Class for managing font loading, caching and path resolution."""
+    """Class for managing font loading, caching and path resolution.
+
+    Handles font discovery, loading, and caching to improve performance.
+    Searches multiple directories for fonts and provides fallback mechanisms
+    for when requested fonts are not available.
+    """
+
     def __init__(self, hass: HomeAssistant, entry=None):
         """Initialize the font manager.
 
@@ -202,7 +307,7 @@ class FontManager:
         self._font_cache: Dict[Tuple[str, int], ImageFont.FreeTypeFont] = {}
         self._known_dirs = []
 
-        # Standsrd font directories to search
+        # Standard font directories to search
         self._font_dirs = []
         self._setup_font_dirs()
 
@@ -248,10 +353,12 @@ class FontManager:
                     self._font_dirs.append(path)
                     _LOGGER.debug(f"Found {path} in Home Assistant")
 
-
-
     def get_font(self, font_name: str, size: int) -> ImageFont.FreeTypeFont:
         """Get a font, loading it if necessary.
+
+        Attempts to load the requested font from the configured font directories.
+        Uses a cache for performance and provides fallback to default fonts
+        if the requested font is not found.
 
         Args:
             font_name: Font filename or absolute path
@@ -259,6 +366,9 @@ class FontManager:
 
         Returns:
             Loaded font object
+
+        Raises:
+            HomeAssistantError: If no font could be loaded
         """
         # Check if config has changed since last load
         if self._entry:
@@ -300,6 +410,9 @@ class FontManager:
     def get_available_fonts(self) -> List[str]:
         """Get list of available font names from all directories.
 
+        Scans all configured font directories and returns a list of
+        available font filenames.
+
         Returns:
             List of font filenames
         """
@@ -323,12 +436,18 @@ class FontManager:
     def _load_font(self, font_name: str, size: int) -> ImageFont.FreeTypeFont:
         """Load a font from disk.
 
+        Attempts to load the requested font by trying various locations.
+        If the font cannot be found, falls back to default fonts.
+
         Args:
             font_name: Font filename or absolute path
             size: Font size in pixels
 
         Returns:
             Loaded font object
+
+        Raises:
+            HomeAssistantError: If no font could be loaded
         """
         # If font name is an absolute path, load directly
         if os.path.isabs(font_name):
@@ -376,10 +495,12 @@ class FontManager:
         )
         raise HomeAssistantError("Could not load any font")
 
-
-
     def _load_custom_font_dirs(self) -> None:
-        """Load custom font directories from config entry."""
+        """Load custom font directories from config entry.
+
+        Parses the custom_font_dirs option from the config entry and adds
+        each specified directory to the font search path.
+        """
         if not self._entry:
             return
 
@@ -397,6 +518,9 @@ class FontManager:
 
     def add_font_directory(self, directory: str) -> bool:
         """Add a custom font directory to search.
+
+        Adds a directory to the font search path if it is a valid
+        absolute path to an existing directory.
 
         Args:
             directory: Absolute path to directory containing fonts
@@ -423,15 +547,34 @@ class FontManager:
         return False
 
     def clear_cache(self) -> None:
-        """Clear the font cache."""
+        """Clear the font cache.
+
+        Removes all cached fonts, forcing them to be reloaded on next request.
+        This is typically called when font directories change.
+        """
         self._font_cache.clear()
 
 
 class ImageGen:
-    """Handles custom image generation for ESLs."""
+    """Handles custom image generation for ESLs.
+
+    This is the core class of the module, responsible for generating images
+    for electronic shelf labels (ESLs). It provides methods for drawing various
+    elements like text, shapes, images, etc., and combines them into a final image.
+
+    The class supports a variety of element types, each with its own drawing method,
+    and handles the common aspects of image generation such as tag information retrieval,
+    element validation, and drawing coordination.
+    """
 
     def __init__(self, hass: HomeAssistant):
-        """Initialize the image generator."""
+        """Initialize the image generator.
+
+        Sets up the image generator with the necessary components and handlers.
+
+        Args:
+            hass: Home Assistant instance
+        """
         self.hass = hass
         self._queue = []
         self._running = False
@@ -468,7 +611,21 @@ class ImageGen:
         }
 
     async def get_tag_info(self, entity_id: str) -> Optional[tuple[TagType, str]]:
-        """Get tag type information for an entity."""
+        """Get tag type information for an entity.
+
+        Retrieves tag type information and accent color for the specified entity.
+        This includes display dimensions, color capabilities, and other hardware details.
+
+        Args:
+            entity_id: The entity ID to get tag information for
+
+        Returns:
+            tuple: (TagType object, accent color string)
+            None: If tag information could not be retrieved
+
+        Raises:
+            HomeAssistantError: For various error conditions (offline AP, unknown tag, etc.)
+        """
 
         try:
             # Get hub instance
@@ -543,7 +700,20 @@ class ImageGen:
 
     @staticmethod
     def get_index_color(color: Optional[str], accent_color: str = "red") -> tuple[int, int, int, int] | None:
-        """Convert color name to RGBA tuple."""
+        """Convert color name to RGBA tuple.
+
+        Translates color names (like "red", "black", "accent") to RGBA tuples
+        for use in PIL drawing operations. Supports shortcuts (like "r" for "red) and handles the
+        accent color for display-specific colors.
+
+        Args:
+            color: Color name or shorthand
+            accent_color: The accent color of the display (red/yellow)
+
+        Returns:
+            tuple: RGBA color tuple
+            None: If color is None
+        """
         if color is None:
             return None
         color_str = str(color).lower()
@@ -568,12 +738,34 @@ class ImageGen:
 
     @staticmethod
     def should_show_element(element: dict) -> bool:
-        """Check if an element should be displayed."""
+        """Check if an element should be displayed.
+
+        Elements can be hidden by setting visible=False in their definition.
+        This is useful for conditional rendering.
+
+        Args:
+            element: Element dictionary
+
+        Returns:
+            bool: True if the element should be displayed, False otherwise
+        """
+
         return element.get("visible", True)
 
     @staticmethod
     def check_required_arguments(element: dict, required_keys: list[str], element_type: str) -> None:
-        """Validate required arguments are present."""
+        """Validate required arguments are present.
+
+        Checks that all required keys are present in an element dictionary.
+
+        Args:
+            element: Element dictionary to check
+            required_keys: List of required key names
+            element_type: Type name for error message
+
+        Raises:
+            HomeAssistantError: If any required keys are missing
+        """
         missing = [key for key in required_keys if key not in element]
         if missing:
             raise HomeAssistantError(
@@ -586,7 +778,22 @@ class ImageGen:
             service_data: Dict[str, Any],
             error_collector: list = None
     ) -> bytes:
-        """Generate a custom image based on service data."""
+        """Generate a custom image based on service data.
+
+        Main entry point for image generation. Creates an image with the
+        specified elements and returns the JPEG data.
+
+        Args:
+            entity_id: The entity ID to generate the image for
+            service_data: Service data containing image parameters and payload
+            error_collector: Optional list to collect error messages
+
+        Returns:
+            bytes: JPEG image data
+
+        Raises:
+            HomeAssistantError: If image generation fails
+        """
 
         error_collector = error_collector if error_collector is not None else []
 
@@ -671,7 +878,24 @@ class ImageGen:
         return image_data
 
     async def _draw_text(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw (coloured) text with optional wrapping or ellipsis."""
+        """Draw (coloured) text with optional wrapping or ellipsis.
+
+        Renders text with support for multiple formatting options:
+
+        - Color markup with [color]text[/color] syntax
+        - Text wrapping based on max_width
+        - Text truncation with ellipsis
+        - Multiple anchoring options
+        - Font selection and sizing
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with text properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(element, ["x", "value"], "text")
 
         draw = ImageDraw.Draw(img)
@@ -783,7 +1007,18 @@ class ImageGen:
 
     @staticmethod
     def _get_wrapped_text(text: str, font: ImageFont.ImageFont, line_length: int) -> str:
-        """Wrap text to fit within a given width."""
+        """Wrap text to fit within a given width.
+
+        Breaks text into multiple lines to fit within the specified width.
+
+        Args:
+            text: Text to wrap
+            font: Font to measure text width with
+            line_length: Maximum line length in pixels
+
+        Returns:
+            str: Text with newlines inserted for wrapping
+        """
         lines = ['']
         for word in text.split():
             line = f'{lines[-1]} {word}'.strip()
@@ -795,7 +1030,17 @@ class ImageGen:
 
     @staticmethod
     def _parse_colored_text(text: str) -> List[TextSegment]:
-        """Parse text with color markup into text segments."""
+        """Parse text with color markup into text segments.
+
+        Breaks text with color markup like "[red]text[/red]" into segments
+        with associated colors.
+
+        Args:
+            text: Text with color markup
+
+        Returns:
+            List[TextSegment]: List of text segments with colors
+        """
 
         segments = []
         current_pos = 0
@@ -835,7 +1080,19 @@ class ImageGen:
             alignment: str = "left"
     ) -> Tuple[List[TextSegment], int]:
         """Calculate x positions for each text segment based on alignment.
-        Returns the modified segments and the total width."""
+
+        Determines the starting x position for each text segment based on
+        the overall alignment and font metrics.
+
+        Args:
+            segments: List of text segments
+            font: Font to measure text width with
+            start_x: Base starting x position
+            alignment: Text alignment (left, center, right)
+
+        Returns:
+            tuple: (modified segments with positions, total width)
+        """
 
         total_width = sum(font.getlength(segment.text) for segment in segments)
 
@@ -857,9 +1114,20 @@ class ImageGen:
 
         return segments, total_width
 
-
     async def _draw_multiline(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw multiline text with delimiter."""
+        """Draw multiline text with delimiter.
+
+        Renders multiple lines of text separated by a delimiter character.
+        Supports similar formatting options as the _draw_text method.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with multiline text properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x", "value", "delimiter", "offset_y"],
@@ -931,7 +1199,19 @@ class ImageGen:
         return max_y
 
     async def _draw_line(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw line element."""
+        """Draw line element.
+
+     Renders a straight line between two points, with options for color,
+     thickness, and dashed style.
+
+     Args:
+         img: PIL Image to draw on
+         element: Element dictionary with line properties
+         pos_y: Current Y position for automatic positioning
+
+     Returns:
+         int: Updated Y position after drawing
+     """
         self.check_required_arguments(element, ["x_start", "x_end"], "line")
 
         draw = ImageDraw.Draw(img)
@@ -980,13 +1260,26 @@ class ImageGen:
                                 fill: tuple[int, int, int, int] = BLACK,
                                 width: int = 1,
                                 ) -> None:
-        """Draw dashed line."""
+        """Draw dashed line.
+
+        Renders a dashed line between two points by drawing alternating
+        segments of visible line and invisible space.
+
+        Args:
+            draw: PIL ImageDraw object to draw with
+            start: Start point coordinates (x, y)
+            end: End point coordinates (x, y)
+            dash_length: Length of visible line segments
+            space_length: Length of invisible space segments
+            fill: Line color
+            width: Line width
+        """
         x1, y1 = start
         x2, y2 = end
 
         dx = x2 - x1
         dy = y2 - y1
-        line_length = (dx**2 + dy**2) ** 0.5
+        line_length = (dx ** 2 + dy ** 2) ** 0.5
 
         step_x = dx / line_length
         step_y = dy / line_length
@@ -1041,7 +1334,16 @@ class ImageGen:
 
     @staticmethod
     def _get_rounded_corners(corner_string: str) -> tuple[bool, bool, bool, bool]:
-        """Get rounded corner configuration."""
+        """Get rounded corner configuration.
+
+        Parses a string specifying which corners of a rectangle should be rounded.
+
+        Args:
+            corner_string: String specifying corners to round ("all" or comma-separated list)
+
+        Returns:
+            tuple: Boolean flags for (top_left, top_right, bottom_right, bottom_left)
+        """
         if corner_string == "all":
             return True, True, True, True
 
@@ -1062,7 +1364,18 @@ class ImageGen:
         return result[0], result[1], result[2], result[3]
 
     async def _draw_rectangle(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw rectangle element."""
+        """Draw rectangle element.
+
+        Renders a rectangle with options for fill, outline, and rounded corners.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with rectangle properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x_start", "x_end", "y_start", "y_end"],
@@ -1089,7 +1402,7 @@ class ImageGen:
 
         # Draw rectangle
         draw.rounded_rectangle(
-            (x_start, y_start, x_end,y_end),
+            (x_start, y_start, x_end, y_end),
             fill=rect_fill,
             outline=rect_outline,
             width=rect_width,
@@ -1100,7 +1413,19 @@ class ImageGen:
         return y_end
 
     async def _draw_rectangle_pattern(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw repeated rectangle pattern."""
+        """Draw repeated rectangle pattern.
+
+        Renders a grid of rectangles with consistent spacing, useful for
+        creating regular patterns or grids.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with rectangle pattern properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x_start", "x_size", "y_start", "y_size",
@@ -1145,7 +1470,18 @@ class ImageGen:
         return max_y
 
     async def _draw_polygon(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw a polygon."""
+        """Draw a polygon.
+
+        Renders a polygon defined by a list of vertex coordinates.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with polygon properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(element, ["points"], "polygon")
 
         draw = ImageDraw.Draw(img)
@@ -1168,7 +1504,18 @@ class ImageGen:
         return pos_y
 
     async def _draw_circle(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw circle element."""
+        """Draw circle element.
+
+        Renders a circle with options for fill and outline.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with circle properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "radius"],
@@ -1182,7 +1529,6 @@ class ImageGen:
         x = coords.parse_x(element['x'])
         y = coords.parse_y(element['y'])
 
-
         # Get circle properties
         fill = self.get_index_color(element.get('fill'))
         outline = self.get_index_color(element.get('outline', "black"))
@@ -1190,7 +1536,7 @@ class ImageGen:
 
         # Draw circle
         draw.ellipse(
-            [(x - element['radius'], y - element['radius']), (x+ element['radius'], y + element['radius'])],
+            [(x - element['radius'], y - element['radius']), (x + element['radius'], y + element['radius'])],
             fill=fill,
             outline=outline,
             width=width
@@ -1199,7 +1545,18 @@ class ImageGen:
         return y + element['radius']
 
     async def _draw_ellipse(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw ellipse element."""
+        """Draw ellipse element.
+
+        Renders an ellipse with options for fill and outline.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with ellipse properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x_start", "x_end", "y_start", "y_end"],
@@ -1231,7 +1588,19 @@ class ImageGen:
         return y_end
 
     async def _draw_arc(self, img: Image, element: dict, pos_y: int):
-        """Draw an arc or pie slice."""
+        """Draw an arc or pie slice.
+
+        Renders an arc (outline) or pie slice (filled) based on center point,
+        radius, and angle range.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with arc properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "radius", "start_angle", "end_angle"],
@@ -1284,7 +1653,22 @@ class ImageGen:
         return pos_y
 
     async def _draw_icon(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw Material Design Icons."""
+        """Draw Material Design Icons.
+
+        Renders an icon from the Material Design Icons font at the specified
+        position and size.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with icon properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+
+        Raises:
+            HomeAssistantError: If icon name is invalid or rendering fails
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "value", "size"],
@@ -1299,7 +1683,6 @@ class ImageGen:
         x = coords.parse_x(element['x'])
         y = coords.parse_y(element['y'])
 
-
         # Load MDI font and metadata
         font_file = os.path.join(os.path.dirname(__file__), 'materialdesignicons-webfont.ttf')
         meta_file = os.path.join(os.path.dirname(__file__), "materialdesignicons-webfont_meta.json")
@@ -1308,6 +1691,7 @@ class ImageGen:
             def load_meta():
                 with open(meta_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
+
             mdi_data = await self.hass.async_add_executor_job(load_meta)
         except Exception as e:
             raise HomeAssistantError(f"Failed to load MDI metadata: {str(e)}")
@@ -1337,6 +1721,7 @@ class ImageGen:
         # Get icon properties
         def load_font():
             return ImageFont.truetype(font_file, element['size'])
+
         font = await self.hass.async_add_executor_job(load_font)
         anchor = element.get('anchor', "la")
         fill = self.get_index_color(
@@ -1369,7 +1754,22 @@ class ImageGen:
         return bbox[3]
 
     async def _draw_icon_sequence(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw a sequence of icons in a specified direction."""
+        """Draw a sequence of icons in a specified direction.
+
+        Renders multiple icons in a sequence with consistent spacing,
+        useful for creating icon-based status indicators or legends.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with icon sequence properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+
+        Raises:
+            HomeAssistantError: If icon names are invalid or rendering fails
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "icons", "size"],
@@ -1399,6 +1799,7 @@ class ImageGen:
             def load_meta():
                 with open(meta_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
+
             mdi_data = await self.hass.async_add_executor_job(load_meta)
         except Exception as e:
             raise HomeAssistantError(f"Failed to load MDI metadata: {str(e)}")
@@ -1406,6 +1807,7 @@ class ImageGen:
         # Load font
         def load_font():
             return ImageFont.truetype(font_file, size)
+
         font = await self.hass.async_add_executor_job(load_font)
 
         max_y = y_start
@@ -1474,7 +1876,21 @@ class ImageGen:
         return max(max_y, current_y)
 
     async def _draw_qrcode(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw QR code element."""
+        """Draw QR code element.
+
+        Generates and renders a QR code with the specified data and properties.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with QR code properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+
+        Raises:
+            HomeAssistantError: If QR code generation fails
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "data"],
@@ -1523,7 +1939,22 @@ class ImageGen:
             raise HomeAssistantError(f"Failed to generate QR code: {str(e)}")
 
     async def _draw_downloaded_image(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw downloaded or local image."""
+        """Draw downloaded or local image.
+
+        Downloads and renders an image from a URL, or loads and renders
+        an image from a local path or data URI.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with image properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+
+        Raises:
+            HomeAssistantError: If image loading or processing fails
+        """
         self.check_required_arguments(
             element,
             ["x", "y", "url", "xsize", "ysize"],
@@ -1536,6 +1967,7 @@ class ImageGen:
             pos_y = element['y']
             target_size = (element['xsize'], element['ysize'])
             rotate = element.get('rotate', 0)
+            resize_method = element.get('resize_method', 'stretch')
 
             # Check if URL is an image entity
             if element['url'].startswith('image.') or element['url'].startswith('camera.'):
@@ -1593,7 +2025,13 @@ class ImageGen:
 
             # Resize if needed
             if source_img.size != target_size:
-                source_img = source_img.resize(target_size)
+                if resize_method in ['crop', 'cover', 'contain']:
+                    source_img = resizeimage.resize(resize_method, source_img, target_size)
+                elif resize_method != 'stretch':
+                    _LOGGER.warning(f"Warning: resize_method is set to unsupported method '{resize_method}', this will result in simple stretch resizing")
+
+                if source_img.size != target_size:
+                    source_img = source_img.resize(target_size)
 
             # Convert to RGBA
             source_img = source_img.convert("RGBA")
@@ -1612,7 +2050,25 @@ class ImageGen:
             raise HomeAssistantError(f"Failed to process image: {str(e)}")
 
     async def _draw_plot(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw plot of Home Assistant sensor data."""
+        """Draw plot of Home Assistant sensor data.
+
+        Creates a line plot visualization of historical data from Home Assistant
+        entities with customizable axes, legends, and styling.
+
+        This is one of the most complex drawing methods, handling data retrieval,
+        scaling, and rendering of multiple data series and plot components.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with plot properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+
+        Raises:
+            HomeAssistantError: If plot generation fails
+        """
         self.check_required_arguments(
             element,
             ["data"],
@@ -1644,13 +2100,15 @@ class ImageGen:
 
             # Fetch sensor data
             all_states = await get_instance(self.hass).async_add_executor_job(partial(get_significant_states,
-                self.hass,
-                start_time=start,
-                entity_ids=[plot["entity"] for plot in element["data"]],
-                significant_changes_only=False,
-                minimal_response=True,
-                no_attributes=False
-            ))
+                                                                                      self.hass,
+                                                                                      start_time=start,
+                                                                                      entity_ids=[plot["entity"] for
+                                                                                                  plot in
+                                                                                                  element["data"]],
+                                                                                      significant_changes_only=False,
+                                                                                      minimal_response=True,
+                                                                                      no_attributes=False
+                                                                                      ))
 
             # Process data and find min/max if not specified
             raw_data = []
@@ -1727,7 +2185,7 @@ class ImageGen:
                 min_bbox = y_legend_font.getbbox(str(min_v))
                 max_width = max_bbox[2] - max_bbox[0]
                 min_width = min_bbox[2] - min_bbox[0]
-                y_legend_width = math.ceil(max(max_width, min_width) )  # Add padding
+                y_legend_width = math.ceil(max(max_width, min_width))  # Add padding
 
             # Configure y axis
             y_axis = element.get("yaxis")
@@ -1849,7 +2307,8 @@ class ImageGen:
                                 # Round to 2 decimal places
                                 formatted_value = round(curr, 2)
                                 # Remove trailing zeros
-                                formatted_value = float(f"{formatted_value:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_value:.2f}" else formatted_value)
+                                formatted_value = float(f"{formatted_value:.2f}".rstrip('0').rstrip(
+                                    '.') if '.' in f"{formatted_value:.2f}" else formatted_value)
 
                         if y_legend_pos == "left":
                             draw.text(
@@ -1889,7 +2348,8 @@ class ImageGen:
                                 # Round to 2 decimal places
                                 formatted_max = round(max_v, 2)
                                 # Remove trailing zeros
-                                formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_max:.2f}" else formatted_max)
+                                formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip(
+                                    '.') if '.' in f"{formatted_max:.2f}" else formatted_max)
 
                         if y_legend_pos == "left":
                             draw.text(
@@ -1921,7 +2381,8 @@ class ImageGen:
                             # Round to 2 decimal places
                             formatted_max = round(max_v, 2)
                             # Remove trailing zeros
-                            formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_max:.2f}" else formatted_max)
+                            formatted_max = float(f"{formatted_max:.2f}".rstrip('0').rstrip(
+                                '.') if '.' in f"{formatted_max:.2f}" else formatted_max)
 
                     if isinstance(min_v, float):
                         # Check if it's a whole number
@@ -1931,7 +2392,8 @@ class ImageGen:
                             # Round to 2 decimal places
                             formatted_min = round(min_v, 2)
                             # Remove trailing zeros
-                            formatted_min = float(f"{formatted_min:.2f}".rstrip('0').rstrip('.') if '.' in f"{formatted_min:.2f}" else formatted_min)
+                            formatted_min = float(f"{formatted_min:.2f}".rstrip('0').rstrip(
+                                '.') if '.' in f"{formatted_min:.2f}" else formatted_min)
 
                     if y_legend_pos == "left":
                         draw.text(
@@ -2015,7 +2477,6 @@ class ImageGen:
                             for x in range(int(diag_x), int(diag_x + diag_width), 5):
                                 draw.point((x, curr_y), fill=y_axis_grid_color)
                         curr += y_axis_tick_every
-
 
             # Determine time range for x-axis labels and grid
             if x_legend and x_legend_height != 0 and x_legend.get("snap_to_hours", True):
@@ -2157,15 +2618,15 @@ class ImageGen:
 
                             return (
                                 int(0.5 * (
-                                        (-t3 + 2*t2 - t) * p0[0] +
-                                        (3*t3 - 5*t2 + 2) * p1[0] +
-                                        (-3*t3 + 4*t2 + t) * p2[0] +
+                                        (-t3 + 2 * t2 - t) * p0[0] +
+                                        (3 * t3 - 5 * t2 + 2) * p1[0] +
+                                        (-3 * t3 + 4 * t2 + t) * p2[0] +
                                         (t3 - t2) * p3[0]
                                 )),
                                 int(0.5 * (
-                                        (-t3 + 2*t2 - t) * p0[1] +
-                                        (3*t3 - 5*t2 + 2) * p1[1] +
-                                        (-3*t3 + 4*t2 + t) * p2[1] +
+                                        (-t3 + 2 * t2 - t) * p0[1] +
+                                        (3 * t3 - 5 * t2 + 2) * p1[1] +
+                                        (-3 * t3 + 4 * t2 + t) * p2[1] +
                                         (t3 - t2) * p3[1]
                                 ))
                             )
@@ -2237,7 +2698,19 @@ class ImageGen:
             raise HomeAssistantError(f"Failed to draw plot: {str(e)}")
 
     async def _draw_progress_bar(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw progress bar with optional percentage text."""
+        """Draw progress bar with optional percentage text.
+
+        Renders a progress bar to visualize a percentage value, with options
+        for fill direction, colors, and text display.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with progress bar properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         self.check_required_arguments(
             element,
             ["x_start", "x_end", "y_start", "y_end", "progress"],
@@ -2341,7 +2814,18 @@ class ImageGen:
         return y_end
 
     async def _draw_diagram(self, img: Image, element: dict, pos_y: int) -> int:
-        """Draw diagram with optional bars."""
+        """Draw diagram with optional bars.
+
+        Renders a basic diagram with axes and optional bar chart elements.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with diagram properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         draw = ImageDraw.Draw(img)
         draw.fontmode = "1"
 
@@ -2409,7 +2893,7 @@ class ImageGen:
 
                     # Draw legend
                     draw.text(
-                        (x_pos + (bar_width/2), pos_y + height - offset_lines/2),
+                        (x_pos + (bar_width / 2), pos_y + height - offset_lines / 2),
                         str(name),
                         fill=legend_color,
                         font=font,
@@ -2431,7 +2915,19 @@ class ImageGen:
         return pos_y + height
 
     async def _draw_debug_grid(self, img: Image, element: dict, pos_y: int) -> int:
+        """Draw debug grid for layout assistance.
 
+        Renders a grid with optional coordinate labels to help with positioning
+        other elements during development.
+
+        Args:
+            img: PIL Image to draw on
+            element: Element dictionary with debug grid properties
+            pos_y: Current Y position for automatic positioning
+
+        Returns:
+            int: Updated Y position after drawing
+        """
         draw = ImageDraw.Draw(img)
         width, height = img.size
 
@@ -2442,7 +2938,7 @@ class ImageGen:
         space_length = element.get("space_length", 4)
 
         show_labels = element.get("show_labels", True)
-        label_step = element.get("label_step", spacing*2)
+        label_step = element.get("label_step", spacing * 2)
         label_color = self.get_index_color(element.get("label_color", "black"))
         label_font_size = element.get("label_font_size", 12)
         font_name = element.get("font", "ppb.ttf")

@@ -141,6 +141,7 @@ from .power_profile.library import ModelInfo, ProfileLibrary
 from .power_profile.power_profile import DEVICE_TYPE_DOMAIN, DOMAIN_DEVICE_TYPE_MAPPING, SUPPORTED_DOMAINS, DeviceType, DiscoveryBy, PowerProfile
 from .sensors.daily_energy import DEFAULT_DAILY_UPDATE_FREQUENCY
 from .sensors.group.config_entry_utils import get_group_entries
+from .sensors.group.tracked_untracked import find_auto_tracked_power_entities
 from .sensors.power import PowerSensor
 from .strategy.factory import PowerCalculatorStrategyFactory
 from .strategy.wled import CONFIG_SCHEMA as SCHEMA_POWER_WLED
@@ -159,6 +160,7 @@ class Step(StrEnum):
     GROUP_DOMAIN = "group_domain"
     GROUP_SUBTRACT = "group_subtract"
     GROUP_TRACKED_UNTRACKED = "group_tracked_untracked"
+    GROUP_TRACKED_UNTRACKED_AUTO = "group_tracked_untracked_auto"
     GROUP_TRACKED_UNTRACKED_MANUAL = "group_tracked_untracked_manual"
     LIBRARY = "library"
     POST_LIBRARY = "post_library"
@@ -697,7 +699,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
             )
 
         default_entities = entity_selector.config.get("include_entities", [])
-        schema = vol.Schema({vol.Required(CONF_ENTITIES, default=default_entities): entity_selector})
+        schema = vol.Schema({vol.Optional(CONF_ENTITIES, default=default_entities): entity_selector})
 
         if not self.is_library_flow:
             schema = schema.extend(SCHEMA_POWER_MULTI_SWITCH_MANUAL.schema)
@@ -991,7 +993,7 @@ class PowercalcCommonFlow(ABC, ConfigEntryBaseFlow):
             library = await ProfileLibrary.factory(self.hass)
             device_types = DOMAIN_DEVICE_TYPE_MAPPING.get(self.source_entity.domain, set()) if self.source_entity else None
             manufacturers = [
-                selector.SelectOptionDict(value=manufacturer, label=manufacturer)
+                selector.SelectOptionDict(value=manufacturer[0], label=manufacturer[1])
                 for manufacturer in await library.get_manufacturer_listing(device_types)
             ]
             return vol.Schema(
@@ -1634,11 +1636,39 @@ class PowercalcConfigFlow(PowercalcCommonFlow, ConfigFlow, domain=DOMAIN):
             user_input[CONF_NAME] = "Tracked / Untracked"
 
         async def _next_step(user_data: dict[str, Any]) -> Step | None:
-            if not bool(user_data.get(CONF_GROUP_TRACKED_AUTO, True)):
-                return Step.GROUP_TRACKED_UNTRACKED_MANUAL
-            return None
+            return Step.GROUP_TRACKED_UNTRACKED_AUTO if bool(user_data.get(CONF_GROUP_TRACKED_AUTO, True)) else Step.GROUP_TRACKED_UNTRACKED_MANUAL
 
-        return await self.handle_group_step(GroupType.TRACKED_UNTRACKED, user_input, schema=SCHEMA_GROUP_TRACKED_UNTRACKED, next_step=_next_step)
+        return await self.handle_group_step(
+            GroupType.TRACKED_UNTRACKED,
+            user_input,
+            schema=SCHEMA_GROUP_TRACKED_UNTRACKED,
+            next_step=_next_step,
+        )
+
+    async def async_step_group_tracked_untracked_auto(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Handle the flow for tracked/untracked group sensor."""
+
+        tracked_entities = await find_auto_tracked_power_entities(self.hass)
+
+        schema = vol.Schema(
+            {
+                vol.Optional(CONF_EXCLUDE_ENTITIES): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        multiple=True,
+                        include_entities=list(tracked_entities),
+                    ),
+                ),
+            },
+        )
+
+        return await self.handle_form_step(
+            PowercalcFormStep(
+                step=Step.GROUP_TRACKED_UNTRACKED_AUTO,
+                schema=schema,
+                continue_utility_meter_options_step=True,
+            ),
+            user_input,
+        )
 
     async def async_step_group_tracked_untracked_manual(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the flow for tracked/untracked group sensor."""

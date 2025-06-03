@@ -16,7 +16,8 @@
     "qrcode[pil]==7.4.2",
     "requests_toolbelt==1.0.0",
     "websocket-client==1.7.0",
-    "websockets==14.2"
+    "websockets==14.2",
+    "python-resize-image==1.1.20"
   ],
   "single_config_entry": true,
   "version": "1.0.0"

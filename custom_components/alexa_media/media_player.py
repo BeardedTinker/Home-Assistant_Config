@@ -8,22 +8,21 @@ https://community.home-assistant.io/t/echo-devices-alexa-as-media-player-testers
 """
 
 import asyncio
-from functools import cached_property
 import logging
 import os
 import re
 import subprocess
-from typing import Dict, List, Optional
+from typing import List, Optional
 import urllib.request
 
 from homeassistant import util
 from homeassistant.components import media_source
-from homeassistant.components.media_player import (
-    ATTR_MEDIA_ANNOUNCE,
-    MediaPlayerEntity as MediaPlayerDevice,
+from homeassistant.components.media_player import MediaPlayerEntity as MediaPlayerDevice
+from homeassistant.components.media_player.browse_media import (
     async_process_play_media_url,
 )
 from homeassistant.components.media_player.const import (
+    ATTR_MEDIA_ANNOUNCE,
     MediaPlayerEntityFeature,
     MediaPlayerState,
     MediaType,
@@ -58,6 +57,7 @@ from .const import (
     STREAMING_ERROR_MESSAGE,
     UPLOAD_PATH,
 )
+from .exceptions import TimeoutException
 from .helpers import _catch_login_errors, add_devices
 
 SUPPORT_ALEXA = (
@@ -252,7 +252,7 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         self._media_album_name = None
         self._media_artist = None
         self._media_player_state = None
-        self._media_is_muted = None
+        self._media_is_muted = False
         self._media_vol_level = None
         self._previous_volume = None
         self._saved_volume = None
@@ -260,6 +260,7 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         self._source_list = []
         self._connected_bluetooth = None
         self._bluetooth_list = []
+        self._history_records = []
         self._shuffle = None
         self._repeat = None
         self._playing_parent = None
@@ -543,6 +544,16 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                         self.name,
                         player_state["volumeSetting"],
                     )
+                    if self._session:
+                        if not self._session.get("volume"):
+                            self._session["volume"] = {}
+                        self._session["volume"]["volume"] = player_state[
+                            "volumeSetting"
+                        ]
+                        self._session["volume"]["muted"] = player_state.get(
+                            "isMuted", False
+                        )
+                        self._media_is_muted = self._session["volume"]["muted"]
                     self._media_vol_level = player_state["volumeSetting"] / 100
                     if self.hass and self.schedule_update_ha_state:
                         self.schedule_update_ha_state()
@@ -575,6 +586,7 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                     and not queue_state["trackOrderChanged"]
                     and "loopMode" in queue_state
                 ):
+                    self._attr_supported_features |= MediaPlayerEntityFeature.REPEAT_SET
                     self._repeat = queue_state["loopMode"] == "LOOP_QUEUE"
                     self._attr_repeat = (
                         RepeatMode.ALL if self._repeat else RepeatMode.OFF
@@ -587,6 +599,9 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                         queue_state["loopMode"],
                     )
                 elif "playBackOrder" in queue_state:
+                    self._attr_supported_features |= (
+                        MediaPlayerEntityFeature.SHUFFLE_SET
+                    )
                     self._shuffle = queue_state["playBackOrder"] == "SHUFFLE_ALL"
                     _LOGGER.debug(
                         "%s: %s shuffle updated to: %s %s",
@@ -607,9 +622,11 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
         self._media_album_name = None
         self._media_artist = None
         self._media_player_state = None
-        self._media_is_muted = None
+        self._media_is_muted = False
         # volume is also used for announce/tts so state should remain
         # self._media_vol_level = None
+        self._attr_supported_features = SUPPORT_ALEXA
+        self._player_info = None
 
     def _set_authentication_details(self, auth):
         """Set Authentication based off auth."""
@@ -729,7 +746,10 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                 else:
                     self._playing_parent = None
                     if self._player_info:
-                        session = {"playerInfo": self._player_info.copy()}
+                        _player_info = self._player_info.copy()
+                        if self._session:
+                            _player_info["volume"] = self._session.get("volume", {})
+                        session = {"playerInfo": _player_info}
                     else:
                         session = await self._api_get_state(no_throttle=no_throttle)
                         if session is None:
@@ -1261,9 +1281,7 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
     @property
     def is_volume_muted(self):
         """Return boolean if volume is currently muted."""
-        if self.volume_level == 0:
-            return True
-        return False
+        return self._media_is_muted
 
     @_catch_login_errors
     async def async_mute_volume(self, mute):
@@ -1524,6 +1542,8 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
                     "48k",
                     "-ar",
                     "24000",
+                    "-write_xing",
+                    "0",
                     output_file_path,
                 ]
                 if subprocess.run(command, check=True).returncode != 0:
@@ -1734,6 +1754,7 @@ class AlexaClient(MediaPlayerDevice, AlexaMedia):
             "last_called_summary": self._last_called_summary,
             "connected_bluetooth": self._connected_bluetooth,
             "bluetooth_list": self._bluetooth_list,
+            "history_records": self._history_records,
             "previous_volume": self._previous_volume,
         }
         return attr

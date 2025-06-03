@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 # Base component constants
 DOMAIN = "moonraker"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.7.0"
+VERSION = "1.8.0"
 MANIFACTURER = "@marcolivierarsenault"
 
 # Platforms
@@ -66,6 +66,7 @@ class METHODS(Enum):
     SERVER_HISTORY_TOTALS = "server.history.totals"
     SERVER_HISTORY_RESET_TOTALS = "server.history.reset_totals"
     SERVER_JOB_QUEUE_STATUS = "server.job_queue.status"
+    SERVER_JOB_QUEUE_START = "server.job_queue.start"
     SERVER_RESTART = "server.restart"
     SERVER_WEBCAMS_LIST = "server.webcams.list"
 

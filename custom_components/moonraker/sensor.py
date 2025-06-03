@@ -153,7 +153,10 @@ SENSORS: tuple[MoonrakerSensorDescription, ...] = [
         key="slicer_print_duration_estimate",
         name="Slicer Print Duration Estimate",
         value_fn=lambda sensor: sensor.empty_result_when_not_printing(
-            sensor.coordinator.data["estimated_time"] / 3600
+            round(
+                sensor.coordinator.data["estimated_time"] / 3600,
+                2,
+            ) if sensor.coordinator.data["estimated_time"] > 0 else 0
         ),
         subscriptions=[],
         icon="mdi:timer",
@@ -171,7 +174,7 @@ SENSORS: tuple[MoonrakerSensorDescription, ...] = [
                 )
                 / 3600,
                 2,
-            )
+            ) if sensor.coordinator.data["estimated_time"] > 0 else 0
         ),
         subscriptions=[("print_stats", "print_duration")],
         icon="mdi:timer",
@@ -523,19 +526,6 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                 )
                 sensors.append(desc)
         elif obj == "fan":
-            desc = MoonrakerSensorDescription(
-                key="fan_speed",
-                name="Fan speed",
-                value_fn=lambda sensor: round(
-                    sensor.coordinator.data["status"]["fan"]["speed"] * 100, 2
-                ),
-                subscriptions=[("fan", "speed")],
-                icon="mdi:fan",
-                unit=PERCENTAGE,
-                state_class=SensorStateClass.MEASUREMENT,
-            )
-            sensors.append(desc)
-
             query_obj = {OBJ: {"fan": ["rpm"]}}
             fan_data = await coordinator.async_fetch_data(
                 METHODS.PRINTER_OBJECTS_QUERY, query_obj, quiet=True
@@ -556,20 +546,6 @@ async def async_setup_optional_sensors(coordinator, entry, async_add_entities):
                     state_class=SensorStateClass.MEASUREMENT,
                 )
                 sensors.append(desc)
-        elif obj == "gcode_move":
-            desc = MoonrakerSensorDescription(
-                key="speed_factor",
-                name="Speed factor",
-                value_fn=lambda sensor: round(
-                    sensor.coordinator.data["status"]["gcode_move"]["speed_factor"]
-                    * 100,
-                    2,
-                ),
-                subscriptions=[("gcode_move", "speed_factor")],
-                icon="mdi:speedometer",
-                unit=PERCENTAGE,
-            )
-            sensors.append(desc)
         elif split_obj[0] == "heater_generic":
             desc = MoonrakerSensorDescription(
                 key=f"{split_obj[0]}_{split_obj[1]}_power",
@@ -897,7 +873,7 @@ def calculate_pct_job(data) -> float:
         divider += 1
 
     if divider == 0:
-        return 0
+        return data["status"]["display_status"]["progress"]
 
     return (time_pct + filament_pct) / divider
 

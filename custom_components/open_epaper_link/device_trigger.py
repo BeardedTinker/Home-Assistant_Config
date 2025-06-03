@@ -18,6 +18,7 @@ from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers import device_registry as dr
 from .const import DOMAIN
+
 _LOGGER: Final = logging.getLogger(__name__)
 
 TRIGGER_TYPES = {"GPIO", "NFC", "BUTTON1", "BUTTON2"}
@@ -30,7 +31,25 @@ TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
 
 
 async def async_get_triggers(hass, device_id):
-    """Return a list of triggers."""
+    """Return a list of triggers for OpenEPaperLink devices.
+
+    Defines all the available triggers for a specific device.
+    This function is called by Home Assistant when setting up
+    automations to let users choose which triggers to use.
+
+    All supported trigger types (BUTTON1, BUTTON2, NFC, GPIO) are
+    presented for each device, regardless of hardware capability.
+
+    TODO Tag specific triggers will be implemented later.
+
+    Args:
+        hass: Home Assistant instance
+        device_id: ID of the device to get triggers for
+
+    Returns:
+        list: List of trigger dictionaries, each defining a specific
+              trigger that can be used in automations
+    """
     device_registry = dr.async_get(hass)
     device = device_registry.async_get(device_id)
     triggers = []
@@ -67,9 +86,28 @@ async def async_get_triggers(hass, device_id):
         CONF_TYPE: "GPIO",
     })
     return triggers
-    
+
+
 async def async_attach_trigger(hass, config, action, trigger_info):
-    """Attach a trigger."""
+    """Attach a trigger to a specific OpenEPaperLink device.
+
+    Sets up an event listener that will call the provided action
+    when the specified trigger event occurs. The trigger is implemented
+    as an event listener for the 'open_epaper_link_event' event type
+    with filtering for the specific device ID and trigger type.
+
+    When a tag reports an event (e.g., button press), the hub converts
+    it to a Home Assistant event that this listener can respond to.
+
+    Args:
+        hass: Home Assistant instance
+        config: Trigger configuration dictionary containing device_id and type
+        action: Action to perform when the trigger fires
+        trigger_info: Information about the trigger
+
+    Returns:
+        function: A function that removes the listener when called
+    """
     event_config = event_trigger.TRIGGER_SCHEMA(
         {
             event_trigger.CONF_PLATFORM: "event",

@@ -1,16 +1,23 @@
 {
   "domain": "uptime_kuma",
   "name": "Uptime Kuma",
-  "codeowners": ["@meichthys", "@jayakornk"],
+  "codeowners": [
+    "@meichthys",
+    "@jayakornk"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/meichthys/uptime_kuma/blob/main/README.md",
   "homekit": {},
-  "iot_class": "cloud_polling",
+  "iot_class": "local_polling",
   "issue_tracker": "https://github.com/meichthys/uptime_kuma/issues",
-  "loggers": ["pyuptimekuma"],
-  "requirements": ["pyuptimekuma-hass"],
+  "loggers": [
+    "pyuptimekuma"
+  ],
+  "requirements": [
+    "pyuptimekuma-hass"
+  ],
   "ssdp": [],
-  "version": "2.3.1",
+  "version": "2.4.0",
   "zeroconf": []
 }

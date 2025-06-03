@@ -33,14 +33,37 @@ _LOGGER: Final = logging.getLogger(__name__)
 from .const import DOMAIN
 from .hub import Hub
 
-@dataclass( kw_only=True, frozen=True)
+
+@dataclass(kw_only=True, frozen=True)
 class OpenEPaperLinkSensorEntityDescription(SensorEntityDescription):
-    """Class describing OpenEPaperLink sensor entities."""
+    """Class describing OpenEPaperLink sensor entities.
+
+    Extends the standard Home Assistant sensor description with
+    additional fields specific to OpenEPaperLink sensors, particularly
+    the value extraction function that pulls data from the raw state.
+
+    This class acts as a blueprint for creating sensor entities with
+    consistent behavior and appearance across the integration.
+
+    Attributes:
+        key: Unique identifier for the sensor type
+        name: Human-readable name for the sensor
+        device_class: Device class for standardized behavior
+        state_class: State class for statistics and history
+        native_unit_of_measurement: Unit for the sensor value
+        suggested_unit_of_measurement: Preferred unit for display
+        suggested_display_precision: Number of decimal places to display
+        entity_category: Category for UI organization
+        entity_registry_enabled_default: Whether enabled by default
+        value_fn: Function to extract the value from raw state data
+        attr_fn: Optional function to extract extra attributes
+        icon: Material Design Icons identifier
+    """
     key: str
     name: str
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
-    native_unit_of_measurement : str | None = None
+    native_unit_of_measurement: str | None = None
     suggested_unit_of_measurement: UnitOfInformation | None = None
     suggested_display_precision: int | None = None
     entity_category: EntityCategory | None = None
@@ -48,6 +71,7 @@ class OpenEPaperLinkSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[dict], Any]
     attr_fn: Callable[[dict], Any] = None
     icon: str
+
 
 AP_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
     OpenEPaperLinkSensorEntityDescription(
@@ -133,7 +157,7 @@ AP_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: datetime.fromtimestamp(data.get("sys_time", 0),tz=timezone.utc),
+        value_fn=lambda data: datetime.fromtimestamp(data.get("sys_time", 0), tz=timezone.utc),
         icon="mdi:clock-outline",
     ),
     OpenEPaperLinkSensorEntityDescription(
@@ -174,6 +198,22 @@ AP_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
         icon="mdi:memory",
     )
 )
+"""Definitions for all AP-related sensor entities.
+
+This tuple defines all the sensor entities created for the Access Point.
+Each entry is an OpenEPaperLinkSensorEntityDescription that specifies
+how to create and populate a sensor entity from AP data.
+
+Sensor types include:
+
+- Network information (IP, WiFi SSID, RSSI)
+- System metrics (heap, database size, uptime)
+- Tag statistics (count, low battery, timeout)
+- Operational state (AP state, run state)
+
+Each sensor uses a value_fn to extract the relevant data from
+the hub's AP status dictionary.
+"""
 TAG_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
     OpenEPaperLinkSensorEntityDescription(
         key="temperature",
@@ -207,21 +247,21 @@ TAG_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
         key="last_seen",
         name="Last Seen",
         device_class=SensorDeviceClass.TIMESTAMP,
-        value_fn=lambda data: datetime.fromtimestamp(data.get("last_seen", 0),tz=timezone.utc),
+        value_fn=lambda data: datetime.fromtimestamp(data.get("last_seen", 0), tz=timezone.utc),
         icon="mdi:history",
     ),
     OpenEPaperLinkSensorEntityDescription(
         key="next_update",
         name="Next Update",
         device_class=SensorDeviceClass.TIMESTAMP,
-        value_fn=lambda data: datetime.fromtimestamp(data.get("next_update", 0),tz=timezone.utc),
+        value_fn=lambda data: datetime.fromtimestamp(data.get("next_update", 0), tz=timezone.utc),
         icon="mdi:update",
     ),
     OpenEPaperLinkSensorEntityDescription(
         key="next_checkin",
         name="Next Checkin",
         device_class=SensorDeviceClass.TIMESTAMP,
-        value_fn=lambda data: datetime.fromtimestamp(data.get("next_checkin", 0),tz=timezone.utc),
+        value_fn=lambda data: datetime.fromtimestamp(data.get("next_checkin", 0), tz=timezone.utc),
         icon="mdi:clock-check",
     ),
     OpenEPaperLinkSensorEntityDescription(
@@ -335,9 +375,42 @@ TAG_SENSOR_TYPES: tuple[OpenEPaperLinkSensorEntityDescription, ...] = (
     ),
 
 )
+"""Definitions for all tag-related sensor entities.
+
+This tuple defines all the sensor entities created for each ESL.
+Each entry is an OpenEPaperLinkSensorEntityDescription that specifies
+how to create and populate a sensor entity from tag data.
+
+Sensor types include:
+
+- Telemetry data (temperature, battery, signal strength)
+- Status information (last seen, next update, pending)
+- Hardware capabilities (runtime, boot count, display size)
+- Technical details (wakeup reason, capabilities flags)
+
+Each sensor uses a value_fn to extract the relevant data from
+the hub's tag data dictionary.
+"""
+
 
 def _calculate_battery_percentage(voltage: int) -> int:
-    """Calculate battery percentage from voltage."""
+    """Calculate battery percentage from raw voltage.
+
+    Converts a battery voltage reading in millivolts to an estimated
+    percentage based on the known discharge curve of a typical
+    lithium battery used in ESL tags.
+
+    The formula approximates:
+
+    - 100% at around 3.0V
+    - 0% at around 2.2V
+
+    Args:
+        voltage: Battery voltage in millivolts
+
+    Returns:
+        int: Battery percentage (0-100), clamped to valid range
+    """
     if not voltage:
         return 0
     percentage = ((voltage / 1000) - 2.20) * 250
@@ -345,17 +418,55 @@ def _calculate_battery_percentage(voltage: int) -> int:
 
 
 class OpenEPaperLinkBaseSensor(SensorEntity):
-    """Base class for all OpenEPaperLink sensors."""
+    """Base class for all OpenEPaperLink sensors.
+
+    Provides common functionality and attributes for all sensor entities
+    in the integration, whether they're associated with the AP or with
+    individual tags.
+
+    This base class handles the interaction with the entity description
+    system to ensure consistent behavior across all sensor types.
+    """
 
     entity_description: OpenEPaperLinkSensorEntityDescription
 
     def __init__(self, hub, description: OpenEPaperLinkSensorEntityDescription) -> None:
-        """Initialize the sensor."""
+        """Initialize the sensor.
+
+        Sets up the sensor with the hub connection and entity description.
+        The description contains all the information needed to extract
+        values and format the sensor's display.
+
+        Args:
+            hub: Hub instance for data access
+            description: Sensor entity description
+        """
         self._hub = hub
         self.entity_description = description
 
+
 class OpenEPaperLinkTagSensor(OpenEPaperLinkBaseSensor):
+    """Sensor class for OpenEPaperLink tag data.
+
+    Provides sensor entities that display data from individual ESL tags,
+    such as battery level, temperature, signal strength, and status
+    information.
+
+    Each tag has multiple sensor entities created from the TAG_SENSOR_TYPES
+    definitions, with values extracted from the tag's data in the hub.
+    """
     def __init__(self, hub, tag_mac: str, description: OpenEPaperLinkSensorEntityDescription) -> None:
+        """Initialize the tag sensor.
+
+    Sets up the sensor with the tag MAC, hub connection, and description.
+    Configures the device info to associate the sensor with the correct
+    tag device in the Home Assistant UI.
+
+    Args:
+        hub: Hub instance for data access
+        tag_mac: MAC address of the tag
+        description: Sensor entity description
+    """
         super().__init__(hub, description)
         self._tag_mac = tag_mac
 
@@ -390,26 +501,56 @@ class OpenEPaperLinkTagSensor(OpenEPaperLinkBaseSensor):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A tag sensor is available if the tag is known to the hub.
+
+        Returns:
+            bool: True if the sensor is available, False otherwise
+        """
         return self._tag_mac in self._hub.tags
 
     @property
     def native_value(self):
-        """Return the state of the sensor."""
+        """Return the state of the sensor.
+
+        Uses the value_fn from the entity description to extract the
+        appropriate value from the tag's data dictionary. This allows
+        each sensor type to extract different data using the same method.
+
+        Returns:
+            Any: The sensor state value
+            None: If the sensor is not available
+        """
         if not self.available or self.entity_description.value_fn is None:
             return None
         return self.entity_description.value_fn(self._hub.get_tag_data(self._tag_mac))
 
     @property
     def extra_state_attributes(self):
-        """Return the state attributes."""
+        """Return the state attributes.
+
+        If the entity description includes an attr_fn, uses it to extract
+        additional attributes for the sensor from the tag's data dictionary.
+
+        Returns:
+            dict: Additional attributes for the sensor
+            None: If no attr_fn is defined
+        """
         if self.entity_description.attr_fn is None:
             return None
 
         return self.entity_description.attr_fn(self._hub.get_tag_data(self._tag_mac))
 
     async def async_added_to_hass(self) -> None:
-        """Run when entity is added to register update signal handler."""
+        """Run when entity is added to register update signal handler.
+
+        Sets up a dispatcher listener for tag updates to refresh the
+        sensor's value when the tag data changes.
+
+        This ensures the sensor stays in sync with the actual tag data
+        without requiring polling.
+        """
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass,
@@ -420,14 +561,35 @@ class OpenEPaperLinkTagSensor(OpenEPaperLinkBaseSensor):
 
     @callback
     def _handle_update(self) -> None:
-        """Handle updated data from the coordinator."""
+        """Handle updated data from the coordinator.
+
+        Called when the tag's data is updated. Triggers a state update
+        to refresh the sensor's value and attributes in the UI.
+        """
         self.async_write_ha_state()
 
+
 class OpenEPaperLinkAPSensor(OpenEPaperLinkBaseSensor):
-    """Sensor class for OpenEPaperLink AP."""
+    """Sensor class for OpenEPaperLink AP data.
+
+    Provides sensor entities that display data from the Access Point,
+    such as connection status, memory usage, tag counts, and system state.
+
+    Each AP has multiple sensor entities created from the AP_SENSOR_TYPES
+    definitions, with values extracted from the AP's status data in the hub.
+    """
 
     def __init__(self, hub, description: OpenEPaperLinkSensorEntityDescription) -> None:
-        """Initialize the AP sensor."""
+        """Initialize the AP sensor.
+
+        Sets up the sensor with the hub connection and description.
+        Configures the device info to associate the sensor with the
+        AP device in the Home Assistant UI.
+
+        Args:
+            hub: Hub instance for data access
+            description: Sensor entity description
+        """
         super().__init__(hub, description)
 
         # Set name and unique_id
@@ -440,24 +602,48 @@ class OpenEPaperLinkAPSensor(OpenEPaperLinkBaseSensor):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "ap")},
             name="OpenEPaperLink AP",
-            model="esp32",
+            model=self._hub.ap_model,
             manufacturer="OpenEPaperLink",
         )
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        An AP sensor is available if the AP is online.
+
+        Returns:
+            bool: True if the sensor is available, False otherwise
+        """
         return self._hub.online
 
     @property
     def native_value(self):
-        """Return the state of the sensor."""
+        """Return the state of the sensor.
+
+        Uses the value_fn from the entity description to extract the
+        appropriate value from the AP's status dictionary. This allows
+        each sensor type to extract different data using the same method.
+
+        Returns:
+            Any: The sensor state value
+            None: If the sensor is not available
+        """
         if not self.available or self.entity_description.value_fn is None:
             return None
         return self.entity_description.value_fn(self._hub.ap_status)
 
     async def async_added_to_hass(self) -> None:
-        """Run when entity is added to register update signal handler."""
+        """Run when entity is added to register update signal handlers.
+
+        Sets up two dispatcher listeners:
+
+        1. AP updates - to refresh the sensor when AP status changes
+        2. Connection status updates - to update availability when AP connects/disconnects
+
+        This ensures the sensor stays in sync with the actual AP status
+        without requiring polling.
+        """
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass,
@@ -475,16 +661,41 @@ class OpenEPaperLinkAPSensor(OpenEPaperLinkBaseSensor):
 
     @callback
     def _handle_update(self) -> None:
-        """Handle updated data from the coordinator."""
+        """Handle updated data from the coordinator.
+
+        Called when the AP's status is updated. Triggers a state update
+        to refresh the sensor's value in the UI.
+        """
         self.async_write_ha_state()
 
     @callback
     def _handle_connection_status(self, is_online: bool) -> None:
-        """Handle connection status updates."""
+        """Handle connection status updates.
+
+        Updates the sensor's availability state when the AP connection
+        status changes.
+
+        Args:
+            is_online: Boolean indicating if the AP is online
+        """
         self.async_write_ha_state()
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    """Set up the OpenEPaperLink sensors."""
+    """Set up the OpenEPaperLink sensors.
+
+    Creates sensor entities for both the AP and all known tags:
+
+    1. AP sensors based on AP_SENSOR_TYPES definitions
+    2. Tag sensors for each known tag based on TAG_SENSOR_TYPES definitions
+
+    Also sets up a callback to add sensors for newly discovered tags.
+
+    Args:
+        hass: Home Assistant instance
+        entry: Configuration entry
+        async_add_entities: Callback to register new entities
+    """
     hub = hass.data[DOMAIN][entry.entry_id]
 
     # Set up AP sensors
@@ -493,7 +704,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     @callback
     def async_add_tag_sensor(tag_mac: str) -> None:
-        """Add sensors for a new tag."""
+        """Add sensors for a new tag.
+
+        Creates sensor entities for a newly discovered tag based on the
+        TAG_SENSOR_TYPES definitions. Called when a new tag is discovered
+        by the integration.
+
+        Args:
+            tag_mac: MAC address of the newly discovered tag
+        """
         entities = []
 
         for description in TAG_SENSOR_TYPES:
@@ -514,8 +733,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             async_add_tag_sensor
         )
     )
+
+
 def get_capabilities(capabilities_value: int) -> list[str]:
-    """Convert a capabilities number into a list of capabilities."""
+    """Convert a capabilities number into a list of capabilities.
+
+    Translates the binary capabilities flags from the tag into a
+    human-readable list of capability names. Each bit in the value
+    represents a different capability.
+
+    Capabilities include:
+
+    - SUPPORTS_COMPRESSION: Tag supports compressed image data
+    - SUPPORTS_CUSTOM_LUTS: Tag supports custom display LUTs
+    - HAS_EXT_POWER: Tag has external power connection
+    - HAS_WAKE_BUTTON: Tag has physical wake button
+    - HAS_NFC: Tag has NFC capability
+    - NFC_WAKE: Tag can wake from NFC scan
+
+    Args:
+        capabilities_value: Integer with capability flags
+
+    Returns:
+        list[str]: List of capability string names
+    """
     capability_map = {
         0x02: "SUPPORTS_COMPRESSION",
         0x04: "SUPPORTS_CUSTOM_LUTS",

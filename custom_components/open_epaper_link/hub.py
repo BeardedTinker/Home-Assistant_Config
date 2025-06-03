@@ -34,9 +34,46 @@ CONNECTION_TIMEOUT = 10
 
 
 class Hub:
+    """Central communication manager for OpenEPaperLink integration.
 
+    This class manages all interaction with the OpenEPaperLink Access Point (AP),
+    including:
+
+    - WebSocket connection for real-time updates
+    - Tag data management and state tracking
+    - AP configuration and status monitoring
+    - Event handling for tag interactions (buttons, NFC)
+    - Persistent storage of tag data
+
+    The Hub maintains the primary state for all tags and the AP itself,
+    serving as the data source for all entities in the integration.
+
+    Attributes:
+        hass: Home Assistant instance
+        entry: Config entry containing connection details
+        host: Hostname or IP of the OpenEPaperLink AP
+        online: Boolean indicating if the AP is currently connected
+        tags: List of known tag MAC addresses
+        ap_config: Dictionary of current AP configuration settings
+        ap_status: Dictionary of current AP status information
+    """
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
-        """Initialize the Hub."""
+        """Handle WebSocket connection and process incoming messages.
+
+        Manages the lifecycle of the WebSocket connection, including:
+
+        - Establishing initial connection to the AP
+        - Processing incoming messages (tag updates, AP status, etc.)
+        - Handling connection errors and implementing reconnection logic
+        - Broadcasting connection state changes to entities
+
+        This is a long-running task that continues until shutdown is triggered.
+        When connection errors occur, it implements a reconnection strategy
+        with a fixed interval defined by RECONNECT_INTERVAL.
+
+        Raises:
+            No exceptions are raised as they are caught and logged internally.
+        """
         self.hass = hass
         self.entry = entry
         self.host = entry.data["host"]
@@ -55,6 +92,8 @@ class Hub:
         self.ap_config: dict[str, any] = {}
         self._known_tags: set[str] = set()
         self._last_record_count = None
+        self.ap_env = None
+        self.ap_model = "ESP32"
 
         self._unsub_callbacks: list[CALLBACK_TYPE] = []
         self.online = False
@@ -69,19 +108,50 @@ class Hub:
         self._update_debounce_interval()
 
     def _update_debounce_interval(self) -> None:
-        """Update debounce intervals from options."""
+        """Update event debounce intervals from integration options.
+
+        Reads the button_debounce and nfc_debounce values from the
+        integration's configuration options and updates the internal
+        debounce interval time deltas accordingly.
+
+        This prevents rapid duplicate events from buttons or NFC scans
+        by setting minimum time intervals between consecutive events.
+        """
         button_debounce_seconds = self.entry.options.get("button_debounce", 0.5)
         nfc_debounce_seconds = self.entry.options.get("nfc_debounce", 1.0)
         self._button_debounce_interval = timedelta(seconds=button_debounce_seconds)
         self._nfc_debounce_interval = timedelta(seconds=nfc_debounce_seconds)
 
     async def async_reload_config(self) -> None:
-        """Reload configuration from config entry."""
+        """Reload configuration from config entry.
+
+        Updates hub settings based on changes to the config entry options:
+
+        - Reloads the tag blacklist
+        - Updates debounce intervals for buttons and NFC
+
+        This is called when the integration options are updated through
+        the configuration flow.
+        """
         await self.async_reload_blacklist()
         self._update_debounce_interval()
 
     async def async_setup_initial(self) -> bool:
-        """Set up hub without WebSocket connection."""
+        """Set up hub without establishing a WebSocket connection.
+
+        Performs the initial setup tasks:
+
+        - Loads stored tag data from persistent storage
+        - Initializes the tag type manager
+        - Registers the shutdown handler
+        - Attempts to load initial tag data from the AP
+
+        This is called during integration setup before the platforms
+        are loaded, allowing entities to be created with initial state.
+
+        Returns:
+            bool: True if setup completed successfully, False otherwise
+        """
         try:
             # Load stored data
             stored = await self._store.async_load()
@@ -101,6 +171,12 @@ class Hub:
                     self._handle_shutdown
                 )
 
+            # Fetch AP env
+            try:
+                await self.async_update_ap_info()
+            except Exception as err:
+                _LOGGER.warning("Could not load initial AP info: %s", str(err))
+
             # Load all tags from AP
             try:
                 await self.async_load_all_tags()
@@ -111,8 +187,19 @@ class Hub:
         except Exception as err:
             _LOGGER.error("Failed to set up hub: %s", err)
             return False
+
     async def async_start_websocket(self) -> bool:
-        """Start WebSocket connection."""
+        """Start WebSocket connection to the AP.
+
+        Establishes the WebSocket connection for real-time updates from the AP.
+        If a previous connection exists, it's cancelled before starting a new one.
+
+        The method waits for the connection to be established or for the
+        CONNECTION_TIMEOUT to expire before returning.
+
+        Returns:
+            bool: True if connection was successfully established, False otherwise
+        """
         if self._ws_task and not self._ws_task.done():
             self._ws_task.cancel()
             try:
@@ -147,13 +234,32 @@ class Hub:
 
 
     async def _handle_shutdown(self, _) -> None:
-        """Handle shutdown event."""
+        """Handle Home Assistant shutdown event.
+
+        Called when Home Assistant is shutting down, this method:
+
+        - Triggers a clean shutdown of the Hub
+        - Clears the shutdown handler reference
+
+        Args:
+            _: Event object (unused)
+        """
         _LOGGER.debug("Processing shutdown for OpenEPaperLink hub")
         await self.shutdown()
         self._shutdown_handler = None
 
     async def shutdown(self) -> None:
-        """Shut down the hub."""
+        """Shut down the hub and clean up resources.
+
+        Performs a graceful shutdown of the hub:
+
+        - Sets shutdown flag to prevent new connection attempts
+        - Cancels any active WebSocket connection task
+        - Removes event listeners and callbacks
+        - Updates connection status for dependent entities
+
+        This should be called when unloading the integration.
+        """
         _LOGGER.debug("Shutting down OpenEPaperLink hub")
 
         # Set shutdown flag first
@@ -182,7 +288,28 @@ class Hub:
         _LOGGER.debug("OpenEPaperLink hub shutdown complete")
 
     async def _websocket_handler(self) -> None:
-        """Handle websocket connection and messages."""
+        """Handle WebSocket connection lifecycle and process messages.
+
+         This is a long-running task that manages all aspects of the WebSocket
+         connection to the OpenEPaperLink Access Point, including:
+
+         - Establishing and maintaining the connection
+         - Processing incoming real-time messages from the AP
+         - Detecting connection failures and implementing reconnection logic
+         - Broadcasting connection state changes to dependent entities
+
+         The handler implements error resilience through nested try/except blocks:
+
+         - Outer block: Handles connection establishment and reconnection
+         - Inner block: Processes individual messages within an active connection
+
+         When connection errors occur, the handler waits for RECONNECT_INTERVAL
+         seconds before attempting to reconnect, continuing until the hub
+         shutdown is signaled via the self._shutdown Event.
+
+         Note: This method should be run as a background task and not awaited
+         directly, as it runs indefinitely until shutdown is triggered.
+         """
         while not self._shutdown.is_set():
             try:
                 ws_url = f"ws://{self.host}/ws"
@@ -232,7 +359,12 @@ class Hub:
 
 
     def _schedule_reconnect(self) -> None:
-        """Schedule a reconnection attempt."""
+        """Schedule a WebSocket reconnection attempt.
+
+        Creates a task to reconnect after RECONNECT_INTERVAL seconds.
+        If a reconnection task is already scheduled, it's cancelled first
+        to avoid multiple concurrent reconnection attempts.
+        """
         async def reconnect():
             await asyncio.sleep(RECONNECT_INTERVAL)
             if not self._shutdown.is_set():
@@ -250,7 +382,23 @@ class Hub:
         )
 
     async def _handle_message(self, message: str) -> None:
-        """Process incoming websocket message."""
+        """Process an incoming WebSocket message from the AP.
+
+        Parses the message JSON and routes it to the appropriate handler
+        based on the message type:
+
+        - "sys" messages: AP system status updates
+        - "tags" messages: Individual tag status updates
+        - "logMsg" messages: Log information from the AP
+        - "errMsg" messages: Error notifications
+        - "apitem" messages: Configuration change notifications
+
+        Args:
+            message: Raw WebSocket message string from the AP
+
+        Raises:
+            No exceptions are raised as they are caught and logged internally.
+        """
         try:
             data = json.loads("{" + message.split("{", 1)[-1])
 
@@ -301,7 +449,21 @@ class Hub:
 
     @callback
     async def _handle_system_message(self, sys_data: dict) -> None:
-        """Process a system message."""
+        """Process a system message from the AP.
+
+        Updates the AP status information based on system data, including:
+
+        - IP address and Wi-Fi settings
+        - Memory usage (heap, database size)
+        - Tag counts and AP state
+        - Runtime information
+
+        This method is called when the AP sends a "sys" WebSocket message,
+        which typically happens periodically or after state changes.
+
+        Args:
+            sys_data: Dictionary containing AP system status information
+        """
 
         # Preserve existing values for fields that are not in every message
         current_low_batt = self._ap_data.get("low_battery_count", 0)
@@ -333,7 +495,18 @@ class Hub:
 
     @callback
     async def _handle_tag_message(self, tag_data: dict) -> None:
-        """Process a tag message."""
+        """Process a tag update message from the AP.
+
+        Updates the stored information for a specific tag based on the
+        data received from the AP. This includes:
+
+        - Tag status (battery, temperature, etc.)
+        - Scheduling information (next update, next check-in)
+        - Signal quality information (RSSI, LQI)
+
+        Args:
+            tag_data: Dictionary containing tag properties from the AP
+        """
         tag_mac = tag_data.get("mac")
         if not tag_mac:
             return
@@ -350,7 +523,15 @@ class Hub:
 
 
     async def _handle_log_message(self, log_msg: str) -> None:
-        """Process a log message."""
+        """Process a log message from the AP.
+
+        Parses log messages for specific events that require action:
+        - Block transfer requests: Updates the block_requests counter
+        - Transfer completion: Triggers image update notification
+
+        Args:
+            log_msg: Raw log message string from the AP
+        """
         if "block request" in log_msg:
             # Extract MAC address from block request message
             # Example: "0000000000123456 block request /current/0000000000123456_452783.pending block 0"
@@ -374,13 +555,25 @@ class Hub:
     async def _process_tag_data(self, tag_mac: str, tag_data: dict, is_initial_load: bool = False) -> bool:
         """Process tag data and update internal state.
 
+        Handles updates for a single tag, including:
+
+        - Updating stored tag information
+        - Calculating runtime and update counters
+        - Managing tag discovery events
+        - Broadcasting update events to entities
+        - Triggering device events for buttons/NFC (with debouncing)
+
         Args:
-            tag_mac: The MAC address of the tag
-            tag_data: The tag data dictionary from the AP
-            is_initial_load: True if this is part of initial loading, which affects event triggering
+            tag_mac: MAC address of the tag
+            tag_data: Dictionary containing tag properties from the AP
+            is_initial_load: True if this is part of initial loading at startup,
+                             which affects event triggering behavior
 
         Returns:
-            True if this was a new tag, False if it was an update
+            bool: True if this was a newly discovered tag, False for an update
+
+        Raises:
+            No exceptions are raised as they are caught and logged internally.
         """
 
         # Skip blacklisted tags
@@ -538,13 +731,23 @@ class Hub:
         return is_new_tag
 
     async def _fetch_all_tags_from_ap(self) -> dict:
-        """Fetch complete list of tags from the AP.
+        """Fetch complete list of tags from the AP database.
+
+        Retrieves all tag data using the AP's HTTP API, handling pagination
+        to ensure all tags are retrieved even when there are many tags.
+
+        The API returns tags in batches, with a continuation token
+        to fetch the next batch until all tags have been retrieved.
 
         Returns:
-            A dictionary mapping MAC addresses to their complete tag data
+            dict: Dictionary mapping tag MAC addresses to their complete data
+
+        Raises:
+            Exception: If HTTP requests fail or return unexpected data
         """
         result = {}
         position = 0
+        retries_left = 10
 
         while True:
             url = f"http://{self.host}/get_db"
@@ -558,7 +761,11 @@ class Hub:
 
                 if response.status_code != 200:
                     _LOGGER.error("Failed to fetch all tags from AP: %s", response.text)
-                    break
+                    retries_left -= 1
+                    if retries_left <= 0:
+                        raise Exception(f"Failed to fetch tags after multiple retries: {response.text}")
+                    await asyncio.sleep(1)
+                    continue
 
                 data = response.json()
 
@@ -575,12 +782,29 @@ class Hub:
 
             except Exception as err:
                 _LOGGER.error("Failed to fetch all tags from AP: %s", str(err))
-                break
+                retries_left -= 1
+                if retries_left <= 0:
+                    raise
+                await asyncio.sleep(1)
+                continue
 
         return result
 
     async def async_load_all_tags(self) -> None:
-        """Load all tags from the AP at startup."""
+        """Load all tags from the AP at startup.
+
+        Fetches the complete list of tags from the AP's database and:
+
+        - Processes each tag to update internal state
+        - Counts new and updated tags for logging purposes
+        - Saves updated data to persistent storage
+
+        This provides a complete initial state for the integration
+        without waiting for individual tag check-ins.
+
+        Raises:
+            Exception: If fetching or processing tags fails
+        """
         try:
             _LOGGER.info("Loading existing tags from AP...")
 
@@ -614,7 +838,15 @@ class Hub:
             raise
 
     def _track_record_count_changes(self, new_record_count: int) -> None:
-        """Track changes in record count to detect tag deletions."""
+        """Track changes in record count to detect tag deletions.
+
+        When the AP's record count decreases, it indicates that one or more
+        tags have been deleted from the AP. This method detects such changes
+        and schedules a verification task to identify and remove deleted tags.
+
+        Args:
+            new_record_count: New record count reported by the AP
+        """
         if self._last_record_count is not None and new_record_count < self._last_record_count:
             # Record count has decreased, indicating a possible tag deletion
             _LOGGER.info(f"AP record count decreased from {self._last_record_count} to {new_record_count}. Checking for deleted tags...")
@@ -633,7 +865,21 @@ class Hub:
         self._last_record_count = new_record_count
 
     async def _verify_and_cleanup_tags(self) -> None:
-        """Verify which tags exist on the AP and clean up deleted tags."""
+        """Verify which tags exist on the AP and clean up deleted ones.
+
+        Checks if any locally known tags have been deleted from the AP
+        and removes them from:
+
+        - Internal data structures
+        - Home Assistant device and entity registries
+        - Persistent storage
+
+        This ensures Home Assistant's state matches the actual AP state
+        when tags are removed from the AP directly.
+
+        Raises:
+            No exceptions are raised as they are caught and logged internally.
+        """
         try:
             # Get current tags from AP
             ap_tags = await self._fetch_all_tags_from_ap()
@@ -659,7 +905,11 @@ class Hub:
             _LOGGER.error(f"Error while verifying AP tags: {err}")
 
     async def _remove_tag(self, tag_mac: str) -> None:
-        """Remove a tag from HA."""
+        """Remove a tag from HA.
+
+        Args:
+            tag_mac: The MAC address of the tag to remove.
+        """
         _LOGGER.info(f"Removing tag {tag_mac} as it no longer exists on the AP")
 
         # Remove from known tags and data
@@ -701,8 +951,17 @@ class Hub:
             # Update storage
             await self._store.async_save({"tags": self._data})
 
-    async def async_reload_blacklist(self):
-        """Reload blacklist from config entry."""
+    async def async_reload_blacklist(self) -> None:
+        """Reload the tag blacklist from config entry options.
+
+        Updates the blacklist based on current integration options and:
+
+        - Removes blacklisted tags from active tracking
+        - Triggers entity and device removal for blacklisted tags
+        - Updates persistent storage to reflect changes
+
+        This is called when the integration options are updated.
+        """
         entry = self.entry
         old_blacklist = self._blacklisted_tags.copy()
         self._blacklisted_tags = entry.options.get("blacklisted_tags", [])
@@ -733,8 +992,19 @@ class Hub:
                 "tags": self._data
             })
 
-    async def _handle_ap_config_message(self, config_data: dict) -> None:
-        """Handle AP configuration updates."""
+    async def _handle_ap_config_message(self,dict) -> None:
+        """Handle AP configuration updates.
+
+        Fetches the current AP configuration via HTTP and updates the
+        internal configuration state. This triggers when the AP sends
+        a configuration change notification.
+
+        The method uses a hash comparison to only trigger entity updates
+        when the configuration actually changes.
+
+        Args:
+            message: The configuration message from the AP
+        """
         try:
             if self._shutdown.is_set():
                 return
@@ -770,7 +1040,26 @@ class Hub:
 
     @staticmethod
     def _get_wakeup_reason_string(reason: int) -> str:
-        """Convert wakeup reason code to string."""
+        """Convert numeric wakeup reason code to human-readable string.
+
+        Maps the numeric reasons received from the AP to descriptive strings:
+
+        - 0: "TIMED" (normal timed wakeup)
+        - 1: "BOOT" (device boot)
+        - 2: "GPIO" (GPIO trigger)
+        - 3: "NFC" (NFC scan)
+        - 4: "BUTTON1" (first button pressed)
+        - 5: "BUTTON2" (second button pressed)
+        - 252: "FIRSTBOOT" (first boot)
+        - 253: "NETWORK_SCAN" (network scan)
+        - 254: "WDT_RESET" (watchdog reset)
+
+        Args:
+            reason: Numeric wakeup reason code from the tag
+
+        Returns:
+            str: Human-readable reason or "UNKNOWN_{code}" if not recognized
+        """
         reasons = {
             0: "TIMED",
             1: "BOOT",
@@ -786,7 +1075,22 @@ class Hub:
 
     @staticmethod
     def _get_ap_state_string(state: int) -> str:
-        """Convert AP state code to string."""
+        """Convert AP state code to human-readable string.
+
+        Maps the numeric state codes received from the AP to descriptive strings:
+
+        - 0: "Offline"
+        - 1: "Online"
+        - 2: "Flashing"
+        - 3: "Waiting for reset"
+        - etc.
+
+        Args:
+            state: Numeric AP state code
+
+        Returns:
+            str: Human-readable state or "Unknown: {code}" if not recognized
+        """
         states = {
             0: "Offline",
             1: "Online",
@@ -801,7 +1105,23 @@ class Hub:
 
     @staticmethod
     def _get_ap_run_state_string(state: int) -> str:
-        """Convert AP run state code to string."""
+        """Convert AP run state code to human-readable string.
+
+        Maps the numeric run state codes received from the AP to descriptive strings:
+
+        - 0: "Stopped"
+        - 1: "Paused"
+        - 2: "Running"
+        - 3: "Initializing"
+
+        The run state indicates the operational mode of the AP's tag update system.
+
+        Args:
+            state: Numeric AP run state code
+
+        Returns:
+            str: Human-readable run state or "Unknown: {state}" if not recognized
+        """
         states = {
             0: "Stopped",
             1: "Paused",
@@ -812,7 +1132,23 @@ class Hub:
 
     @staticmethod
     def _get_content_mode_string(mode: int) -> str:
-        """Convert content mode code to string."""
+        """Convert content mode code to human-readable string.
+
+        Maps the numeric content mode codes to descriptive strings indicating
+        what type of content the tag is displaying:
+
+        - 0: "Not configured"
+        - 1: "Current date"
+        - 7: "Image URL"
+        - 25: "Home Assistant"
+        - etc.
+
+        Args:
+            mode: Numeric content mode code
+
+        Returns:
+            str: Human-readable content mode or "Unknown: {mode}" if not recognized
+        """
         modes = {
             0: "Not configured",
             1: "Current date",
@@ -846,29 +1182,88 @@ class Hub:
 
     @property
     def tags(self) -> list[str]:
-        """Return list of known tag IDs."""
+        """Return list of known tag MAC addresses.
+
+        Provides access to the current set of tracked tag MAC addresses,
+        excluding those that have been blacklisted.
+
+        Returns:
+            list[str]: List of MAC addresses for all known, non-blacklisted tags
+        """
         return list(self._known_tags)
 
     def get_tag_data(self, tag_mac: str) -> dict:
-        """Get data for specific tag."""
+        """Get the current data for a specific tag.
+
+        Retrieves the complete tag data dictionary for the specified
+        tag MAC address, containing all properties like battery level,
+        temperature, status, etc.
+
+        Args:
+            tag_mac: MAC address of the tag
+
+        Returns:
+            dict: Complete tag data dictionary or empty dict if tag not found
+        """
         return self._data.get(tag_mac, {})
 
     def get_blacklisted_tags(self) -> list[str]:
-        """Return list of blacklisted tag IDs."""
+        """Return the list of blacklisted tag MAC addresses.
+
+        Blacklisted tags are known to the AP but ignored by Home Assistant.
+        This is configured through the integration's options flow.
+
+        Returns:
+            list[str]: List of blacklisted tag MAC addresses
+        """
         return self._blacklisted_tags
 
     @property
     def ap_status(self) -> dict:
-        """Get current AP status."""
+        """Get current AP status information.
+
+        Returns a copy of the current AP status dictionary containing:
+
+        - Connection information (IP, Wi-Fi settings)
+        - System metrics (heap, database size)
+        - Operational state (uptime, run state)
+        - Tag statistics (record count, low battery count)
+
+        Returns:
+            dict: Copy of the current AP status dictionary
+        """
         return self._ap_data.copy()
 
     async def async_update_ap_config(self) -> None:
-        """Force update of AP configuration."""
+        """Force an update of AP configuration from the AP.
+
+        Fetches the current AP configuration settings via HTTP and
+        updates the internal configuration state. This will trigger
+        updates for any entities that display configuration values.
+
+        Raises:
+            HomeAssistantError: If the AP is offline or returns an error.
+        """
         await self._handle_ap_config_message({"apitem": {"type": "change"}})
 
     @staticmethod
     def _calculate_runtime_delta(new_data: dict, existing_data: dict) -> int:
-        """Calculate runtime delta considering power cycles and valid check-in intervals."""
+        """Calculate a tag's runtime delta between check-ins.
+
+        Determines how much runtime to add based on the difference
+        between last_seen timestamps, taking into account:
+
+        - Power cycles (resets runtime counter)
+        - Invalid intervals (exceeding max_valid_interval)
+
+        Args:
+            new_data: New tag data received from AP
+            existing_data: Previously stored tag data
+
+        Returns:
+            int: Runtime in seconds to add to the tag's total runtime,
+                 or 0 if the interval is invalid or a power cycle occurred
+        """
         last_seen_old = existing_data.get("last_seen", 0)
         last_seen_new = new_data.get("lastseen", 0)
 
@@ -885,3 +1280,67 @@ class Hub:
             return 0
 
         return time_diff
+
+    async def async_update_ap_info(self) -> None:
+        """Force update of AP configuration.
+
+        Fetches the current configuration from the AP via HTTP
+        and updates the internal state. This will trigger updates
+        for any entities that display configuration values.
+
+        This can be called manually to refresh configuration or
+        is triggered automatically when the AP sends a configuration
+        change notification.
+        """
+        try:
+            async with async_timeout.timeout(10):
+                async with self._session.get(f"http://{self.host}/sysinfo") as response:
+                    if response.status != 200:
+                        _LOGGER.error("Failed to fetch AP sys info: HTTP %s", response.status)
+                        return
+
+                    data = await response.json()
+                    self.ap_env = data.get("env")
+                    self.ap_model = self._format_ap_model(self.ap_env)
+
+        except Exception as err:
+            _LOGGER.error(f"Error updating AP info: {err}")
+
+    @staticmethod
+    def _format_ap_model(ap_env: str) -> str:
+        """Format the build string to a user-friendly display name.
+
+        Converts technical model identifiers received from the AP
+        into human-readable device model names for display in the UI.
+
+        For example:
+
+        - "OpenEPaper_Mini_AP_v4" becomes "Mini AP v4"
+        - "ESP32_S3_16_8_YELLOW_AP" becomes "Yellow AP"
+
+        Args:
+            ap_env: The raw build environment string from the AP
+
+        Returns:
+            str: Human-friendly model name if known, or the original
+                 string if no mapping exists. Returns "ESP32" if input is empty.
+        """
+        if not ap_env:
+            return "ESP32"
+
+        model_mapping = {
+            "ESP32_S3_C6_NANO_AP": "Nano AP",
+            "OpenEPaperLink_Mini_AP_v4": "Mini AP v4",
+            "OpenEPaperLink_ESP32-PoE-ISO_AP": "PoE ISO AP",
+            "ESP32_S3_16_8_LILYGO_AP": "LilyGo T-Panel S3",
+            "OpenEPaperLink_AP_and_Flasher": "AP and Flasher",
+            "OpenEPaperLink_PoE_AP": "PoE AP",
+            "BLE_ONLY_AP": "BLE only AP",
+            "OpenEPaperLink_Nano_TLSR": "Nano TLSR AP",
+            "ESP32_S3_16_8_YELLOW_AP": "Yellow AP",
+        }
+
+        if ap_env in model_mapping:
+            return model_mapping[ap_env]
+
+        return ap_env

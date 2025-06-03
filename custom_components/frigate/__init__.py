@@ -48,7 +48,6 @@ from .const import (
     ATTR_CONFIG,
     ATTR_COORDINATOR,
     ATTR_WS_EVENT_PROXY,
-    ATTRIBUTE_LABELS,
     CONF_CAMERA_STATIC_IMAGE_HEIGHT,
     CONF_RTMP_URL_TEMPLATE,
     DOMAIN,
@@ -76,6 +75,11 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 #   to be marked as ignored or casted, when using the default Home Assistant
 #   mypy settings. Using the same settings is preferable, to smoothen a future
 #   migration to Home Assistant Core.
+
+
+def verify_frigate_version(config: dict[str, Any], check_version: str) -> bool:
+    """Checks if Frigate is at least the check version."""
+    return str(config.get("version", "0.14")) >= check_version
 
 
 def get_frigate_device_identifier(
@@ -116,8 +120,19 @@ def get_cameras_and_objects(
     camera_objects = set()
     for cam_name, cam_config in config["cameras"].items():
         for obj in cam_config["objects"]["track"]:
-            if obj not in ATTRIBUTE_LABELS:
-                camera_objects.add((cam_name, obj))
+            if obj in config["model"].get(
+                "non_logo_attributes", ["face", "license_plate"]
+            ):
+                # don't create sensors for attributes that are not logos
+                continue
+
+            if not verify_frigate_version(config, "0.16") and obj in config[
+                "model"
+            ].get("all_attributes", ["amazon", "fedex", "ups"]):
+                # Logo attributes are only supported in Frigate 0.16+
+                continue
+
+            camera_objects.add((cam_name, obj))
 
         # add an artificial all label to track
         # all objects for this camera
@@ -204,6 +219,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_get_clientsession(hass),
         entry.data.get(CONF_USERNAME),
         entry.data.get(CONF_PASSWORD),
+        bool(entry.data.get("validate_ssl")),
     )
     coordinator = FrigateDataUpdateCoordinator(hass, client=client)
     await coordinator.async_config_entry_first_refresh()

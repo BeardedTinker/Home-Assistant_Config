@@ -30,7 +30,15 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for OpenEPaperLink."""
+    """Handle a config flow for OpenEPaperLink.
+
+    Implements the flow for initial integration setup and reauthorization.
+    The flow validates that the provided AP host is reachable and responds
+    correctly before creating a configuration entry.
+
+    The class stores connection state throughout the flow steps to maintain
+    context between user interactions.
+    """
 
     VERSION = 2
 
@@ -39,9 +47,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._host: str | None = None
 
     async def _validate_input(self, host: str) -> tuple[dict[str, str], str | None]:
-        """Validate the user input allows us to connect.
+        """Validate the user input allows us to connect to the OpenEPaperLink AP.
 
-        Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
+        Tests the connection to the specified host address by:
+
+        1. Sanitizing the input (removing protocol prefixes, trailing slashes)
+        2. Attempting an HTTP request to the root endpoint
+        3. Verifying the response indicates a valid OpenEPaperLink AP
+
+        Args:
+            host: The hostname or IP address of the AP
+
+        Returns:
+            tuple: A tuple containing:
+                - A dictionary with validated info (empty if validation failed)
+                - An error code string if validation failed, None otherwise
         """
         errors = {}
         info = None
@@ -74,8 +94,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
             self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Handle the initial step."""
+    ):
+        """Handle the initial step of the config flow.
+
+        Presents a form for the user to enter the AP host address,
+        validates the connection, and creates a config entry if successful.
+
+        Args:
+            user_input: User-provided configuration data, or None if the
+                       form is being shown for the first time
+
+        Returns:
+            FlowResult: Result of the flow step, either showing the form
+                       again (with errors if applicable) or creating an entry
+        """
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -97,15 +129,37 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_reauth(self, entry_data: Mapping[str, Any]) -> FlowResult:
-        """Handle reauthorization."""
+    async def async_step_reauth(self, entry_data: Mapping[str, Any]):
+        """Handle reauthorization flow initiated by connection failure.
+
+        Prepares for reauthorization by extracting the current host from
+        the existing config entry data and storing it for validation.
+
+        Args:
+            entry_data: Data from the existing config entry
+
+        Returns:
+            FlowResult: Flow result directing to the reauth confirmation step
+        """
         self._host = entry_data[CONF_HOST]
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
             self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Handle reauthorization confirmation."""
+    ):
+        """Handle reauthorization confirmation.
+
+        Validates the connection to the previously configured AP.
+
+        If successful, updates the existing config entry;
+        if not, shows an error.
+
+        Args:
+            user_input: User input from form, or None on first display
+
+        Returns:
+            FlowResult: Flow result object for the next step or completion
+        """
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -131,14 +185,41 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
-        """Get the options flow for this handler."""
+        """Create the options flow handler.
+
+        Returns an instance of the OptionsFlowHandler to manage the
+        integration's configuration options.
+
+        Args:
+            config_entry: The current configuration entry
+
+        Returns:
+            OptionsFlow: The options flow handler
+        """
         return OptionsFlowHandler(config_entry)
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle options flow for OpenEPaperLink."""
+    """Handle OpenEPaperLink integration options.
+
+    Provides a UI for configuring integration options including:
+
+    - Tag blacklisting to hide unwanted devices
+    - Button and NFC debounce intervals to prevent duplicate triggers
+    - Custom font directories for the image generation system
+
+    The options flow fetches current tag data from the hub to
+    populate the selection fields with accurate information.
+    """
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
+        """Initialize options flow with the current configuration.
+
+        Stores references to the current config entry and extracts
+        existing option values to use as defaults in the flow.
+
+        Args:
+            config_entry: Current configuration entry
+        """
         self.config_entry = config_entry
         self._blacklisted_tags = self.config_entry.options.get("blacklisted_tags", [])
         self._button_debounce = self.config_entry.options.get("button_debounce", 0.5)
@@ -146,7 +227,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._custom_font_dirs = self.config_entry.options.get("custom_font_dirs", "")
 
     async def async_step_init(self, user_input=None):
-        """Manage blacklisted tags."""
+        """Manage OpenEPaperLink options.
+
+        Presents a form with configuration options for the integration.
+        When submitted, updates the config entry with the new options.
+
+        This step retrieves a list of available tags from the hub to
+        allow selection of tags to blacklist.
+
+        Args:
+            user_input: User-provided input data, or None on first display
+
+        Returns:
+            FlowResult: Flow result showing the form or saving options
+        """
         if user_input is not None:
             # Update blacklisted tags
             return self.async_create_entry(

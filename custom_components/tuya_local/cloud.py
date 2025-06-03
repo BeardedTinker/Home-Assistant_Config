@@ -87,7 +87,7 @@ class Cloud:
     async def async_login(self) -> bool:
         """Login to the Tuya cloud."""
         if not self.__user_code or not self.__qr_code:
-            _LOGGER.warn("Login attempted without successful QR scan")
+            _LOGGER.warning("Login attempted without successful QR scan")
             return False, {}
 
         success, info = await self.__hass.async_add_executor_job(
@@ -246,7 +246,7 @@ class DeviceListener(SharingDeviceListener):
 
     def add_device(self, device: CustomerDevice) -> None:
         """A new device has been added."""
-        _LOGGER.device(
+        _LOGGER.debug(
             "Received add device %s: %s",
             device.id,
             self._manager.device_map[device.id].status,

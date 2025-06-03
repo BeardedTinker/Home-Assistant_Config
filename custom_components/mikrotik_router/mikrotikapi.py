@@ -28,12 +28,14 @@ class MikrotikAPI:
         password,
         port=0,
         use_ssl=True,
+        ssl_verify=True,
         login_method=DEFAULT_LOGIN_METHOD,
         encoding=DEFAULT_ENCODING,
     ):
         """Initialize the Mikrotik Client."""
         self._host = host
         self._use_ssl = use_ssl
+        self._ssl_verify = ssl_verify
         self._port = port
         self._username = username
         self._password = password
@@ -50,6 +52,7 @@ class MikrotikAPI:
         self.error = None
         self.connection_error_reported = False
         self.client_traffic_last_run = None
+        self.disable_health = False
 
         # Default ports
         if not self._port:
@@ -118,15 +121,19 @@ class MikrotikAPI:
             "port": self._port,
         }
 
-        if self._use_ssl:
-            if self._ssl_wrapper is None:
-                ssl_context = ssl.create_default_context()
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
-                self._ssl_wrapper = ssl_context.wrap_socket
-            kwargs["ssl_wrapper"] = self._ssl_wrapper
         self.lock.acquire()
         try:
+            if self._use_ssl:
+                if self._ssl_wrapper is None:
+                    ssl_context = ssl.create_default_context()
+                    ssl_context.check_hostname = False
+                    if self._ssl_verify:
+                        ssl_context.verify_mode = ssl.CERT_REQUIRED
+                        ssl_context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+                    else:
+                        ssl_context.verify_mode = ssl.CERT_NONE
+                    self._ssl_wrapper = ssl_context.wrap_socket
+                kwargs["ssl_wrapper"] = self._ssl_wrapper
             self._connection = librouteros.connect(
                 self._host, self._username, self._password, **kwargs
             )
@@ -164,6 +171,9 @@ class MikrotikAPI:
         if "ALERT_HANDSHAKE_FAILURE" in error:
             self.error = "ssl_handshake_failure"
 
+        if "CERTIFICATE_VERIFY_FAILED" in error:
+            self.error = "ssl_verify_failure"
+
     # ---------------------------
     #   connected
     # ---------------------------
@@ -177,6 +187,9 @@ class MikrotikAPI:
     def query(self, path, command=None, args=None, return_list=True) -> Optional(list):
         """Retrieve data from Mikrotik API."""
         """Returns generator object, unless return_list passed as True"""
+        if path == "/system/health" and self.disable_health:
+            return None
+
         if args is None:
             args = {}
 
@@ -196,9 +209,15 @@ class MikrotikAPI:
             try:
                 response = list(response)
             except Exception as e:
+                if path == "/system/health" and "no such command prefix" in str(e):
+                    self.disable_health = True
+                    self.lock.release()
+                    return None
+
                 self.disconnect(f"building list for path {path}", e)
                 self.lock.release()
                 return None
+
         elif response and command:
             _LOGGER.debug("API query: %s, %s, %s", path, command, args)
             try:

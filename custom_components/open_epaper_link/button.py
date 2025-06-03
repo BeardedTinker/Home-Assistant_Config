@@ -17,13 +17,56 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+    """Set up button entities from a config entry.
+
+    Creates button entities for all tags and the AP based on the
+    integration's configuration. For each tag, creates:
+
+    - Clear pending updates button
+    - Force refresh button
+    - Reboot tag button
+    - Scan channels button
+    - Deep sleep button
+
+    For the AP, creates:
+
+    - Reboot AP button
+    - Refresh tag types button
+
+    Also sets up listeners for new tag discovery and blacklist updates
+    to dynamically add and remove buttons as needed.
+
+    Args:
+        hass: Home Assistant instance
+        entry: Configuration entry
+        async_add_entities: Callback to register new entities
+    """
     hub = hass.data[DOMAIN][entry.entry_id]
 
     # Track added tags to prevent duplicates
     added_tags = set()
 
     async def async_add_tag_buttons(tag_mac: str) -> None:
-        """Add buttons for a newly discovered tag."""
+        """Add buttons for a newly discovered tag.
+
+        Creates and registers button entities for a specific tag:
+
+        - Clear pending updates button
+        - Force refresh button
+        - Reboot tag button
+        - Scan channels button
+        - Deep sleep button
+
+        This function is called both during initial setup for existing
+        tags and dynamically when new tags are discovered.
+
+        The function includes deduplication logic to prevent creating
+        multiple button sets for the same tag, and filtering to avoid
+        creating buttons for blacklisted tags.
+
+        Args:
+            tag_mac: MAC address of the tag to create buttons for
+        """
 
         # Skip if tag is blacklisted
         if tag_mac in hub.get_blacklisted_tags():
@@ -64,7 +107,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     # Listen for blacklist updates
     async def handle_blacklist_update() -> None:
-        """Handle blacklist updates by removing buttons for blacklisted tags."""
+        """Handle blacklist updates by removing buttons for blacklisted tags.
+
+        When tags are added to the blacklist, this removes their
+        associated button entities and devices from Home Assistant.
+
+        This ensures that blacklisted tags don't appear in the UI
+        and don't consume resources in Home Assistant.
+        """
         # Get all buttons registered for this entry
         device_registry = dr.async_get(hass)
         entity_registry = er.async_get(hass)
@@ -105,8 +155,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     )
 
 class ClearPendingTagButton(ButtonEntity):
+    """Button to clear pending updates for a tag.
+
+    Creates a button entity that clears any pending content updates
+    for a specific tag. This is useful when a tag has queued updates
+    that are not being applied or need to be canceled.
+    """
     def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button entity with appropriate name, icon, and identifiers.
+
+        Args:
+            hass: Home Assistant instance
+            tag_mac: MAC address of the tag
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._tag_mac = tag_mac
         self._entity_id = f"{DOMAIN}.{tag_mac}"
@@ -120,7 +184,14 @@ class ClearPendingTagButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the tag.
+
+        Associates this button with the tag device in Home Assistant
+        using the tag MAC address as the identifier.
+
+        Returns:
+            dict: Device information dictionary
+        """
         tag_name = self._hub._data[self._tag_mac]['tag_name']
         return {
             "identifiers": {(DOMAIN, self._tag_mac)},
@@ -129,15 +200,41 @@ class ClearPendingTagButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A button is available if its associated tag is known to the AP
+        and not blacklisted in the integration options.
+
+        Returns:
+            bool: True if the tag is available, False otherwise
+        """
         return self._tag_mac not in self._hub.get_blacklisted_tags()
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends the "clear" command to the tag via the AP when the
+        button is pressed in the UI.
+        """
         await send_tag_cmd(self.hass, self._entity_id, "clear")
 
 class ForceRefreshButton(ButtonEntity):
+    """Button to force refresh a tag's display.
+
+    Creates a button entity that triggers an immediate display update
+    on the tag, forcing it to refresh with the current content.
+    This is useful when a tag's display hasn't updated as expected.
+    """
     def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button entity with appropriate name, icon, and identifiers.
+
+        Args:
+            hass: Home Assistant instance
+            tag_mac: MAC address of the tag
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._tag_mac = tag_mac
         self._entity_id = f"{DOMAIN}.{tag_mac}"
@@ -151,7 +248,14 @@ class ForceRefreshButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the tag.
+
+        Associates this button with the tag device in Home Assistant
+        using the tag MAC address as the identifier.
+
+        Returns:
+            dict: Device information dictionary
+        """
         tag_name = self._hub._data[self._tag_mac]['tag_name']
         return {
             "identifiers": {(DOMAIN, self._tag_mac)},
@@ -160,15 +264,40 @@ class ForceRefreshButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A button is available if its associated tag is known to the AP
+        and not blacklisted in the integration options.
+
+        Returns:
+            bool: True if the tag is available, False otherwise
+        """
         return self._tag_mac not in self._hub.get_blacklisted_tags()
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends the "refresh" command to the tag via the AP when the
+        button is pressed in the UI.
+        """
         await send_tag_cmd(self.hass, self._entity_id, "refresh")
 
 class RebootTagButton(ButtonEntity):
+    """Button to reboot a tag.
+
+    Creates a button entity that sends a reboot command to the tag,
+    forcing a complete restart of the tag's firmware.
+    """
     def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button entity with appropriate name, icon, and identifiers.
+
+        Args:
+            hass: Home Assistant instance
+            tag_mac: MAC address of the tag
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._tag_mac = tag_mac
         self._entity_id = f"{DOMAIN}.{tag_mac}"
@@ -182,7 +311,14 @@ class RebootTagButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the tag.
+
+        Associates this button with the tag device in Home Assistant
+        using the tag MAC address as the identifier.
+
+        Returns:
+            dict: Device information dictionary
+        """
         tag_name = self._hub._data[self._tag_mac]['tag_name']
         return {
             "identifiers": {(DOMAIN, self._tag_mac)},
@@ -191,15 +327,40 @@ class RebootTagButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A button is available if its associated tag is known to the AP
+        and not blacklisted in the integration options.
+
+        Returns:
+            bool: True if the tag is available, False otherwise
+        """
         return self._tag_mac not in self._hub.get_blacklisted_tags()
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends the "reboot" command to the tag via the AP when the
+        button is pressed in the UI.
+        """
         await send_tag_cmd(self.hass, self._entity_id, "reboot")
 
 class ScanChannelsButton(ButtonEntity):
+    """Button to initiate channel scanning on a tag.
+
+    Creates a button entity that triggers an IEEE 802.15.4 channel scan
+    on the tag.
+    """
     def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button entity with appropriate name, icon, and identifiers.
+
+        Args:
+            hass: Home Assistant instance
+            tag_mac: MAC address of the tag
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._tag_mac = tag_mac
         self._entity_id = f"{DOMAIN}.{tag_mac}"
@@ -213,7 +374,14 @@ class ScanChannelsButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the tag.
+
+        Associates this button with the tag device in Home Assistant
+        using the tag MAC address as the identifier.
+
+        Returns:
+            dict: Device information dictionary
+        """
         tag_name = self._hub._data[self._tag_mac]['tag_name']
         return {
             "identifiers": {(DOMAIN, self._tag_mac)},
@@ -222,15 +390,40 @@ class ScanChannelsButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A button is available if its associated tag is known to the AP
+        and not blacklisted in the integration options.
+
+        Returns:
+            bool: True if the tag is available, False otherwise
+        """
         return self._tag_mac not in self._hub.get_blacklisted_tags()
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends the "scan" command to the tag via the AP when the
+        button is pressed in the UI.
+        """
         await send_tag_cmd(self.hass, self._entity_id, "scan")
 
 class DeepSleepButton(ButtonEntity):
+    """Button to put a tag into deep sleep mode.
+
+    Creates a button entity that sends a deep sleep command to the tag,
+    putting it into a low-power state to conserve battery.
+    """
     def __init__(self, hass: HomeAssistant, tag_mac: str, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button entity with appropriate name, icon, and identifiers.
+
+        Args:
+            hass: Home Assistant instance
+            tag_mac: MAC address of the tag
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._tag_mac = tag_mac
         self._entity_id = f"{DOMAIN}.{tag_mac}"
@@ -244,7 +437,14 @@ class DeepSleepButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the tag.
+
+        Associates this button with the tag device in Home Assistant
+        using the tag MAC address as the identifier.
+
+        Returns:
+            dict: Device information dictionary
+        """
         tag_name = self._hub._data[self._tag_mac]['tag_name']
         return {
             "identifiers": {(DOMAIN, self._tag_mac)},
@@ -253,15 +453,42 @@ class DeepSleepButton(ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
+        """Return if entity is available.
+
+        A button is available if its associated tag is known to the AP
+        and not blacklisted in the integration options.
+
+        Returns:
+            bool: True if the tag is available, False otherwise
+        """
         return self._tag_mac not in self._hub.get_blacklisted_tags()
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends the "deepsleep" command to the tag via the AP when the
+        button is pressed in the UI.
+        """
         await send_tag_cmd(self.hass, self._entity_id, "deepsleep")
 
 class RebootAPButton(ButtonEntity):
+    """Button to reboot the Access Point.
+
+    Creates a button entity that triggers a reboot of the OpenEPaperLink
+    Access Point, restarting all AP services and connections.
+
+    Note: Rebooting the AP will temporarily disconnect all tags
+    until they reconnect after the AP comes back online.
+    """
     def __init__(self, hass: HomeAssistant, hub) -> None:
-        """Initialize the button."""
+        """Initialize the button entity.
+
+        Sets up the button with appropriate name, icon, and device association.
+
+        Args:
+            hass: Home Assistant instance
+            hub: Hub instance for AP communication
+        """
         self.hass = hass
         self._hub = hub
         # self._attr_name = "Reboot AP"
@@ -272,18 +499,46 @@ class RebootAPButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the AP.
+
+        Associates this button with the AP device in Home Assistant.
+
+        Returns:
+            dict: Device information dictionary
+        """
         return {
             "identifiers": {(DOMAIN, "ap")},
         }
 
     async def async_press(self) -> None:
+        """Handle the button press.
+
+        Sends a reboot command to the AP when the button is pressed
+        in the UI. The AP will disconnect and restart all services.
+        """
         await reboot_ap(self.hass)
 
 class RefreshTagTypesButton(ButtonEntity):
-    """Button to manually refresh tag types from GitHub."""
+    """Button to manually refresh tag types from GitHub.
+
+    Creates a button entity that triggers a refresh of the tag type
+    definitions from the OpenEPaperLink GitHub repository.
+
+    This is useful when new tag models are added to the repository
+    or when the local cache needs to be updated for any reason.
+
+    A persistent notification is shown when the refresh completes
+    to inform the user of the result.
+    """
 
     def __init__(self, hass: HomeAssistant) -> None:
+        """Initialize the button entity.
+
+        Sets up the button with appropriate name, icon, and device association.
+
+        Args:
+            hass: Home Assistant instance
+        """
         self._hass = hass
         self._attr_unique_id = "refresh_tag_types"
         # self._attr_name = "Refresh Tag Types"
@@ -294,16 +549,33 @@ class RefreshTagTypesButton(ButtonEntity):
 
     @property
     def device_info(self):
-        """Return device info."""
+        """Return device info for the AP.
+
+        Associates this button with the AP device in Home Assistant,
+        adding manufacturer and model information.
+
+        Returns:
+            dict: Device information dictionary
+        """
         return {
             "identifiers": {(DOMAIN, "ap")},
             "name": "OpenEPaperLink AP",
-            "model": "esp32",
+            # "model": self._hub.ap_model,
             "manufacturer": "OpenEPaperLink",
         }
 
     async def async_press(self) -> None:
-        """Trigger a manual refresh of tag types."""
+        """Handle the button press.
+
+        Triggers a refresh of tag type definitions from GitHub
+        and displays a notification with the result.
+
+        The refresh process:
+
+        1. Clears the cache timestamp to force a new GitHub fetch
+        2. Calls the tag types manager to load the latest definitions
+        3. Shows a notification with the number of tag types loaded
+        """
         manager = await get_tag_types_manager(self._hass)
         # Force a refresh by clearing the last update timestamp
         manager._last_update = None

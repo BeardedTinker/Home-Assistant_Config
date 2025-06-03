@@ -7,7 +7,7 @@
     "issue_tracker": "https://github.com/tomaae/homeassistant-mikrotik_router/issues",
     "dependencies": [],
     "requirements": [
-        "librouteros>=3.2.0",
+        "librouteros>=3.4.1",
         "mac-vendor-lookup>=0.1.12"
     ],
     "codeowners": [

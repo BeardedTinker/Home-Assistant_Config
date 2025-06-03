@@ -34,17 +34,6 @@ class UptimeKumaEntity(CoordinatorEntity[UptimeKumaDataUpdateCoordinator]):
             entry_type=DeviceEntryType.SERVICE,
             model=self.monitor.monitor_type,
         )
-        self._attr_extra_state_attributes = {
-            "monitor_cert_days_remaining": self.monitor.monitor_cert_days_remaining,
-            "monitor_cert_is_valid": self.monitor.monitor_cert_is_valid,
-            "monitor_hostname": self.monitor.monitor_hostname,
-            "monitor_name": self.monitor.monitor_name,
-            "monitor_port": self.monitor.monitor_port,
-            "monitor_response_time": self.monitor.monitor_response_time,
-            "monitor_status": self.monitor.monitor_status,
-            "monitor_type": self.monitor.monitor_type,
-            "monitor_url": self.monitor.monitor_url,
-        }
         self._attr_unique_id = f"uptimekuma_{self.monitor.monitor_name}"
         self.api = coordinator.api
 
@@ -64,6 +53,22 @@ class UptimeKumaEntity(CoordinatorEntity[UptimeKumaDataUpdateCoordinator]):
             ),
             self._monitor,
         )
+
+    @property
+    def extra_state_attributes(self):
+        """Return the latest extra state attributes for this monitor."""
+        monitor = self.monitor
+        return {
+            "monitor_cert_days_remaining": monitor.monitor_cert_days_remaining,
+            "monitor_cert_is_valid": monitor.monitor_cert_is_valid,
+            "monitor_hostname": monitor.monitor_hostname,
+            "monitor_name": monitor.monitor_name,
+            "monitor_port": monitor.monitor_port,
+            "monitor_response_time": monitor.monitor_response_time,
+            "monitor_status": monitor.monitor_status,
+            "monitor_type": monitor.monitor_type,
+            "monitor_url": monitor.monitor_url,
+        }
 
     @property
     def monitor_available(self) -> bool:

@@ -13,7 +13,28 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def decode_esl_raw(data: bytes, tag_type: TagType) -> bytes:
-    """Decode an OpenEPaperLink raw file."""
+    """Decode an OpenEPaperLink raw file.
+
+    Processes raw image data from the OpenEPaperLink AP, handling:
+
+    - Zlib compression detection and decompression
+    - BWR/BWY dual-plane formats for 2-bit displays
+    - Packed pixel formats for higher color depths
+    - Buffer rotation settings from tag type
+
+    The function detects the data format based on the tag type
+    information and header data, then processes accordingly.
+
+    Args:
+        data: Raw image data bytes from the AP
+        tag_type: TagType object containing display specifications
+
+    Returns:
+        bytes: Decoded raw bitmap data ready for rendering
+
+    Raises:
+        Exception: For decompression errors or invalid data format
+    """
     _LOGGER.debug(f"Input size: {len(data)} bytes")
     _LOGGER.debug(f"Tag type: {tag_type.name}")
     _LOGGER.debug(f"Dimensions: {tag_type.width}x{tag_type.height}")
@@ -63,8 +84,8 @@ def decode_esl_raw(data: bytes, tag_type: TagType) -> bytes:
 
                     # Extract and combine planes
                     header = decompressed_data[:header_size]
-                    first_plane = decompressed_data[header_size:header_size + total_size//2]
-                    second_plane = second_block[header_size:header_size + total_size//2]
+                    first_plane = decompressed_data[header_size:header_size + total_size // 2]
+                    second_plane = second_block[header_size:header_size + total_size // 2]
                     data = first_plane + second_plane
                 else:
                     # Single block contains all data
@@ -86,16 +107,9 @@ def decode_esl_raw(data: bytes, tag_type: TagType) -> bytes:
 
     return data
 
-def decode_g5(data: bytes, width: int, height: int) -> bytes:
-    """
-    Decode G5 compressed data.
 
-    G5 is a simple RLE compression designed for 1bpp displays.
-    Each command byte starts with:
-    - Bit 7 (0x80): 1=repeat, 0=copy
-    - Bit 6 (0x40): For repeat: 1=ones, 0=zeros
-    - Bits 0-6: Count of 8-bit chunks minus 1
-    """
+def decode_g5(data: bytes, width: int, height: int) -> bytes:
+    """DOES NOT WORK YET and is a completely wrong implementation."""
     output_size = (width * height + 7) // 8
     output = bytearray(output_size)
     out_pos = 0
@@ -144,8 +158,34 @@ def decode_g5(data: bytes, width: int, height: int) -> bytes:
 
     return bytes(output)
 
+
 def to_image(raw_data: bytes, tag_type: TagType) -> bytes:
-    """Convert decoded ESL raw data to JPEG image."""
+    """Convert decoded ESL raw data to JPEG image.
+
+    Transforms the decoded raw bitmap data into a standard JPEG image
+    that can be displayed in Home Assistant or saved to disk.
+
+    The conversion process:
+
+    1. Decodes the raw data using decode_esl_raw
+    2. Creates a new PIL Image with appropriate dimensions
+    3. Processes pixels based on the tag's color depth and format
+    4. Applies rotation according to the tag's buffer rotation setting
+    5. Converts to JPEG format
+
+    The color mapping depends on the tag type's color table,
+    which defines the available colors for different bit values.
+
+    Args:
+        raw_data: Raw image data from the AP
+        tag_type: TagType object with display specifications
+
+    Returns:
+        bytes: JPEG image data
+
+    Raises:
+        Exception: For image processing errors or invalid color format
+    """
     data = decode_esl_raw(raw_data, tag_type)
 
     # For 90/270 degree rotated displays, swap width/height before processing
@@ -153,7 +193,6 @@ def to_image(raw_data: bytes, tag_type: TagType) -> bytes:
     native_height = tag_type.height
     if tag_type.rotatebuffer % 2:  # 90 or 270 degrees
         native_width, native_height = native_height, native_width
-
 
     _LOGGER.debug("\n=== Color Table Information ===")
     _LOGGER.debug(f"Color table contents: {tag_type.color_table}")
@@ -164,7 +203,6 @@ def to_image(raw_data: bytes, tag_type: TagType) -> bytes:
 
     # Convert color table to RGB tuples
     color_table = {k: tuple(v) for k, v in tag_type.color_table.items()}
-
 
     _LOGGER.debug(f"Available colors: {list(color_table.keys())}")
 

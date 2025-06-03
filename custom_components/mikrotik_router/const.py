@@ -1,4 +1,5 @@
 """Constants used by the Mikrotik Router component and platforms."""
+
 from homeassistant.const import Platform
 
 PLATFORMS = [
@@ -14,8 +15,6 @@ DOMAIN = "mikrotik_router"
 DEFAULT_NAME = "Mikrotik Router"
 ATTRIBUTION = "Data provided by Mikrotik"
 
-RUN_SCRIPT_COMMAND = "run_script"
-
 DEFAULT_ENCODING = "ISO-8859-1"
 DEFAULT_LOGIN_METHOD = "plain"
 
@@ -24,6 +23,7 @@ DEFAULT_USERNAME = "admin"
 DEFAULT_PORT = 0
 DEFAULT_DEVICE_NAME = "Mikrotik"
 DEFAULT_SSL = False
+DEFAULT_VERIFY_SSL = False
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 30
@@ -58,6 +58,8 @@ CONF_SENSOR_SCRIPTS = "sensor_scripts"
 DEFAULT_SENSOR_SCRIPTS = False
 CONF_SENSOR_ENVIRONMENT = "sensor_environment"
 DEFAULT_SENSOR_ENVIRONMENT = False
+CONF_SENSOR_NETWATCH_TRACKER = "sensor_netwatch_tracker"
+DEFAULT_SENSOR_NETWATCH_TRACKER = False
 
 TO_REDACT = {
     "ip-address",

@@ -1,4 +1,5 @@
 """API parser for JSON APIs."""
+
 from datetime import datetime
 from logging import getLogger
 

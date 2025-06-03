@@ -1,4 +1,5 @@
 """Support for the Mikrotik Router binary sensor service."""
+
 from __future__ import annotations
 
 from logging import getLogger
@@ -16,12 +17,15 @@ from .binary_sensor_types import (
     DEVICE_ATTRIBUTES_IFACE_ETHER,
     DEVICE_ATTRIBUTES_IFACE_SFP,
     DEVICE_ATTRIBUTES_IFACE_WIRELESS,
+    DEVICE_ATTRIBUTES_NETWATCH,
 )
 from .const import (
     CONF_SENSOR_PPP,
     DEFAULT_SENSOR_PPP,
     CONF_SENSOR_PORT_TRACKER,
     DEFAULT_SENSOR_PORT_TRACKER,
+    CONF_SENSOR_NETWATCH_TRACKER,
+    DEFAULT_SENSOR_NETWATCH_TRACKER,
 )
 from .entity import MikrotikEntity, async_add_entities
 from .helper import format_attribute

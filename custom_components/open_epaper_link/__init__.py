@@ -18,9 +18,27 @@ PLATFORMS = [
     Platform.SWITCH,
     Platform.TEXT,
 ]
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up OpenEPaperLink from a config entry."""
+    """Set up OpenEPaperLink integration from a config entry.
+
+    This is the main entry point for integration initialization, which:
+
+    1. Creates and initializes the Hub instance
+    2. Stores the Hub in hass.data for component-wide access
+    3. Sets up entity platforms (sensor, button, etc.)
+    4. Registers service handlers
+    5. Starts the WebSocket connection to the AP
+
+    The WebSocket connection is started after Home Assistant is fully loaded
+    to avoid blocking startup with network operations.
+
+    Args:
+        hass: Home Assistant instance
+        entry: Configuration Entry object with connection details
+
+    Returns:
+        bool: True if setup was successful, False otherwise
+    """
     hub = Hub(hass, entry)
 
     # Do basic setup without WebSocket connection
@@ -37,9 +55,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Listen for changes to options
     entry.async_on_unload(entry.add_update_listener(async_update_options))
 
-    # Create an async task to start the WebSocket after HA is fully started
     async def start_websocket(_):
-        """Start WebSocket connection after HA is fully started."""
+        """Start WebSocket connection after HA is fully started.
+
+        Delayed startup of the WebSocket connection to ensure
+        Home Assistant is fully initialized and ready to handle
+        entity updates that might result from incoming data.
+
+        Args:
+            _: Event object (unused)
+        """
         await hub.async_start_websocket()
 
     if hass.is_running:
@@ -52,12 +77,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Update options."""
+    """Handle updates to integration options.
+
+    Called when the user updates integration options through the UI.
+    Reloads configuration settings such as:
+
+    - Tag blacklist
+    - Button/NFC debounce intervals
+    - Font directories
+
+    Args:
+        hass: Home Assistant instance
+        entry: Updated configuration entry
+    """
     hub = hass.data[DOMAIN][entry.entry_id]
     await hub.async_reload_config()
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload a config entry."""
+    """Unload the integration when removed or restarted.
+
+    Performs cleanup operations including:
+
+    1. Unloading entity platforms
+    2. Shutting down the Hub (closes WebSocket connection)
+    3. Unregistering service handlers
+    4. Removing the Hub from hass.data
+
+    Args:
+        hass: Home Assistant instance
+        entry: Configuration entry being unloaded
+
+    Returns:
+        bool: True if unload was successful, False otherwise
+    """
     hub = hass.data[DOMAIN][entry.entry_id]
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
@@ -70,12 +122,32 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle removal of an entry."""
-    # This is called only when the integration is removed, not during restarts
+    """Handle complete removal of integration.
+
+    Called when the integration is completely removed from Home Assistant
+    (not during restarts). Performs cleanup of persistent storage files.
+
+    Args:
+        hass: Home Assistant instance
+        entry: Configuration entry being removed
+    """
     await async_remove_storage_files(hass)
 
 async def async_remove_storage_files(hass: HomeAssistant) -> None:
-    """Remove storage files when removing integration."""
+    """Remove persistent storage files when removing integration.
+
+    Cleans up files created by the integration:
+
+    1. Tag types file (open_epaper_link_tagtypes.json)
+    2. Tag storage file (.storage/open_epaper_link_tags)
+    3. Image directory (www/open_epaper_link)
+
+    This prevents orphaned files when the integration is removed
+    and ensures a clean reinstallation if needed.
+
+    Args:
+        hass: Home Assistant instance
+    """
 
     # Remove tag types file
     tag_types_file = hass.config.path("open_epaper_link_tagtypes.json")

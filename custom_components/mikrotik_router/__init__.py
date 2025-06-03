@@ -1,23 +1,25 @@
 """Mikrotik Router integration."""
+
 from __future__ import annotations
 
 import voluptuous as vol
+import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry
 from homeassistant.config_entries import ConfigEntry
 
-from .const import (
-    PLATFORMS,
-    DOMAIN,
-    RUN_SCRIPT_COMMAND,
-)
+from homeassistant.const import CONF_VERIFY_SSL
+
+from .const import PLATFORMS, DOMAIN, DEFAULT_VERIFY_SSL
 from .coordinator import MikrotikData, MikrotikCoordinator, MikrotikTrackerCoordinator
 
 SCRIPT_SCHEMA = vol.Schema(
     {vol.Required("router"): cv.string, vol.Required("script"): cv.string}
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 # ---------------------------
@@ -37,10 +39,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
     config_entry.async_on_unload(config_entry.add_update_listener(async_reload_entry))
-
-    hass.services.async_register(
-        DOMAIN, RUN_SCRIPT_COMMAND, coordinator.run_script, schema=SCRIPT_SCHEMA
-    )
 
     return True
 
@@ -62,7 +60,6 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     ):
-        hass.services.async_remove(DOMAIN, RUN_SCRIPT_COMMAND)
         hass.data[DOMAIN].pop(config_entry.entry_id)
 
     return unload_ok
@@ -75,4 +72,27 @@ async def async_remove_config_entry_device(
     hass, config_entry: ConfigEntry, device_entry: device_registry.DeviceEntry
 ) -> bool:
     """Remove a config entry from a device."""
+    return True
+
+
+# ---------------------------
+#   async_migrate_entry
+# ---------------------------
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    _LOGGER.debug(
+        "Migrating configuration from version %s.%s",
+        config_entry.version,
+        config_entry.minor_version,
+    )
+
+    if config_entry.version < 2:
+        new_data = {**config_entry.data}
+        new_data[CONF_VERIFY_SSL] = DEFAULT_VERIFY_SSL
+        hass.config_entries.async_update_entry(config_entry, data=new_data, version=2)
+
+    _LOGGER.debug(
+        "Migration to configuration version %s.%s successful",
+        config_entry.version,
+        config_entry.minor_version,
+    )
     return True
