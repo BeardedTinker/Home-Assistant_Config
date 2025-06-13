@@ -2088,7 +2088,7 @@ class ImageGen:
 
             # Get time range
             duration = timedelta(seconds=element.get("duration", 60 * 60 * 24))
-            end = dt.utcnow()
+            end = dt.now()
             start = end - duration
 
             # Set up font

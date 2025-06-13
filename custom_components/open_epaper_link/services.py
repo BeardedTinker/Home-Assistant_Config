@@ -26,7 +26,7 @@ DITHER_ORDERED = 2
 DITHER_DEFAULT = DITHER_ORDERED
 
 MAX_RETRIES = 3
-INITIAL_BACKOFF = 1  # seconds
+INITIAL_BACKOFF = 2  # seconds
 
 
 def rgb_to_rgb332(rgb):
@@ -420,33 +420,28 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         # Convert TTL fom seconds to minutes for the AP
         ttl_minutes = max(1, ttl // 60)
 
-        # Prepare multipart form data
-        fields = {
-            'mac': mac,
-            'contentmode': "25",
-            'dither': str(dither),
-            'ttl': str(ttl_minutes),
-            'image': ('image.jpg', img, 'image/jpeg'),
-        }
-
-        _LOGGER.debug("Image size for %s: %.1f KB", entity_id, len(img)/1024)
-
-        # Add preload parameters if needed
-        if preload_type > 0:
-            fields.update({
-                'preloadtype': str(preload_type),
-                'preloadlut': str(preload_lut),
-            })
-
-        mp_encoder = MultipartEncoder(fields=fields)
-
-        """
-        Try up to MAX_RETRIES times to upload the image, retrying on TimeoutError.
-        """
-        backoff_delay = INITIAL_BACKOFF
+        backoff_delay = INITIAL_BACKOFF # Try up to MAX_RETRIES times to upload the image, retrying on TimeoutError.
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
+
+                # Create a new MultipartEncoder for each attempt
+                fields = {
+                    'mac': mac,
+                    'contentmode': "25",
+                    'dither': str(dither),
+                    'ttl': str(ttl_minutes),
+                    'image': ('image.jpg', img, 'image/jpeg'),
+                }
+
+                if preload_type > 0:
+                    fields.update({
+                        'preloadtype': str(preload_type),
+                        'preloadlut': str(preload_lut),
+                    })
+
+                mp_encoder = MultipartEncoder(fields=fields)
+
                 async with async_timeout.timeout(30):  # 30 second timeout for upload
                     response = await hass.async_add_executor_job(
                         lambda: requests.post(
@@ -460,6 +455,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                     raise HomeAssistantError(
                         f"Image upload failed for {entity_id} with status code: {response.status_code}"
                     )
+                break
 
             except asyncio.TimeoutError:
                 if attempt < MAX_RETRIES:
