@@ -16,13 +16,13 @@ entities:
           - dps_val: mode_1
             value: Standby
           - dps_val: mode_2
-            value: mode_2
+            value: Constant current
           - dps_val: mode_3
             value: Constant voltage
           - dps_val: mode_4
             value: MPPT
           - dps_val: mode_5
-            value: mode_5
+            value: Floating charge
   - entity: sensor
     class: voltage
     category: diagnostic
@@ -99,7 +99,7 @@ entities:
       - id: 108
         type: integer
         name: sensor
-        unit: kW
+        unit: kWh
         class: total_increasing
         mapping:
           - scale: 10

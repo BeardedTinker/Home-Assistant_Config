@@ -21,7 +21,7 @@ from .const import DOMAIN
 
 _LOGGER: Final = logging.getLogger(__name__)
 
-TRIGGER_TYPES = {"GPIO", "NFC", "BUTTON1", "BUTTON2"}
+TRIGGER_TYPES = {"GPIO", "NFC", "BUTTON1", "BUTTON2", "BUTTON3", "BUTTON4", "BUTTON5", "BUTTON6", "BUTTON7", "BUTTON8", "BUTTON9", "BUTTON10"}
 
 TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
     {
@@ -37,7 +37,7 @@ async def async_get_triggers(hass, device_id):
     This function is called by Home Assistant when setting up
     automations to let users choose which triggers to use.
 
-    All supported trigger types (BUTTON1, BUTTON2, NFC, GPIO) are
+    All supported trigger types (BUTTON1, BUTTON2, BUTTON3, NFC, GPIO) are
     presented for each device, regardless of hardware capability.
 
     TODO Tag specific triggers will be implemented later.
@@ -68,6 +68,70 @@ async def async_get_triggers(hass, device_id):
         CONF_DEVICE_ID: device_id,
         # Required fields of TRIGGER_SCHEMA
         CONF_TYPE: "BUTTON2",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON3",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON4",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON5",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON6",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON7",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON8",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON9",
+    })
+    triggers.append({
+        # Required fields of TRIGGER_BASE_SCHEMA
+        CONF_PLATFORM: "device",
+        CONF_DOMAIN: DOMAIN,
+        CONF_DEVICE_ID: device_id,
+        # Required fields of TRIGGER_SCHEMA
+        CONF_TYPE: "BUTTON10",
     })
     triggers.append({
         # Required fields of TRIGGER_BASE_SCHEMA

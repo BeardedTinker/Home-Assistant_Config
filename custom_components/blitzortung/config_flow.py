@@ -7,7 +7,7 @@ from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
-    OptionsFlowWithConfigEntry,
+    OptionsFlow,
 )
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME
 
@@ -73,42 +73,34 @@ class BlitortungConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_reconfigure(
-        self, _: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Handle a reconfiguration flow initialized by the user."""
-        self.entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
-
-        return await self.async_step_reconfigure_confirm()
-
-    async def async_step_reconfigure_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle a reconfiguration flow initialized by the user."""
         errors = {}
+        reconfigure_entry = self._get_reconfigure_entry()
 
         if user_input is not None:
-            self.hass.config_entries.async_update_entry(
-                self.entry, data=self.entry.data | user_input
-            )
-            await self.hass.config_entries.async_reload(self.entry.entry_id)
-            return self.async_abort(reason="reconfigure_successful")
+            return self.async_update_reload_and_abort(
+                    reconfigure_entry,
+                    data_updates=user_input,
+                )
 
         return self.async_show_form(
-            step_id="reconfigure_confirm",
+            step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(
                 data_schema=RECONFIGURE_SCHEMA,
-                suggested_values=self.entry.data | (user_input or {}),
+                suggested_values=reconfigure_entry.data | (user_input or {}),
             ),
-            description_placeholders={"name": self.entry.title},
+            description_placeholders={"name": reconfigure_entry.title},
             errors=errors,
         )
 
     @staticmethod
-    def async_get_options_flow(config_entry: ConfigEntry):
-        return BlitzortungOptionsFlowHandler(config_entry)
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        return BlitzortungOptionsFlowHandler()
 
 
-class BlitzortungOptionsFlowHandler(OptionsFlowWithConfigEntry):
+class BlitzortungOptionsFlowHandler(OptionsFlow):
     """Handle an options flow for Blitzortung."""
 
     async def async_step_init(

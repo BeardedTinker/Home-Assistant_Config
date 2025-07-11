@@ -115,9 +115,12 @@ CONF_API_LANGUAGE = 'api_language'
 CONF_SHUFFLE = 'shuffle'
 CONF_SHUFFLE_MODE = 'shuffle_mode'
 CONF_COOKIE = 'cookie'
+CONF_CLIENT_ID = 'client_id'
+CONF_CLIENT_SECRET = 'secret'
 CONF_CODE = 'code'
 CONF_BRAND_ID = 'brand_id'
 CONF_ADVANCE_CONFIG = 'advance_config'
+CONF_RENEW_OAUTH = 'renew_oauth'
 CONF_LIKE_IN_NAME = 'like_in_name'
 CONF_DEBUG_AS_ERROR = 'debug_as_error'
 CONF_LEGACY_RADIO = 'legacy_radio'
@@ -166,6 +169,7 @@ DEFAULT_SORT_BROWSER = True
 ERROR_COOKIE = 'ERROR_COOKIE'
 ERROR_AUTH_USER = 'ERROR_AUTH_USER'
 ERROR_GENERIC = 'ERROR_GENERIC'
+ERROR_OAUTH = 'ERROR_OAUTH'
 ERROR_CONTENTS = 'ERROR_CONTENTS'
 ERROR_FORMAT = 'ERROR_FORMAT'
 ERROR_NONE = 'ERROR_NONE'
@@ -254,18 +258,16 @@ _LOGGER = logging.getLogger(__name__)
 
 
 
-async def async_try_login(hass, path, brand_id, language='en'):
+async def async_try_login(hass, path, brand_id=None, language='en',oauth=None):
 	ret = {}
 	api = None
 	msg = ""
 	#### try to init object #####
 	try:
-		if(brand_id!=""):
-			_LOGGER.debug("- using brand ID: "+brand_id)
-			api = await hass.async_add_executor_job(YTMusic,path,brand_id,None,None,language)
+		if(oauth):
+			api = await hass.async_add_executor_job(lambda: YTMusic(auth=path,oauth_credentials=oauth,user=brand_id,language=language))
 		else:
-			_LOGGER.debug("- login without brand ID and credential at path "+path)
-			api = await hass.async_add_executor_job(YTMusic,path,None,None,None,language)
+			api = await hass.async_add_executor_job(YTMusic,path,brand_id,None,None,language)
 	except KeyError as err:
 		_LOGGER.debug("- Key exception")
 		if(str(err)=="'contents'"):
@@ -333,7 +335,10 @@ def ensure_config(user_input):
 	out[CONF_PROXY_URL] = ""
 	out[CONF_BRAND_ID] = ""
 	out[CONF_COOKIE] = ""
+	out[CONF_CLIENT_ID] = ""
+	out[CONF_CLIENT_SECRET] = ""
 	out[CONF_ADVANCE_CONFIG] = False
+	out[CONF_RENEW_OAUTH] = False
 	out[CONF_LIKE_IN_NAME] = DEFAULT_LIKE_IN_NAME
 	out[CONF_DEBUG_AS_ERROR] = DEFAULT_DEBUG_AS_ERROR
 	out[CONF_TRACK_LIMIT] = DEFAULT_TRACK_LIMIT

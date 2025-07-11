@@ -25,6 +25,7 @@ from pytubefix import request # to generate cipher
 from pytubefix import extract # to generate cipher
 
 import ytmusicapi
+from ytmusicapi.auth.oauth import OAuthCredentials
 from pytubefix.exceptions import RegexMatchError
 # use this to work with local version
 # and make sure that the local package is also only loading local files
@@ -58,15 +59,16 @@ class yTubeMusicComponent(MediaPlayerEntity):
 	def __init__(self, hass, config, name_add):
 		self.hass = hass
 		self._attr_unique_id = config.entry_id
+		configuration = dict(config.options or config.data)
 		self.hass.data[DOMAIN][self._attr_unique_id][DOMAIN_MP] = self
-		self._debug_log_concat = ""
-		self._debug_as_error = config.data.get(CONF_DEBUG_AS_ERROR, DEFAULT_DEBUG_AS_ERROR)
-		self._org_name = config.data.get(CONF_NAME, DOMAIN + name_add)
+		self._debug_log_concat = ""	
+		self._debug_as_error = configuration.get(CONF_DEBUG_AS_ERROR, DEFAULT_DEBUG_AS_ERROR)
+		self._org_name = configuration.get(CONF_NAME, DOMAIN + name_add)
 		self._attr_name = self._org_name
-		self._api_language = config.data.get(CONF_API_LANGUAGE, DEFAULT_API_LANGUAGE)
-		self._init_extra_sensor = config.data.get(CONF_INIT_EXTRA_SENSOR, DEFAULT_INIT_EXTRA_SENSOR)
-		self._init_dropdowns = config.data.get(CONF_INIT_DROPDOWNS, DEFAULT_INIT_DROPDOWNS)
-		self._maxDatarate = config.data.get(CONF_MAX_DATARATE,DEFAULT_MAX_DATARATE)
+		self._api_language = configuration.get(CONF_API_LANGUAGE, DEFAULT_API_LANGUAGE)
+		self._init_extra_sensor = configuration.get(CONF_INIT_EXTRA_SENSOR, DEFAULT_INIT_EXTRA_SENSOR)
+		self._init_dropdowns = configuration.get(CONF_INIT_DROPDOWNS, DEFAULT_INIT_DROPDOWNS)
+		self._maxDatarate = configuration.get(CONF_MAX_DATARATE,DEFAULT_MAX_DATARATE)
 
 		# All entities are now automatically generated,will be registered in the async_update_selects method later.
 		# This should be helpful for multiple accounts.
@@ -78,29 +80,29 @@ class yTubeMusicComponent(MediaPlayerEntity):
 			else:
 				_domain = input_select.DOMAIN
 			try:
-				self._selects[k] = config.data.get(v)
+				self._selects[k] = configuration.get(v)
 			except:
 				pass
 			if self._selects[k] is not None and self._selects[k].replace(" ","") != "":
 				self._selects[k] = _domain + "." + self._selects[k].replace(_domain + ".", "")
 				self.log_me('debug', "Found old {} {}: {},please consider using the new select entities.".format(_domain, k, self._selects[k] ))	
 
-		self._like_in_name = config.data.get(CONF_LIKE_IN_NAME, DEFAULT_LIKE_IN_NAME)
+		self._like_in_name = configuration.get(CONF_LIKE_IN_NAME, DEFAULT_LIKE_IN_NAME)
 
-		self._attr_shuffle = config.data.get(CONF_SHUFFLE, DEFAULT_SHUFFLE)
-		self._shuffle_mode = config.data.get(CONF_SHUFFLE_MODE, DEFAULT_SHUFFLE_MODE)
+		self._attr_shuffle = configuration.get(CONF_SHUFFLE, DEFAULT_SHUFFLE)
+		self._shuffle_mode = configuration.get(CONF_SHUFFLE_MODE, DEFAULT_SHUFFLE_MODE)
 
 		default_header_file = os.path.join(hass.config.path(STORAGE_DIR), DEFAULT_HEADER_FILENAME)
-		self._header_file = config.data.get(CONF_HEADER_PATH, default_header_file)
-		self._speakersList = config.data.get(CONF_RECEIVERS)
-		self._trackLimit = config.data.get(CONF_TRACK_LIMIT)
-		self._legacyRadio = config.data.get(CONF_LEGACY_RADIO)
-		self._sortBrowser = config.data.get(CONF_SORT_BROWSER)
+		self._header_file = configuration.get(CONF_HEADER_PATH, default_header_file)
+		self._speakersList = configuration.get(CONF_RECEIVERS)
+		self._trackLimit = configuration.get(CONF_TRACK_LIMIT)
+		self._legacyRadio = configuration.get(CONF_LEGACY_RADIO)
+		self._sortBrowser = configuration.get(CONF_SORT_BROWSER)
 		self._friendly_speakersList = dict()
 
 		# proxy settings
-		self._proxy_url = config.data.get(CONF_PROXY_URL, "")
-		self._proxy_path = config.data.get(CONF_PROXY_PATH, "")
+		self._proxy_url = configuration.get(CONF_PROXY_URL, "")
+		self._proxy_path = configuration.get(CONF_PROXY_PATH, "")
 
 
 		self.log_me('debug', "YtubeMediaPlayer config: ")
@@ -112,8 +114,10 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		self.log_me('debug', "- track_limit: " + str(self._trackLimit))
 		self.log_me('debug', "- legacy_radio: " + str(self._legacyRadio))
 		self.log_me('debug', "- max_dataRate: " + str(self._maxDatarate))
-
-		self._brand_id = str(config.data.get(CONF_BRAND_ID, ""))
+		
+		self._client_id = configuration.get(CONF_CLIENT_ID)
+		self._client_secret = configuration.get(CONF_CLIENT_SECRET)
+		self._brand_id = str(configuration.get(CONF_BRAND_ID, ""))
 		self._api = None
 		self._js = ""
 		self._update_needed = False
@@ -337,7 +341,8 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		if(self._api is None):
 			self.log_debug_later("- no valid API, try to login")
 			if(os.path.exists(self._header_file)):
-				[ret, msg, self._api] = await async_try_login(self.hass, self._header_file, self._brand_id, self._api_language)
+				oauth_credentials=OAuthCredentials(client_id=self._client_id, client_secret=self._client_secret)
+				[ret, msg, self._api] = await async_try_login(self.hass, self._header_file, self._brand_id, self._api_language,oauth_credentials)
 				if(msg != ""):
 					self._api = None
 					out = "Issue during login: " + msg
@@ -353,7 +358,6 @@ class yTubeMusicComponent(MediaPlayerEntity):
 						self.log_debug_later("YouTube Api initialized ok")
 			else:
 				out = "can't find header file at " + self._header_file
-				_LOGGER.error(out)
 				data = {"title": "yTubeMediaPlayer error", "message": out}
 				await self.hass.services.async_call("persistent_notification", "create", data)
 				self.log_me('debug', "[E] (fail) async_check_api")
@@ -968,13 +972,14 @@ class yTubeMusicComponent(MediaPlayerEntity):
 		# get entity id from friendly_name
 		for e, f in self._friendly_speakersList.items():
 			if(f == source):
-				source_entity_id = e
+				source_entity_id = f"{DOMAIN_MP}.{e}"
 				break
 		if(source_entity_id is None):
 			self.log_me('debug', "- Couldn't find " + source + " in dropdown list, giving up")
 			return
 		else:
 			self.log_me('debug', 'Translated friendly name ' + source + ' to entity id ' + source_entity_id)
+		self.log_me('debug', "selected '"+source_entity_id+"'")
 		self.log_me('debug', "[E] async_select_source_helper")
 		return await self.async_select_source(source_entity_id)
 
@@ -1034,7 +1039,11 @@ class yTubeMusicComponent(MediaPlayerEntity):
 					if pos < old_player.attributes['media_duration']:
 						data = {'seek_position': pos, ATTR_ENTITY_ID: self._remote_player}
 						await self.hass.services.async_call(DOMAIN_MP, media_player.SERVICE_MEDIA_SEEK, data)
-		self.async_schedule_update_ha_state()
+		if not self.entity_id:
+			self.log_me('debug', "Skipping state update because entity_id is not yet set")
+		else:
+			self.async_schedule_update_ha_state()
+
 		self.log_me('debug', "[E] async_select_source")
 
 
@@ -1151,10 +1160,10 @@ class yTubeMusicComponent(MediaPlayerEntity):
 				if not('count' in playlist):
 					try:
 						extra_info = await self.hass.async_add_executor_job(self._api.get_playlist, playlist['playlistId'])
+						self._playlists[idx]['count'] = 25
 						if('trackCount' in extra_info):
-							self._playlists[idx]['count'] = int(extra_info['trackCount'])
-						else:
-							self._playlists[idx]['count'] = 25
+							if(extra_info['trackCount']):
+								self._playlists[idx]['count'] = int(extra_info['trackCount'])
 					except:
 						if('playlistId' in playlist):
 							self.log_me('debug', "- Failed to get_playlist count for playlist ID '" + str(playlist['playlistId']) + "' setting it to 25")

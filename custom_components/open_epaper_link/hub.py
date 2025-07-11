@@ -699,7 +699,7 @@ class Hub:
             current_time = datetime.now()
 
             # Apply debouncing based on event type
-            if reason_string in ["BUTTON1", "BUTTON2"]:
+            if reason_string in ["BUTTON1", "BUTTON2", "BUTTON3", "BUTTON4", "BUTTON5", "BUTTON6", "BUTTON7", "BUTTON8", "BUTTON9", "BUTTON10"]:
                 # Button debouncing
                 debounce_key = f"{tag_mac}_{reason_string}"
                 last_event = self._last_button_press.get(debounce_key)
@@ -1048,8 +1048,16 @@ class Hub:
         - 1: "BOOT" (device boot)
         - 2: "GPIO" (GPIO trigger)
         - 3: "NFC" (NFC scan)
-        - 4: "BUTTON1" (first button pressed)
-        - 5: "BUTTON2" (second button pressed)
+        - 4: "BUTTON1" (button 1 pressed)
+        - 5: "BUTTON2" (button 2 pressed)
+        - 6: "BUTTON3" (button 3 pressed)
+        - 7: "BUTTON4" (button 4 pressed)
+        - 8: "BUTTON5" (button 5 pressed)
+        - 9: "BUTTON6" (button 6 pressed)
+        - 10: "BUTTON7" (button 7 pressed)
+        - 11: "BUTTON8" (button 8 pressed)
+        - 12: "BUTTON9" (button 9 pressed)
+        - 13: "BUTTON10" (button 10 pressed)
         - 252: "FIRSTBOOT" (first boot)
         - 253: "NETWORK_SCAN" (network scan)
         - 254: "WDT_RESET" (watchdog reset)
@@ -1067,6 +1075,14 @@ class Hub:
             3: "NFC",
             4: "BUTTON1",
             5: "BUTTON2",
+            6: "BUTTON3",
+            7: "BUTTON4",
+            8: "BUTTON5",
+            9: "BUTTON6",
+            10: "BUTTON7",
+            11: "BUTTON8",
+            12: "BUTTON9",
+            13: "BUTTON10",
             252: "FIRSTBOOT",
             253: "NETWORK_SCAN",
             254: "WDT_RESET"

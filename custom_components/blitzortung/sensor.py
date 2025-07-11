@@ -65,7 +65,7 @@ class BlitzortungSensor(SensorEntity):
             sw_version=SW_VERSION,
             entry_type=DeviceEntryType.SERVICE,
             configuration_url=BLIZORTUNG_URL.format(
-                lat=coordinator.latitude, 
+                lat=coordinator.latitude,
                 lon=coordinator.longitude
             ),
         )
@@ -205,7 +205,7 @@ SENSORS: tuple[BlitzortungSensorEntityDescription, ...] = (
         translation_key=ATTR_LIGHTNING_COUNTER,
         has_entity_name=True,
         native_unit_of_measurement="↯",
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         entity_class=CounterSensor,
     ),
     BlitzortungSensorEntityDescription(
